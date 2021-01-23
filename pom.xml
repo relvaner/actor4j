@@ -7,6 +7,26 @@
 	<version>${actor4j.version}</version>
 	<packaging>pom</packaging>
 	
+	<name>actor4j</name>
+	<description>Actor4j is an actor-oriented Java framework.</description>
+	<url>https://github.com/relvaner/actor4j</url>
+	<inceptionYear>2015</inceptionYear>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>David A. Bauer</name>
+			<email>relvaner.github@gmail.com</email>
+		</developer>
+	</developers>
+	
 	<properties>
 		<actor4j.version>1.1.0</actor4j.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -16,5 +36,6 @@
 	
 	<modules>
 		<module>actor4j-data</module>
+		<module>actor4j-analyzer</module>
 	</modules>
 </project>
