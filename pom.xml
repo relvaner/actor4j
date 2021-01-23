@@ -37,5 +37,6 @@
 	<modules>
 		<module>actor4j-data</module>
 		<module>actor4j-analyzer</module>
+		<module>actor4j-benchmark</module>
 	</modules>
 </project>
