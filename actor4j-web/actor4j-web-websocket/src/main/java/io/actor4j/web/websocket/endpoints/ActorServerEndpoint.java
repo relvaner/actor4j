@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.websocket.endpoints;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.system.ActorLogger.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,7 +53,7 @@ public abstract class ActorServerEndpoint {
 	public void onOpen(Session session) throws IOException {
 		service = getService();
 		
-		logger().info(String.format("%s - Websocket-Session started...", service.getName()));
+		systemLogger().info(String.format("%s - Websocket-Session started...", service.getName()));
 	}
 	
     @OnMessage
@@ -121,7 +121,7 @@ public abstract class ActorServerEndpoint {
     
     @OnClose
 	public void onClose(Session session, CloseReason closeReason) {
-    	logger().info(String.format("%s - Websocket-Session stopped...", service.getName()));
+    	systemLogger().info(String.format("%s - Websocket-Session stopped...", service.getName()));
 	}
     
     @OnError
