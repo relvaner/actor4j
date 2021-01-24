@@ -18,13 +18,13 @@ package io.actor4j.core.data.access.mongo;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.bson.Document;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -148,7 +148,8 @@ public final class MongoOperations {
 		if (limit>0)
 			iterable = iterable.limit(limit);
 		
-		iterable.forEach((Block<Document>) document -> {documents.add(document);});
+		iterable.forEach((Consumer<? super Document>) document -> {documents.add(document);});
+		//iterable.forEach((Block<Document>) document -> {documents.add(document);});
 		
 		for (Document document : documents)
 			try {
