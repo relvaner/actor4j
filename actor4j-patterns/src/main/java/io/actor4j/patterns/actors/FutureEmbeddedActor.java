@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.pattern.actors;
+package io.actor4j.patterns.actors;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import io.actor4j.core.actors.EmbeddedActor;
 import io.actor4j.core.actors.EmbeddedHostActor;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.pattern.messages.FutureActorMessage;
+import io.actor4j.patterns.messages.FutureActorMessage;
 
 public class FutureEmbeddedActor extends EmbeddedActor {
 	protected CompletableFuture<Object> future;

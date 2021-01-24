@@ -13,36 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.pattern.actors;
+package io.actor4j.patterns.actors;
 
-import java.util.UUID;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 
+import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 
-public class RouteeHandler {
-	protected Predicate<ActorMessage<?>> predicate;
-	protected UUID routee;
+public class UnhandledActor extends Actor {
+	protected Consumer<ActorMessage<?>> handler;
 	
-	public RouteeHandler(Predicate<ActorMessage<?>> predicate, UUID routee) {
-		super();
-		this.predicate = predicate;
-		this.routee = routee;
-	}
-
-	public Predicate<ActorMessage<?>> getPredicate() {
-		return predicate;
+	public UnhandledActor(Consumer<ActorMessage<?>> handler) {
+		this(null, handler);
 	}
 	
-	public void setPredicate(Predicate<ActorMessage<?>> predicate) {
-		this.predicate = predicate;
+	public UnhandledActor(String name, Consumer<ActorMessage<?>> handler) {
+		super(name);
+		
+		this.handler = handler;
 	}
 	
-	public UUID getRoutee() {
-		return routee;
-	}
-	
-	public void setRoutee(UUID routee) {
-		this.routee = routee;
+	@Override
+	public void receive(ActorMessage<?> message) {
+		handler.accept(message);
 	}
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.pattern.utils;
+package io.actor4j.patterns.utils;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -21,8 +21,8 @@ import java.util.concurrent.Future;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.ActorRef;
-import io.actor4j.pattern.actors.FutureActor;
-import io.actor4j.pattern.messages.FutureActorMessage;
+import io.actor4j.patterns.actors.FutureActor;
+import io.actor4j.patterns.messages.FutureActorMessage;
 
 public final class FuturePattern {
 	public static <T> Future<T> ask(T value, int tag, UUID dest, ActorRef actorRef) {

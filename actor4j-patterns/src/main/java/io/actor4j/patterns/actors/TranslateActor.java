@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.pattern.actors;
+package io.actor4j.patterns.actors;
 
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -21,24 +21,12 @@ import java.util.function.BiFunction;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 
-public class PipeActor extends Actor {
-	protected BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler;
-	protected UUID next;
-	
-	public PipeActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, UUID next) {
-		this(null, handler, next);
+public class TranslateActor extends PipeActor {
+	public TranslateActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> translate, UUID next) {
+		super(translate, next);
 	}
 	
-	public PipeActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, UUID next) {
-		super(name);
-		
-		this.handler = handler;
-		this.next = next;
-	}
-
-	@Override
-	public void receive(ActorMessage<?> message) {
-		if (handler!=null)
-			send(handler.apply(this, message), next);
+	public TranslateActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> translate, UUID next) {
+		super(name, translate, next);
 	}
 }

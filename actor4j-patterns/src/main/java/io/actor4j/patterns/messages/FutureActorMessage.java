@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.pattern.messages;
+package io.actor4j.patterns.messages;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

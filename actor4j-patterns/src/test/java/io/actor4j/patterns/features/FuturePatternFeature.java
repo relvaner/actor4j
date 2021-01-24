@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.pattern.features;
+package io.actor4j.patterns.features;
 
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -26,7 +26,7 @@ import org.junit.Test;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.pattern.utils.FuturePattern;
+import io.actor4j.patterns.utils.FuturePattern;
 
 import static org.junit.Assert.*;
 

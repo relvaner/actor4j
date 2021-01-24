@@ -13,28 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.pattern.actors;
+package io.actor4j.patterns.actors;
 
-import java.util.function.Consumer;
+import java.util.UUID;
+import java.util.function.BiFunction;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 
-public class UnhandledActor extends Actor {
-	protected Consumer<ActorMessage<?>> handler;
-	
-	public UnhandledActor(Consumer<ActorMessage<?>> handler) {
-		this(null, handler);
+public class FilterActor extends PipeActor {
+	public FilterActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> filter, UUID next) {
+		super(filter, next);
 	}
 	
-	public UnhandledActor(String name, Consumer<ActorMessage<?>> handler) {
-		super(name);
-		
-		this.handler = handler;
-	}
-	
-	@Override
-	public void receive(ActorMessage<?> message) {
-		handler.accept(message);
+	public FilterActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> filter, UUID next) {
+		super(name, filter, next);
 	}
 }
