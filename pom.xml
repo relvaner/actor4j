@@ -41,5 +41,8 @@
 		<module>actor4j-verification</module>
 		<module>actor4j-benchmark</module>
 		<module>actor4j-examples</module>
+		
+		<module>actor4j-apc-actor</module>
+		<module>actor4j-web</module>
 	</modules>
 </project>
