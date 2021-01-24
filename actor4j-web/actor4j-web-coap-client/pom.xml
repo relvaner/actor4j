@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.actor4j</groupId>
+		<artifactId>actor4j-web</artifactId>
+		<version>${actor4j.version}</version>
+	</parent>
+	<artifactId>actor4j-web-coap-client</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-web-utils</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-json-provider</artifactId>
+			<version>2.9.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.californium</groupId>
+			<artifactId>californium-core</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.actor4j</groupId>
+		<artifactId>actor4j</artifactId>
+		<version>${actor4j.version}</version>
+	</parent>
+	<artifactId>actor4j-web</artifactId>
+	<packaging>pom</packaging>
+	
+	<dependencies>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-core</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+	</dependencies>
+		
+	<modules>
+		<module>actor4j-web-utils</module>
+		<module>actor4j-web-rest-server</module>
+		<module>actor4j-web-rest-client</module>
+		<module>actor4j-web-websocket</module>
+		<module>actor4j-web-grpc</module>
+		<module>actor4j-web-mqtt</module>
+		<module>actor4j-web-amqp</module>
+		<module>actor4j-web-coap-client</module>
+		<module>actor4j-web-coap-server</module>
+		<module>actor4j-web-opcua-client</module>
+		<module>actor4j-web-opcua-server</module>
+	</modules>
+</project>

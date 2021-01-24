@@ -1,0 +1,18 @@
+syntax = "proto3";
+package actor4j.web.grpc;
+
+message ActorGrpcRequest {
+	int32 tag = 1;
+  	string id = 2;
+  	string message = 3;
+}
+
+message ActorGrpcResponse {
+  	int32 tag = 1;
+  	string id = 2;
+  	string message = 3;
+}
+
+service ActorGrpcService {
+  rpc send(ActorGrpcRequest) returns (ActorGrpcResponse);
+}
