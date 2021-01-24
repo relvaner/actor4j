@@ -22,7 +22,7 @@
 		<artifactId>actor4j</artifactId>
 		<version>${actor4j.version}</version>
 	</parent>
-	<artifactId>actor4j-pattern</artifactId>
+	<artifactId>actor4j-patterns</artifactId>
 	
 	<dependencies>
 		<dependency>

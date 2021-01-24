@@ -59,7 +59,7 @@
 		<module>actor4j-benchmark</module>
 		<module>actor4j-examples</module>
 		
-		<module>actor4j-pattern</module>
+		<module>actor4j-patterns</module>
 		<module>actor4j-apc-actor</module>
 		<module>actor4j-web</module>
 		
