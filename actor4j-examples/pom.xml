@@ -1,0 +1,72 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.actor4j</groupId>
+		<artifactId>actor4j</artifactId>
+		<version>${actor4j.version}</version>
+	</parent>
+	<artifactId>actor4j-examples</artifactId>
+	
+	<dependencies>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-core</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-data</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-testing</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-verification</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-analyzer</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>actor4j-web</groupId>
+			<artifactId>actor4j-web-mqtt</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>actor4j-web</groupId>
+			<artifactId>actor4j-web-amqp</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>actor4j-web</groupId>
+			<artifactId>actor4j-web-coap-client</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>actor4j-web</groupId>
+			<artifactId>actor4j-web-coap-server</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-apc-actor</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
+    		<groupId>org.apache.commons</groupId>
+    		<artifactId>commons-lang3</artifactId>
+    		<version>3.11</version>
+		</dependency>
+	</dependencies>
+</project>

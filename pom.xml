@@ -40,5 +40,6 @@
 		<module>actor4j-analyzer</module>
 		<module>actor4j-verification</module>
 		<module>actor4j-benchmark</module>
+		<module>actor4j-examples</module>
 	</modules>
 </project>
