@@ -15,7 +15,7 @@
  */
 package io.actor4j.examples.apc.actor;
 
-import static io.actor4j.core.utils.ActorLogger.*;
+import static io.actor4j.core.logging.user.ActorLogger.*;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;

@@ -21,7 +21,7 @@ import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.connectors.MongoDBPersistenceConnector;
 
-import static io.actor4j.core.utils.ActorLogger.*;
+import static io.actor4j.core.logging.user.ActorLogger.*;
 
 import java.util.UUID;
 

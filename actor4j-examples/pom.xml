@@ -36,31 +36,31 @@
 			<version>${actor4j.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>actor4j-web</groupId>
+			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-mqtt</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>actor4j-web</groupId>
+			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-amqp</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
 		</dependency>
 		
 		<dependency>
-			<groupId>actor4j-web</groupId>
+			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-coap-client</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>actor4j-web</groupId>
+			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-coap-server</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-apc-actor</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
 		</dependency>
 		
 		<dependency>

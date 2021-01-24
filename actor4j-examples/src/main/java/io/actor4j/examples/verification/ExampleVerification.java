@@ -15,7 +15,7 @@
  */
 package io.actor4j.examples.verification;
 
-import static io.actor4j.core.utils.ActorLogger.*;
+import static io.actor4j.core.logging.user.ActorLogger.*;
 
 import java.util.LinkedList;
 import java.util.List;

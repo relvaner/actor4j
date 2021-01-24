@@ -27,12 +27,12 @@ import org.junit.Test;
 
 import io.actor4j.testing.ActorTest;
 import io.actor4j.testing.TestSystem;
-import bdd4j.Story;
+import io.actor4j.bdd.Story;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 
-import static bdd4j.OutcomeFactory.*;
-import static io.actor4j.core.utils.ActorLogger.logger;
+import static io.actor4j.bdd.OutcomeFactory.*;
+import static io.actor4j.core.logging.user.ActorLogger.logger;
 
 public class TestCase {
 	protected static class MyActor extends Actor implements ActorTest {

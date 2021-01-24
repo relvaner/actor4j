@@ -15,7 +15,7 @@
  */
 package io.actor4j.examples.starter;
 
-import static io.actor4j.core.utils.ActorLogger.*;
+import static io.actor4j.core.logging.user.ActorLogger.*;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;

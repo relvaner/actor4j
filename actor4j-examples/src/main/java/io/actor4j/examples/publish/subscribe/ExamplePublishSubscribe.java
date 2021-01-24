@@ -15,7 +15,7 @@
  */
 package io.actor4j.examples.publish.subscribe;
 
-import static io.actor4j.core.utils.ActorLogger.logger;
+import static io.actor4j.core.logging.user.ActorLogger.logger;
 
 import java.util.Random;
 import java.util.UUID;
