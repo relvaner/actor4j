@@ -30,7 +30,8 @@ import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 public class ExamplePersistentCache {
 	public ExamplePersistentCache() {
 		MongoClient mongoClient = new MongoClient("localhost", 27017);
-		mongoClient.dropDatabase("actor4j-test");
+		
+		mongoClient.getDatabase("actor4j-test").drop();
 		
 		ActorSystem system = new ActorSystem("ExamplePersistentCache");
 		final int INSTANCES = system.getParallelismMin()*system.getParallelismFactor();
