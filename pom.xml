@@ -44,5 +44,7 @@
 		
 		<module>actor4j-apc-actor</module>
 		<module>actor4j-web</module>
+		
+		<module>actor4j-persistence-mongo</module>
 	</modules>
 </project>

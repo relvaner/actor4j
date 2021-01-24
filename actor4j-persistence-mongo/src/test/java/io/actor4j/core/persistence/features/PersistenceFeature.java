@@ -13,21 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.examples.persistence;
+package io.actor4j.core.persistence.features;
+
 import io.actor4j.core.ActorSystem;
+import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.connectors.mongo.MongoDBPersistenceConnector;
 
-import static io.actor4j.core.logging.user.ActorLogger.*;
-
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-public class ExamplePersistence {
+import de.bwaldvogel.mongo.MongoServer;
+import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
+
+import static io.actor4j.core.logging.user.ActorLogger.*;
+import static org.junit.Assert.*;
+
+public class PersistenceFeature {
 	static class MyState extends ActorPersistenceObject {
 		public String title;
 		
@@ -66,21 +76,39 @@ public class ExamplePersistence {
 		}
 	}
 	
-	public ExamplePersistence() {
-		ActorSystem system = new ActorSystem("ExamplePersistence");
+	//@Ignore("Works only until MongoDB Java Driver 3.6.4, with Fongo 2.2.0-RC2")
+	@Test(timeout=30000)
+	public void test() {
+		CountDownLatch testDone = new CountDownLatch(2);
 		
+		ActorSystem system = new ActorSystem();
+		
+		AtomicBoolean first = new AtomicBoolean(true);
 		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				saveSnapshot(null, null, new MyState("I am a state!"));
+				saveSnapshot(null, null, new MyState("I am the first state!"));
 				
 				MyEvent event1 = new MyEvent("I am the first event!");
-				MyEvent event2 = new MyEvent("I am the second event!");
 				
 				persist(
 					(s) -> logger().debug(String.format("Event: %s", s)), 
 					(e) -> logger().error(String.format("Error: %s", e.getMessage())),
-					event1, event2);
+					event1);
+				
+				saveSnapshot(null, null, new MyState("I am the second state!"));
+				
+				MyEvent event2 = new MyEvent("I am the second event!");
+				MyEvent event3 = new MyEvent("I am the third event!");
+				MyEvent event4 = new MyEvent("I am the fourth event!");
+				
+				persist(
+						(s) -> logger().debug(String.format("Event: %s", s)), 
+						(e) -> logger().error(String.format("Error: %s", e.getMessage())),
+						event2, event3, event4);
+				
+				if (first.getAndSet(false))
+					tell(null, Actor.RESTART, self());
 			}
 
 			@Override
@@ -89,6 +117,16 @@ public class ExamplePersistence {
 					logger().debug(String.format("Recovery: %s", json));
 					Recovery<MyState, MyEvent> obj = Recovery.convertValue(json, new TypeReference<Recovery<MyState, MyEvent>>(){});
 					logger().debug(String.format("Recovery: %s", obj.toString()));
+					if (first.get())
+						assertEquals("{\"state\":{}}", json);
+					else {
+						assertEquals("I am the second state!", obj.state.title);
+						assertTrue(obj.events.size()==3);
+						assertEquals("I am the second event!", obj.events.get(0).title);
+						assertEquals("I am the third event!", obj.events.get(1).title);
+						assertEquals("I am the fourth event!", obj.events.get(2).title);
+					}
+					testDone.countDown();
 				}
 				else
 					logger().error(String.format("Error: %s", Recovery.getErrorMsg(json)));
@@ -101,21 +139,27 @@ public class ExamplePersistence {
 			}
 		});
 		
-		system.persistenceMode(new MongoDBPersistenceConnector("localhost", 27017, "actor4j"));
+		// Drop database
+		/*
+		MongoClient client = new MongoClient("localhost", 27017);
+		client.dropDatabase("actor4j-test");
+		client.close();
+		*/
+		MongoServer mongoServer = new MongoServer(new MemoryBackend());
+		mongoServer.bind("localhost", 27027);
+		
+		system.persistenceMode(new MongoDBPersistenceConnector("localhost", 27027, "actor4j-test"));
 		system.start();
 		
 		system.sendWhenActive(new ActorMessage<Object>(null, 0, system.SYSTEM_ID, id));
 		
 		try {
-			Thread.sleep(3000);
+			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
 		system.shutdownWithActors(true);
-	}
-	
-	public static void main(String[] args) {
-		new ExamplePersistence();
+		mongoServer.shutdown();
 	}
 }
