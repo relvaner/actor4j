@@ -38,6 +38,7 @@
 		<module>actor4j-data</module>
 		<module>actor4j-testing</module>
 		<module>actor4j-analyzer</module>
+		<module>actor4j-verification</module>
 		<module>actor4j-benchmark</module>
 	</modules>
 </project>
