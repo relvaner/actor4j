@@ -15,14 +15,8 @@
  */
 package io.actor4j.core.data.access.features;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.MongoClient;
-
-import de.bwaldvogel.mongo.MongoServer;
-import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorWithCache;
@@ -35,7 +29,6 @@ import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
 import io.actor4j.core.data.access.VolatileDataAccessObject;
 import io.actor4j.core.data.access.imdb.IMDBDataAccessActor;
-import io.actor4j.core.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
 import static io.actor4j.core.logging.user.ActorLogger.logger;
@@ -48,28 +41,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PersistentCacheFeature {
-	protected MongoServer mongoServer;
-	protected MongoClient client;
-	
-	@Before
-	public void before() {
-		/*
-		client = new MongoClient("localhost", 27017);
-		client.dropDatabase("actor4j-test");
-		*/
-		
-		mongoServer = new MongoServer(new MemoryBackend());
-		mongoServer.bind("localhost", 27027);
-		
-		client = new MongoClient("localhost", 27027);
-	}
-	
-	@After
-	public void after() {
-		client.close();
-		mongoServer.shutdown();
-	}
-	
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor() {
 		ActorSystem system = new ActorSystem();
@@ -84,7 +55,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
+				UUID dataAccess = system.addActor(() -> new IMDBDataAccessActor<String, TestObject>("dc"));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
@@ -107,76 +78,6 @@ public class PersistentCacheFeature {
 					if (payload.value!=null) {
 						assertEquals(values[i], payload.value.value);
 						logger().debug(payload.value.value);
-						if (i<keys.length-1)
-							i++;
-						testDone.countDown();
-					}/*
-					else
-						logger().debug(false);*/
-					unbecome();
-				});
-			}
-		});
-		
-		system.start();
-		
-		Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				system.send(new ActorMessage<>(null, 0, system.SYSTEM_ID, mediator));
-			}
-		}, 0, 100);
-		
-		try {
-			testDone.await();
-			timer.cancel();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		system.shutdownWithActors(true);
-	}
-	
-	@Test(timeout=5000)
-	public void test_primary_secondary_persistent_cache_actor_with_manager() {
-		ActorSystem system = new ActorSystem();
-		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
-		
-		CountDownLatch testDone = new CountDownLatch(COUNT);
-		
-		UUID mediator = system.addActor(() -> new Actor("mediator") {
-			protected PersistentActorCacheManager<String, TestObject> manager;
-			
-			protected final String[] keys = {"key4", "key1", "key3", "key2"};
-			protected final String[] values = {"value4", "value1", "value3", "value2"};
-			protected int i = 0;
-			
-			@Override 
-			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
-				
-				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
-				system.addActor(manager.create(COUNT, 500, dataAccess));
-				
-				manager.set("key1", new TestObject("key1", "value1"));
-				manager.set("key2", new TestObject("key2", "value2"));
-				manager.set("key3", new TestObject("key3", "value3"));
-				manager.set("key4", new TestObject("key4", "value4"));
-			}
-			
-			@Override
-			public void receive(ActorMessage<?> message) {
-				manager.get(keys[i]);
-				
-				await((msg) -> msg.source!=system.SYSTEM_ID && msg.value!=null, (msg) -> {
-					Pair<String, TestObject> pair = manager.get(msg);
-					
-					if (pair!=null && pair.b!=null) {
-						assertEquals(keys[i], pair.a);
-						assertEquals(keys[i], pair.b.key);
-						assertEquals(values[i], pair.b.value);
-						logger().debug(pair.b.value);
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();
