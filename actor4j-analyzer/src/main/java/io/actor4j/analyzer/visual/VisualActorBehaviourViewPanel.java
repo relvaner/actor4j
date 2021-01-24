@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import com.mxgraph.layout.mxCircleLayout;
-import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.model.mxCell;
