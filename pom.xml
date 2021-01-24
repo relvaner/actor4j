@@ -52,6 +52,7 @@
 	
 	<modules>
 		<module>actor4j-data</module>
+		<module>actor4j-data-mongo</module>
 		<module>actor4j-testing</module>
 		<module>actor4j-analyzer</module>
 		<module>actor4j-verification</module>
