@@ -20,8 +20,6 @@ import static io.actor4j.core.logging.user.ActorLogger.logger;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,11 +43,8 @@ import com.google.common.cache.LoadingCache;
 
 import io.actor4j.core.ActorClientRunnable;
 import io.actor4j.core.ActorServiceNode;
-import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.web.utils.BulkTransferActorMessage;
 import io.actor4j.web.utils.TransferActorMessage;
-import io.actor4j.web.websocket.actors.Websocket;
 import io.actor4j.web.websocket.endpoints.ActorClientEndpoint;
 
 public class WebsocketActorClientRunnable implements ActorClientRunnable {

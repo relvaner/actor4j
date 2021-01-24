@@ -18,9 +18,7 @@ package io.actor4j.web.websocket.actors;
 import io.actor4j.core.ActorClientRunnable;
 import io.actor4j.core.actors.ResourceActor;
 import io.actor4j.core.annotations.Stateful;
-import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.web.websocket.WebsocketActorClientRunnable;
 
 @Stateful
 public class WebsocketResourceActor extends ResourceActor {
@@ -35,7 +33,6 @@ public class WebsocketResourceActor extends ResourceActor {
 		this(name, false, clientRunnable);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void receive(ActorMessage<?> message) {
 		System.out.println(getName());
