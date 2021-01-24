@@ -32,8 +32,8 @@ import javax.websocket.server.ServerEndpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
-import io.actor4j.core.messages.RemoteActorMessage;
 import io.actor4j.web.utils.BulkTransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessage;
 import io.actor4j.web.utils.TransferActorMessage;
 
 @ServerEndpoint(value = "/actor4j")

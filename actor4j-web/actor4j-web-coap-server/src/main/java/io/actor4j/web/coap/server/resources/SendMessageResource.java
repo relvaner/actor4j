@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
-import io.actor4j.core.messages.RemoteActorMessage;
+import io.actor4j.web.utils.RemoteActorMessage;
 import io.actor4j.web.utils.TransferActorMessage;
 import io.actor4j.web.utils.rest.databind.COAPActorResponse;
 

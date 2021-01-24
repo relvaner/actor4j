@@ -22,11 +22,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
-import io.actor4j.core.messages.RemoteActorMessage;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass;
 import io.actor4j.web.grpc.ActorGrpcServiceGrpc.ActorGRPCServiceImplBase;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCResponse;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCResponse.Builder;
+import io.actor4j.web.utils.RemoteActorMessage;
 import io.actor4j.web.utils.TransferActorMessage;
 import io.grpc.stub.StreamObserver;
 
