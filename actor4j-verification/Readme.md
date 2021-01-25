@@ -8,7 +8,7 @@ For further information on `Actor4j`, see the following more complete [documenta
 
 ## Dependencies ##
 
-Following dependency from this site is often involved:
+Following dependency from this site is involved:
 ```xml
 		<dependency>
 			<groupId>io.actor4j</groupId>
