@@ -8,12 +8,12 @@ For further information on `Actor4j`, see the following more complete [documenta
 
 ## Dependencies ##
 
-Following manual dependencies from this site are involved:
+Following dependency from this site is often involved:
 ```xml
 		<dependency>
-			<groupId>bdd4j</groupId>
-			<artifactId>bdd4j</artifactId>
-			<version>1.3.1</version>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-core</artifactId>
+			<version>${actor4j.version}</version>
 		</dependency>
 ```
 

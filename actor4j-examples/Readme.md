@@ -13,22 +13,64 @@ Following dependencies from this site are involved:
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-persistence-mongo</artifactId>
+			<version>${actor4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-data</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-data-mongo</artifactId>
+			<version>${actor4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-testing</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-verification</artifactId>
+			<version>${actor4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-analyzer</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-web-mqtt</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-web-amqp</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-web-coap-client</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-web-coap-server</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-apc-actor</artifactId>
+			<version>${actor4j.version}</version>
 		</dependency>
 ```
 

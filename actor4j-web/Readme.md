@@ -13,7 +13,7 @@ Following dependency from this site is often involved:
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core</artifactId>
-			<version>1.0.0</version>
+			<version>${actor4j.version}</version>
 		</dependency>
 ```
 
