@@ -27,7 +27,7 @@ import io.actor4j.core.messages.ActorMessage;
 
 public class TestSystem extends ActorSystem {
 	public TestSystem() {
-		super("actor4j-test", TestSystemImpl.class);
+		super("actor4j-test", (n, wrapper) -> new TestSystemImpl(n, wrapper));
 		
 		((TestSystemImpl)system).pseudoActor = new PseudoActor(this, true) {
 			@Override
