@@ -20,7 +20,7 @@ import io.actor4j.core.ActorSystem;
 public class ActorAnalyzer extends ActorSystem {
 
 	public ActorAnalyzer(ActorAnalyzerThread analyzerThread) {
-		super("actor4j-analyzer", AnalyzerActorSystemImpl.class);
+		super("actor4j-analyzer", (n, wrapper) -> new AnalyzerActorSystemImpl(n, wrapper));
 		
 		((AnalyzerActorSystemImpl)system).analyze(analyzerThread);
 	}
