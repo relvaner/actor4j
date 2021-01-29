@@ -17,15 +17,13 @@ package io.actor4j.web.websocket.actors;
 
 import io.actor4j.core.ActorClientRunnable;
 import io.actor4j.core.actors.ResourceActor;
-import io.actor4j.core.annotations.Stateful;
 import io.actor4j.core.messages.ActorMessage;
 
-@Stateful
 public class WebsocketResourceActor extends ResourceActor {
 	protected final ActorClientRunnable clientRunnable;
 	
 	public WebsocketResourceActor(String name, boolean bulk, ActorClientRunnable clientRunnable) {
-		super(name, bulk);
+		super(name, true, bulk);
 		this.clientRunnable = clientRunnable;
 	}
 

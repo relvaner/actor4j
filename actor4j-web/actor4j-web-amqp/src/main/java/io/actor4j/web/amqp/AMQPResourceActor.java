@@ -30,14 +30,12 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
 
 import io.actor4j.core.actors.ResourceActor;
-import io.actor4j.core.annotations.Stateless;
 import io.actor4j.core.messages.ActorMessage;
 
 /*
  *  MQTT compatible implementation (MQTT topics use a topic exchange (amq.topic by default))
  * 	@See https://www.rabbitmq.com/mqtt.html 
  */
-@Stateless
 public abstract class AMQPResourceActor extends ResourceActor {
 	public static final int PUBLISH     = 1;
 	public static final int SUBSCRIBE   = 2;

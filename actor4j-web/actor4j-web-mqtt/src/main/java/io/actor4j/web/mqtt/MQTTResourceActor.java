@@ -26,10 +26,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import io.actor4j.core.actors.ResourceActor;
-import io.actor4j.core.annotations.Stateful;
 import io.actor4j.core.messages.ActorMessage;
 
-@Stateful
 public abstract class MQTTResourceActor extends ResourceActor {
 	public static final int PUBLISH     = 1;
 	public static final int SUBSCRIBE   = 2;
@@ -43,7 +41,7 @@ public abstract class MQTTResourceActor extends ResourceActor {
 	}
 
 	public MQTTResourceActor(String name, String broker) {
-		super(name);
+		super(name, true, false);
 		this.broker = broker;
 	}
 	
