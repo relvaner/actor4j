@@ -24,7 +24,7 @@ import io.actor4j.core.ActorSystem;
 public class ActorVerificator extends ActorSystem {
 	
 	public ActorVerificator() {
-		super("actor4j-verification", VerificatorActorSystemImpl.class);
+		super("actor4j-verification", (n, wrapper) -> new VerificatorActorSystemImpl(n, wrapper));
 	}
 	
 	public void verify(Consumer<ActorVerificationSM> consumer) {
