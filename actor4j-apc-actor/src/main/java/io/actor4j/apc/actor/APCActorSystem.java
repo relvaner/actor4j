@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.ActorSystemImpl;
+import io.actor4j.core.ActorSystemImplFactory;
 
 public class APCActorSystem extends ActorSystem {
 	protected final Map<UUID, CompletableFuture<?>> futureMap = new ConcurrentHashMap<>();
@@ -32,12 +32,12 @@ public class APCActorSystem extends ActorSystem {
 		super();
 	}
 
-	public APCActorSystem(Class<? extends ActorSystemImpl> clazz) {
-		super(clazz);
+	public APCActorSystem(ActorSystemImplFactory factory) {
+		super(factory);
 	}
 
-	public APCActorSystem(String name, Class<? extends ActorSystemImpl> clazz) {
-		super(name, clazz);
+	public APCActorSystem(String name, ActorSystemImplFactory factory) {
+		super(name, factory);
 	}
 
 	public APCActorSystem(String name) {
