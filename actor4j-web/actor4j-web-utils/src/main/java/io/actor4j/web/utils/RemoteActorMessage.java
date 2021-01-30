@@ -20,7 +20,6 @@ import java.util.UUID;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.utils.Utils;
 
 public class RemoteActorMessage<T> extends ActorMessage<T> {
 	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, String domain) {
