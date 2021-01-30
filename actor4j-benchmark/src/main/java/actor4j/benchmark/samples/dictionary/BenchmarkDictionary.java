@@ -18,8 +18,7 @@ package actor4j.benchmark.samples.dictionary;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import io.actor4j.core.ActorSystem;
-import io.actor4j.core.XActorSystemImpl;
+import io.actor4j.corex.XActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
@@ -36,13 +35,15 @@ public class BenchmarkDictionary extends BenchmarkSample {
 		final int attempts = 2_500_000;//2_500_000;
 		final int keySize  = 5_000_000;//5_000_000;
 		
-		ActorSystem system = new ActorSystem("actor4j::Dictionary", XActorSystemImpl.class);
+		XActorSystem system = new XActorSystem("actor4j::Dictionary");
 		if (config.parallelismMin>0)
 			system.setParallelismMin(config.parallelismMin);
 		if (config.parallelismFactor>0)
 			system.setParallelismFactor(config.parallelismFactor);
+		/*
 		system.underlyingImpl().setQueueSize(5_000_000);
 		system.underlyingImpl().setBufferQueueSize(1_000_000);
+		*/
 		final int COUNT = config.parallelism();
 
 		CountDownLatch testDone = new CountDownLatch(1);
@@ -55,7 +56,7 @@ public class BenchmarkDictionary extends BenchmarkSample {
 			@Override
 			public void preStart() {
 				manager = new VolatileActorCacheManager<Integer, Integer>(this, "vcache1");
-				system.addActor(VolatileActorCacheManager.create(COUNT - 1, attempts, "vcache1"));
+				system.addActor(VolatileActorCacheManager.create(COUNT, attempts, "vcache1"));
 				Random random = new Random();
 				for (int i=0; i<attempts; i++)
 					manager.set(random.nextInt(keySize), random.nextInt());

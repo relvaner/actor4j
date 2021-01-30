@@ -18,7 +18,7 @@ package actor4j.benchmark.samples.bcast;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.core.ActorSystem;
+import io.actor4j.corex.XActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -29,7 +29,7 @@ public class BenchmarkBcast extends BenchmarkSample {
 	public BenchmarkBcast(BenchmarkConfig config) {
 		super();
 		
-		ActorSystem system = new ActorSystem("actor4j::Bcast"/*, XActorSystemImpl.class*/);
+		XActorSystem system = new XActorSystem("actor4j::Bcast");
 		system.sleepMode();
 		
 		final ActorGroup group = new ActorGroupSet();

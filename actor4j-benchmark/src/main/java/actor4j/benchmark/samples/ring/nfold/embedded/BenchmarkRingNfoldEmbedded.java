@@ -18,7 +18,7 @@ package actor4j.benchmark.samples.ring.nfold.embedded;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.core.ActorSystem;
+import io.actor4j.corex.XActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.BenchmarkConfig;
 import shared.benchmark.BenchmarkSample;
@@ -27,7 +27,7 @@ public class BenchmarkRingNfoldEmbedded extends BenchmarkSample {
 	public BenchmarkRingNfoldEmbedded(BenchmarkConfig config) {
 		super();
 		
-		ActorSystem system = new ActorSystem("actor4j::NFoldRingEmbedded"); // use -Xss1g
+		XActorSystem system = new XActorSystem("actor4j::NFoldRingEmbedded"); // use -Xss1g
 		system.sleepMode();
 		
 		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());

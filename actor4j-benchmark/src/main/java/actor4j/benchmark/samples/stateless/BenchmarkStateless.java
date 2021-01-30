@@ -19,18 +19,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.ActorWithDistributedGroup;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
+import io.actor4j.corex.XActorSystem;
 import shared.benchmark.BenchmarkConfig;
 
 public class BenchmarkStateless {
 	public BenchmarkStateless(BenchmarkConfig config) {
 		super();
 		
-		ActorSystem system = new ActorSystem("actor4j::Stateless");
+		XActorSystem system = new XActorSystem("actor4j::Stateless");
 		system.parkMode();
 		
 		System.out.printf("#actors: %d%n", config.parallelism());

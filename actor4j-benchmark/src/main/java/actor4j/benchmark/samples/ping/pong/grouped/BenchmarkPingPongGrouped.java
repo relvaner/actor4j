@@ -20,7 +20,7 @@ import static actor4j.benchmark.samples.ping.pong.grouped.ActorMessageTag.MSG;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.core.ActorSystem;
+import io.actor4j.corex.XActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -31,7 +31,7 @@ public class BenchmarkPingPongGrouped extends BenchmarkSample {
 	public BenchmarkPingPongGrouped(BenchmarkConfig config) {
 		super();
 		
-		ActorSystem system = new ActorSystem("actor4j::PingPong-Grouped");
+		XActorSystem system = new XActorSystem("actor4j::PingPong-Grouped");
 		system.sleepMode();
 		
 		ActorGroup group = new ActorGroupSet();

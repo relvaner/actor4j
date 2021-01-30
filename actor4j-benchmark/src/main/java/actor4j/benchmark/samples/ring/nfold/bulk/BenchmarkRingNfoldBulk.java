@@ -20,7 +20,7 @@ import static actor4j.benchmark.samples.ring.nfold.bulk.ActorMessageTag.RUN;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.core.ActorSystem;
+import io.actor4j.corex.XActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -31,7 +31,7 @@ public class BenchmarkRingNfoldBulk extends BenchmarkSample {
 	public BenchmarkRingNfoldBulk(BenchmarkConfig config) {
 		super();
 		
-		ActorSystem system = new ActorSystem("actor4j::NFoldRing-Bulk");
+		XActorSystem system = new XActorSystem("actor4j::NFoldRing-Bulk");
 		system.sleepMode();
 		
 		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());

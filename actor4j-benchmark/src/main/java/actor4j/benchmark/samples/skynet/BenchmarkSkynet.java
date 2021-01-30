@@ -23,9 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import io.actor4j.core.ActorSystem;
-import io.actor4j.core.XActorSystemImpl;
-import io.actor4j.core.XAntiFloodingTimer;
+import io.actor4j.corex.XActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
 import io.actor4j.core.messages.ActorMessage;
@@ -40,9 +38,10 @@ public class BenchmarkSkynet extends BenchmarkSample {
 	
 	public BenchmarkSkynet(BenchmarkConfig config) {
 		super();
-		
-		ActorSystem system = new ActorSystem("actor4j::Skynet", XActorSystemImpl.class);
-		((XActorSystemImpl)system.underlyingImpl()).setFactoryAntiFloodingTimer(() -> new XAntiFloodingTimer(-1, 30_000));
+
+		//ActorSystem system = new ActorSystem("actor4j::Skynet", (name, wrapper) -> new AntiFloodingActorSystemImpl(name, wrapper));
+		//((AntiFloodingActorSystemImpl)system.underlyingImpl()).setFactoryAntiFloodingTimer(() -> new AntiFloodingTimer(-1, 30_000));
+		XActorSystem system = new XActorSystem("actor4j::Skynet");
 		if (config.parallelismMin>0)
 			system.setParallelismMin(config.parallelismMin);
 		if (config.parallelismFactor>0)
