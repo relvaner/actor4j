@@ -23,6 +23,7 @@ import org.bson.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -31,7 +32,9 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.ActorSystem;
+import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.connectors.PersistenceAdapter;
 import io.actor4j.core.persistence.connectors.PersistenceConnector;
 
@@ -78,7 +81,10 @@ public class MongoDBPersistenceAdapter extends PersistenceAdapter {
 	public void receive(ActorMessage<?> message) {
 		if (message.tag==PERSIST_EVENTS) {
 			try {
-				JSONArray array = new JSONArray(message.valueAsString());
+				@SuppressWarnings("unchecked")
+				String json = new ObjectMapper().writeValueAsString(((ImmutableList<ActorPersistenceObject>)message.value).get()); // temporary
+				
+				JSONArray array = new JSONArray(json);
 				if (array.length()==1) {
 					Document document = Document.parse(array.get(0).toString());
 					checkTimeStamp(document);
@@ -102,7 +108,9 @@ public class MongoDBPersistenceAdapter extends PersistenceAdapter {
 		}
 		else if (message.tag==PERSIST_STATE){
 			try {
-				Document document = Document.parse(message.valueAsString());
+				String json = new ObjectMapper().writeValueAsString(message.value); // temporary
+				
+				Document document = Document.parse(json);
 				checkTimeStamp(document);
 				states.insertOne(document);
 				parent.send(new ActorMessage<Object>(null, INTERNAL_PERSISTENCE_SUCCESS, self(), message.source));
