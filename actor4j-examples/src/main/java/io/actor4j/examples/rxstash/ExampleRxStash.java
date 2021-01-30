@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
-import io.actor4j.core.actors.ActorWithRxStash;
+import io.actor4j.corex.actors.ActorWithRxStash;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorMessageMatcher;
@@ -78,10 +78,10 @@ public class ExampleRxStash {
 			}
 		});
 		
+		system.start();
+		
 		system
 			.timer().schedule(new ActorMessage<>(null, 0, null, null), sender, 0, 100, TimeUnit.MILLISECONDS);
-		
-		system.start();
 		
 		try {
 			Thread.sleep(15000);

@@ -49,7 +49,7 @@ public class ExampleAnalyzer {
 								for (int i=0; i<3; i++) {
 									final int f_i = i;
 									final UUID f_next = next;
-									UUID current = addChild(Sender.class, "child-"+f_i, f_next);
+									UUID current = addChild(() -> new Sender("child-"+f_i, f_next));
 									next = current;
 								}
 								last = next;

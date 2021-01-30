@@ -24,15 +24,15 @@ import java.util.concurrent.TimeUnit;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
-import io.actor4j.core.actors.PseudoActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
+import io.actor4j.corex.actors.PseudoActorWithRx;
 
 public class ExamplePseudo {
 	public ExamplePseudo() {
 		ActorSystem system = new ActorSystem("ExamplePseudo");
 		
-		PseudoActor main = new PseudoActor(system, false) {
+		PseudoActorWithRx main = new PseudoActorWithRx(system, false) {
 			@Override
 			public void receive(ActorMessage<?> message) {
 			}
