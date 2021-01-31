@@ -34,7 +34,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 
-import static io.actor4j.core.logging.user.ActorLogger.*;
+import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
 public class PersistenceFeature {
@@ -92,8 +92,8 @@ public class PersistenceFeature {
 				MyEvent event1 = new MyEvent("I am the first event!");
 				
 				persist(
-					(s) -> logger().debug(String.format("Event: %s", s)), 
-					(e) -> logger().error(String.format("Error: %s", e.getMessage())),
+					(s) -> logger().log(DEBUG, String.format("Event: %s", s)), 
+					(e) -> logger().log(ERROR, String.format("Error: %s", e.getMessage())),
 					event1);
 				
 				saveSnapshot(null, null, new MyState("I am the second state!"));
@@ -103,8 +103,8 @@ public class PersistenceFeature {
 				MyEvent event4 = new MyEvent("I am the fourth event!");
 				
 				persist(
-						(s) -> logger().debug(String.format("Event: %s", s)), 
-						(e) -> logger().error(String.format("Error: %s", e.getMessage())),
+						(s) -> logger().log(DEBUG, String.format("Event: %s", s)), 
+						(e) -> logger().log(ERROR, String.format("Error: %s", e.getMessage())),
 						event2, event3, event4);
 				
 				if (first.getAndSet(false))
@@ -114,9 +114,9 @@ public class PersistenceFeature {
 			@Override
 			public void recover(String json) {
 				if (!Recovery.isError(json)) {
-					logger().debug(String.format("Recovery: %s", json));
+					logger().log(DEBUG, String.format("Recovery: %s", json));
 					Recovery<MyState, MyEvent> obj = Recovery.convertValue(json, new TypeReference<Recovery<MyState, MyEvent>>(){});
-					logger().debug(String.format("Recovery: %s", obj.toString()));
+					logger().log(DEBUG, String.format("Recovery: %s", obj.toString()));
 					if (first.get())
 						assertEquals("{\"state\":{}}", json);
 					else {
@@ -129,7 +129,7 @@ public class PersistenceFeature {
 					testDone.countDown();
 				}
 				else
-					logger().error(String.format("Error: %s", Recovery.getErrorMsg(json)));
+					logger().log(ERROR, String.format("Error: %s", Recovery.getErrorMsg(json)));
 			}
 			
 			@Override
