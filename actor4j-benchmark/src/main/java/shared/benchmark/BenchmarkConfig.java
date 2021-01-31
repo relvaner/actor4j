@@ -15,12 +15,12 @@
  */
 package shared.benchmark;
 
-import io.actor4j.core.logging.Level;
-import io.actor4j.core.logging.system.SystemActorLogger;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 public class BenchmarkConfig {
 	static {
-		SystemActorLogger.systemLogger().setLevel(Level.ERROR);
+		systemLogger().setLevel(ERROR);
+		logger().setLevel(ERROR);
 	}
 	
 	public int numberOfActors;
