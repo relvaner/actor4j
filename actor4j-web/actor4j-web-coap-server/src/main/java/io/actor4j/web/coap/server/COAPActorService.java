@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.coap.server;
 
-import static io.actor4j.core.logging.system.SystemActorLogger.*;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.config.NetworkConfig;
@@ -53,11 +53,11 @@ public abstract class COAPActorService extends CoapServer {
 	@Override
 	public void start() {
 		super.start();
-		systemLogger().info(String.format("%s - COAP-Service started...", service.getName()));
+		systemLogger().log(INFO, String.format("%s - COAP-Service started...", service.getName()));
 	}
 	
 	public void shutdown() {
 		stop();
-		systemLogger().info(String.format("%s - COAP-Service stopped...", service.getName()));
+		systemLogger().log(INFO, String.format("%s - COAP-Service stopped...", service.getName()));
 	}
 }

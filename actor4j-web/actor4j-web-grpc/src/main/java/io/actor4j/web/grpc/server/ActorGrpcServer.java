@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.grpc.server;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.logger;
 
 import java.io.IOException;
 

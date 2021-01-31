@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.websocket;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -130,7 +130,7 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 					message.dest = uuids.get(ThreadLocalRandom.current().nextInt(uuids.size()));
 			}
 			else {
-				logger().debug("The actor for a given alias was not found.");
+				systemLogger().log(DEBUG, "The actor for a given alias was not found.");
 				return;	
 			}
 		}
@@ -143,7 +143,7 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 				String response = WebSocketActorClientManager.sendMessage(session, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.equals("1")) {
 					WebSocketActorClientManager.requestMap.remove(msg.id.toString());
-					logger().debug("Message was not acknowledged.");
+					systemLogger().log(DEBUG, "Message was not acknowledged.");
 				}
 				
 			} catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
@@ -151,7 +151,7 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 			}
 		}
 		else
-			logger().debug("The actor was not found.");
+			systemLogger().log(DEBUG, "The actor was not found.");
 	}
 		
 	@Override
@@ -168,7 +168,7 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 				response = WebSocketActorClientManager.sendMessage(session, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.equals("1")) {
 					WebSocketActorClientManager.requestMap.remove(msg.id.toString());
-					logger().debug("Message was not acknowledged.");
+					systemLogger().log(DEBUG, "Message was not acknowledged.");
 				}
 			}
 				

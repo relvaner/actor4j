@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.mqtt;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.logger;
 
 import java.util.UUID;
 

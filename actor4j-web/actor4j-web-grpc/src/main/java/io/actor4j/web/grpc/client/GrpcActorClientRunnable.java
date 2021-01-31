@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.grpc.client;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -124,7 +124,7 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 					message.dest = uuids.get(ThreadLocalRandom.current().nextInt(uuids.size()));
 			}
 			else {
-				logger().debug("The actor for a given alias was not found.");
+				logger().log(DEBUG, "The actor for a given alias was not found.");
 				return;	
 			}
 		}
@@ -136,14 +136,14 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 				TransferActorMessage msg = new TransferActorMessage(message.value, message.tag, message.source, message.dest);
 				ActorGRPCResponse response = GrpcActorClientManager.sendMessage(channel, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.getMessage().equals("1"))
-					logger().debug("Message was not acknowledged.");
+					logger().log(DEBUG, "Message was not acknowledged.");
 				
 			} catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
 				e.printStackTrace();
 			}
 		}
 		else
-			logger().debug("The actor was not found.");
+			logger().log(DEBUG, "The actor was not found.");
 	}
 	
 	@Override
@@ -159,7 +159,7 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 				TransferActorMessage msg = new TransferActorMessage(message.value, message.tag, message.source, dest);
 				response = GrpcActorClientManager.sendMessage(channel, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.getMessage().equals("1"))
-					logger().debug("Message was not acknowledged.");
+					logger().log(DEBUG, "Message was not acknowledged.");
 			}
 				
 		} catch (IOException | InterruptedException | ExecutionException | TimeoutException e) {
