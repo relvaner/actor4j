@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.coap.server;
 
-import static io.actor4j.core.logging.system.ActorLogger.*;
+import static io.actor4j.core.logging.system.SystemActorLogger.*;
 
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.config.NetworkConfig;

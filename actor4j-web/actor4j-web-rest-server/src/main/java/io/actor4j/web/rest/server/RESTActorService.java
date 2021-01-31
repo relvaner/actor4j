@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.rest.server;
 
-import static io.actor4j.core.logging.system.ActorLogger.*;
+import static io.actor4j.core.logging.system.SystemActorLogger.*;
 
 import javax.annotation.PreDestroy;
 

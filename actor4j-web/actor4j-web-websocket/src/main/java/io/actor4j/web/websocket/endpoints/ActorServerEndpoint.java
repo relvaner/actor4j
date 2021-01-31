@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.websocket.endpoints;
 
-import static io.actor4j.core.logging.system.ActorLogger.*;
+import static io.actor4j.core.logging.system.SystemActorLogger.*;
 
 import java.io.IOException;
 import java.util.List;
