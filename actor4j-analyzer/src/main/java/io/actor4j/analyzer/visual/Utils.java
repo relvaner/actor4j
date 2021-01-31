@@ -15,7 +15,7 @@
  */
 package io.actor4j.analyzer.visual;
 
-import static io.actor4j.core.logging.system.SystemActorLogger.systemLogger;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public final class Utils {
 		colorPalette.add("#760408");
 		
 		if (!(new HashSet<String>(colorPalette).size()==colorPalette.size()))
-			systemLogger().error(String.format("[ANALYZER] color palette inconsistent"));
+			systemLogger().log(ERROR, String.format("[ANALYZER] color palette inconsistent"));
 	}
 	
 	public static Color randomColor(int index, int parallelism) {
