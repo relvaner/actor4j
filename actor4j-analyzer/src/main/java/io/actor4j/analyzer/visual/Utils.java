@@ -15,7 +15,7 @@
  */
 package io.actor4j.analyzer.visual;
 
-import static io.actor4j.core.logging.system.ActorLogger.systemLogger;
+import static io.actor4j.core.logging.system.SystemActorLogger.systemLogger;
 
 import java.awt.Color;
 import java.util.ArrayList;
