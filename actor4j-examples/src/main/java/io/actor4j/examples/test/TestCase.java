@@ -32,7 +32,7 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 
 import static io.actor4j.bdd.OutcomeFactory.*;
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.logger;
 
 public class TestCase {
 	protected static class MyActor extends Actor implements ActorTest {

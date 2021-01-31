@@ -15,7 +15,7 @@
  */
 package io.actor4j.examples.verification;
 
-import static io.actor4j.core.logging.user.ActorLogger.*;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -97,17 +97,17 @@ public class ExampleVerification {
 		
 		verificator.verifyAll((sm) -> {
 			list.add(sm);
-			logger().debug(String.format("%s - Cycles: %s", sm.getName(), ActorVerificationUtils.findCycles(sm.getGraph())));
-			logger().debug(String.format("%s - Unreachables: %s", sm.getName(), ActorVerificationUtils.findUnreachables(sm.getGraph(), sm.getIntialStateMarker())));
-			logger().debug(String.format("%s - Deads: %s", sm.getName(), ActorVerificationUtils.findDead(
+			logger().log(DEBUG, String.format("%s - Cycles: %s", sm.getName(), ActorVerificationUtils.findCycles(sm.getGraph())));
+			logger().log(DEBUG, String.format("%s - Unreachables: %s", sm.getName(), ActorVerificationUtils.findUnreachables(sm.getGraph(), sm.getIntialStateMarker())));
+			logger().log(DEBUG, String.format("%s - Deads: %s", sm.getName(), ActorVerificationUtils.findDead(
 					sm.getGraph(), ActorVerificationUtils.findUnreachables(sm.getGraph(), sm.getIntialStateMarker()))));
 			
-			logger().debug(String.format("%s - Edges (initial state, self reference): %s", sm.getName(), sm.getGraph().getAllEdges(sm.getIntialStateMarker(), sm.getIntialStateMarker())));
+			logger().log(DEBUG, String.format("%s - Edges (initial state, self reference): %s", sm.getName(), sm.getGraph().getAllEdges(sm.getIntialStateMarker(), sm.getIntialStateMarker())));
 		}, (graph) -> {
 			ActorVerificationUtils.interconnect(list, graph);
-			logger().debug(String.format("All - Cycles: %s", ActorVerificationUtils.findCycles(graph)));
-			logger().debug(String.format("All - Unreachables: %s", ActorVerificationUtils.findUnreachables(graph, globalIntialStateMarker)));
-			logger().debug(String.format("All - Deads: %s", ActorVerificationUtils.findDead(
+			logger().log(DEBUG, String.format("All - Cycles: %s", ActorVerificationUtils.findCycles(graph)));
+			logger().log(DEBUG, String.format("All - Unreachables: %s", ActorVerificationUtils.findUnreachables(graph, globalIntialStateMarker)));
+			logger().log(DEBUG, String.format("All - Deads: %s", ActorVerificationUtils.findDead(
 					graph, ActorVerificationUtils.findUnreachables(graph, globalIntialStateMarker))));
 		});
 	}

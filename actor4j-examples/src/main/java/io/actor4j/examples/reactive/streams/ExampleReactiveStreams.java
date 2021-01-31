@@ -15,7 +15,8 @@
  */
 package io.actor4j.examples.reactive.streams;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.DEBUG;
+import static io.actor4j.core.logging.ActorLogger.logger;
 
 import java.util.Random;
 import java.util.UUID;
@@ -42,14 +43,14 @@ public class ExampleReactiveStreams {
 		system.addActor(() -> new SubscriberActor("subscriberA") {
 			@Override
 			public void preStart() {
-				subscribe(publisher, (obj) -> logger().debug(String.format("At actor %s following value was received: %s", name, obj)), null, null);
+				subscribe(publisher, (obj) -> logger().log(DEBUG, String.format("At actor %s following value was received: %s", name, obj)), null, null);
 				request(10, publisher);
 			}
 		});
 		system.addActor(() -> new SubscriberActor("subscriberB") {
 			@Override
 			public void preStart() {
-				subscribe(publisher, (obj) -> logger().debug(String.format("At actor %s following value was received: %s", name, obj)), null, null);
+				subscribe(publisher, (obj) -> logger().log(DEBUG, String.format("At actor %s following value was received: %s", name, obj)), null, null);
 				request(15, publisher);
 			}
 		});

@@ -15,7 +15,8 @@
  */
 package io.actor4j.examples.publish.subscribe;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.DEBUG;
+import static io.actor4j.core.logging.ActorLogger.logger;
 
 import java.util.Random;
 import java.util.UUID;
@@ -37,13 +38,13 @@ public class ExamplePublishSubscribe {
 		UUID subscriberA = system.addActor(() -> new Actor("subscriberA") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().debug(String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
 			}
 		});
 		UUID subscriberB = system.addActor(() -> new Actor("subscriberB") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().debug(String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
 			}
 		});
 		

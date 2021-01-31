@@ -21,7 +21,7 @@ import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.connectors.mongo.MongoDBPersistenceConnector;
 
-import static io.actor4j.core.logging.user.ActorLogger.*;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.util.UUID;
 
@@ -78,20 +78,20 @@ public class ExamplePersistence {
 				MyEvent event2 = new MyEvent("I am the second event!");
 				
 				persist(
-					(s) -> logger().debug(String.format("Event: %s", s)), 
-					(e) -> logger().error(String.format("Error: %s", e.getMessage())),
+					(s) -> logger().log(DEBUG, String.format("Event: %s", s)), 
+					(e) -> logger().log(ERROR, String.format("Error: %s", e.getMessage())),
 					event1, event2);
 			}
 
 			@Override
 			public void recover(String json) {
 				if (!Recovery.isError(json)) {
-					logger().debug(String.format("Recovery: %s", json));
+					logger().log(DEBUG, String.format("Recovery: %s", json));
 					Recovery<MyState, MyEvent> obj = Recovery.convertValue(json, new TypeReference<Recovery<MyState, MyEvent>>(){});
-					logger().debug(String.format("Recovery: %s", obj.toString()));
+					logger().log(DEBUG, String.format("Recovery: %s", obj.toString()));
 				}
 				else
-					logger().error(String.format("Error: %s", Recovery.getErrorMsg(json)));
+					logger().log(ERROR, String.format("Error: %s", Recovery.getErrorMsg(json)));
 			}
 			
 			@Override

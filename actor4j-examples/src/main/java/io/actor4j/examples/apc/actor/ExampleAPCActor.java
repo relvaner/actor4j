@@ -15,7 +15,7 @@
  */
 package io.actor4j.examples.apc.actor;
 
-import static io.actor4j.core.logging.user.ActorLogger.*;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -36,22 +36,22 @@ public class ExampleAPCActor {
 	public static class GreeterImpl extends APCObject implements Greeter {
 		@Override
 		public void sayGreeting() {
-			logger().debug(String.format("sayGreeting: Hello Developer!"));
+			logger().log(DEBUG, String.format("sayGreeting: Hello Developer!"));
 		}
 		
 		@Override
 		public void sayGreeting(String name) {
-			logger().debug(String.format("sayGreeting: Hello %s", name));
+			logger().log(DEBUG, String.format("sayGreeting: Hello %s", name));
 		}
 
 		@Override
 		public void sayGreeting(Integer number) {
-			logger().debug(String.format("sayGreeting: Hello Number %d", number));
+			logger().log(DEBUG, String.format("sayGreeting: Hello Number %d", number));
 		}
 		
 		@Override
 		public void sayGreeting(Integer number, String alias) {
-			logger().debug(String.format("sayGreeting: Hello Number %d (%s)", number, alias));
+			logger().log(DEBUG, String.format("sayGreeting: Hello Number %d (%s)", number, alias));
 		}
 		
 		@Override
@@ -72,7 +72,7 @@ public class ExampleAPCActor {
 		system.start();
 		
 		try {
-			logger().debug(String.format("task: Result is %d", ref.tell().task(41).get()));
+			logger().log(DEBUG, String.format("task: Result is %d", ref.tell().task(41).get()));
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
