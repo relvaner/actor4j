@@ -19,8 +19,8 @@ import static io.actor4j.core.logging.ActorLogger.*;
 
 public class BenchmarkConfig {
 	static {
-		systemLogger().setLevel(ERROR);
-		logger().setLevel(ERROR);
+		systemLogger().setLevel(ERROR); // default actor4j-core system logger
+		logger().setLevel(ERROR); // default actor4j-core user logger
 	}
 	
 	public int numberOfActors;
