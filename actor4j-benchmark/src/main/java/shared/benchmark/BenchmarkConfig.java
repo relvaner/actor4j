@@ -15,7 +15,14 @@
  */
 package shared.benchmark;
 
+import io.actor4j.core.logging.Level;
+import io.actor4j.core.logging.system.SystemActorLogger;
+
 public class BenchmarkConfig {
+	static {
+		SystemActorLogger.systemLogger().setLevel(Level.ERROR);
+	}
+	
 	public int numberOfActors;
 	
 	public int warmupIterations;
