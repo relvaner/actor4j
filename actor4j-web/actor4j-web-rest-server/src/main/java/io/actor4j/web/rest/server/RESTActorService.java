@@ -15,7 +15,7 @@
  */
 package io.actor4j.web.rest.server;
 
-import static io.actor4j.core.logging.system.SystemActorLogger.*;
+import static io.actor4j.core.logging.ActorLogger.*;
 
 import javax.annotation.PreDestroy;
 
@@ -37,7 +37,7 @@ public abstract class RESTActorService extends ResourceConfig {
 		
 		service = getService();
 		
-		systemLogger().info(String.format("%s - REST-Service started...", service.getName()));
+		systemLogger().log(INFO, String.format("%s - REST-Service started...", service.getName()));
 		
 		packages("io.actor4j.web.rest.server");
 
@@ -52,6 +52,6 @@ public abstract class RESTActorService extends ResourceConfig {
 	
 	@PreDestroy
 	public void shutdown() {
-		systemLogger().info(String.format("%s - REST-Service stopped...", service.getName()));
+		systemLogger().log(INFO, String.format("%s - REST-Service stopped...", service.getName()));
 	}
 }
