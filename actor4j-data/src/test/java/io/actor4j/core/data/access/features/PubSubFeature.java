@@ -15,7 +15,7 @@
  */
 package io.actor4j.core.data.access.features;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
 import java.util.UUID;
@@ -47,7 +47,7 @@ public class PubSubFeature {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().debug(String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
 				assertEquals(values[i], ((Publish<?>)message.value).value);
 				i++;
 				if (i==values.length)
@@ -58,7 +58,7 @@ public class PubSubFeature {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().debug(String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
 				assertEquals(values[i], ((Publish<?>)message.value).value);
 				i++;
 				if (i==values.length)
@@ -120,7 +120,7 @@ public class PubSubFeature {
 				ActorOptional<Integer> optional = manager.get(message);
 				assertTrue(optional.isDone());
 				assertEquals(values[i], (int)optional.get());
-				logger().debug(String.format("Message received (%s): %d", name, optional.get()));
+				logger().log(DEBUG, String.format("Message received (%s): %d", name, optional.get()));
 				i++;
 				if (i==values.length)
 					testDone.countDown();
@@ -139,7 +139,7 @@ public class PubSubFeature {
 				assertTrue(optional.isDone());
 				assertTrue(optional.isPresent());
 				assertEquals(values[i], (int)optional.get());
-				logger().debug(String.format("Message received (%s): %d", name, optional.get()));
+				logger().log(DEBUG, String.format("Message received (%s): %d", name, optional.get()));
 				i++;
 				if (i==values.length)
 					testDone.countDown();

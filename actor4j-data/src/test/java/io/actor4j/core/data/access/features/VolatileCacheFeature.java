@@ -28,7 +28,7 @@ import io.actor4j.core.data.access.SecondaryVolatileCacheActor;
 import io.actor4j.core.data.access.VolatileDataAccessObject;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
 import java.util.Timer;
@@ -74,7 +74,7 @@ public class VolatileCacheFeature {
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value);
 						if (payload.value!=null) {
 							assertEquals(values[i], payload.value);
-							logger().debug(payload.value);
+							logger().log(DEBUG, payload.value);
 							i++;
 							testDone.countDown();
 						}/*
@@ -93,7 +93,7 @@ public class VolatileCacheFeature {
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value);
 								if (payload.value==null) {
 									assertNull(payload.value);
-									logger().debug(payload.value);
+									logger().log(DEBUG, payload.value);
 									i++;
 									testDone.countDown();
 								}
@@ -114,7 +114,7 @@ public class VolatileCacheFeature {
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value);
 						if (payload.value!=null) {
 							assertEquals(values[i-5], payload.value);
-							logger().debug(payload.value);
+							logger().log(DEBUG, payload.value);
 							i++;
 							testDone.countDown();
 						}
@@ -131,7 +131,7 @@ public class VolatileCacheFeature {
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value);
 								if (keys[i-9].equals(payload.key)) {
 									assertNull(payload.value);
-									logger().debug(payload.value);
+									logger().log(DEBUG, payload.value);
 									i++;
 									testDone.countDown();
 								}
@@ -198,7 +198,7 @@ public class VolatileCacheFeature {
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value);
 						if (payload.value!=null) {
 							assertEquals(values[i], payload.value);
-							logger().debug(payload.value);
+							logger().log(DEBUG, payload.value);
 							i++;
 							testDone.countDown();
 						}/*
@@ -217,7 +217,7 @@ public class VolatileCacheFeature {
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value);
 								if (payload.value==null) {
 									assertNull(payload.value);
-									logger().debug(payload.value);
+									logger().log(DEBUG, payload.value);
 									i++;
 									testDone.countDown();
 								}
@@ -238,7 +238,7 @@ public class VolatileCacheFeature {
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value);
 						if (payload.value!=null) {
 							assertEquals(values[i-5], payload.value);
-							logger().debug(payload.value);
+							logger().log(DEBUG, payload.value);
 							i++;
 							testDone.countDown();
 						}
@@ -255,7 +255,7 @@ public class VolatileCacheFeature {
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value);
 								if (keys[i-9].equals(payload.key)) {
 									assertNull(payload.value);
-									logger().debug(payload.value);
+									logger().log(DEBUG, payload.value);
 									i++;
 									testDone.countDown();
 								}

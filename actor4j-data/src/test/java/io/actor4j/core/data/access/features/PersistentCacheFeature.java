@@ -31,7 +31,7 @@ import io.actor4j.core.data.access.VolatileDataAccessObject;
 import io.actor4j.core.data.access.imdb.IMDBDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
-import static io.actor4j.core.logging.user.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
 import java.util.Timer;
@@ -77,7 +77,7 @@ public class PersistentCacheFeature {
 					VolatileDataAccessObject<String, TestObject> payload = ((VolatileDataAccessObject<String, TestObject>)msg.value);
 					if (payload.value!=null) {
 						assertEquals(values[i], payload.value.value);
-						logger().debug(payload.value.value);
+						logger().log(DEBUG, payload.value.value);
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();
@@ -147,7 +147,7 @@ public class PersistentCacheFeature {
 						assertEquals(keys[i], pair.a);
 						assertEquals(keys[i], pair.b.key);
 						assertEquals(values[i], pair.b.value);
-						logger().debug(pair.b.value);
+						logger().log(DEBUG, pair.b.value);
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();
