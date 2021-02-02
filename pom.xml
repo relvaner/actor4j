@@ -19,7 +19,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.actor4j</groupId>
 	<artifactId>actor4j</artifactId>
-	<version>${actor4j.version}</version>
+	<version>1.1.0</version>
 	<packaging>pom</packaging>
 	
 	<name>actor4j</name>
