@@ -15,9 +15,9 @@
  */
 package actor4j.benchmark.samples.ring.nfold.embedded;
 
-import io.actor4j.core.ActorThread;
 import io.actor4j.core.actors.EmbeddedActor;
 import io.actor4j.core.actors.EmbeddedHostActor;
+import io.actor4j.core.internal.ActorThread;
 import io.actor4j.core.messages.ActorMessage;
 
 import java.util.UUID;

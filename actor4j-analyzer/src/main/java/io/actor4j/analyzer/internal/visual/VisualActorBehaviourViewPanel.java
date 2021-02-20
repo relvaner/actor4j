@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.visual;
+package io.actor4j.analyzer.internal.visual;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,8 +24,8 @@ import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.model.mxCell;
 
-import io.actor4j.core.ActorCell;
-import io.actor4j.core.ActorSystemImpl;
+import io.actor4j.core.internal.ActorCell;
+import io.actor4j.core.internal.ActorSystemImpl;
 
 import java.util.Map.Entry;
 

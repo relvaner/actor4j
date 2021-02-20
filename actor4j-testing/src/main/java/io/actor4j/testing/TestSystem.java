@@ -19,23 +19,23 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import io.actor4j.core.ActorCell;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
+import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.testing.internal.TestSystemImpl;
 
 public class TestSystem extends ActorSystem {
 	public TestSystem() {
 		super("actor4j-test", (n, wrapper) -> new TestSystemImpl(n, wrapper));
 		
-		((TestSystemImpl)system).pseudoActor = new PseudoActor(this, true) {
+		((TestSystemImpl)system).createPseudoActor(() -> new PseudoActor(this, true) {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				((TestSystemImpl)system).actualMessage.complete(message);
+				((TestSystemImpl)system).getActualMessage().complete(message);
 			}
-		};
-		((TestSystemImpl)system).pseudoActorId = ((TestSystemImpl)system).pseudoActor.getId();
+		});
 	}
 	
 	public ActorCell underlyingCell(UUID id) {

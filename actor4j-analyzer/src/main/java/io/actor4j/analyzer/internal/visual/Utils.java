@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.visual;
+package io.actor4j.analyzer.internal.visual;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 

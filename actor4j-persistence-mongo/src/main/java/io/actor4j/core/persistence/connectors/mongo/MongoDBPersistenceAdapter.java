@@ -38,10 +38,10 @@ import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.connectors.PersistenceAdapter;
 import io.actor4j.core.persistence.connectors.PersistenceConnector;
 
-import static io.actor4j.core.persistence.actor.PersistenceServiceActor.*;
-import static io.actor4j.core.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_FAILURE;
-import static io.actor4j.core.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_RECOVER;
-import static io.actor4j.core.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
+import static io.actor4j.core.internal.persistence.actor.PersistenceServiceActor.*;
+import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_FAILURE;
+import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_RECOVER;
+import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
 
 public class MongoDBPersistenceAdapter extends PersistenceAdapter {
 	protected MongoDatabase database;

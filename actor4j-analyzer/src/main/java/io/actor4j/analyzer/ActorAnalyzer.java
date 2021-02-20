@@ -15,6 +15,8 @@
  */
 package io.actor4j.analyzer;
 
+import io.actor4j.analyzer.internal.ActorAnalyzerThread;
+import io.actor4j.analyzer.internal.AnalyzerActorSystemImpl;
 import io.actor4j.core.ActorSystem;
 
 public class ActorAnalyzer extends ActorSystem {

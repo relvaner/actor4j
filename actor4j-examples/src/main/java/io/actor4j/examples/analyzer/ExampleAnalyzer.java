@@ -26,7 +26,7 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.HubPattern;
 import io.actor4j.analyzer.ActorAnalyzer;
-import io.actor4j.analyzer.DefaultActorAnalyzerThread;
+import io.actor4j.analyzer.internal.DefaultActorAnalyzerThread;
 
 public class ExampleAnalyzer {
 	public ExampleAnalyzer() {

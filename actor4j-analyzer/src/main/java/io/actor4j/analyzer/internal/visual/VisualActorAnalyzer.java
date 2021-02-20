@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.visual;
+package io.actor4j.analyzer.internal.visual;
 
 import java.awt.event.WindowEvent;
 import java.util.Map;
 import java.util.UUID;
 
-import io.actor4j.core.ActorCell;
-import io.actor4j.core.ActorSystemImpl;
+import io.actor4j.core.internal.ActorCell;
+import io.actor4j.core.internal.ActorSystemImpl;
 import tools4j.utils.SwingSubApplication;
 
 public class VisualActorAnalyzer {

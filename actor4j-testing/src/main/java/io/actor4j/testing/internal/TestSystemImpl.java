@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.testing;
+package io.actor4j.testing.internal;
 
 import java.util.Iterator;
 import java.util.List;
@@ -21,16 +21,17 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
+import java.util.function.Supplier;
 import java.util.Map.Entry;
 
 import io.actor4j.bdd.Story;
-import io.actor4j.core.ActorCell;
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.DefaultActorSystemImpl;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
+import io.actor4j.core.internal.ActorCell;
+import io.actor4j.core.internal.DefaultActorSystemImpl;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.testing.ActorTest;
 
 import static org.junit.Assert.*;
 
@@ -50,6 +51,15 @@ public class TestSystemImpl extends DefaultActorSystemImpl  {
 		messageDispatcher = new TestActorMessageDispatcher(this);
 	}
 	
+	public void createPseudoActor(Supplier<PseudoActor> factory) {
+		pseudoActor = factory.get();
+		pseudoActorId = pseudoActor.getId();
+	}
+	
+	public CompletableFuture<ActorMessage<?>> getActualMessage() {
+		return actualMessage;
+	}
+
 	public ActorCell underlyingCell(UUID id) {
 		return getCells().get(id);
 	}

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer;
+package io.actor4j.analyzer.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.ActorSystemImpl;
-import io.actor4j.core.ActorThreadMode;
-import io.actor4j.core.DefaultActorSystemImpl;
+import io.actor4j.core.internal.ActorSystemImpl;
+import io.actor4j.core.internal.ActorThreadMode;
+import io.actor4j.core.internal.DefaultActorSystemImpl;
 
 public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl {
 	protected AtomicBoolean analyzeMode;

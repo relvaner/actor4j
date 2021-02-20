@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer;
+package io.actor4j.analyzer.internal;
 
 import java.util.Map;
 import java.util.UUID;
@@ -21,10 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.SwingUtilities;
 
-import io.actor4j.core.ActorCell;
-import io.actor4j.core.ActorSystemImpl;
+import io.actor4j.analyzer.internal.visual.VisualActorAnalyzer;
+import io.actor4j.core.internal.ActorCell;
+import io.actor4j.core.internal.ActorSystemImpl;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.analyzer.visual.VisualActorAnalyzer;
 
 public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	protected VisualActorAnalyzer visualAnalyzer;

@@ -13,57 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer;
+package io.actor4j.testing.internal;
 
-import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
-import io.actor4j.core.ActorSystemImpl;
-import io.actor4j.core.ActorThread;
-import io.actor4j.core.DefaultActorMessageDispatcher;
+import io.actor4j.core.internal.ActorSystemImpl;
+import io.actor4j.core.internal.ActorThread;
+import io.actor4j.core.internal.DefaultActorMessageDispatcher;
 import io.actor4j.core.messages.ActorMessage;
 
-public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatcher {
-	public AnalyzerActorMessageDispatcher(ActorSystemImpl system) {
+public class TestActorMessageDispatcher extends DefaultActorMessageDispatcher {
+
+	public TestActorMessageDispatcher(ActorSystemImpl system) {
 		super(system);
 	}
-
+	
 	@Override
 	public void post(ActorMessage<?> message, UUID source, String alias) {
-		if (alias!=null) {
-			List<UUID> destinations = system.getActorsFromAlias(alias);
-
-			UUID dest = null;
-			if (!destinations.isEmpty()) {
-				if (destinations.size()==1)
-					dest = destinations.get(0);
-				else {
-					Random random = new Random();
-					dest = destinations.get(random.nextInt(destinations.size()));
-				}
-			}
-			message.dest = (dest!=null) ? dest : UUID_ALIAS;
-		}
-		analyze(message);
+		redirect(message);
 		super.post(message, source, alias);
 	}
 	
 	@Override
 	protected void postQueue(ActorMessage<?> message, BiConsumer<ActorThread, ActorMessage<?>> biconsumer) {
-		analyze(message);
+		redirect(message);
 		super.postQueue(message, biconsumer);
 	}
 	
 	@Override
 	public void postOuter(ActorMessage<?> message) {
-		analyze(message);
+		redirect(message);
 		super.postOuter(message);
 	}
 	
-	protected void analyze(ActorMessage<?> message) {
-		if (message!=null && ((AnalyzerActorSystemImpl)system).getAnalyzeMode().get())
-				((AnalyzerActorSystemImpl)system).getAnalyzerThread().getOuterQueue().offer(message.copy());
+	protected void redirect(ActorMessage<?> message) {
+		if (message!=null && ((TestSystemImpl)system).testActorId!=null && message.dest!=((TestSystemImpl)system).testActorId)
+			message.dest = ((TestSystemImpl)system).pseudoActorId;
 	}
 }

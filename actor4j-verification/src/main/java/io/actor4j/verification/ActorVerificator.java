@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import org.jgrapht.Graph;
 
 import io.actor4j.core.ActorSystem;
+import io.actor4j.verification.internal.VerificatorActorSystemImpl;
 
 public class ActorVerificator extends ActorSystem {
 	

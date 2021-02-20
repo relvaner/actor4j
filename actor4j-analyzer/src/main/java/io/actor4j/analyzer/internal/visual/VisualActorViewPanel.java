@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.visual;
+package io.actor4j.analyzer.internal.visual;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseWheelEvent;
@@ -28,7 +28,7 @@ import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxGraphView;
 
-import io.actor4j.core.ActorSystemImpl;
+import io.actor4j.core.internal.ActorSystemImpl;
 
 public abstract class VisualActorViewPanel extends JPanel {
 	protected static final long serialVersionUID = 2646158450651956287L;
