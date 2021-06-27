@@ -21,7 +21,7 @@ import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
-import io.actor4j.core.persistence.connectors.mongo.MongoDBPersistenceConnector;
+import io.actor4j.core.persistence.drivers.mongo.MongoDBPersistenceDriver;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -148,7 +148,7 @@ public class PersistenceFeature {
 		MongoServer mongoServer = new MongoServer(new MemoryBackend());
 		mongoServer.bind("localhost", 27027);
 		
-		system.persistenceMode(new MongoDBPersistenceConnector("localhost", 27027, "actor4j-test"));
+		system.persistenceMode(new MongoDBPersistenceDriver("localhost", 27027, "actor4j-test"));
 		system.start();
 		
 		system.sendWhenActive(new ActorMessage<Object>(null, 0, system.SYSTEM_ID, id));

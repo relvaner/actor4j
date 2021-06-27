@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.persistence.connectors.mongo;
+package io.actor4j.core.persistence.drivers.mongo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +35,15 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.ActorPersistenceObject;
-import io.actor4j.core.persistence.connectors.PersistenceAdapter;
-import io.actor4j.core.persistence.connectors.PersistenceConnector;
+import io.actor4j.core.persistence.drivers.PersistenceDriver;
+import io.actor4j.core.persistence.drivers.PersistenceImpl;
 
 import static io.actor4j.core.internal.persistence.actor.PersistenceServiceActor.*;
 import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_FAILURE;
 import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_RECOVER;
 import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
 
-public class MongoDBPersistenceAdapter extends PersistenceAdapter {
+public class MongoDBPersistenceImpl extends PersistenceImpl {
 	protected MongoDatabase database;
 	protected MongoCollection<Document> events;
 	protected MongoCollection<Document> states;
@@ -51,15 +51,15 @@ public class MongoDBPersistenceAdapter extends PersistenceAdapter {
 	protected long lastTimeStamp;
 	protected int indexIfEqualTimeStamp;
 	
-	public MongoDBPersistenceAdapter(ActorSystem parent, PersistenceConnector connector) {
-		super(parent, connector);
+	public MongoDBPersistenceImpl(ActorSystem parent, PersistenceDriver driver) {
+		super(parent, driver);
 	}
 
 	@Override
 	public void preStart(UUID id) {
 		super.preStart(id);
 		
-		database = ((MongoDBPersistenceConnector)connector).client.getDatabase(connector.getDatabaseName());
+		database = ((MongoDBPersistenceDriver)driver).client.getDatabase(driver.getDatabaseName());
 		events = database.getCollection("persistence.events");
 		states = database.getCollection("persistence.states");
 		

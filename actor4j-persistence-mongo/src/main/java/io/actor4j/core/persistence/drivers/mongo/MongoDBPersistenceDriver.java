@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.persistence.connectors.mongo;
+package io.actor4j.core.persistence.drivers.mongo;
 
 import com.mongodb.MongoClient;
 
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.persistence.connectors.PersistenceAdapter;
-import io.actor4j.core.persistence.connectors.PersistenceConnector;
+import io.actor4j.core.persistence.drivers.PersistenceDriver;
+import io.actor4j.core.persistence.drivers.PersistenceImpl;
 
-public class MongoDBPersistenceConnector extends PersistenceConnector {
+public class MongoDBPersistenceDriver extends PersistenceDriver {
 	protected MongoClient client;
 	
-	public MongoDBPersistenceConnector(String host, int port, String databaseName) {
+	public MongoDBPersistenceDriver(String host, int port, String databaseName) {
 		super(host, port, databaseName);
 	}
 	
@@ -40,7 +40,7 @@ public class MongoDBPersistenceConnector extends PersistenceConnector {
 	}
 
 	@Override
-	public PersistenceAdapter createAdapter(ActorSystem parent) {
-		return new MongoDBPersistenceAdapter(parent, this);
+	public PersistenceImpl createPersistenceImpl(ActorSystem parent) {
+		return new MongoDBPersistenceImpl(parent, this);
 	}
 }

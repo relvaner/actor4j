@@ -19,7 +19,7 @@ import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
-import io.actor4j.core.persistence.connectors.mongo.MongoDBPersistenceConnector;
+import io.actor4j.core.persistence.drivers.mongo.MongoDBPersistenceDriver;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 
@@ -101,7 +101,7 @@ public class ExamplePersistence {
 			}
 		});
 		
-		system.persistenceMode(new MongoDBPersistenceConnector("localhost", 27017, "actor4j"));
+		system.persistenceMode(new MongoDBPersistenceDriver("localhost", 27017, "actor4j"));
 		system.start();
 		
 		system.sendWhenActive(new ActorMessage<Object>(null, 0, system.SYSTEM_ID, id));
