@@ -28,7 +28,7 @@ public class ExampleEmbedded {
 	protected final int SWAP=22;
 	
 	public ExampleEmbedded() {
-		ActorSystem system = new ActorSystem("ExampleEmbedded");
+		ActorSystem system = new ActorSystem();
 		
 		UUID host = system.addActor(() -> new EmbeddedHostActor("host") {
 			protected EmbeddedActor client;

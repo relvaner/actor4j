@@ -28,7 +28,7 @@ import io.actor4j.core.utils.ActorMessageMatcher;
 
 public class ExampleRxStash {
 	public ExampleRxStash() {
-		ActorSystem system = new ActorSystem("ExampleRxStash");
+		ActorSystem system = new ActorSystem();
 		
 		UUID receiver = system.addActor(new ActorFactory() {
 			@Override

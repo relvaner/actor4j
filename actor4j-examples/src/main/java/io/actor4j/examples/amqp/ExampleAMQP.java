@@ -38,7 +38,7 @@ public class ExampleAMQP {
 	public ExampleAMQP() {
 		super();
 		
-		ActorSystem system = new ActorSystem("ExampleAMQP");
+		ActorSystem system = new ActorSystem();
 		
 		CountDownLatch done = new CountDownLatch(2);
 		

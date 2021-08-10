@@ -32,8 +32,8 @@ public class ExamplePersistentCache {
 		MongoClient mongoClient = new MongoClient("localhost", 27017);
 		mongoClient.getDatabase("actor4j-test").drop();
 		
-		ActorSystem system = new ActorSystem("ExamplePersistentCache");
-		final int INSTANCES = system.getParallelismMin()*system.getParallelismFactor();
+		ActorSystem system = new ActorSystem();
+		final int INSTANCES = system.getConfig().parallelism*system.getConfig().parallelismFactor;
 		
 		system.addActor(() -> new Actor("manager") {
 			protected PersistentActorCacheManager<String, ExampleObject> manager;

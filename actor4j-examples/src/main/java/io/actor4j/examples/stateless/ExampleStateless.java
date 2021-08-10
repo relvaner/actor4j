@@ -20,14 +20,17 @@ import java.util.TimerTask;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.ActorWithDistributedGroup;
+import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 
 public class ExampleStateless {
 	public ExampleStateless() {
-		ActorSystem system = new ActorSystem("ExampleStateless");
-		system.setParallelismFactor(2);
+		ActorSystemConfig config = ActorSystemConfig.builder()
+			.parallelism(2)
+			.build();
+		ActorSystem system = new ActorSystem(config);
 		
 		ActorGroup group = new ActorGroupSet();
 		system.setAlias(system.addActor(() -> new ActorWithDistributedGroup(group) {
@@ -35,7 +38,7 @@ public class ExampleStateless {
 			public void receive(ActorMessage<?> message) {
 				System.out.printf("from thread %s of actor %s%n", Thread.currentThread().getName(), self());
 			}
-		}, system.getParallelismMin()*system.getParallelismFactor()), "instances");
+		}, system.getConfig().parallelism*system.getConfig().parallelismFactor), "instances");
 		
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {

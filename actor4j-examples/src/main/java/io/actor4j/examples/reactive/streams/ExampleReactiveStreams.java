@@ -29,7 +29,7 @@ import io.actor4j.core.reactive.streams.SubscriberActor;
 
 public class ExampleReactiveStreams {
 	public ExampleReactiveStreams() {
-		ActorSystem system = new ActorSystem("ExampleReactiveStreams");
+		ActorSystem system = new ActorSystem();
 		
 		UUID publisher = system.addActor(() -> new PublisherActor("publisher") {
 			@Override

@@ -35,7 +35,7 @@ public class ExampleMQTT {
 	public ExampleMQTT() {
 		super();
 		
-		ActorSystem system = new ActorSystem("ExampleMQTT");
+		ActorSystem system = new ActorSystem();
 		
 		CountDownLatch done = new CountDownLatch(2);
 		
