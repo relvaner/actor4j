@@ -61,7 +61,7 @@ public class ExampleAPCActor {
 	}
 	
 	public ExampleAPCActor() {
-		APCActorSystem system = new APCActorSystem("actor4j-apc-actor");
+		APCActorSystem system = new APCActorSystem();
 		APCActorRef<Greeter> ref = system.addAPCActor(Greeter.class, new GreeterImpl());
 		
 		ref.tell().sayGreeting();
