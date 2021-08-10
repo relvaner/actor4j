@@ -20,6 +20,7 @@ import static io.actor4j.core.logging.ActorLogger.logger;
 import java.io.IOException;
 
 import io.actor4j.core.ActorService;
+import io.actor4j.core.config.ActorServiceConfig;
 import io.actor4j.web.grpc.client.GrpcActorClientRunnable;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -37,24 +38,28 @@ public abstract class ActorGrpcServer {
 	}
 	
 	public void start(String name, int port, Runnable onStartup) {
-		service = new ActorService(name);
-		config(service);
-		service.setClientRunnable(new GrpcActorClientRunnable(service.getServiceNodes(), service.getParallelismMin()*service.getParallelismFactor(), 10000));
+		service = new ActorService();
+		deploy(service);
+		ActorServiceConfig config = ActorServiceConfig.builder((ActorServiceConfig)service.getConfig())
+			.name(name)
+			.clientRunnable(new GrpcActorClientRunnable(service.getConfig().serviceNodes, service.getConfig().parallelism*service.getConfig().parallelismFactor, 10000))
+			.build();
+		service.setConfig(config);
 		
 		try {
 			server = ServerBuilder.forPort(port)
 				.addService(new ActorGrpcServiceImpl(service)).build()
 				.start();
-			logger().info(String.format("%s - gRPC-Server started...", service.getName()));
+			logger().info(String.format("%s - gRPC-Server started...", service.getConfig().name));
 			
 			onStartup.run();
-			logger().info(String.format("%s - Service started...", service.getName()));
+			logger().info(String.format("%s - Service started...", service.getConfig().name));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	protected abstract void config(ActorService service);
+	protected abstract void deploy(ActorService service);
 	
 	public void awaitTermination() {		
 		try {
@@ -64,7 +69,7 @@ public abstract class ActorGrpcServer {
 		}
 		
 		service.shutdownWithActors(true);
-		((GrpcActorClientRunnable)service.getClientRunnable()).closeAll();
-		logger().info(String.format("%s - Service stopped...", service.getName()));
+		((GrpcActorClientRunnable)service.getConfig().clientRunnable).closeAll();
+		logger().info(String.format("%s - Service stopped...", service.getConfig().name));
 	}
 }
