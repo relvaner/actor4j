@@ -18,6 +18,7 @@ package io.actor4j.core.persistence.features;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PersistentActor;
+import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
@@ -81,7 +82,10 @@ public class PersistenceFeature {
 	public void test() {
 		CountDownLatch testDone = new CountDownLatch(2);
 		
-		ActorSystem system = new ActorSystem();
+		ActorSystemConfig config = ActorSystemConfig.builder()
+			.persistenceMode(new MongoDBPersistenceDriver("localhost", 27027, "actor4j-test"))
+			.build();
+		ActorSystem system = new ActorSystem(config);
 		
 		AtomicBoolean first = new AtomicBoolean(true);
 		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
@@ -148,7 +152,6 @@ public class PersistenceFeature {
 		MongoServer mongoServer = new MongoServer(new MemoryBackend());
 		mongoServer.bind("localhost", 27027);
 		
-		system.persistenceMode(new MongoDBPersistenceDriver("localhost", 27027, "actor4j-test"));
 		system.start();
 		
 		system.sendWhenActive(new ActorMessage<Object>(null, 0, system.SYSTEM_ID, id));
