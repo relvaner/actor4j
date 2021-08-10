@@ -17,9 +17,9 @@ package io.actor4j.analyzer.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.actor4j.analyzer.config.ActorAnalyzerConfig;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.internal.ActorSystemImpl;
-import io.actor4j.core.internal.ActorThreadMode;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
 
 public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl {
@@ -27,17 +27,15 @@ public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl {
 	protected ActorAnalyzerThread analyzerThread;
 
 	public AnalyzerActorSystemImpl(ActorSystem wrapper) {
-		this(null, wrapper);
+		this(wrapper, null);
 	}
 	
-	public AnalyzerActorSystemImpl (String name, ActorSystem wrapper) {
-		super(name, wrapper);
+	public AnalyzerActorSystemImpl (ActorSystem wrapper, ActorAnalyzerConfig config) {
+		super(wrapper, config!=null ? config : ActorAnalyzerConfig.create());
 		
 		analyzeMode = new AtomicBoolean(false);
 		
 		messageDispatcher = new AnalyzerActorMessageDispatcher(this);
-		
-		threadMode = ActorThreadMode.SLEEP;
 	}
 	
 	public ActorSystemImpl analyze(ActorAnalyzerThread analyzerThread) {

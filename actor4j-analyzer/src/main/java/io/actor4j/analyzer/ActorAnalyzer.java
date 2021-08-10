@@ -15,14 +15,29 @@
  */
 package io.actor4j.analyzer;
 
+import io.actor4j.analyzer.config.ActorAnalyzerConfig;
 import io.actor4j.analyzer.internal.ActorAnalyzerThread;
 import io.actor4j.analyzer.internal.AnalyzerActorSystemImpl;
 import io.actor4j.core.ActorSystem;
+import io.actor4j.core.config.ActorSystemConfig;
 
 public class ActorAnalyzer extends ActorSystem {
-
 	public ActorAnalyzer(ActorAnalyzerThread analyzerThread) {
-		super("actor4j-analyzer", (n, wrapper) -> new AnalyzerActorSystemImpl(n, wrapper));
+		this(analyzerThread, null);
+	}
+	
+	@Deprecated
+	@Override
+	public boolean setConfig(ActorSystemConfig config) {
+		return false;
+	}
+	
+	public boolean setConfig(ActorAnalyzerConfig config) {
+		return super.setConfig(config);
+	}
+
+	public ActorAnalyzer(ActorAnalyzerThread analyzerThread, ActorAnalyzerConfig config) {
+		super((wrapper, c) -> new AnalyzerActorSystemImpl(wrapper, (ActorAnalyzerConfig)c), config);
 		
 		((AnalyzerActorSystemImpl)system).analyze(analyzerThread);
 	}

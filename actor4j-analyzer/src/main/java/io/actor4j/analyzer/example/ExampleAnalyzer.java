@@ -29,12 +29,15 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.HubPattern;
 import io.actor4j.analyzer.ActorAnalyzer;
+import io.actor4j.analyzer.config.ActorAnalyzerConfig;
 import io.actor4j.analyzer.internal.DefaultActorAnalyzerThread;
 
 public class ExampleAnalyzer {
 	public ExampleAnalyzer() {
-		ActorSystem system = new ActorAnalyzer(new DefaultActorAnalyzerThread(2000, true, true));
-		system.setParallelismMin(4);
+		ActorAnalyzerConfig config = ActorAnalyzerConfig.builder()
+			.parallelism(4)
+			.build();
+		ActorSystem system = new ActorAnalyzer(new DefaultActorAnalyzerThread(2000, true, true), config);
 		
 		ActorGroup distributedGroup = new ActorGroupSet();
 		final int size = 4;
