@@ -19,6 +19,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
@@ -29,22 +30,21 @@ import shared.benchmark.BenchmarkSample;
 
 // @see https://hackernoon.com/what-to-do-with-5-000-000-akka-actors-381a915a0f78
 public class BenchmarkDictionary extends BenchmarkSample {
-	public BenchmarkDictionary(BenchmarkConfig config) {
+	public BenchmarkDictionary(BenchmarkConfig benchmarkConfig) {
 		super();
 		
 		final int attempts = 2_500_000;//2_500_000;
 		final int keySize  = 5_000_000;//5_000_000;
 		
-		XActorSystem system = new XActorSystem("actor4j::Dictionary");
-		if (config.parallelismMin>0)
-			system.setParallelismMin(config.parallelismMin);
-		if (config.parallelismFactor>0)
-			system.setParallelismFactor(config.parallelismFactor);
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::Dictionary")
+			.build();
+		XActorSystem system = new XActorSystem(config);
 		/*
 		system.underlyingImpl().setQueueSize(5_000_000);
 		system.underlyingImpl().setBufferQueueSize(1_000_000);
 		*/
-		final int COUNT = config.parallelism();
+		final int COUNT = benchmarkConfig.parallelism();
 
 		CountDownLatch testDone = new CountDownLatch(1);
 
@@ -76,7 +76,7 @@ public class BenchmarkDictionary extends BenchmarkSample {
 			}
 		};
 		
-		Benchmark benchmark = new Benchmark(config);
+		Benchmark benchmark = new Benchmark(benchmarkConfig);
 
 		benchmark.start((timeMeasurement, iteration) -> {
 			timeMeasurement.start();

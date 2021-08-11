@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -28,29 +29,32 @@ import shared.benchmark.BenchmarkConfig;
 import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkPingPongGrouped extends BenchmarkSample {
-	public BenchmarkPingPongGrouped(BenchmarkConfig config) {
+	public BenchmarkPingPongGrouped(BenchmarkConfig benchmarkConfig) {
 		super();
 		
-		XActorSystem system = new XActorSystem("actor4j::PingPong-Grouped");
-		system.sleepMode();
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::PingPong-Grouped")
+			.sleepMode()
+			.build();
+		XActorSystem system = new XActorSystem(config);
 		
 		ActorGroup group = new ActorGroupSet();
-		ActorGroup[] groups = new ActorGroup[config.parallelism()];
+		ActorGroup[] groups = new ActorGroup[benchmarkConfig.parallelism()];
 		for (int i=0; i<groups.length; i++)
 			groups[i] = new ActorGroupSet();
-		int size = config.numberOfActors*config.parallelism()/2;
-		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
+		int size = benchmarkConfig.numberOfActors*benchmarkConfig.parallelism()/2;
+		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
 		UUID dest = null;
 		UUID id = null;
 		for(int i=0; i<size; i++) {
-			dest = system.addActor(Destination.class, groups[i%config.parallelism()]);
-			id = system.addActor(Client.class, groups[(i+1)%config.parallelism()], dest);
+			dest = system.addActor(Destination.class, groups[i%benchmarkConfig.parallelism()]);
+			id = system.addActor(Client.class, groups[(i+1)%benchmarkConfig.parallelism()], dest);
 			group.add(id);
 		}
 		
 		system.broadcast(new ActorMessage<Object>(new Object(), MSG, dest, null), group);
 		
-		Benchmark benchmark = new Benchmark(system, config);
+		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
 		benchmark.start();
 	}
 	

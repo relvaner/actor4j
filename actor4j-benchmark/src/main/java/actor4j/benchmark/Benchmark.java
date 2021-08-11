@@ -24,11 +24,14 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import actor4j.benchmark.utils.MessageThroughputMeasurement;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
+import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
+import io.actor4j.corex.config.XActorSystemConfig.Builder;
 import shared.benchmark.BenchmarkConfig;
 
 public class Benchmark {
 	protected ActorSystem system;
-	protected BenchmarkConfig config;
+	protected BenchmarkConfig benchmarkConfig;
 	
 	protected MessageThroughputMeasurement messageTM;
 	
@@ -40,26 +43,31 @@ public class Benchmark {
 		this(system,  new BenchmarkConfig(warmupIterations, duration));
 	}
 	
-	public Benchmark(ActorSystem system, BenchmarkConfig config) {
+	public Benchmark(ActorSystem system, BenchmarkConfig benchmarkConfig) {
 		super();
 		
 		this.system = system;
-		this.config = config;
+		this.benchmarkConfig = benchmarkConfig;
 	}
 	
 	public void start() {
-		if (config.parallelismMin>0)
-			system.setParallelismMin(config.parallelismMin);
-		if (config.parallelismFactor>0)
-			system.setParallelismFactor(config.parallelismFactor);
+		if (system instanceof XActorSystem) {
+			Builder<?> builder = XActorSystemConfig.builder((XActorSystemConfig)((XActorSystem)system).getConfig());
+			if (benchmarkConfig.parallelism>0)
+				builder.parallelism(benchmarkConfig.parallelism);
+			if (benchmarkConfig.parallelismFactor>0)
+				builder.parallelismFactor(benchmarkConfig.parallelismFactor);
+			builder.counterEnabled(true);
+				
+			((XActorSystem) system).setConfig(builder.build());	
+		}
 		
 		final DescriptiveStatistics statistics = new DescriptiveStatistics();
 		final AtomicLong warmupCount = new AtomicLong();
 		
 		System.out.printf("Logical cores: %d%n", Runtime.getRuntime().availableProcessors());
-		System.out.printf("activeThreads: %d%n", system.getParallelismMin()*system.getParallelismFactor());
-		System.out.printf("Benchmark started (%s)...%n", system.getName());
-		system.underlyingImpl().setCounterEnabled(true);
+		System.out.printf("activeThreads: %d%n", system.getConfig().parallelism*system.getConfig().parallelismFactor);
+		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name);
 		system.start(null, new Runnable() {
 			@Override
 			public void run() {
@@ -83,7 +91,7 @@ public class Benchmark {
 					}
 				}
 				System.out.printf("statistics::count         : %s%n", decimalFormat.format(system.underlyingImpl().getExecuterService().getCount()-warmupCount.get()));
-				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((system.underlyingImpl().getExecuterService().getCount()-warmupCount.get())/(config.getDuration()/1000)));
+				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((system.underlyingImpl().getExecuterService().getCount()-warmupCount.get())/(benchmarkConfig.getDuration()/1000)));
 				System.out.printf("statistics::mean          : %s msg/s%n", decimalFormat.format(statistics.getMean()));
 				System.out.printf("statistics::sd            : %s msg/s%n", decimalFormat.format(statistics.getStandardDeviation()));
 				System.out.printf("statistics::median        : %s msg/s%n", decimalFormat.format(statistics.getPercentile(50)));
@@ -96,11 +104,11 @@ public class Benchmark {
 			public Long get() {
 				return system.underlyingImpl().getExecuterService().getCount();
 			}
-		}, config.warmupIterations, warmupCount, statistics, true);
+		}, benchmarkConfig.warmupIterations, warmupCount, statistics, true);
 		messageTM.start();
 		
 		try {
-			Thread.sleep(config.getDuration()+config.warmupIterations*1000);
+			Thread.sleep(benchmarkConfig.getDuration()+benchmarkConfig.warmupIterations*1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

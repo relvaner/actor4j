@@ -19,24 +19,28 @@ import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.BenchmarkConfig;
 import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkRingNfoldEmbeddedClassic extends BenchmarkSample {
-	public BenchmarkRingNfoldEmbeddedClassic(BenchmarkConfig config) {
+	public BenchmarkRingNfoldEmbeddedClassic(BenchmarkConfig benchmarkConfig) {
 		super();
 		
-		XActorSystem system = new XActorSystem("actor4j::NFoldRingEmbeddedClassic"); // use -Xss1g
-		system.sleepMode();
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::NFoldRingEmbeddedClassic")
+			.sleepMode()
+			.build();
+		XActorSystem system = new XActorSystem(config); // use -Xss1g
 		
-		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
-		for (int j=0; j<config.parallelism(); j++) {
-			UUID host = system.addActor(Host.class, config.numberOfActors);
+		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
+		for (int j=0; j<benchmarkConfig.parallelism(); j++) {
+			UUID host = system.addActor(Host.class, benchmarkConfig.numberOfActors);
 			system.send(new ActorMessage<>(new String("DUMMY"), 0, host, host));
 		}
 		
-		Benchmark benchmark = new Benchmark(system, config);
+		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
 		benchmark.start();
 		Host.stop.set(true);
 	}

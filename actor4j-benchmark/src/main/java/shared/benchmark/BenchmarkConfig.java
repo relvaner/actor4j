@@ -28,7 +28,7 @@ public class BenchmarkConfig {
 	public int warmupIterations;
 	public long durationTimes;
 	
-	public int parallelismMin;
+	public int parallelism;
 	public int parallelismFactor; 
 		
 	public BenchmarkConfig() {
@@ -50,12 +50,12 @@ public class BenchmarkConfig {
 		this.warmupIterations = warmupIterations;
 		this.durationTimes = durationTimes;
 		
-		parallelismMin = Runtime.getRuntime().availableProcessors();
+		parallelism = Runtime.getRuntime().availableProcessors();
 		parallelismFactor = 1;
 	}
 
 	public int parallelism() {
-		return parallelismMin*parallelismFactor;
+		return parallelism*parallelismFactor;
 	}
 	
 	public long getDuration() {

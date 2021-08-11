@@ -19,21 +19,25 @@ import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.BenchmarkConfig;
 import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkRing extends BenchmarkSample {
-	public BenchmarkRing(BenchmarkConfig config) {
+	public BenchmarkRing(BenchmarkConfig benchmarkConfig) {
 		super();
 		
-		XActorSystem system = new XActorSystem("actor4j::Ring");
-		system.sleepMode();
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::Ring")
+			.sleepMode()
+			.build();
+		XActorSystem system = new XActorSystem(config);
 		
-		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
-		for (int j=0; j<config.parallelism(); j++) {
+		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
+		for (int j=0; j<benchmarkConfig.parallelism(); j++) {
 			UUID next = system.addActor(Forwarder.class);
-			for(int i=0; i<config.numberOfActors-2; i++) {
+			for(int i=0; i<benchmarkConfig.numberOfActors-2; i++) {
 				next = system.addActor(Forwarder.class, next);
 			}
 			UUID sender = system.addActor(Sender.class, next);
@@ -41,7 +45,7 @@ public class BenchmarkRing extends BenchmarkSample {
 			system.send(new ActorMessage<>(new Object(), 0, sender, sender));
 		}
 		
-		Benchmark benchmark = new Benchmark(system, config);
+		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
 		benchmark.start();
 	}
 	

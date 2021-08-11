@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -28,19 +29,22 @@ import shared.benchmark.BenchmarkConfig;
 import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkRingNfoldBulk extends BenchmarkSample {
-	public BenchmarkRingNfoldBulk(BenchmarkConfig config) {
+	public BenchmarkRingNfoldBulk(BenchmarkConfig benchmarkConfig) {
 		super();
 		
-		XActorSystem system = new XActorSystem("actor4j::NFoldRing-Bulk");
-		system.sleepMode();
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::NFoldRing-Bulk")
+			.sleepMode()
+			.build();
+		XActorSystem system = new XActorSystem(config);
 		
-		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
-		for (int j=0; j<config.parallelism(); j++) {
+		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
+		for (int j=0; j<benchmarkConfig.parallelism(); j++) {
 			ActorGroup group = new ActorGroupSet();
 			
 			UUID next = system.addActor(Forwarder.class, group);
 			group.add(next);
-			for(int i=0; i<config.numberOfActors-2; i++) {
+			for(int i=0; i<benchmarkConfig.numberOfActors-2; i++) {
 				next = system.addActor(Forwarder.class, group, next);
 				group.add(next);
 			}
@@ -50,7 +54,7 @@ public class BenchmarkRingNfoldBulk extends BenchmarkSample {
 			system.send(new ActorMessage<>(new Object(), RUN, sender, sender));
 		}
 		
-		Benchmark benchmark = new Benchmark(system, config);
+		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
 		benchmark.start();
 	}
 	

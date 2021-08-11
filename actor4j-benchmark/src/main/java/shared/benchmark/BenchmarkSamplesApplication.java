@@ -105,7 +105,7 @@ public class BenchmarkSamplesApplication {
 			if (line.hasOption("times"))
 				config.durationTimes = Long.valueOf(line.getOptionValue("times"));
 			if (line.hasOption("threads"))
-				config.parallelismMin = Integer.valueOf(line.getOptionValue("threads"));
+				config.parallelism = Integer.valueOf(line.getOptionValue("threads"));
 			if (line.hasOption("factor"))
 				config.parallelismFactor = Integer.valueOf(line.getOptionValue("factor"));
 			

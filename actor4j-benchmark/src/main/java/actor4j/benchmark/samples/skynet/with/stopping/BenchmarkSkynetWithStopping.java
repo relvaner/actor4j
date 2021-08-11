@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
@@ -31,26 +32,24 @@ import shared.benchmark.BenchmarkSample;
 public class BenchmarkSkynetWithStopping extends BenchmarkSample {
 	public static CountDownLatch latch;
 	
-	public BenchmarkSkynetWithStopping(BenchmarkConfig config) {
+	public BenchmarkSkynetWithStopping(BenchmarkConfig benchmarkConfig) {
 		super();
 		
 		//ActorSystem system = new ActorSystem("actor4j::SkynetWithStopping", (name, wrapper) -> new AntiFloodingActorSystemImpl(name, wrapper));
 		//((AntiFloodingActorSystemImpl)system.underlyingImpl()).setFactoryAntiFloodingTimer(() -> new AntiFloodingTimer(-1, 30_000));
-		XActorSystem system = new XActorSystem("actor4j::SkynetWithStopping");
-		if (config.parallelismMin>0)
-			system.setParallelismMin(config.parallelismMin);
-		if (config.parallelismFactor>0)
-			system.setParallelismFactor(config.parallelismFactor);
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::SkynetWithStopping")
+			.parkMode()
+			.build();
+		XActorSystem system = new XActorSystem(config);
 		
 		/*
 		system.underlyingImpl().setBufferQueueSize(1_000_000);
 		system.underlyingImpl().setQueueSize(5_000_000);
 		*/
 		
-		system.parkMode();
-		
-		System.out.printf("activeThreads: %d%n", config.parallelism());
-		System.out.printf("Benchmark started (%s)...%n", system.getName());
+		System.out.printf("activeThreads: %d%n", benchmarkConfig.parallelism());
+		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name);
 		
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() { 
@@ -62,7 +61,7 @@ public class BenchmarkSkynetWithStopping extends BenchmarkSample {
 		
 		system.start();
 		
-		Benchmark benchmark = new Benchmark(config);
+		Benchmark benchmark = new Benchmark(benchmarkConfig);
 		
 		benchmark.start((timeMeasurement, iteration) -> {
 			latch = new CountDownLatch(1);

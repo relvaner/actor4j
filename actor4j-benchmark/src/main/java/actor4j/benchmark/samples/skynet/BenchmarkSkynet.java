@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
 import io.actor4j.core.messages.ActorMessage;
@@ -36,26 +37,24 @@ import shared.benchmark.BenchmarkSample;
 public class BenchmarkSkynet extends BenchmarkSample {
 	public static CountDownLatch latch;
 	
-	public BenchmarkSkynet(BenchmarkConfig config) {
+	public BenchmarkSkynet(BenchmarkConfig benchmarkConfig) {
 		super();
 
 		//ActorSystem system = new ActorSystem("actor4j::Skynet", (name, wrapper) -> new AntiFloodingActorSystemImpl(name, wrapper));
 		//((AntiFloodingActorSystemImpl)system.underlyingImpl()).setFactoryAntiFloodingTimer(() -> new AntiFloodingTimer(-1, 30_000));
-		XActorSystem system = new XActorSystem("actor4j::Skynet");
-		if (config.parallelismMin>0)
-			system.setParallelismMin(config.parallelismMin);
-		if (config.parallelismFactor>0)
-			system.setParallelismFactor(config.parallelismFactor);
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::Skynet")
+			.parkMode()
+			.build();
+		XActorSystem system = new XActorSystem(config);
 		
 		/*
 		system.underlyingImpl().setBufferQueueSize(1_000_000);
 		system.underlyingImpl().setQueueSize(5_000_000);
 		*/
 		
-		system.parkMode();
-		
-		System.out.printf("activeThreads: %d%n", config.parallelism());
-		System.out.printf("Benchmark started (%s)...%n", system.getName());
+		System.out.printf("activeThreads: %d%n", benchmarkConfig.parallelism());
+		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name);
 		
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() { 
@@ -67,7 +66,7 @@ public class BenchmarkSkynet extends BenchmarkSample {
 		
 		system.start();
 		
-		Benchmark benchmark = new Benchmark(config);
+		Benchmark benchmark = new Benchmark(benchmarkConfig);
 		
 		benchmark.start((timeMeasurement, iteration) -> {
 			latch = new CountDownLatch(1);

@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
 import io.actor4j.corex.XActorSystem;
+import io.actor4j.corex.config.XActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -26,14 +27,17 @@ import shared.benchmark.BenchmarkConfig;
 import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkBcast extends BenchmarkSample {
-	public BenchmarkBcast(BenchmarkConfig config) {
+	public BenchmarkBcast(BenchmarkConfig benchmarkConfig) {
 		super();
 		
-		XActorSystem system = new XActorSystem("actor4j::Bcast");
-		system.sleepMode();
+		XActorSystemConfig config = XActorSystemConfig.builder()
+			.name("actor4j::Bcast")
+			.sleepMode()
+			.build();
+		XActorSystem system = new XActorSystem(config);
 		
 		final ActorGroup group = new ActorGroupSet();
-		int size = config.numberOfActors*config.parallelism();
+		int size = benchmarkConfig.numberOfActors*benchmarkConfig.parallelism();
 		System.out.printf("#actors: %d%n", size);
 		UUID id = null;
 		for(int i=0; i<size; i++) {
@@ -44,7 +48,7 @@ public class BenchmarkBcast extends BenchmarkSample {
 		system.broadcast((new ActorMessage<Object>(new Object(), 0, id, null)), group);
 		
 		
-		Benchmark benchmark = new Benchmark(system, config);
+		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
 		benchmark.start();
 	}
 	
