@@ -22,13 +22,15 @@ import java.util.concurrent.TimeoutException;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
+import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.testing.config.TestSystemConfig;
 import io.actor4j.testing.internal.TestSystemImpl;
 
 public class TestSystem extends ActorSystem {
 	public TestSystem() {
-		super("actor4j-test", (n, wrapper) -> new TestSystemImpl(n, wrapper));
+		super((wrapper, c) -> new TestSystemImpl(wrapper, c), TestSystemConfig.create());
 		
 		((TestSystemImpl)system).createPseudoActor(() -> new PseudoActor(this, true) {
 			@Override
@@ -36,6 +38,16 @@ public class TestSystem extends ActorSystem {
 				((TestSystemImpl)system).getActualMessage().complete(message);
 			}
 		});
+	}
+	
+	@Deprecated
+	@Override
+	public boolean setConfig(ActorSystemConfig config) {
+		return false;
+	}
+	
+	public boolean setConfig(TestSystemConfig config) {
+		return super.setConfig(config);
 	}
 	
 	public ActorCell underlyingCell(UUID id) {

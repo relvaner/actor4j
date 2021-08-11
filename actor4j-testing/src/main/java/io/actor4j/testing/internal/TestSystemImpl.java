@@ -28,6 +28,7 @@ import io.actor4j.bdd.Story;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
+import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
 import io.actor4j.core.messages.ActorMessage;
@@ -42,11 +43,11 @@ public class TestSystemImpl extends DefaultActorSystemImpl  {
 	protected volatile CompletableFuture<ActorMessage<?>> actualMessage;
 	
 	public TestSystemImpl(ActorSystem wrapper) {
-		this(null, wrapper);
+		this(wrapper, null);
 	}
 
-	public TestSystemImpl(String name, ActorSystem wrapper) {
-		super(name, wrapper);
+	public TestSystemImpl(ActorSystem wrapper, ActorSystemConfig config) {
+		super(wrapper, config);
 		
 		messageDispatcher = new TestActorMessageDispatcher(this);
 	}
