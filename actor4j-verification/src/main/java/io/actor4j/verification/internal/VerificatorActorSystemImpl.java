@@ -22,6 +22,7 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 import io.actor4j.core.ActorSystem;
+import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
 import io.actor4j.verification.ActorVerification;
@@ -29,13 +30,12 @@ import io.actor4j.verification.ActorVerificationEdge;
 import io.actor4j.verification.ActorVerificationSM;
 
 public class VerificatorActorSystemImpl extends DefaultActorSystemImpl {
-	
 	public VerificatorActorSystemImpl(ActorSystem wrapper) {
 		super(wrapper);
 	}
 
-	public VerificatorActorSystemImpl(String name, ActorSystem wrapper) {
-		super(name, wrapper);
+	public VerificatorActorSystemImpl(ActorSystem wrapper, ActorSystemConfig config) {
+		super(wrapper, config);
 	}
 	
 	public void verify(Consumer<ActorVerificationSM> consumer) {

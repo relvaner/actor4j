@@ -20,12 +20,23 @@ import java.util.function.Consumer;
 import org.jgrapht.Graph;
 
 import io.actor4j.core.ActorSystem;
+import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.verification.config.ActorVerificationConfig;
 import io.actor4j.verification.internal.VerificatorActorSystemImpl;
 
 public class ActorVerificator extends ActorSystem {
-	
 	public ActorVerificator() {
-		super("actor4j-verification", (n, wrapper) -> new VerificatorActorSystemImpl(n, wrapper));
+		super((wrapper, c) -> new VerificatorActorSystemImpl(wrapper, c), ActorVerificationConfig.create());
+	}
+	
+	@Deprecated
+	@Override
+	public boolean setConfig(ActorSystemConfig config) {
+		return false;
+	}
+	
+	public boolean setConfig(ActorVerificationConfig config) {
+		return super.setConfig(config);
 	}
 	
 	public void verify(Consumer<ActorVerificationSM> consumer) {
