@@ -28,10 +28,10 @@ public final class FuturePattern {
 	public static <T> Future<T> ask(T value, int tag, UUID dest, ActorRef actorRef) {
 		UUID mediator = actorRef.getSystem().addActor(() -> new FutureActor(dest, true));
 		
-		return ask(value, tag, dest, mediator, actorRef);
+		return askWithMediator(value, tag, mediator, actorRef);
 	}
 	
-	public static <T> Future<T> ask(T value, int tag, UUID dest, UUID mediator, ActorRef actorRef) {	
+	public static <T> Future<T> askWithMediator(T value, int tag, UUID mediator, ActorRef actorRef) {	
 		CompletableFuture<T> result = new CompletableFuture<>();
 		actorRef.send(new FutureActorMessage<T>(result, value, tag, actorRef.self(), mediator));
 		
@@ -41,10 +41,10 @@ public final class FuturePattern {
 	public static <T> Future<T> ask(T value, int tag, UUID dest, ActorSystem system) {
 		UUID mediator = system.addActor(() -> new FutureActor(dest, true));
 		
-		return ask(value, tag, dest, mediator, system);
+		return askWithMediator(value, tag, mediator, system);
 	}
 	
-	public static <T> Future<T> ask(T value, int tag, UUID dest, UUID mediator, ActorSystem system) {	
+	public static <T> Future<T> askWithMediator(T value, int tag, UUID mediator, ActorSystem system) {	
 		CompletableFuture<T> result = new CompletableFuture<>();
 		system.send(new FutureActorMessage<T>(result, value, tag, system.SYSTEM_ID, mediator));
 		
