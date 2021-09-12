@@ -59,14 +59,17 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	        while (iterator.hasNext()) {
 	        	ActorCell actorCell = iterator.next(); 
 	        	if (activeCells.put(actorCell.getId(), true)==null) {
-	        		if (actorCell.getId()==system.USER_ID || actorCell.getId()==system.SYSTEM_ID || actorCell.getId()==system.UNKNOWN_ID)
+	        		if (actorCell.getId()==system.USER_ID || actorCell.getId()==system.SYSTEM_ID || actorCell.getId()==system.UNKNOWN_ID || actorCell.getId()==system.PSEUDO_ID)
 	        			color = ";fillColor=yellow";
 	        		else {
 	        			if (colorize) {
-	        				long threadId = system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getCellsMap().get(actorCell.getId());
-	        				color = ";fillColor="+Utils.randomColorAsHex(
+	        				Long threadId = system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getCellsMap().get(actorCell.getId());
+	        				if (threadId!=null)
+	        					color = ";fillColor="+Utils.randomColorAsHex(
 	        						system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getThreadsList().indexOf(threadId), 
 	        						system.getConfig().parallelism*system.getConfig().parallelismFactor);
+	        				else
+	        					color = ";fillColor=#F0F0F0";
 	        			}
 	        			else
 	        				color = ";fillColor=#00FF00";

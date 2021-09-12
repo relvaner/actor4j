@@ -59,6 +59,7 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
         	analyzeRootActor(actorCells, actorCells.get(system.USER_ID),    ";fillColor=yellow", showDefaultRoot, colorize);
         	analyzeRootActor(actorCells, actorCells.get(system.SYSTEM_ID),  ";fillColor=yellow", showDefaultRoot, colorize);
         	analyzeRootActor(actorCells, actorCells.get(system.UNKNOWN_ID), ";fillColor=yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, actorCells.get(system.PSEUDO_ID), ";fillColor=yellow", showDefaultRoot, colorize);
         	
         	iteratorActiveCells = activeCells.entrySet().iterator();
         	while (iteratorActiveCells.hasNext()) {
@@ -108,10 +109,13 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 					
 					String color = null;
 					if (colorize) {
-        				long threadId = system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getCellsMap().get(child.getId());
-        				color = ";fillColor="+Utils.randomColorAsHex(
+        				Long threadId = system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getCellsMap().get(child.getId());
+        				if (threadId!=null)
+        					color = ";fillColor="+Utils.randomColorAsHex(
         						system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getThreadsList().indexOf(threadId), 
         						system.getConfig().parallelism*system.getConfig().parallelismFactor);
+        				else
+        					color = ";fillColor=#F0F0F0";
         			}
         			else
         				color = ";fillColor=#00FF00";
