@@ -19,10 +19,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.swing.SwingConstants;
+
 import java.util.UUID;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
-import com.mxgraph.layout.mxParallelEdgeLayout;
+import com.mxgraph.layout.mxGraphLayout;
+import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 
 import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.internal.ActorSystemImpl;
@@ -35,6 +40,9 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 	
 	protected Object defaultRoot;
 	protected boolean changed;
+	protected int lastLayoutIndex;
+	
+	public static final AtomicInteger layoutIndex = new AtomicInteger(0);
 
 	public VisualActorStructureViewPanel(ActorSystemImpl system) {
 		super(system);
@@ -42,10 +50,12 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 		activeCells = new HashMap<>();
 		cells = new HashMap<>();
 		
+		lastLayoutIndex = -1;
+		
 		add("Structure", paDesign);
 	}
 			
-	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultRoot, boolean colorize) {
+	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		Iterator<Entry<UUID, Boolean>> iteratorActiveCells = activeCells.entrySet().iterator();
 		while (iteratorActiveCells.hasNext())
 			iteratorActiveCells.next().setValue(false);
@@ -56,8 +66,11 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
         	if (showDefaultRoot && defaultRoot==null)
         		defaultRoot = addVertex("actor4j", ";fillColor=white");
         	
-        	analyzeRootActor(actorCells, actorCells.get(system.USER_ID),    ";fillColor=yellow", showDefaultRoot, colorize);
-        	analyzeRootActor(actorCells, actorCells.get(system.SYSTEM_ID),  ";fillColor=yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, actorCells.get(system.USER_ID), ";fillColor=yellow", showDefaultRoot, colorize);
+        	if (showRootSystem)
+        		analyzeRootActor(actorCells, actorCells.get(system.SYSTEM_ID), ";fillColor=yellow", showDefaultRoot, colorize);
+        	else
+        		showOnlyRootActor(actorCells, actorCells.get(system.SYSTEM_ID), ";fillColor=yellow", showDefaultRoot);
         	analyzeRootActor(actorCells, actorCells.get(system.UNKNOWN_ID), ";fillColor=yellow", showDefaultRoot, colorize);
         	analyzeRootActor(actorCells, actorCells.get(system.PSEUDO_ID), ";fillColor=yellow", showDefaultRoot, colorize);
         	
@@ -77,6 +90,24 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 			graph.getModel().endUpdate();
 		}
         graphComponent.refresh();
+	}
+	
+	public void showOnlyRootActor(Map<UUID, ActorCell> actorCells, ActorCell root, String color, boolean showDefaultRoot) {
+		if (root!=null) {
+			if (activeCells.put(root.getId(), true)==null) {
+				Object rootVertex;
+				if (root.getActor().getName()!=null)
+					rootVertex = addVertex(root.getActor().getName(), color);
+				else
+					rootVertex = addVertex(root.getId().toString(), color);
+			
+				if (showDefaultRoot)
+					addEdge(null, defaultRoot, rootVertex);
+				
+				cells.put(root.getId(), rootVertex);
+				changed = true;
+			}
+		}
 	}
 	
 	public void analyzeRootActor(Map<UUID, ActorCell> actorCells, ActorCell root, String color, boolean showDefaultRoot, boolean colorize) {
@@ -140,15 +171,34 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 	@Override
 	public void updateStructure() {
 		resetViewport();
-		 
-		if (changed) {
-			mxFastOrganicLayout layout = new mxFastOrganicLayout(graph);
-			layout.setForceConstant(40); 			// the higher, the more separated
-			layout.setDisableEdgeStyle( false); 	// true transforms the edges and makes them direct lines
-			layout.execute(graph.getDefaultParent());
 		
-			//new mxCircleLayout(graph).execute(graph.getDefaultParent());
-			new mxParallelEdgeLayout(graph).execute(graph.getDefaultParent());
+		int currentLayoutIndex = layoutIndex.get();
+		if (changed || lastLayoutIndex!=currentLayoutIndex) {
+			mxGraphLayout layout = null;
+			switch (currentLayoutIndex){
+				case 0: {
+					layout = new mxFastOrganicLayout(graph);
+					// the higher, the more separated
+					((mxFastOrganicLayout)layout).setForceConstant(40); 
+					// true transforms the edges and makes them direct lines
+					((mxFastOrganicLayout)layout).setDisableEdgeStyle(false); 	
+					break;
+				}
+				case 1: {
+					layout = new mxHierarchicalLayout(graph);
+					((mxHierarchicalLayout)layout).setFineTuning(true);
+					((mxHierarchicalLayout)layout).setDisableEdgeStyle(false);
+					break;
+				}
+				case 2: {
+					layout = new mxHierarchicalLayout(graph, SwingConstants.WEST);
+					((mxHierarchicalLayout)layout).setFineTuning(true);
+					((mxHierarchicalLayout)layout).setDisableEdgeStyle(false);
+					break;
+				}
+			}
+			layout.execute(graph.getDefaultParent());
+			lastLayoutIndex = currentLayoutIndex;
 		}
 	    
 	    fitViewport();

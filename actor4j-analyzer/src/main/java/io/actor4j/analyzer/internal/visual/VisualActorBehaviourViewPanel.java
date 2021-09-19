@@ -21,13 +21,17 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
-import com.mxgraph.layout.mxParallelEdgeLayout;
+import com.mxgraph.layout.mxGraphLayout;
+import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 
 import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.internal.ActorSystemImpl;
 
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.swing.SwingConstants;
 
 public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	protected static final long serialVersionUID = 9212208191147321764L;
@@ -36,6 +40,9 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	protected Map<UUID, Object>  cells;
 	
 	protected boolean changed;
+	protected int lastLayoutIndex;
+	
+	public static final AtomicInteger layoutIndex = new AtomicInteger(0);
 
 	public VisualActorBehaviourViewPanel(ActorSystemImpl system) {
 		super(system);
@@ -43,10 +50,12 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 		activeCells = new HashMap<>();
 		cells = new HashMap<>();
 		
+		lastLayoutIndex = -1;
+		
 		add("Behaviour", paDesign);
 	}
 	
-	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean colorize) {
+	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		Iterator<Entry<UUID, Boolean>> iteratorActiveCells = activeCells.entrySet().iterator();
 		while (iteratorActiveCells.hasNext())
 			iteratorActiveCells.next().setValue(false);
@@ -58,6 +67,10 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	    	Iterator<ActorCell> iterator = actorCells.values().iterator();
 	        while (iterator.hasNext()) {
 	        	ActorCell actorCell = iterator.next(); 
+	        	
+	        	if (!showRootSystem && actorCell.isRootInSystem())
+	        		continue;
+	        	
 	        	if (activeCells.put(actorCell.getId(), true)==null) {
 	        		if (actorCell.getId()==system.USER_ID || actorCell.getId()==system.SYSTEM_ID || actorCell.getId()==system.UNKNOWN_ID || actorCell.getId()==system.PSEUDO_ID)
 	        			color = ";fillColor=yellow";
@@ -148,15 +161,33 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	public void updateStructure() {
 		resetViewport();
 		
-		if (changed) {
-			mxFastOrganicLayout layout = new mxFastOrganicLayout(graph);
-			layout.setForceConstant(60); 			// the higher, the more separated
-			layout.setDisableEdgeStyle( false); 	// true transforms the edges and makes them direct lines
+		int currentLayoutIndex = layoutIndex.get();
+		if (changed || lastLayoutIndex!=currentLayoutIndex) {
+			mxGraphLayout layout = null;
+			switch (currentLayoutIndex){
+				case 0: {
+					layout = new mxFastOrganicLayout(graph);
+					// the higher, the more separated
+					((mxFastOrganicLayout)layout).setForceConstant(60); 
+					// true transforms the edges and makes them direct lines
+					((mxFastOrganicLayout)layout).setDisableEdgeStyle(false); 	
+					break;
+				}
+				case 1: {
+					layout = new mxHierarchicalLayout(graph);
+					((mxHierarchicalLayout)layout).setFineTuning(false);
+					((mxHierarchicalLayout)layout).setDisableEdgeStyle(false);
+					break;
+				}
+				case 2: {
+					layout = new mxHierarchicalLayout(graph, SwingConstants.WEST);
+					((mxHierarchicalLayout)layout).setFineTuning(true);
+					((mxHierarchicalLayout)layout).setDisableEdgeStyle(false);
+					break;
+				}
+			}
 			layout.execute(graph.getDefaultParent());
-
-			//new mxCompactTreeLayout(graph).execute(graph.getDefaultParent());
-			//new mxCircleLayout(graph).execute(graph.getDefaultParent());
-			new mxParallelEdgeLayout(graph).execute(graph.getDefaultParent());
+			lastLayoutIndex = currentLayoutIndex;
 		}
 		
 		fitViewport();

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.internal;
+package io.actor4j.analyzer;
 
 import java.util.Map;
 import java.util.UUID;
@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.SwingUtilities;
 
+import io.actor4j.analyzer.internal.ActorAnalyzerThread;
 import io.actor4j.analyzer.internal.visual.VisualActorAnalyzer;
 import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.internal.ActorSystemImpl;
@@ -32,16 +33,22 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	protected Map<UUID, Map<UUID, Long>> deliveryRoutes;
 	
 	protected boolean showDefaultRoot;
+	protected boolean showRootSystem;
 	protected boolean colorize;
 	
 	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot) {
-		this(delay, showDefaultRoot, false);
+		this(delay, showDefaultRoot, false, false);
 	}
 	
-	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean colorize) {
+	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem) {
+		this(delay, showDefaultRoot, showRootSystem, false);
+	}
+	
+	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		super(delay);
 		
 		this.showDefaultRoot = showDefaultRoot;
+		this.showRootSystem = showRootSystem;
 		this.colorize = colorize;
 		
 		deliveryRoutes = new ConcurrentHashMap<>();
@@ -78,8 +85,8 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				visualAnalyzer.analyzeStructure(cells, showDefaultRoot, colorize);
-				visualAnalyzer.analyzeBehaviour(cells, deliveryRoutes, colorize);
+				visualAnalyzer.analyzeStructure(cells, showDefaultRoot, showRootSystem, colorize);
+				visualAnalyzer.analyzeBehaviour(cells, deliveryRoutes, showRootSystem, colorize);
 			}
 		});
 	}

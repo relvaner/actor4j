@@ -17,6 +17,8 @@ package io.actor4j.analyzer.internal.visual;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,6 +35,8 @@ public class VisualActorFrame extends JFrame {
 	protected ActorSystemImpl system;
 
 	protected JPanel contentPane;
+	
+	protected VisualActorMenuBar menuBar;
 	
 	protected VisualActorViewPanel leftViewPanel;
 	protected VisualActorViewPanel rightViewPanel;
@@ -62,15 +66,40 @@ public class VisualActorFrame extends JFrame {
 		
 		paContent.add(leftViewPanel);
 		paContent.add(rightViewPanel);
+		
+		menuBar = new VisualActorMenuBar();
+		menuBar.getCbStructure().addActionListener(new ActionListener() {
+	        public void actionPerformed(ActionEvent event) {
+	        	leftViewPanel.setVisible(menuBar.getCbStructure().isSelected());
+	        	if (!menuBar.getCbStructure().isSelected())
+	        		paContent.remove(leftViewPanel);
+	        	else
+	        		paContent.add(leftViewPanel, 0);
+	        	
+	        	paContent.revalidate();
+	        }
+		});
+		menuBar.getCbBehaviour().addActionListener(new ActionListener() {
+	        public void actionPerformed(ActionEvent event) {
+	        	rightViewPanel.setVisible(menuBar.getCbBehaviour().isSelected());
+	        	if (!menuBar.getCbBehaviour().isSelected())
+	        		paContent.remove(rightViewPanel);
+	        	else
+	        		paContent.add(rightViewPanel);
+	        	
+	        	paContent.revalidate();
+	        }
+		});
+		setJMenuBar(menuBar);
 	}
 	
-	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultParent, boolean colorize) {
-		((VisualActorStructureViewPanel)leftViewPanel).analyzeStructure(actorCells, showDefaultParent, colorize);
+	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultParent, boolean showRootSystem, boolean colorize) {
+		((VisualActorStructureViewPanel)leftViewPanel).analyzeStructure(actorCells, showDefaultParent, showRootSystem, colorize);
 		((VisualActorStructureViewPanel)leftViewPanel).updateStructure();
 	}
 	
-	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean colorize) {
-		((VisualActorBehaviourViewPanel)rightViewPanel).analyzeBehaviour(actorCells, deliveryRoutes, colorize);
+	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+		((VisualActorBehaviourViewPanel)rightViewPanel).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 		((VisualActorBehaviourViewPanel)rightViewPanel).updateStructure();
 	}
 }

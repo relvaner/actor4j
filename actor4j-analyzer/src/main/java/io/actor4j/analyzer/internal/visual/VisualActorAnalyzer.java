@@ -43,11 +43,11 @@ public class VisualActorAnalyzer {
 		application.getFrame().dispatchEvent(new WindowEvent(application.getFrame(), WindowEvent.WINDOW_CLOSING));
 	}
 	
-	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultRoot, boolean colorize) {
-		((VisualActorFrame)application.getFrame()).analyzeStructure(actorCells, showDefaultRoot, colorize);
+	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+		((VisualActorFrame)application.getFrame()).analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 	
-	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean colorize) {
-		((VisualActorFrame)application.getFrame()).analyzeBehaviour(actorCells, deliveryRoutes, colorize);
+	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+		((VisualActorFrame)application.getFrame()).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 	}
 }
