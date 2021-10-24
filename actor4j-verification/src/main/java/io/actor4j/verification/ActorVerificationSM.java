@@ -23,16 +23,16 @@ import java.util.Set;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
-import io.actor4j.core.actors.Actor;
+import io.actor4j.core.actors.ActorRef;
 
 public class ActorVerificationSM {
 	protected Graph<String, ActorVerificationEdge> graph;
-	protected Actor actor;
+	protected ActorRef actor;
 	protected String prefix;
 	
 	protected String intialStateMarker;
 	
-	public ActorVerificationSM(Actor actor) {
+	public ActorVerificationSM(ActorRef actor) {
 		super();
 		this.actor = actor;
 		graph = new DefaultDirectedGraph<>(ActorVerificationEdge.class);
