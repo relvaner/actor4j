@@ -99,7 +99,7 @@ public abstract class ActorAnalyzerThread extends Thread {
 			
 			if ((!hasNextOuter))
 				if (system.getConfig().threadMode==ActorThreadMode.YIELD)
-					yield();
+					Thread.yield();
 				else {
 					try {
 						sleep(system.getConfig().sleepTime);

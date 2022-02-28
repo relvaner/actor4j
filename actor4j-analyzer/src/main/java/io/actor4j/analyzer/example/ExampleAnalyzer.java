@@ -64,8 +64,8 @@ public class ExampleAnalyzer {
 								last = next;
 								first = false;
 							}
-							if (message.tag==1)
-								send(new ActorMessage<Object>(null, 0, self(), last));
+							if (message.tag()==1)
+								send(ActorMessage.create(null, 0, self(), last));
 						}
 						@Override
 						public UUID getGroupId() {
@@ -103,7 +103,7 @@ public class ExampleAnalyzer {
 							}
 							first = false;
 						}
-						hub.broadcast(new ActorMessage<Object>(null, 0, self(), null));
+						hub.broadcast(ActorMessage.create(null, 0, self(), null));
 					}
 				};
 			}
@@ -127,18 +127,15 @@ public class ExampleAnalyzer {
 									return new ActorWithDistributedGroup("pong", pingpongGroup) {
 										@Override
 										public void receive(ActorMessage<?> message) {
-											UUID buffer = message.source;
-											message.source = message.dest;
-											message.dest = buffer;
-											send(message);
+											send(message.weakCopy(message.dest(), message.source()));
 										}
 									};
 								}
 							});
 							first = false;
 						}
-						if (message.tag==1)
-							send(new ActorMessage<Object>(null, 0, self(), pong));
+						if (message.tag()==1)
+							send(ActorMessage.create(null, 0, self(), pong));
 					}
 				};
 			}
@@ -148,7 +145,7 @@ public class ExampleAnalyzer {
 		system
 			.start();
 		
-		system.timer().schedule(new ActorMessage<Object>(null, 1, system.SYSTEM_ID, null), group, 0, 500, TimeUnit.MILLISECONDS);
+		system.timer().schedule(ActorMessage.create(null, 1, system.SYSTEM_ID, null), group, 0, 500, TimeUnit.MILLISECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.RESTART, system.SYSTEM_ID, null), ping, 5, TimeUnit.SECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.STOP, system.SYSTEM_ID, null), id, 15, TimeUnit.SECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.STOP, system.SYSTEM_ID, null), system.USER_ID, 25, TimeUnit.SECONDS);

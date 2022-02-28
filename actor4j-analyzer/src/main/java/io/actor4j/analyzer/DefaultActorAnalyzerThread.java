@@ -63,21 +63,24 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	
 	@Override
 	protected void analyze(ActorMessage<?> message) {
-		if (message.source==null)
-			message.source = system.UNKNOWN_ID;
-		if (message.dest==null)
-			message.dest = system.UNKNOWN_ID;
+		UUID source = message.source();
+		UUID dest = message.dest();
 		
-		Map<UUID, Long> routes = deliveryRoutes.get(message.source);
+		if (message.source()==null)
+			source = system.UNKNOWN_ID;
+		if (message.dest()==null)
+			dest = system.UNKNOWN_ID;
+		
+		Map<UUID, Long> routes = deliveryRoutes.get(source);
 		if (routes==null) {
 			routes = new ConcurrentHashMap<>();
-			deliveryRoutes.put(message.source, routes);
+			deliveryRoutes.put(source, routes);
 		}
-		Long count = routes.get(message.dest);
+		Long count = routes.get(dest);
 		if (count==null)
-			routes.put(message.dest, 1L);
+			routes.put(dest, 1L);
 		else
-			routes.put(message.dest, count+1);
+			routes.put(dest, count+1);
 	}
 
 	@Override
