@@ -51,7 +51,7 @@ public class APCActorRef<I> {
 							((APCActorSystem)system).futureMap.put(interaction, (CompletableFuture<?>)result);
 						}
 						
-						system.send(new ActorMessage<APCActorPair>(new APCActorPair(method.getName(), args), 0, system.SYSTEM_ID, id, interaction , null, null));
+						system.send(ActorMessage.create(new APCActorPair(method.getName(), args), 0, system.SYSTEM_ID, id, interaction , null, null));
 						
 						return result;
 					}

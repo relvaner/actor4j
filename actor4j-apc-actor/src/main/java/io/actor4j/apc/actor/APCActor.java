@@ -42,8 +42,8 @@ public class APCActor extends Actor {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value!=null && message.value instanceof APCActorPair) {
-			APCActorPair pair = ((APCActorPair)message.value);
+		if (message.value()!=null && message.value() instanceof APCActorPair) {
+			APCActorPair pair = ((APCActorPair)message.value());
 			
 			Method method = null;
 			if (pair.methodParams!=null) {
@@ -52,14 +52,14 @@ public class APCActor extends Actor {
 					for(int i=0;  i<pair.methodParams.length; i++)
 						parameterTypes[i] = pair.methodParams[i].getClass();
 					
-					method = interf.getMethod(((APCActorPair)message.value).methodName, parameterTypes);
+					method = interf.getMethod(((APCActorPair)message.value()).methodName, parameterTypes);
 				} catch (NoSuchMethodException | SecurityException e) {
 					e.printStackTrace();
 				}
 				
 				if (method!=null)
 					try {
-						handleOptionalFuture(method, message.interaction);
+						handleOptionalFuture(method, message.interaction());
 						method.invoke(obj, pair.methodParams);
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 						e.printStackTrace();
@@ -67,14 +67,14 @@ public class APCActor extends Actor {
 			}
 			else {
 				try {
-					method = interf.getMethod(((APCActorPair)message.value).methodName);
+					method = interf.getMethod(((APCActorPair)message.value()).methodName);
 				} catch (NoSuchMethodException | SecurityException e) {
 					e.printStackTrace();
 				}
 				
 				if (method!=null)
 					try {
-						handleOptionalFuture(method, message.interaction);
+						handleOptionalFuture(method, message.interaction());
 						method.invoke(obj);
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 						e.printStackTrace();
