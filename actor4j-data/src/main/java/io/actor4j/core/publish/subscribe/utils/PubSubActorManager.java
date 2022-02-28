@@ -47,32 +47,32 @@ public class PubSubActorManager<T> {
 	
 	@SuppressWarnings("unchecked")
 	public ActorOptional<T> get(ActorMessage<?> message) {
-		if (message.value!=null && message.value instanceof Publish)
-			return ActorOptional.of(((Publish<T>)message.value).value);
+		if (message.value()!=null && message.value() instanceof Publish)
+			return ActorOptional.of(((Publish<T>)message.value()).value);
 		else
 			return ActorOptional.none();
 	}
 	
 	public ActorOptional<UUID> getTopic(ActorMessage<?> message) {
-		if (message.source.equals(broker) && message.tag==GET_TOPIC_ACTOR)
+		if (message.source().equals(broker) && message.tag()==GET_TOPIC_ACTOR)
 			return ActorOptional.of(message.valueAsUUID());
 		else
 			return ActorOptional.none();
 	}
 	
 	public void publish(Publish<T> value) {
-		actorRef.send(new ActorMessage<Publish<T>>(value, GET_TOPIC_ACTOR, actorRef.getId(), broker));
+		actorRef.send(ActorMessage.create(value, GET_TOPIC_ACTOR, actorRef.getId(), broker));
 	}
 	
 	public void publish(Publish<T> value, UUID topic) {
-		actorRef.send(new ActorMessage<Publish<T>>(value, 0, actorRef.getId(), topic));
+		actorRef.send(ActorMessage.create(value, 0, actorRef.getId(), topic));
 	}
 	
 	public void subscribe(String topic) {
-		actorRef.send(new ActorMessage<Subscribe>(new Subscribe(topic), 0, actorRef.getId(), broker));
+		actorRef.send(ActorMessage.create(new Subscribe(topic), 0, actorRef.getId(), broker));
 	}
 	
 	public void unsubscribe(String topic) {
-		actorRef.send(new ActorMessage<Unsubscribe>(new Unsubscribe(topic), 0, actorRef.getId(), broker));
+		actorRef.send(ActorMessage.create(new Unsubscribe(topic), 0, actorRef.getId(), broker));
 	}
 }

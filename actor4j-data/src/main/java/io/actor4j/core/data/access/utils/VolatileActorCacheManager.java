@@ -56,8 +56,8 @@ public class VolatileActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value!=null && message.value instanceof VolatileDataAccessObject) {
-			VolatileDataAccessObject<K, V> obj = (VolatileDataAccessObject<K, V>)message.value;
+		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
+			VolatileDataAccessObject<K, V> obj = (VolatileDataAccessObject<K, V>)message.value();
 			return Pair.of(obj.key, obj.value);
 		}
 		else

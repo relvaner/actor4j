@@ -38,15 +38,15 @@ public class IMDBDataAccessActor<K, V> extends Actor {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value!=null && message.value instanceof PersistentDataAccessObject) {
+		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
 			@SuppressWarnings("unchecked")
-			PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value;
+			PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value();
 			
-			if (message.tag==GET) {
+			if (message.tag()==GET) {
 				obj.value = findOne(obj.key, obj.filter, imdb, obj.collectionName);
-				tell(obj, FIND_ONE, message.source, message.interaction);
+				tell(obj, FIND_ONE, message.source(), message.interaction());
 			}
-			else if (message.tag==SET) {
+			else if (message.tag()==SET) {
 				if (obj.key!=null) 
 					put(obj.key, obj.value, imdb, obj.collectionName);
 				else {
@@ -56,9 +56,9 @@ public class IMDBDataAccessActor<K, V> extends Actor {
 						replaceOne(obj.key, obj.filter, obj.value, imdb, obj.collectionName);
 				}
 			}
-			else if (message.tag==UPDATE_ONE || message.tag==UPDATE)
+			else if (message.tag()==UPDATE_ONE || message.tag()==UPDATE)
 				; // empty
-			else if (message.tag==INSERT_ONE) {
+			else if (message.tag()==INSERT_ONE) {
 				if (obj.filter!=null) {
 					if (!hasOne(obj.key, obj.filter, imdb, obj.collectionName))
 						insertOne(obj.key, obj.value, imdb, obj.collectionName);
@@ -66,11 +66,11 @@ public class IMDBDataAccessActor<K, V> extends Actor {
 				else
 					insertOne(obj.key, obj.value, imdb, obj.collectionName);
 			}
-			else if (message.tag==DELETE_ONE)
+			else if (message.tag()==DELETE_ONE)
 				deleteOne(obj.key, obj.filter, imdb, obj.collectionName);
-			else if (message.tag==HAS_ONE) {
+			else if (message.tag()==HAS_ONE) {
 				obj.reserved = hasOne(obj.key, obj.filter, imdb, obj.collectionName);
-				tell(obj, FIND_ONE, message.source, message.interaction);
+				tell(obj, FIND_ONE, message.source(), message.interaction());
 			}
 			else
 				unhandled(message);

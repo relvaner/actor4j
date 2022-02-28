@@ -43,19 +43,19 @@ public class SubscriberImpl {
 	}
 	
 	public void receive(ActorMessage<?> message) {
-		if (message.source!=null) {
-			if (message.tag==ON_NEXT) {
-				Consumer<Object> onNext = onNextMap.get(message.source); 
+		if (message.source()!=null) {
+			if (message.tag()==ON_NEXT) {
+				Consumer<Object> onNext = onNextMap.get(message.source()); 
 				if (onNext!=null)
-					onNext.accept(message.value);
+					onNext.accept(message.value());
 			}
-			else if (message.tag==ON_ERROR) {
-				Consumer<String> onError = onErrorMap.get(message.source); 
+			else if (message.tag()==ON_ERROR) {
+				Consumer<String> onError = onErrorMap.get(message.source()); 
 				if (onError!=null)
 					onError.accept(message.valueAsString());
 			}
-			else if (message.tag==ON_COMPLETE) {
-				Procedure onComplete = onCompleteMap.get(message.source); 
+			else if (message.tag()==ON_COMPLETE) {
+				Procedure onComplete = onCompleteMap.get(message.source()); 
 				if (onComplete!=null)
 					onComplete.apply();
 			}

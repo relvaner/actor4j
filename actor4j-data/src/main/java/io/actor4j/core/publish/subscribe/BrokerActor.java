@@ -49,27 +49,29 @@ public class BrokerActor extends Actor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value!=null) {
-			if (message.value instanceof Topic) {
-				final String topic = ((Topic)message.value).topic;
+		if (message.value()!=null) {
+			if (message.value() instanceof Topic) {
+				int tag = message.tag();
+				
+				final String topic = ((Topic)message.value()).topic;
 				UUID dest = topics.get(topic);
 				if (dest==null) {
-					if (message.value instanceof Unsubscribe)
+					if (message.value() instanceof Unsubscribe)
 						return; // Abort, the topic was not found
 					dest = addChild(() -> new TopicActor("topic-actor:"+topic, topic));
 					topics.put(topic, dest);
 					counter.put(topic, 0);
 				}
-				if (message.value instanceof Publish) {
-					if (message.tag==GET_TOPIC_ACTOR)
-						tell(dest, message.tag, message.source);
+				if (message.value() instanceof Publish) {
+					if (message.tag()==GET_TOPIC_ACTOR)
+						tell(dest, message.tag(), message.source());
 				}
-				else if (message.value instanceof Subscribe) {
-					message.tag = INTERNAL_FORWARDED_BY_BROKER;
+				else if (message.value() instanceof Subscribe) {
+					tag = INTERNAL_FORWARDED_BY_BROKER;
 					counter.put(topic, counter.get(topic)+1);
 				}
-				else if (message.value instanceof Unsubscribe) {
-					message.tag = INTERNAL_FORWARDED_BY_BROKER;
+				else if (message.value() instanceof Unsubscribe) {
+					tag = INTERNAL_FORWARDED_BY_BROKER;
 					int count = counter.get(topic);
 					if (count-1<=0) {
 						topics.remove(topic);
@@ -78,12 +80,12 @@ public class BrokerActor extends Actor {
 					else
 						counter.put(topic, count-1);
 				}
-				forward(message, dest);
+				forward(message.weakCopy(tag), dest);
 			}
 			else
 				unhandled(message);
 		}
-		else if (message.tag==CLEAN_UP) {
+		else if (message.tag()==CLEAN_UP) {
 			Iterator<Entry<String, Integer>> iterator = counter.entrySet().iterator();
 			while (iterator.hasNext())
 				if (iterator.next().getValue()==0)

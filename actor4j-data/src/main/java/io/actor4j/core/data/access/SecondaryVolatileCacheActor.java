@@ -42,38 +42,38 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value!=null && message.value instanceof VolatileDataAccessObject) {
+		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
 			@SuppressWarnings("unchecked")
-			VolatileDataAccessObject<K,V> obj = (VolatileDataAccessObject<K,V>)message.value;
+			VolatileDataAccessObject<K,V> obj = (VolatileDataAccessObject<K,V>)message.value();
 			
-			if (message.tag==GET)
-				tell(new VolatileDataAccessObject<K,V>(obj.key, cache.get(obj.key), null), GET, obj.source, message.interaction); // normally deep copy necessary of obj.value
-			else if (message.source == primary) {
-				if (message.tag==SET)
+			if (message.tag()==GET)
+				tell(new VolatileDataAccessObject<K,V>(obj.key, cache.get(obj.key), null), GET, obj.source, message.interaction()); // normally deep copy necessary of obj.value
+			else if (message.source() == primary) {
+				if (message.tag()==SET)
 					cache.put(obj.key, obj.value);
-				else if (message.tag==DEL)
+				else if (message.tag()==DEL)
 					cache.remove(obj.key);
-				else if (message.tag==DEL_ALL || message.tag==CLEAR)
+				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
 					cache.clear();
-				else if (message.tag==GC)
+				else if (message.tag()==GC)
 					cache.gc(message.valueAsLong());
 				else
 					unhandled(message);
 			}
 			else {
-				if (message.tag==SET)
+				if (message.tag()==SET)
 					publish(new VolatileDataAccessObject<K,V>(obj.key, obj.value, null), SET);
-				else if (message.tag==UPDATE)
+				else if (message.tag()==UPDATE)
 					; // empty
-				else if (message.tag==DEL)
+				else if (message.tag()==DEL)
 					publish(new VolatileDataAccessObject<K,V>(obj.key, null, null), DEL);
-				else if (message.tag==DEL_ALL || message.tag==CLEAR)
+				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
 					publish(new VolatileDataAccessObject<K,V>(), DEL_ALL);
 				else
 					unhandled(message);
 			}
 		}
-		else if (message.tag==GC)
+		else if (message.tag()==GC)
 			publish(null, GC);
 		else
 			unhandled(message);

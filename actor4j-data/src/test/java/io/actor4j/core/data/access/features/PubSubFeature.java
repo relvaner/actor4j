@@ -47,8 +47,8 @@ public class PubSubFeature {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
-				assertEquals(values[i], ((Publish<?>)message.value).value);
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
+				assertEquals(values[i], ((Publish<?>)message.value()).value);
 				i++;
 				if (i==values.length)
 					testDone.countDown();
@@ -58,30 +58,30 @@ public class PubSubFeature {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
-				assertEquals(values[i], ((Publish<?>)message.value).value);
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
+				assertEquals(values[i], ((Publish<?>)message.value()).value);
 				i++;
 				if (i==values.length)
 					testDone.countDown();
 			}
 		});
 		
-		system.send(new ActorMessage<Subscribe>(new Subscribe("MyTopic"), 0, subscriberA, broker));
-		system.send(new ActorMessage<Subscribe>(new Subscribe("MyTopic"), 0, subscriberB, broker));
+		system.send(ActorMessage.create(new Subscribe("MyTopic"), 0, subscriberA, broker));
+		system.send(ActorMessage.create(new Subscribe("MyTopic"), 0, subscriberB, broker));
 		
 		system.addActor(() -> new Actor("publisher") {
 			protected int i = 1;
 			@Override
 			public void preStart() {
-				send(new ActorMessage<Publish<Integer>>(new Publish<Integer>("MyTopic", -1), BrokerActor.GET_TOPIC_ACTOR, self(), broker));
+				send(ActorMessage.create(new Publish<Integer>("MyTopic", -1), BrokerActor.GET_TOPIC_ACTOR, self(), broker));
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag==BrokerActor.GET_TOPIC_ACTOR)
+				if (message.tag()==BrokerActor.GET_TOPIC_ACTOR)
 					system.timer().schedule(() -> {
 						if (i<values.length)
-							return new ActorMessage<Publish<Integer>>(new Publish<Integer>("MyTopic", values[i++]), 0, null, null);
+							return ActorMessage.create(new Publish<Integer>("MyTopic", values[i++]), 0, null, null);
 						else
 							throw new RuntimeException("Task canceled");
 					}, message.valueAsUUID(), 0, 25, TimeUnit.MILLISECONDS);
@@ -151,14 +151,14 @@ public class PubSubFeature {
 			protected int i = 1;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.source.equals(getSystem().SYSTEM_ID))
+				if (message.source().equals(getSystem().SYSTEM_ID))
 					manager.publish(new Publish<Integer>("MyTopic", -1));
 				
 				ActorOptional<UUID> optional = manager.getTopic(message);
 				if (optional.isDone())
 					system.timer().schedule(() -> {
 						if (i<values.length)
-							return new ActorMessage<Publish<Integer>>(new Publish<Integer>("MyTopic", values[i++]), 0, null, null);
+							return ActorMessage.create(new Publish<Integer>("MyTopic", values[i++]), 0, null, null);
 						else
 							throw new RuntimeException("Task canceled");
 					}, optional.get(), 0, 25, TimeUnit.MILLISECONDS);
@@ -166,7 +166,7 @@ public class PubSubFeature {
 		});
 		
 		system.start();
-		system.send(new ActorMessage<>(null, 0, system.SYSTEM_ID, publisher));
+		system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, publisher));
 		
 		try {
 			testDone.await();

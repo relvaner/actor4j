@@ -42,45 +42,45 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value!=null) {
-			if (message.value instanceof PersistentDataAccessObject) {
+		if (message.value()!=null) {
+			if (message.value() instanceof PersistentDataAccessObject) {
 				@SuppressWarnings("unchecked")
-				PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value;
+				PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value();
 				
-				if (message.tag==GET) {
+				if (message.tag()==GET) {
 					obj.value = cache.get(obj.key);
 					if (obj.value!=null)
-						tell(obj, GET, obj.source, message.interaction); // normally deep copy necessary of obj.value
+						tell(obj, GET, obj.source, message.interaction()); // normally deep copy necessary of obj.value
 					else
 						publish(message);
 				}
-				else if (message.tag==SET || 
-						 message.tag==UPDATE ||
-					     message.tag==DEL ||
-					     message.tag==DEL_ALL || 
-					     message.tag==CLEAR ||
-					     message.tag==CAS || 
-					     message.tag==CAU || 
-					     message.tag==GC)
+				else if (message.tag()==SET || 
+						 message.tag()==UPDATE ||
+					     message.tag()==DEL ||
+					     message.tag()==DEL_ALL || 
+					     message.tag()==CLEAR ||
+					     message.tag()==CAS || 
+					     message.tag()==CAU || 
+					     message.tag()==GC)
 					publish(message);
 				else
 					unhandled(message);
 			}
-			else if (message.value instanceof VolatileDataAccessObject && message.source == primary) {
+			else if (message.value() instanceof VolatileDataAccessObject && message.source() == primary) {
 				@SuppressWarnings("unchecked")
-				VolatileDataAccessObject<K,V> obj = (VolatileDataAccessObject<K,V>)message.value;
+				VolatileDataAccessObject<K,V> obj = (VolatileDataAccessObject<K,V>)message.value();
 				
-				if (message.tag==SET)
+				if (message.tag()==SET)
 					cache.put(obj.key, obj.value);
-				else if (message.tag==DEL)
+				else if (message.tag()==DEL)
 					cache.remove(obj.key);
-				else if (message.tag==DEL_ALL || message.tag==CLEAR)
+				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
 					cache.clear();
 				else
 					unhandled(message);
 			}
 		}
-		else if (message.tag==GC)
+		else if (message.tag()==GC)
 			cache.gc(message.valueAsLong());
 		else
 			unhandled(message);

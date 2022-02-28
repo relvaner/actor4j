@@ -63,8 +63,8 @@ public class PersistentActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value!=null && message.value instanceof PersistentDataAccessObject) {
-			PersistentDataAccessObject<K, V> obj = (PersistentDataAccessObject<K, V>)message.value;
+		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
+			PersistentDataAccessObject<K, V> obj = (PersistentDataAccessObject<K, V>)message.value();
 			return Pair.of(obj.key, obj.value);
 		}
 		else

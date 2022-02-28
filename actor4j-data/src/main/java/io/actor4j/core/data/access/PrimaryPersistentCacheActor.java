@@ -49,59 +49,58 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value!=null) {
-			if (message.value instanceof PersistentDataAccessObject) {
+		if (message.value()!=null) {
+			if (message.value() instanceof PersistentDataAccessObject) {
 				@SuppressWarnings("unchecked")
-				PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value;
+				PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value();
 				
-				if (message.tag==GET) {
+				if (message.tag()==GET) {
 					obj.value = cache.get(obj.key);
 					if (obj.value!=null)
-						tell(obj, GET, obj.source, message.interaction); // normally deep copy necessary of obj.value
+						tell(obj, GET, obj.source, message.interaction()); // normally deep copy necessary of obj.value
 					else
-						tell(message.value, GET, dataAccess, message.interaction);
+						tell(message.value(), GET, dataAccess, message.interaction());
 				}
-				else if (message.tag==SET) {
+				else if (message.tag()==SET) {
 					obj.reserved = cache.get(obj.key) != null;
 					cache.put(obj.key, obj.value);
-					tell(message.value, SET, dataAccess);
+					tell(message.value(), SET, dataAccess);
 					publish(new VolatileDataAccessObject<K,V>(obj.key, obj.value, null), SET);
 				}
-				else if (message.tag==UPDATE) {
+				else if (message.tag()==UPDATE) {
 					cache.remove(obj.key);
-					tell(message.value, UPDATE, dataAccess);
+					tell(message.value(), UPDATE, dataAccess);
 					publish(new VolatileDataAccessObject<K,V>(obj.key, null, null), DEL);
 				}
-				else if (message.tag==DEL) {
+				else if (message.tag()==DEL) {
 					cache.remove(obj.key);
-					tell(message.value, DELETE_ONE, dataAccess);
+					tell(message.value(), DELETE_ONE, dataAccess);
 					publish(new VolatileDataAccessObject<K,V>(obj.key, null, null), DEL);
 				}
-				else if (message.tag==DEL_ALL ) {
+				else if (message.tag()==DEL_ALL ) {
 					cache.clear();
 					// drop collection
 					publish(new VolatileDataAccessObject<K,V>(), DEL_ALL);
 				}
-				else if (message.tag==CLEAR) {
+				else if (message.tag()==CLEAR) {
 					cache.clear();
 					publish(new VolatileDataAccessObject<K,V>(), CLEAR);
 				}
-				else if (message.source==dataAccess && message.tag==FIND_ONE) {
+				else if (message.source()==dataAccess && message.tag()==FIND_ONE) {
 					cache.put(obj.key, obj.value);
-					tell(obj, GET, obj.source, message.interaction);
+					tell(obj, GET, obj.source, message.interaction());
 					publish(new VolatileDataAccessObject<K,V>(obj.key, obj.value, null), SET);
 				}
-				else if (message.tag==CAS || message.tag==CAU) {
+				else if (message.tag()==CAS || message.tag()==CAU) {
 					V v = cache.get(obj.key);
 					if (v.hashCode()==obj.hashCodeExpected) {
-						if (message.tag==CAS)
-							message.tag = SET;
-						else
-							message.tag = UPDATE;
-						receive(message);
+						int tag = SET;
+						if (message.tag()==CAU)
+							tag = UPDATE;
+						receive(message.weakCopy(tag));
 					}
 					else
-						tell(obj, message.tag, obj.source, message.interaction);
+						tell(obj, message.tag(), obj.source, message.interaction());
 				}
 				else
 					unhandled(message);
@@ -109,9 +108,9 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 			else 
 				unhandled(message);
 		}
-		else if (message.tag==SUBSCRIBE_SECONDARY)
-			hub.add(message.source);
-		else if (message.tag==GC) {
+		else if (message.tag()==SUBSCRIBE_SECONDARY)
+			hub.add(message.source());
+		else if (message.tag()==GC) {
 			cache.gc(message.valueAsLong());
 			publish(null, GC);
 		}
