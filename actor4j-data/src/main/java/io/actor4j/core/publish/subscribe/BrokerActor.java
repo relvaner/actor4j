@@ -80,7 +80,7 @@ public class BrokerActor extends Actor {
 					else
 						counter.put(topic, count-1);
 				}
-				forward(message.weakCopy(tag), dest);
+				forward(message.shallowCopy(tag), dest);
 			}
 			else
 				unhandled(message);

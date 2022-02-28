@@ -127,7 +127,7 @@ public class ExampleAnalyzer {
 									return new ActorWithDistributedGroup("pong", pingpongGroup) {
 										@Override
 										public void receive(ActorMessage<?> message) {
-											send(message.weakCopy(message.dest(), message.source()));
+											send(message.shallowCopy(message.dest(), message.source()));
 										}
 									};
 								}

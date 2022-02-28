@@ -44,7 +44,7 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 					dest = destinations.get(random.nextInt(destinations.size()));
 				}
 			}
-			message = message.weakCopy((dest!=null) ? dest : UUID_ALIAS);
+			message = message.shallowCopy((dest!=null) ? dest : UUID_ALIAS);
 		}
 		analyze(message);
 		super.post(message, source, alias);

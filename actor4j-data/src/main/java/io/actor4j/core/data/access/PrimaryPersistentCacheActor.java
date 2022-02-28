@@ -97,7 +97,7 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 						int tag = SET;
 						if (message.tag()==CAU)
 							tag = UPDATE;
-						receive(message.weakCopy(tag));
+						receive(message.shallowCopy(tag));
 					}
 					else
 						tell(obj, message.tag(), obj.source, message.interaction());
