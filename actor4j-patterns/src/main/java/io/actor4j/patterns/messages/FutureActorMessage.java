@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2022, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.messages.ActorMessageUtils;
 import io.actor4j.core.utils.Copyable;
 import io.actor4j.core.utils.Shareable;
 
-public class FutureActorMessage<T> extends ActorMessage<T> {
-	public final CompletableFuture<T> future;
-	
-	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest, UUID interaction, String protocol, String domain) {
-		super(value, tag, source, dest, interaction, protocol, domain);
-		this.future = future;
-	}
-
+public record FutureActorMessage<T>(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest, UUID interaction, String protocol, String domain) implements ActorMessage<T> {
 	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest) {
 		this(future, value, tag, source, dest, null, null, null);
 	}
@@ -39,25 +33,57 @@ public class FutureActorMessage<T> extends ActorMessage<T> {
 	}
 	
 	@Override
-	protected ActorMessage<T> weakCopy() {
+	public ActorMessage<T> weakCopy() {
 		return new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain);
+	}
+	
+	@Override
+	public ActorMessage<T> weakCopy(int tag) {
+		return this.tag!=tag ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> weakCopy(UUID source, UUID dest) {
+		return this.source!=source || this.dest!=dest ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> weakCopy(UUID dest) {
+		return this.dest!=dest ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public ActorMessage<T> copy() {
 		if (value!=null) { 
-			if (isSupportedType(value.getClass()) || value instanceof Shareable)
-				return new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain);
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Shareable)
+				return this;
 			else if (value instanceof Copyable)
 				return new FutureActorMessage<T>(future, ((Copyable<T>)value).copy(), tag, source, dest, interaction, protocol, domain);
 			else if (value instanceof Exception)
-				return new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain);
+				return this;
 			else
 				throw new IllegalArgumentException(value.getClass().getName());
 		}
 		else
-			return new FutureActorMessage<T>(future, null, tag, source, dest, interaction, protocol, domain);
+			return this;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public ActorMessage<T> copy(UUID dest) {
+		if (value!=null) { 
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Shareable)
+				return dest()!=dest ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
+			else if (value instanceof Copyable)
+				return new FutureActorMessage<T>(future,((Copyable<T>)value).copy(), tag, source, dest, interaction, protocol, domain);
+			else if (value instanceof Exception)
+				return dest()!=dest ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
+			else
+				throw new IllegalArgumentException(value.getClass().getName());
+		}
+		else
+			return dest()!=dest ? new FutureActorMessage<T>(future,null, tag, source, dest, interaction, protocol, domain) : this;
 	}
 
 	@Override

@@ -42,11 +42,11 @@ public class FutureEmbeddedActor extends EmbeddedActor {
 		boolean result = true;
 		
 		if (message instanceof FutureActorMessage<?>) {
-			future = ((FutureActorMessage<Object>)message).future;
-			host.tell(message.value, message.tag, dest);
+			future = ((FutureActorMessage<Object>)message).future();
+			host.tell(message.value(), message.tag(), dest);
 		}
-		else if (message.source==dest) {
-			future.complete(message.value);
+		else if (message.source()==dest) {
+			future.complete(message.value());
 		}
 		else
 			result = false;

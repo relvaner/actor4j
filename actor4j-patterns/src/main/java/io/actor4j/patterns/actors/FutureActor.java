@@ -42,11 +42,11 @@ public class FutureActor extends Actor {
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message instanceof FutureActorMessage<?>) {
-			future = ((FutureActorMessage<Object>)message).future;
-			tell(message.value, message.tag, dest);
+			future = ((FutureActorMessage<Object>)message).future();
+			tell(message.value(), message.tag(), dest);
 		}
-		else if (message.source==dest) {
-			future.complete(message.value);
+		else if (message.source()==dest) {
+			future.complete(message.value());
 			if (stopOnComplete)
 				stop();
 		}

@@ -46,16 +46,16 @@ public class FuturePatternFeature {
 				child = addChild(() -> new Actor("child") {
 					@Override
 					public void receive(ActorMessage<?> message) {
-						if (message.tag==11)
-							tell("success_two", 11, message.source);
+						if (message.tag()==11)
+							tell("success_two", 11, message.source());
 					}
 				});
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag==10) {
-					tell("success", 0, message.source);
+				if (message.tag()==10) {
+					tell("success", 0, message.source());
 					future = FuturePattern.ask(null, 11, child, this);
 					become((msg) -> {
 						// don't block the actor itself
@@ -68,7 +68,7 @@ public class FuturePatternFeature {
 								e.printStackTrace();
 							}
 					});
-					getSystem().timer().schedule(new ActorMessage<>("test", 0, self(), null), self(), 0, 100, TimeUnit.MILLISECONDS);
+					getSystem().timer().schedule(ActorMessage.create("test", 0, self(), null), self(), 0, 100, TimeUnit.MILLISECONDS);
 					testDone.countDown();
 				}
 			}
