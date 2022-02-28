@@ -79,10 +79,10 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.tag==PERSIST_EVENTS) {
+		if (message.tag()==PERSIST_EVENTS) {
 			try {
 				@SuppressWarnings("unchecked")
-				String json = new ObjectMapper().writeValueAsString(((ImmutableList<ActorPersistenceObject>)message.value).get()); // temporary
+				String json = new ObjectMapper().writeValueAsString(((ImmutableList<ActorPersistenceObject>)message.value()).get()); // temporary
 				
 				JSONArray array = new JSONArray(json);
 				if (array.length()==1) {
@@ -99,28 +99,28 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 					}
 					events.bulkWrite(requests);
 				}
-				parent.send(new ActorMessage<Object>(null, INTERNAL_PERSISTENCE_SUCCESS, self(), message.source));
+				parent.send(ActorMessage.create(null, INTERNAL_PERSISTENCE_SUCCESS, self(), message.source()));
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				parent.send(new ActorMessage<Exception>(e, INTERNAL_PERSISTENCE_FAILURE, self(), message.source));
+				parent.send(ActorMessage.create(e, INTERNAL_PERSISTENCE_FAILURE, self(), message.source()));
 			}
 		}
-		else if (message.tag==PERSIST_STATE){
+		else if (message.tag()==PERSIST_STATE){
 			try {
-				String json = new ObjectMapper().writeValueAsString(message.value); // temporary
+				String json = new ObjectMapper().writeValueAsString(message.value()); // temporary
 				
 				Document document = Document.parse(json);
 				checkTimeStamp(document);
 				states.insertOne(document);
-				parent.send(new ActorMessage<Object>(null, INTERNAL_PERSISTENCE_SUCCESS, self(), message.source));
+				parent.send(ActorMessage.create(null, INTERNAL_PERSISTENCE_SUCCESS, self(), message.source()));
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				parent.send(new ActorMessage<Exception>(e, INTERNAL_PERSISTENCE_FAILURE, self(), message.source));
+				parent.send(ActorMessage.create(e, INTERNAL_PERSISTENCE_FAILURE, self(), message.source()));
 			}
 		}
-		else if (message.tag==RECOVER) {
+		else if (message.tag()==RECOVER) {
 			try {
 				JSONObject obj = new JSONObject();
 				Document document = null;
@@ -163,13 +163,13 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 				else
 					obj.put("state", new JSONObject());
 				
-				parent.send(new ActorMessage<String>(obj.toString(), INTERNAL_PERSISTENCE_RECOVER, self(), message.source));
+				parent.send(ActorMessage.create(obj.toString(), INTERNAL_PERSISTENCE_RECOVER, self(), message.source()));
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 				JSONObject obj = new JSONObject();
 				obj.put("error", e.getMessage());
-				parent.send(new ActorMessage<String>(obj.toString(), INTERNAL_PERSISTENCE_RECOVER, self(), message.source));
+				parent.send(ActorMessage.create(obj.toString(), INTERNAL_PERSISTENCE_RECOVER, self(), message.source()));
 			}
 		}
 	}

@@ -154,7 +154,7 @@ public class PersistenceFeature {
 		
 		system.start();
 		
-		system.sendWhenActive(new ActorMessage<Object>(null, 0, system.SYSTEM_ID, id));
+		system.sendWhenActive(ActorMessage.create(null, 0, system.SYSTEM_ID, id));
 		
 		try {
 			testDone.await();
