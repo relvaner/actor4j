@@ -100,9 +100,9 @@ public class PersistentCacheFeature {
 			public void receive(ActorMessage<?> message) {
 				tell(new PersistentDataAccessObject<>(keys[i], "key", "test", self()), ActorWithCache.GET, "cache1");
 				
-				await((msg) -> msg.source!=system.SYSTEM_ID && msg.value!=null, (msg) -> {
+				await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
 					@SuppressWarnings("unchecked")
-					VolatileDataAccessObject<String, TestObject> payload = ((VolatileDataAccessObject<String, TestObject>)msg.value);
+					VolatileDataAccessObject<String, TestObject> payload = ((VolatileDataAccessObject<String, TestObject>)msg.value());
 					if (payload.value!=null) {
 						assertEquals(values[i], payload.value.value);
 						logger().log(DEBUG, payload.value.value);
@@ -123,7 +123,7 @@ public class PersistentCacheFeature {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				system.send(new ActorMessage<>(null, 0, system.SYSTEM_ID, mediator));
+				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, mediator));
 			}
 		}, 0, 100);
 		
@@ -168,7 +168,7 @@ public class PersistentCacheFeature {
 			public void receive(ActorMessage<?> message) {
 				manager.get(keys[i]);
 				
-				await((msg) -> msg.source!=system.SYSTEM_ID && msg.value!=null, (msg) -> {
+				await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
 					Pair<String, TestObject> pair = manager.get(msg);
 					
 					if (pair!=null && pair.b!=null) {
@@ -193,7 +193,7 @@ public class PersistentCacheFeature {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				system.send(new ActorMessage<>(null, 0, system.SYSTEM_ID, mediator));
+				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, mediator));
 			}
 		}, 0, 100);
 		
