@@ -31,24 +31,23 @@ public class TestActorMessageDispatcher extends DefaultActorMessageDispatcher {
 	
 	@Override
 	public void post(ActorMessage<?> message, UUID source, String alias) {
-		redirect(message);
-		super.post(message, source, alias);
+		super.post(redirect(message), source, alias);
 	}
 	
 	@Override
 	protected void postQueue(ActorMessage<?> message, BiConsumer<ActorThread, ActorMessage<?>> biconsumer) {
-		redirect(message);
-		super.postQueue(message, biconsumer);
+		super.postQueue(redirect(message), biconsumer);
 	}
 	
 	@Override
 	public void postOuter(ActorMessage<?> message) {
-		redirect(message);
-		super.postOuter(message);
+		super.postOuter(redirect(message));
 	}
 	
-	protected void redirect(ActorMessage<?> message) {
-		if (message!=null && ((TestSystemImpl)system).testActorId!=null && message.dest!=((TestSystemImpl)system).testActorId)
-			message.dest = ((TestSystemImpl)system).pseudoActorId;
+	protected ActorMessage<?> redirect(ActorMessage<?> message) {
+		if (message!=null && ((TestSystemImpl)system).testActorId!=null && message.dest()!=((TestSystemImpl)system).testActorId)
+			return message.shallowCopy(((TestSystemImpl)system).pseudoActorId);
+		else
+			return message;
 	}
 }
