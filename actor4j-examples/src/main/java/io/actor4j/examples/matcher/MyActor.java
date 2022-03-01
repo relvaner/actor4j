@@ -36,7 +36,7 @@ public class MyActor extends Actor {
 			.match(ACK, 
 				msg -> logger().info("ACK tag received"))
 			.matchAny(
-				msg -> send(msg, msg.dest))
+				msg -> send(msg, msg.dest()))
 			.matchElse(
 				msg -> unhandled(msg));
 	}

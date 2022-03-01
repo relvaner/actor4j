@@ -38,10 +38,10 @@ public class TestCase {
 	protected static class MyActor extends Actor implements ActorTest {
 		@Override
 		public void receive(ActorMessage<?> message) {
-			if (message.value instanceof String) {
+			if (message.value() instanceof String) {
 				logger().info(String.format(
 						"Received String message: %s", message.valueAsString()));
-				tell("Hello World Again!", 0, message.source);
+				tell("Hello World Again!", 0, message.source());
 			} 
 			else
 				unhandled(message);
@@ -58,7 +58,7 @@ public class TestCase {
 				.annotate("Sceneario: Sending and receiving a message String")
 				.annotate("Given a request message")
 				.given(() -> {
-					send(new ActorMessage<String>("Hello World!", 0, getSystem().SYSTEM_ID, self()));
+					send(ActorMessage.create("Hello World!", 0, getSystem().SYSTEM_ID, self()));
 				})
 				.annotate("When the responded message was received")
 				.when(()-> {

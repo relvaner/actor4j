@@ -39,7 +39,7 @@ public class ExampleEmbedded {
 					public boolean receive(ActorMessage<?> message) {
 						boolean result = false;
 						
-						if (message.tag == SWAP) {
+						if (message.tag() == SWAP) {
 							become(msg -> {
 								logger().info(String.format(
 										"Received String message: %s", msg.valueAsString()));
@@ -61,10 +61,10 @@ public class ExampleEmbedded {
 			}
 		});
 		
-		system.send(new ActorMessage<Object>(null, SWAP, system.SYSTEM_ID, host));
-		system.send(new ActorMessage<Object>("Hello World!", 0, system.SYSTEM_ID, host));
-		system.send(new ActorMessage<Object>(null, SWAP, system.SYSTEM_ID, host));
-		system.send(new ActorMessage<Object>("Hello World Again!", 0, system.SYSTEM_ID, host));
+		system.send(ActorMessage.create(null, SWAP, system.SYSTEM_ID, host));
+		system.send(ActorMessage.create("Hello World!", 0, system.SYSTEM_ID, host));
+		system.send(ActorMessage.create(null, SWAP, system.SYSTEM_ID, host));
+		system.send(ActorMessage.create("Hello World Again!", 0, system.SYSTEM_ID, host));
 		system.start();
 		
 		try {

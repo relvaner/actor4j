@@ -45,7 +45,7 @@ public class ExampleAMQP {
 		UUID receiver = system.addActor(() -> new Actor("receiver") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag==PUBLISH && message.value!=null) {
+				if (message.tag()==PUBLISH && message.value()!=null) {
 					System.out.printf("Message received: %s%n", message.valueAsString());
 					done.countDown();
 				}
@@ -72,9 +72,9 @@ public class ExampleAMQP {
 			}
 		});
 		
-		system.send(new ActorMessage<>("MyTopic", SUBSCRIBE, receiver, amqp));
-		system.send(new ActorMessage<>(new AMQPPublish("MyTopic", "Hello World!".getBytes()), PUBLISH, system.SYSTEM_ID, amqp));
-		system.send(new ActorMessage<>(new AMQPPublish("MyTopic", "Hello World Again!".getBytes()), PUBLISH, system.SYSTEM_ID, amqp));
+		system.send(ActorMessage.create("MyTopic", SUBSCRIBE, receiver, amqp));
+		system.send(ActorMessage.create(new AMQPPublish("MyTopic", "Hello World!".getBytes()), PUBLISH, system.SYSTEM_ID, amqp));
+		system.send(ActorMessage.create(new AMQPPublish("MyTopic", "Hello World Again!".getBytes()), PUBLISH, system.SYSTEM_ID, amqp));
 		
 		system.start();
 		

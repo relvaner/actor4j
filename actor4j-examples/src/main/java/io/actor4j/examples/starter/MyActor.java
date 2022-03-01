@@ -23,10 +23,10 @@ import io.actor4j.core.messages.ActorMessage;
 public class MyActor extends Actor {
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value instanceof String) {
+		if (message.value() instanceof String) {
 			logger().info(String.format(
 					"Received String message: %s", message.valueAsString()));
-			send(message, message.source);
+			send(message, message.source());
 		} 
 		else
 			unhandled(message);

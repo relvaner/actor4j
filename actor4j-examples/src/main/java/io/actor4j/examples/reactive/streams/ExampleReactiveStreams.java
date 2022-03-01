@@ -35,8 +35,8 @@ public class ExampleReactiveStreams {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				super.receive(message);
-				if (message.tag==1001)
-					broadcast(message.value);
+				if (message.tag()==1001)
+					broadcast(message.value());
 			}
 		});
 		
@@ -58,7 +58,7 @@ public class ExampleReactiveStreams {
 		system.start();
 		
 		Random random = new Random();
-		system.timer().schedule(() -> new ActorMessage<Integer>(random.nextInt(512), 1001, null, null), publisher, 500, 100, TimeUnit.MILLISECONDS);
+		system.timer().schedule(() -> ActorMessage.create(random.nextInt(512), 1001, null, null), publisher, 500, 100, TimeUnit.MILLISECONDS);
 
 		try {
 			Thread.sleep(3000);

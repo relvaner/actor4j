@@ -40,12 +40,12 @@ public class ExampleRxStash {
 					public void preStart() {
 						rxStash = rxStash
 							.filter(msg -> msg.valueAsInt() > 50)
-							.map(msg -> new ActorMessage<Integer>(msg.valueAsInt(), msg.tag+1976, msg.source, msg.dest));
+							.map(msg -> ActorMessage.create(msg.valueAsInt(), msg.tag()+1976, msg.source(), msg.dest()));
 						
 						matcher = new ActorMessageMatcher();
 						matcher
 							.match(0, msg -> stash.offer(msg))
-							.match(msg -> msg.tag>0, msg -> {
+							.match(msg -> msg.tag()>0, msg -> {
 								rxStash.subscribe(System.out::println);
 							});
 					}
@@ -72,7 +72,7 @@ public class ExampleRxStash {
 					
 					@Override
 					public void receive(ActorMessage<?> message) {
-						send(new ActorMessage<Integer>(random.nextInt(100), random.nextInt(1+1), self(), receiver));
+						send(ActorMessage.create(random.nextInt(100), random.nextInt(1+1), self(), receiver));
 					}
 				};
 			}
@@ -81,7 +81,7 @@ public class ExampleRxStash {
 		system.start();
 		
 		system
-			.timer().schedule(new ActorMessage<>(null, 0, null, null), sender, 0, 100, TimeUnit.MILLISECONDS);
+			.timer().schedule(ActorMessage.create(null, 0, null, null), sender, 0, 100, TimeUnit.MILLISECONDS);
 		
 		try {
 			Thread.sleep(15000);

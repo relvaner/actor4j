@@ -42,7 +42,7 @@ public class ExampleMQTT {
 		UUID receiver = system.addActor(() -> new Actor("receiver") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag==PUBLISH && message.value!=null) {
+				if (message.tag()==PUBLISH && message.value()!=null) {
 					System.out.printf("Message received: %s%n", message.valueAsString());
 					done.countDown();
 				}
@@ -84,9 +84,9 @@ public class ExampleMQTT {
 			}
 		});
 		
-		system.send(new ActorMessage<>("MyTopic", SUBSCRIBE, receiver, mqtt));
-		system.send(new ActorMessage<>(new MQTTPublish("MyTopic", "Hello World!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID, mqtt));
-		system.send(new ActorMessage<>(new MQTTPublish("MyTopic", "Hello World Again!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID, mqtt));
+		system.send(ActorMessage.create("MyTopic", SUBSCRIBE, receiver, mqtt));
+		system.send(ActorMessage.create(new MQTTPublish("MyTopic", "Hello World!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID, mqtt));
+		system.send(ActorMessage.create(new MQTTPublish("MyTopic", "Hello World Again!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID, mqtt));
 		
 		system.start();
 		

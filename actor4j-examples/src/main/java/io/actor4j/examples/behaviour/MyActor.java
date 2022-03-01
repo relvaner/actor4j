@@ -25,7 +25,7 @@ public class MyActor extends Actor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.tag == SWAP)
+		if (message.tag() == SWAP)
 			become(msg -> {
 				logger().info(String.format(
 						"Received String message: %s", msg.valueAsString()));

@@ -38,7 +38,7 @@ public class ExampleVerification {
 		
 		@Override
 		public void receive(ActorMessage<?> message) {
-			tell("ping", PING, message.source);
+			tell("ping", PING, message.source());
 		}
 		
 		@Override
@@ -70,7 +70,7 @@ public class ExampleVerification {
 		
 		@Override
 		public void receive(ActorMessage<?> message) {
-			tell("pong", PONG, message.source);
+			tell("pong", PONG, message.source());
 		}
 		
 		@Override

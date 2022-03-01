@@ -38,31 +38,31 @@ public class ExamplePublishSubscribe {
 		UUID subscriberA = system.addActor(() -> new Actor("subscriberA") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
 			}
 		});
 		UUID subscriberB = system.addActor(() -> new Actor("subscriberB") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
 			}
 		});
 		
-		system.send(new ActorMessage<Subscribe>(new Subscribe("MyTopic"), 0, subscriberA, broker));
-		system.send(new ActorMessage<Subscribe>(new Subscribe("MyTopic"), 0, subscriberB, broker));
+		system.send(ActorMessage.create(new Subscribe("MyTopic"), 0, subscriberA, broker));
+		system.send(ActorMessage.create(new Subscribe("MyTopic"), 0, subscriberB, broker));
 		
 		system.addActor(() -> new Actor("publisher") {
 			protected Random random;
 			@Override
 			public void preStart() {
 				random = new Random();
-				send(new ActorMessage<Publish<String>>(new Publish<String>("MyTopic", String.valueOf(random.nextInt(512))), BrokerActor.GET_TOPIC_ACTOR, self(), broker));
+				send(ActorMessage.create(new Publish<String>("MyTopic", String.valueOf(random.nextInt(512))), BrokerActor.GET_TOPIC_ACTOR, self(), broker));
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag==BrokerActor.GET_TOPIC_ACTOR) { 
-					system.timer().schedule(() -> new ActorMessage<Publish<String>>(new Publish<String>("MyTopic", String.valueOf(random.nextInt(512))), 0, null, null), message.valueAsUUID(), 0, 100, TimeUnit.MILLISECONDS);
+				if (message.tag()==BrokerActor.GET_TOPIC_ACTOR) { 
+					system.timer().schedule(() -> ActorMessage.create(new Publish<String>("MyTopic", String.valueOf(random.nextInt(512))), 0, null, null), message.valueAsUUID(), 0, 100, TimeUnit.MILLISECONDS);
 				}
 			}
 		});

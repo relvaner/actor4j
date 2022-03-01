@@ -48,12 +48,12 @@ public class ExamplePseudo {
 					public void preStart() {
 						Random random = new Random();
 						timerFuture = system.timer()
-							.schedule(() -> new ActorMessage<Integer>(random.nextInt(512), 0, self(), null), main.getId(), 0, 100, TimeUnit.MILLISECONDS);
+							.schedule(() -> ActorMessage.create(random.nextInt(512), 0, self(), null), main.getId(), 0, 100, TimeUnit.MILLISECONDS);
 					}
 					
 					@Override
 					public void receive(ActorMessage<?> message) {
-						System.out.printf("numberGenerator received a message.tag (%d) from main%n", message.tag);
+						System.out.printf("numberGenerator received a message.tag (%d) from main%n", message.tag());
 					}
 					
 					@Override
@@ -74,7 +74,7 @@ public class ExamplePseudo {
 					.map(msg -> "-> main received a message.value ("+msg.valueAsInt()+") from numberGenerator")
 					.subscribe(System.out::println);
 					
-				main.send(new ActorMessage<>(null, i++, main.getId(), numberGenerator));
+				main.send(ActorMessage.create(null, i++, main.getId(), numberGenerator));
 			}
 		}, 0, 1000);
 		
