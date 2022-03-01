@@ -49,7 +49,7 @@ public class BenchmarkPingPongBulk extends BenchmarkSample {
 			group.add(id);
 		}
 		
-		system.broadcast(new ActorMessage<Object>(new Object(), RUN, system.SYSTEM_ID, null), group);
+		system.broadcast(ActorMessage.create(new Object(), RUN, system.SYSTEM_ID, null), group);
 		
 		
 		Benchmark benchmark = new Benchmark(system, benchmarkConfig);

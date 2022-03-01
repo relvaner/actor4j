@@ -44,6 +44,6 @@ public class Host extends EmbeddedHostActor {
 	@Override
 	public void receive(ActorMessage<?> message) {
 		while (!stop.get())
-			next.embedded(new ActorMessage<Object>(next, 0, self(), self()));
+			next.embedded(ActorMessage.create(next, 0, self(), self()));
 	}
 }

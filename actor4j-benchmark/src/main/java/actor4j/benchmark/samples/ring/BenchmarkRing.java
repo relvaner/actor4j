@@ -42,7 +42,7 @@ public class BenchmarkRing extends BenchmarkSample {
 			}
 			UUID sender = system.addActor(Sender.class, next);
 			
-			system.send(new ActorMessage<>(new Object(), 0, sender, sender));
+			system.send(ActorMessage.create(new Object(), 0, sender, sender));
 		}
 		
 		Benchmark benchmark = new Benchmark(system, benchmarkConfig);

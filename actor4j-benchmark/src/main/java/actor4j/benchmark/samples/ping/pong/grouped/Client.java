@@ -34,10 +34,7 @@ public class Client extends ActorWithGroup {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.tag==MSG.ordinal()) {
-			message.source = self();
-			message.dest = dest;
-			send(message);
-		}
+		if (message.tag()==MSG.ordinal())
+			send(message.shallowCopy(self(), dest));
 	}
 }

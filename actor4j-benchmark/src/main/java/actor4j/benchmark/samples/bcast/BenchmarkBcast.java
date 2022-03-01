@@ -45,7 +45,7 @@ public class BenchmarkBcast extends BenchmarkSample {
 			group.add(id);
 		}
 		
-		system.broadcast((new ActorMessage<Object>(new Object(), 0, id, null)), group);
+		system.broadcast((ActorMessage.create(new Object(), 0, id, null)), group);
 		
 		
 		Benchmark benchmark = new Benchmark(system, benchmarkConfig);

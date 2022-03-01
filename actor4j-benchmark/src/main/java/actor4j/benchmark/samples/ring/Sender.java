@@ -31,6 +31,6 @@ public class Sender extends Actor {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		send(new ActorMessage<UUID>(self(), 0, self(), next));
+		send(ActorMessage.create(self(), 0, self(), next));
 	}
 }

@@ -37,7 +37,7 @@ public class BenchmarkRingNfoldEmbedded extends BenchmarkSample {
 		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
 		for (int j=0; j<benchmarkConfig.parallelism(); j++) {
 			UUID host = system.addActor(Host.class, benchmarkConfig.numberOfActors);
-			system.send(new ActorMessage<>(new String("DUMMY"), 0, host, host));
+			system.send(ActorMessage.create(new String("DUMMY"), 0, host, host));
 		}
 		
 		Benchmark benchmark = new Benchmark(system, benchmarkConfig);

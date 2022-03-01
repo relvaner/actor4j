@@ -53,7 +53,7 @@ public class Skynet extends Actor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.tag == CREATE) {
+		if (message.tag() == CREATE) {
 			if (size == 1)
 				tell(num, 0, getParent());
 			else {	
@@ -64,7 +64,7 @@ public class Skynet extends Actor {
 				new HubPattern(this, children).broadcast(null, CREATE);
 			}
 		}
-		else if (children.remove(message.source)) {
+		else if (children.remove(message.source())) {
 			sum += message.valueAsLong();
 			
 			if (children.isEmpty()) {

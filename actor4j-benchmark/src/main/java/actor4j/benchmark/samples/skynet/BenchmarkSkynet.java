@@ -73,7 +73,7 @@ public class BenchmarkSkynet extends BenchmarkSample {
 			
 			timeMeasurement.start();
 			UUID skynet = system.addActor(() -> new Skynet(0, 1_000_000, 10));
-			system.send(new ActorMessage<>(null, Skynet.CREATE, system.SYSTEM_ID, skynet));
+			system.send(ActorMessage.create(null, Skynet.CREATE, system.SYSTEM_ID, skynet));
 			try {
 				latch.await();
 			} catch (InterruptedException e) {
@@ -92,11 +92,11 @@ public class BenchmarkSkynet extends BenchmarkSample {
 				}
 			};
 			
-			system.send(new ActorMessage<>(null, Actor.POISONPILL, null, skynet));
+			system.send(ActorMessage.create(null, Actor.POISONPILL, null, skynet));
 			boolean success = false;
 			try {
 				success = pseudoActor.await(
-						(msg) -> msg.tag==Actor.TERMINATED, 
+						(msg) -> msg.tag()==Actor.TERMINATED, 
 						(msg) -> { System.out.println("Skynet stopped..."); return true;}, 
 						10_000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException | TimeoutException e) {

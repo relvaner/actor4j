@@ -51,7 +51,7 @@ public class BenchmarkRingNfoldBulk extends BenchmarkSample {
 			UUID sender = system.addActor(Sender.class, group, next);
 			group.add(sender);
 		
-			system.send(new ActorMessage<>(new Object(), RUN, sender, sender));
+			system.send(ActorMessage.create(new Object(), RUN, sender, sender));
 		}
 		
 		Benchmark benchmark = new Benchmark(system, benchmarkConfig);

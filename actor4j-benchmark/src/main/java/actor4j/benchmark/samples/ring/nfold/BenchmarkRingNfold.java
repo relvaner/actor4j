@@ -49,7 +49,7 @@ public class BenchmarkRingNfold extends BenchmarkSample {
 			UUID sender = system.addActor(Sender.class, group, next);
 			group.add(sender);
 		
-			system.send(new ActorMessage<>(new String("DUMMY"), 0, sender, sender));
+			system.send(ActorMessage.create(new String("DUMMY"), 0, sender, sender));
 		}
 		
 		Benchmark benchmark = new Benchmark(system, benchmarkConfig);

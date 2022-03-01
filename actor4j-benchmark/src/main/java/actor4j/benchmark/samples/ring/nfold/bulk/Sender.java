@@ -39,10 +39,10 @@ public class Sender extends ActorWithGroup {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.tag==MSG.ordinal())
-			send(new ActorMessage<UUID>(self(), 0, self(), next));
-		else if (message.tag==RUN.ordinal())
+		if (message.tag()==MSG.ordinal())
+			send(ActorMessage.create(self(), 0, self(), next));
+		else if (message.tag()==RUN.ordinal())
 			 for (int i=0; i<initalMessages; i++)
-				 send(new ActorMessage<UUID>(self(), MSG, self(), next));
+				 send(ActorMessage.create(self(), MSG, self(), next));
 	}
 }

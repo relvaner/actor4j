@@ -28,10 +28,7 @@ public class Destination extends ActorWithGroup {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.tag==MSG.ordinal()) {
-			message.dest = message.source;
-			message.source = self();
-			send(message);
-		}
+		if (message.tag()==MSG.ordinal())
+			send(message.shallowCopy(self(), message.source()));
 	}
 }

@@ -37,7 +37,6 @@ public class TestActor extends Actor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		message.source = self();
-		hub.broadcast(message);
+		hub.broadcast(message.shallowCopy(self(), message.dest()));
 	}
 }

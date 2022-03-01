@@ -68,7 +68,7 @@ public class BenchmarkSkynetWithStopping extends BenchmarkSample {
 			
 			timeMeasurement.start();
 			UUID skynet = system.addActor(() -> new Skynet(0, 1_000_000, 10));
-			system.send(new ActorMessage<>(null, Skynet.CREATE, system.SYSTEM_ID, skynet));
+			system.send(ActorMessage.create(null, Skynet.CREATE, system.SYSTEM_ID, skynet));
 			try {
 				latch.await();
 			} catch (InterruptedException e) {
