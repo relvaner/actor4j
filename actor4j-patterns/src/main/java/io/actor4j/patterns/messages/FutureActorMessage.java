@@ -38,18 +38,33 @@ public record FutureActorMessage<T>(CompletableFuture<T> future, T value, int ta
 	}
 	
 	@Override
+	public ActorMessage<T> shallowCopy(T value) {
+		return !this.value.equals(value) ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
 	public ActorMessage<T> shallowCopy(int tag) {
 		return this.tag!=tag ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
 	
 	@Override
+	public ActorMessage<T> shallowCopy(T value, int tag) {
+		return !this.value.equals(value) || this.tag!=tag ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(int tag, String protocol) {
+		return this.tag!=tag || !this.protocol.equals(protocol) ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
 	public ActorMessage<T> shallowCopy(UUID source, UUID dest) {
-		return this.source!=source || this.dest!=dest ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+		return !this.source.equals(source) || !this.dest.equals(dest) ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
 	
 	@Override
 	public ActorMessage<T> shallowCopy(UUID dest) {
-		return this.dest!=dest ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+		return !this.dest.equals(dest) ? new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -74,16 +89,16 @@ public record FutureActorMessage<T>(CompletableFuture<T> future, T value, int ta
 	public ActorMessage<T> copy(UUID dest) {
 		if (value!=null) { 
 			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Shareable)
-				return dest()!=dest ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
+				return !this.dest.equals(dest) ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
 			else if (value instanceof DeepCopyable)
 				return new FutureActorMessage<T>(future,((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
 			else if (value instanceof Exception)
-				return dest()!=dest ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
+				return !this.dest.equals(dest) ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
 			else
 				throw new IllegalArgumentException(value.getClass().getName());
 		}
 		else
-			return dest()!=dest ? new FutureActorMessage<T>(future,null, tag, source, dest, interaction, protocol, domain) : this;
+			return !this.dest.equals(dest) ? new FutureActorMessage<T>(future,null, tag, source, dest, interaction, protocol, domain) : this;
 	}
 
 	@Override
