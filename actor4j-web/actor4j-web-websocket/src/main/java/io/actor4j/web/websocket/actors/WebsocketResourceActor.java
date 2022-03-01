@@ -34,9 +34,9 @@ public class WebsocketResourceActor extends ResourceActor {
 	@Override
 	public void receive(ActorMessage<?> message) {
 		System.out.println(getName());
-		if (message.value!=null) {
-			if (message.value instanceof Websocket) {
-				Websocket websocket = (Websocket)message.value;
+		if (message.value()!=null) {
+			if (message.value() instanceof Websocket) {
+				Websocket websocket = (Websocket)message.value();
 				if (websocket.alias!=null)
 					clientRunnable.runViaAlias(message, websocket.alias);
 				else if (websocket.node!=null && websocket.path!=null)

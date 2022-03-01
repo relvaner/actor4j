@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2022, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,48 +20,49 @@ import java.util.UUID;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.messages.ActorMessageUtils;
+import io.actor4j.core.utils.DeepCopyable;
+import io.actor4j.core.utils.Shareable;
 
-public class RemoteActorMessage<T> extends ActorMessage<T> {
-	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, String domain) {
-		super(value, tag, source, dest, domain);
-	}
-
-	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, UUID interaction, String protocol,
-			String domain) {
-		super(value, tag, source, dest, interaction, protocol, domain);
-	}
-
-	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, UUID interaction, String protocol) {
-		super(value, tag, source, dest, interaction, protocol);
-	}
-
-	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, UUID interaction) {
-		super(value, tag, source, dest, interaction);
+public record RemoteActorMessage<T>(T value, int tag, UUID source, UUID dest, UUID interaction, String protocol, String domain) implements ActorMessage<T> {
+	public RemoteActorMessage {
+		// empty
 	}
 
 	public RemoteActorMessage(T value, int tag, UUID source, UUID dest) {
-		super(value, tag, source, dest);
+		this(value, tag, source, dest, null, null, null);
 	}
 	
-	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, String domain) {
-		super(value, tag, source, dest, domain);
+	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, String domain) {
+		this(value, tag, source, dest, null, null, domain);
 	}
-
-	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, UUID interaction, String protocol,
-			String domain) {
-		super(value, tag, source, dest, interaction, protocol, domain);
+	
+	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, UUID interaction) {
+		this(value, tag, source, dest, interaction, null, null);
 	}
-
-	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, UUID interaction, String protocol) {
-		super(value, tag, source, dest, interaction, protocol);
-	}
-
-	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, UUID interaction) {
-		super(value, tag, source, dest, interaction);
+	
+	public RemoteActorMessage(T value, int tag, UUID source, UUID dest, UUID interaction, String protocol) {
+		this(value, tag, source, dest, interaction, protocol, null);
 	}
 
 	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest) {
-		super(value, tag, source, dest);
+		this(value, tag.ordinal(), source, dest);
+	}
+	
+	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, String domain) {
+		this(value, tag.ordinal(), source, dest, domain);
+	}
+	
+	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, UUID interaction) {
+		this(value, tag.ordinal(), source, dest, interaction);
+	}
+	
+	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, UUID interaction, String protocol) {
+		this(value, tag.ordinal(), source, dest, interaction, protocol);
+	}
+	
+	public RemoteActorMessage(T value, Enum<?> tag, UUID source, UUID dest, UUID interaction, String protocol, String domain) {
+		this(value, tag.ordinal(), source, dest, interaction, protocol, domain);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -76,26 +77,85 @@ public class RemoteActorMessage<T> extends ActorMessage<T> {
 	@SuppressWarnings("unchecked")
 	public static <C> C convertValue(ActorMessage<?> message, Class<C> clazz) {
 		C result = null;
-		if ((message instanceof RemoteActorMessage)) {
-			message.value = ((RemoteActorMessage<C>)message).convertValue(clazz);
-			result = (C)message.value;
-		}
+		if ((message instanceof RemoteActorMessage))
+			result = ((RemoteActorMessage<C>)message).convertValue(clazz);
 		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <C> C optionalConvertValue(ActorMessage<?> message, Class<C> clazz) {
 		C result = null;
-		if ((message instanceof RemoteActorMessage) && !((RemoteActorMessage<?>)message).valueIsPrimitiveType()) {
-			message.value = ((RemoteActorMessage<C>)message).convertValue(clazz);
-			result = (C)message.value;
-		}
+		if ((message instanceof RemoteActorMessage) && !((RemoteActorMessage<?>)message).valueIsPrimitiveType())
+			result = ((RemoteActorMessage<C>)message).convertValue(clazz);
 		return result;
 	}
-
+	
 	@Override
-	public String toString() {
-		return "RemoteActorMessage [value=" + value + ", tag=" + tag + ", source=" + source + ", dest=" + dest
-				+ ", interaction=" + interaction + ", protocol=" + protocol + ", domain=" + domain + "]";
+	public ActorMessage<T> shallowCopy() {
+		return new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain);
+	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(T value) {
+		return !this.value.equals(value) ? new RemoteActorMessage<T>(value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(int tag) {
+		return this.tag!=tag ? new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(T value, int tag) {
+		return !this.value.equals(value) || this.tag!=tag ? new RemoteActorMessage<T>(value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(int tag, String protocol) {
+		return this.tag!=tag || !this.protocol.equals(protocol) ? new RemoteActorMessage<T>(value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(UUID source, UUID dest) {
+		return !this.source.equals(source) || !this.dest.equals(dest) ? new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(UUID dest) {
+		return !this.dest.equals(dest) ? new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public ActorMessage<T> copy() {
+		if (value!=null) { 
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Shareable)
+				return this;
+			else if (value instanceof DeepCopyable)
+				return new RemoteActorMessage<>(((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
+			else if (value instanceof Exception)
+				return this;
+			else
+				throw new IllegalArgumentException(value.getClass().getName());
+		}
+		else
+			return this;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public ActorMessage<T> copy(UUID dest) {
+		if (value!=null) { 
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Shareable)
+				return !this.dest.equals(dest) ? new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
+			else if (value instanceof DeepCopyable)
+				return new RemoteActorMessage<>(((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
+			else if (value instanceof Exception)
+				return !this.dest.equals(dest) ? new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
+			else
+				throw new IllegalArgumentException(value.getClass().getName());
+		}
+		else
+			return !this.dest.equals(dest) ? new RemoteActorMessage<>(null, tag, source, dest, interaction, protocol, domain) : this;
 	}
 }

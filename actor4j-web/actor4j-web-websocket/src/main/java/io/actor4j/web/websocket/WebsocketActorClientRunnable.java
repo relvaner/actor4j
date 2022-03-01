@@ -121,13 +121,15 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 	
 	@Override
 	public void runViaAlias(ActorMessage<?> message, String alias) {
+		UUID dest = message.dest();
+		
 		if (alias!=null) {
 			List<UUID> uuids = null;
 			if (!(uuids=cacheAlias.getUnchecked(alias)).isEmpty()) {
 				if (uuids.size()==1)
-					message.dest = uuids.get(0);
+					dest = uuids.get(0);
 				else
-					message.dest = uuids.get(ThreadLocalRandom.current().nextInt(uuids.size()));
+					dest = uuids.get(ThreadLocalRandom.current().nextInt(uuids.size()));
 			}
 			else {
 				systemLogger().log(DEBUG, "The actor for a given alias was not found.");
@@ -136,10 +138,10 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 		}
 		
 		int index;
-		if ((index=cache.getUnchecked(message.dest))!=-1) {
+		if ((index=cache.getUnchecked(dest))!=-1) {
 			try {
 				Session session = getSession(serviceNodes.get(index));
-				TransferActorMessage msg = new TransferActorMessage(message.value, message.tag, message.source, message.dest);
+				TransferActorMessage msg = new TransferActorMessage(message.value(), message.tag(), message.source(), dest);
 				String response = WebSocketActorClientManager.sendMessage(session, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.equals("1")) {
 					WebSocketActorClientManager.requestMap.remove(msg.id.toString());
@@ -164,7 +166,7 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 			dest = (!response.equals("null")) ? new ObjectMapper().readValue(response, UUID.class) : null;
 				
 			if (dest!=null) {
-				TransferActorMessage msg = new TransferActorMessage(message.value, message.tag, message.source, dest);
+				TransferActorMessage msg = new TransferActorMessage(message.value(), message.tag(), message.source(), dest);
 				response = WebSocketActorClientManager.sendMessage(session, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.equals("1")) {
 					WebSocketActorClientManager.requestMap.remove(msg.id.toString());

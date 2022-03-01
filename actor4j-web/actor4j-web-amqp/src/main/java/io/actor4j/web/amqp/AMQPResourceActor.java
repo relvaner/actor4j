@@ -91,11 +91,11 @@ public abstract class AMQPResourceActor extends ResourceActor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.tag==PUBLISH && message.value!=null && message.value instanceof AMQPPublish)
-			publish((AMQPPublish)message.value);
-		else if (message.tag==SUBSCRIBE && message.value!=null && message.value instanceof String)
+		if (message.tag()==PUBLISH && message.value()!=null && message.value() instanceof AMQPPublish)
+			publish((AMQPPublish)message.value());
+		else if (message.tag()==SUBSCRIBE && message.value()!=null && message.value() instanceof String)
 			subscribe(message.valueAsString());
-		else if (message.tag==UNSUBSCRIBE && message.value!=null && message.value instanceof String)
+		else if (message.tag()==UNSUBSCRIBE && message.value()!=null && message.value() instanceof String)
 			unsubscribe(message.valueAsString());
 		else
 			unhandled(message);

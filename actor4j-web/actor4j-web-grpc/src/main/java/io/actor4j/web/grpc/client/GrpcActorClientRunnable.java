@@ -115,13 +115,15 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 	
 	@Override
 	public void runViaAlias(ActorMessage<?> message, String alias) {
+		UUID dest = message.dest();
+		
 		if (alias!=null) {
 			List<UUID> uuids = null;
 			if (!(uuids=cacheAlias.getUnchecked(alias)).isEmpty()) {
 				if (uuids.size()==1)
-					message.dest = uuids.get(0);
+					dest = uuids.get(0);
 				else
-					message.dest = uuids.get(ThreadLocalRandom.current().nextInt(uuids.size()));
+					dest = uuids.get(ThreadLocalRandom.current().nextInt(uuids.size()));
 			}
 			else {
 				logger().log(DEBUG, "The actor for a given alias was not found.");
@@ -130,10 +132,10 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 		}
 		
 		int index;
-		if ((index=cache.getUnchecked(message.dest))!=-1) {
+		if ((index=cache.getUnchecked(dest))!=-1) {
 			try {
 				ManagedChannel channel = getChannel(serviceNodes.get(index));
-				TransferActorMessage msg = new TransferActorMessage(message.value, message.tag, message.source, message.dest);
+				TransferActorMessage msg = new TransferActorMessage(message.value(), message.tag(), message.source(), dest);
 				ActorGRPCResponse response = GrpcActorClientManager.sendMessage(channel, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.getMessage().equals("1"))
 					logger().log(DEBUG, "Message was not acknowledged.");
@@ -156,7 +158,7 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 			dest = (!response.getMessage().equals("null")) ? new ObjectMapper().readValue(response.getMessage(), UUID.class) : null;
 				
 			if (dest!=null) {
-				TransferActorMessage msg = new TransferActorMessage(message.value, message.tag, message.source, dest);
+				TransferActorMessage msg = new TransferActorMessage(message.value(), message.tag(), message.source(), dest);
 				response = GrpcActorClientManager.sendMessage(channel, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.getMessage().equals("1"))
 					logger().log(DEBUG, "Message was not acknowledged.");
