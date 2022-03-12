@@ -135,7 +135,7 @@ public record RemoteActorMessage<T>(T value, int tag, UUID source, UUID dest, UU
 	@Override
 	public ActorMessage<T> copy() {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Shareable)
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
 				return this;
 			else if (value instanceof DeepCopyable)
 				return new RemoteActorMessage<>(((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
@@ -152,7 +152,7 @@ public record RemoteActorMessage<T>(T value, int tag, UUID source, UUID dest, UU
 	@Override
 	public ActorMessage<T> copy(UUID dest) {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Shareable)
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
 				return !ActorMessageUtils.equals(this.dest, dest) ? new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
 			else if (value instanceof DeepCopyable)
 				return new RemoteActorMessage<>(((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
