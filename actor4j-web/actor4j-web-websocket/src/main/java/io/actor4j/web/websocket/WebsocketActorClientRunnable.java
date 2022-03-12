@@ -301,7 +301,7 @@ public class WebsocketActorClientRunnable implements ActorClientRunnable {
 				result = sessions.get(serviceNode);
 				if (result==null || !result.isOpen()) {
 					try {
-						result = WebSocketActorClientManager.connectToServer(annotatedEndpointInstance, new URI(serviceNode.getUri()));
+						result = WebSocketActorClientManager.connectToServer(annotatedEndpointInstance, new URI(serviceNode.uri()));
 						sessions.put(serviceNode, result);
 					} catch (URISyntaxException e) {
 						e.printStackTrace();

@@ -176,7 +176,7 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 			synchronized(lock) {
 				result = channels.get(serviceNode);
 				if (result==null) {
-					result = GrpcActorClientManager.connectToServer(serviceNode.getUri());
+					result = GrpcActorClientManager.connectToServer(serviceNode.uri());
 					channels.put(serviceNode, result);
 				}
 			}
