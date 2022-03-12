@@ -67,7 +67,7 @@ public class ExampleVolatileCache {
 			public void receive(ActorMessage<?> message) {
 				Pair<String, String> pair = manager.get(message);
 				if (pair!=null) {
-					System.out.printf("value for '%s': %s%n", pair.a, pair.b);
+					System.out.printf("value for '%s': %s%n", pair.a(), pair.b());
 					done.countDown();
 				}
 			}

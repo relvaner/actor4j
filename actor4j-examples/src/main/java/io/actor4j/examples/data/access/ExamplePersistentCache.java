@@ -76,7 +76,7 @@ public class ExamplePersistentCache {
 			public void receive(ActorMessage<?> message) {
 				Pair<String, ExampleObject> pair = manager.get(message);
 				if (pair!=null) {
-					System.out.printf("value for '%s': %s%n", pair.a, pair.b.value);
+					System.out.printf("value for '%s': %s%n", pair.a(), pair.b().value);
 					done.countDown();
 				}
 			}
