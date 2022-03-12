@@ -143,11 +143,11 @@ public class PersistentCacheFeature {
 				await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
 					Pair<String, TestObject> pair = manager.get(msg);
 					
-					if (pair!=null && pair.b!=null) {
-						assertEquals(keys[i], pair.a);
-						assertEquals(keys[i], pair.b.key);
-						assertEquals(values[i], pair.b.value);
-						logger().log(DEBUG, pair.b.value);
+					if (pair!=null && pair.b()!=null) {
+						assertEquals(keys[i], pair.a());
+						assertEquals(keys[i], pair.b().key);
+						assertEquals(values[i], pair.b().value);
+						logger().log(DEBUG, pair.b().value);
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();

@@ -52,9 +52,9 @@ public class PodVolatileActorCacheManager<K, V> {
 	
 	public ActorFactory createReplica(int cacheSize, PodContext context) {
 		if (context.isShard())
-			cacheAlias = cacheAlias + context.getShardId();
+			cacheAlias = cacheAlias + context.shardId();
 		
-		if (context.isPrimaryReplica())
+		if (context.primaryReplica())
 			return () -> new PodPrimaryVolatileCacheActor<K, V>("primary-"+cacheAlias, new ActorGroupSet(), cacheAlias, null, 0, cacheSize, context) {
 				@Override
 				public void preStart() {

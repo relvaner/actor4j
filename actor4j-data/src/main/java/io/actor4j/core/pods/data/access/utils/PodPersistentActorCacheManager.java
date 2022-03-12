@@ -54,9 +54,9 @@ public class PodPersistentActorCacheManager<K, V> {
 	
 	public ActorFactory createReplica(int cacheSize, UUID dataAccess, PodContext context) {
 		if (context.isShard())
-			cacheAlias = cacheAlias + context.getShardId();
+			cacheAlias = cacheAlias + context.shardId();
 		
-		if (context.isPrimaryReplica())
+		if (context.primaryReplica())
 			return () -> new PodPrimaryPersistentCacheActor<K, V>("primary-"+cacheAlias, new ActorGroupSet(), cacheAlias, null, 0, cacheSize, dataAccess, context) {
 				@Override
 				public void preStart() {
