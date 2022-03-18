@@ -26,7 +26,7 @@ import shared.benchmark.BenchmarkSample;
 // @see https://hackernoon.com/what-to-do-with-5-000-000-akka-actors-381a915a0f78
 public class BenchmarkDictionary extends BenchmarkSample {
 	public BenchmarkDictionary(BenchmarkConfig config) {
-		super();
+		super(config);
 		
 		int attempts = 2_500_000;
 		int keySize  = 5_000_000;

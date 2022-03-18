@@ -18,29 +18,24 @@ package actor4j.benchmark.samples.ring.nfold.embedded.classic;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
+import actor4j.benchmark.BenchmarkSampleActor4j;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.BenchmarkConfig;
-import shared.benchmark.BenchmarkSample;
 
-public class BenchmarkRingNfoldEmbeddedClassic extends BenchmarkSample {
-	public BenchmarkRingNfoldEmbeddedClassic(BenchmarkConfig benchmarkConfig) {
-		super();
+public class BenchmarkRingNfoldEmbeddedClassic extends BenchmarkSampleActor4j {
+	public BenchmarkRingNfoldEmbeddedClassic(BenchmarkConfig config) {
+		super(config);
+
+		ActorSystem system = createActorSystem("actor4j::NFoldRingEmbeddedClassic"); // use -Xss1g
 		
-		XActorSystemConfig config = XActorSystemConfig.builder()
-			.name("actor4j::NFoldRingEmbeddedClassic")
-			.sleepMode()
-			.build();
-		XActorSystem system = new XActorSystem(config); // use -Xss1g
-		
-		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
-		for (int j=0; j<benchmarkConfig.parallelism(); j++) {
-			UUID host = system.addActor(Host.class, benchmarkConfig.numberOfActors);
+		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
+		for (int j=0; j<config.parallelism(); j++) {
+			UUID host = system.addActor(() -> new Host(config.numberOfActors));
 			system.send(ActorMessage.create(new String("DUMMY"), 0, host, host));
 		}
 		
-		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
+		Benchmark benchmark = new Benchmark(system, config);
 		benchmark.start();
 		Host.stop.set(true);
 	}

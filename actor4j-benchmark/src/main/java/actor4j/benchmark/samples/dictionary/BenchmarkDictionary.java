@@ -18,33 +18,29 @@ package actor4j.benchmark.samples.dictionary;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
+import actor4j.benchmark.BenchmarkSampleActor4j;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
-import shared.benchmark.BenchmarkSample;
 
 // @see https://hackernoon.com/what-to-do-with-5-000-000-akka-actors-381a915a0f78
-public class BenchmarkDictionary extends BenchmarkSample {
-	public BenchmarkDictionary(BenchmarkConfig benchmarkConfig) {
-		super();
+public class BenchmarkDictionary extends BenchmarkSampleActor4j {
+	public BenchmarkDictionary(BenchmarkConfig config) {
+		super(config);
 		
 		final int attempts = 2_500_000;//2_500_000;
 		final int keySize  = 5_000_000;//5_000_000;
 		
-		XActorSystemConfig config = XActorSystemConfig.builder()
-			.name("actor4j::Dictionary")
-			.build();
-		XActorSystem system = new XActorSystem(config);
+		ActorSystem system = createActorSystem("actor4j::Dictionary");
 		/*
 		system.underlyingImpl().setQueueSize(5_000_000);
 		system.underlyingImpl().setBufferQueueSize(1_000_000);
 		*/
-		final int COUNT = benchmarkConfig.parallelism();
+		final int COUNT = config.parallelism();
 
 		CountDownLatch testDone = new CountDownLatch(1);
 
@@ -76,7 +72,7 @@ public class BenchmarkDictionary extends BenchmarkSample {
 			}
 		};
 		
-		Benchmark benchmark = new Benchmark(benchmarkConfig);
+		Benchmark benchmark = new Benchmark(config);
 
 		benchmark.start((timeMeasurement, iteration) -> {
 			timeMeasurement.start();
@@ -95,6 +91,6 @@ public class BenchmarkDictionary extends BenchmarkSample {
 	}
 
 	public static void main(String[] args) {
-		new BenchmarkDictionary(new BenchmarkConfig(10, 60));
+		new BenchmarkDictionary(new BenchmarkConfig(-1, 10, 60_000, 4, 1));
 	}
 }

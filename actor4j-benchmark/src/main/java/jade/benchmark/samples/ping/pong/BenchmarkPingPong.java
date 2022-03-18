@@ -28,7 +28,7 @@ import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkPingPong extends BenchmarkSample {
 	public BenchmarkPingPong(BenchmarkConfig config) {
-		super();
+		super(config);
 		
 		Jade jade = new Jade("jade-benchmark-ping-pong");
 		jade.start();

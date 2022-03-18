@@ -32,11 +32,6 @@
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-corex</artifactId>
-			<version>${actor4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-data</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>

@@ -18,45 +18,43 @@ package actor4j.benchmark.samples.ring.nfold;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
+import actor4j.benchmark.BenchmarkSampleActor4j;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import shared.benchmark.BenchmarkConfig;
-import shared.benchmark.BenchmarkSample;
 
-public class BenchmarkRingNfold extends BenchmarkSample {
-	public BenchmarkRingNfold(BenchmarkConfig benchmarkConfig) {
-		super();
+public class BenchmarkRingNfold extends BenchmarkSampleActor4j {
+	public BenchmarkRingNfold(BenchmarkConfig config) {
+		super(config);
+
+		ActorSystem system = createActorSystem("actor4j::NFoldRing");
 		
-		XActorSystemConfig config = XActorSystemConfig.builder()
-			.name("actor4j::NFoldRing")
-			.sleepMode()
-			.build();
-		XActorSystem system = new XActorSystem(config);
-		
-		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
-		for (int j=0; j<benchmarkConfig.parallelism(); j++) {
+		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
+		for (int j=0; j<config.parallelism(); j++) {
 			ActorGroup group = new ActorGroupSet();
 			
-			UUID next = system.addActor(Forwarder.class, group);
+			UUID next = system.addActor(() -> new Forwarder(group));
 			group.add(next);
-			for(int i=0; i<benchmarkConfig.numberOfActors-2; i++) {
-				next = system.addActor(Forwarder.class, group, next);
+			for(int i=0; i<config.numberOfActors-2; i++) {
+				final UUID next_ = next;
+				next = system.addActor(() -> new Forwarder(group, next_));
 				group.add(next);
 			}
-			UUID sender = system.addActor(Sender.class, group, next);
+			final UUID next_ = next;
+			UUID sender = system.addActor(() -> new Sender(group, next_));
 			group.add(sender);
 		
 			system.send(ActorMessage.create(new String("DUMMY"), 0, sender, sender));
 		}
 		
-		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
+		Benchmark benchmark = new Benchmark(system, config);
 		benchmark.start();
 	}
 	
 	public static void main(String[] args) {
+		//new BenchmarkRingNfold(new BenchmarkConfig(100, 10, 60_000, 16, 1));
 		new BenchmarkRingNfold(new BenchmarkConfig(100));
 	}
 }

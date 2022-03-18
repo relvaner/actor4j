@@ -20,39 +20,35 @@ import static actor4j.benchmark.samples.ping.pong.ActorMessageTag.MSG;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
+import actor4j.benchmark.BenchmarkSampleActor4j;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import shared.benchmark.BenchmarkConfig;
-import shared.benchmark.BenchmarkSample;
 
-public class BenchmarkPingPong extends BenchmarkSample {
-	public BenchmarkPingPong(BenchmarkConfig benchmarkConfig) {
-		super();
+public class BenchmarkPingPong extends BenchmarkSampleActor4j {
+	public BenchmarkPingPong(BenchmarkConfig config) {
+		super(config);
 		
-		XActorSystemConfig config = XActorSystemConfig.builder()
-			.name("actor4j::PingPong")
-			.sleepMode()
-			.build();
-		XActorSystem system = new XActorSystem(config);
+		ActorSystem system = createActorSystem("actor4j::PingPong");
 		
 		ActorGroup group = new ActorGroupSet();
-		int size = benchmarkConfig.numberOfActors*benchmarkConfig.parallelism()/2;
-		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
+		int size = config.numberOfActors*config.parallelism()/2;
+		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
 		UUID dest = null;
 		UUID id = null;
 		for(int i=0; i<size; i++) {
-			dest = system.addActor(Destination.class);
-			id = system.addActor(Client.class, dest);
+			dest = system.addActor(() -> new Destination());
+			final UUID dest_ = dest;
+			id = system.addActor(() -> new Client(dest_));
 			group.add(id);
 		}
 		
 		system.broadcast(ActorMessage.create(new Object(), MSG, dest, null), group);
 		
 		
-		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
+		Benchmark benchmark = new Benchmark(system, config);
 		benchmark.start();
 	}
 	

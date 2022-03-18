@@ -18,10 +18,6 @@ package shared.benchmark;
 public class BenchmarkSample {
 	protected BenchmarkConfig config;
 	
-	public BenchmarkSample() {
-		super();
-	}
-	
 	public BenchmarkSample(BenchmarkConfig config) {
 		super();
 		

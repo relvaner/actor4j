@@ -29,7 +29,7 @@ import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkRingNfold extends BenchmarkSample {
 	public BenchmarkRingNfold(BenchmarkConfig config) {
-		super();
+		super(config);
 		
 		Jade jade = new Jade("jade-benchmark-nfold-ring");
 		jade.start();

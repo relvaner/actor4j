@@ -23,10 +23,6 @@ import shared.benchmark.BenchmarkSample;
 
 public class BenchmarkSampleAkka extends BenchmarkSample {
 	protected Config akkaConfig;
-	
-	public BenchmarkSampleAkka() {
-		super();
-	}
 
 	public BenchmarkSampleAkka(BenchmarkConfig config) {
 		super(config);

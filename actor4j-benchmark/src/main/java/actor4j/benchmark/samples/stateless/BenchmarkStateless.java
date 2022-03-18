@@ -19,35 +19,31 @@ import java.util.LinkedList;
 import java.util.List;
 
 import actor4j.benchmark.Benchmark;
+import actor4j.benchmark.BenchmarkSampleActor4j;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.ActorWithDistributedGroup;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
 import shared.benchmark.BenchmarkConfig;
 
-public class BenchmarkStateless {
-	public BenchmarkStateless(BenchmarkConfig benchmarkConfig) {
-		super();
-		
-		XActorSystemConfig config = XActorSystemConfig.builder()
-			.name("actor4j::Stateless")
-			.parkMode()
-			.build();
-		XActorSystem system = new XActorSystem(config);
+public class BenchmarkStateless extends BenchmarkSampleActor4j {
+	public BenchmarkStateless(BenchmarkConfig config) {
+		super(config);
 
-		System.out.printf("#actors: %d%n", benchmarkConfig.parallelism());
+		ActorSystem system = createActorSystem("actor4j::Stateless");
+
+		System.out.printf("#actors: %d%n", config.parallelism());
 		ActorGroup group = new ActorGroupSet();
 		system.setAlias(system.addActor(() -> new ActorWithDistributedGroup(group) {
 			@Override
 			public void receive(ActorMessage<?> message) {
 			}
-		}, benchmarkConfig.parallelism), "instances");
+		}, config.parallelism), "instances");
 		
 		
 		List<Thread> threads = new LinkedList<>();
-		for (int i=0; i<benchmarkConfig.parallelism*benchmarkConfig.parallelismFactor; i++)
+		for (int i=0; i<config.parallelism*config.parallelismFactor; i++)
 			threads.add(new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -58,7 +54,7 @@ public class BenchmarkStateless {
 		for (Thread t : threads)
 			t.start();
 		
-		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
+		Benchmark benchmark = new Benchmark(system, config);
 		benchmark.start();
 		
 		for (Thread t : threads)

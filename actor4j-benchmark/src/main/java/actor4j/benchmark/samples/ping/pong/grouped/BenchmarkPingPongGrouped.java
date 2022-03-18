@@ -20,41 +20,38 @@ import static actor4j.benchmark.samples.ping.pong.grouped.ActorMessageTag.MSG;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
+import actor4j.benchmark.BenchmarkSampleActor4j;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import shared.benchmark.BenchmarkConfig;
-import shared.benchmark.BenchmarkSample;
 
-public class BenchmarkPingPongGrouped extends BenchmarkSample {
-	public BenchmarkPingPongGrouped(BenchmarkConfig benchmarkConfig) {
-		super();
+public class BenchmarkPingPongGrouped extends BenchmarkSampleActor4j {
+	public BenchmarkPingPongGrouped(BenchmarkConfig config) {
+		super(config);
 		
-		XActorSystemConfig config = XActorSystemConfig.builder()
-			.name("actor4j::PingPong-Grouped")
-			.sleepMode()
-			.build();
-		XActorSystem system = new XActorSystem(config);
+		ActorSystem system = createActorSystem("actor4j::PingPong-Grouped");
 		
 		ActorGroup group = new ActorGroupSet();
-		ActorGroup[] groups = new ActorGroup[benchmarkConfig.parallelism()];
+		ActorGroup[] groups = new ActorGroup[config.parallelism()];
 		for (int i=0; i<groups.length; i++)
 			groups[i] = new ActorGroupSet();
-		int size = benchmarkConfig.numberOfActors*benchmarkConfig.parallelism()/2;
-		System.out.printf("#actors: %d%n", benchmarkConfig.numberOfActors*benchmarkConfig.parallelism());
+		int size = config.numberOfActors*config.parallelism()/2;
+		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
 		UUID dest = null;
 		UUID id = null;
 		for(int i=0; i<size; i++) {
-			dest = system.addActor(Destination.class, groups[i%benchmarkConfig.parallelism()]);
-			id = system.addActor(Client.class, groups[(i+1)%benchmarkConfig.parallelism()], dest);
+			final int i_ = i;
+			dest = system.addActor(() -> new Destination(groups[i_%config.parallelism()]));
+			final UUID dest_ = dest;
+			id = system.addActor(() -> new Client(groups[(i_+1)%config.parallelism()], dest_));
 			group.add(id);
 		}
 		
 		system.broadcast(ActorMessage.create(new Object(), MSG, dest, null), group);
 		
-		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
+		Benchmark benchmark = new Benchmark(system, config);
 		benchmark.start();
 	}
 	

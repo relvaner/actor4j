@@ -18,37 +18,32 @@ package actor4j.benchmark.samples.bcast;
 import java.util.UUID;
 
 import actor4j.benchmark.Benchmark;
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
+import actor4j.benchmark.BenchmarkSampleActor4j;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import shared.benchmark.BenchmarkConfig;
-import shared.benchmark.BenchmarkSample;
 
-public class BenchmarkBcast extends BenchmarkSample {
-	public BenchmarkBcast(BenchmarkConfig benchmarkConfig) {
-		super();
+public class BenchmarkBcast extends BenchmarkSampleActor4j {
+	public BenchmarkBcast(BenchmarkConfig config) {
+		super(config);
 		
-		XActorSystemConfig config = XActorSystemConfig.builder()
-			.name("actor4j::Bcast")
-			.sleepMode()
-			.build();
-		XActorSystem system = new XActorSystem(config);
+		ActorSystem system = createActorSystem("actor4j::Bcast");
 		
 		final ActorGroup group = new ActorGroupSet();
-		int size = benchmarkConfig.numberOfActors*benchmarkConfig.parallelism();
+		int size = config.numberOfActors*config.parallelism();
 		System.out.printf("#actors: %d%n", size);
 		UUID id = null;
 		for(int i=0; i<size; i++) {
-			id = system.addActor(TestActor.class, group);
+			id = system.addActor(() -> new TestActor(group));
 			group.add(id);
 		}
 		
 		system.broadcast((ActorMessage.create(new Object(), 0, id, null)), group);
 		
 		
-		Benchmark benchmark = new Benchmark(system, benchmarkConfig);
+		Benchmark benchmark = new Benchmark(system, config);
 		benchmark.start();
 	}
 	

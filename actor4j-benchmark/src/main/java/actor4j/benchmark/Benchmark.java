@@ -24,9 +24,6 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import actor4j.benchmark.utils.MessageThroughputMeasurement;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
-import io.actor4j.corex.XActorSystem;
-import io.actor4j.corex.config.XActorSystemConfig;
-import io.actor4j.corex.config.XActorSystemConfig.Builder;
 import shared.benchmark.BenchmarkConfig;
 
 public class Benchmark {
@@ -51,17 +48,6 @@ public class Benchmark {
 	}
 	
 	public void start() {
-		if (system instanceof XActorSystem) {
-			Builder<?> builder = XActorSystemConfig.builder((XActorSystemConfig)((XActorSystem)system).getConfig());
-			if (benchmarkConfig.parallelism>0)
-				builder.parallelism(benchmarkConfig.parallelism);
-			if (benchmarkConfig.parallelismFactor>0)
-				builder.parallelismFactor(benchmarkConfig.parallelismFactor);
-			builder.counterEnabled(true);
-				
-			((XActorSystem) system).setConfig(builder.build());	
-		}
-		
 		final DescriptiveStatistics statistics = new DescriptiveStatistics();
 		final AtomicLong warmupCount = new AtomicLong();
 		
