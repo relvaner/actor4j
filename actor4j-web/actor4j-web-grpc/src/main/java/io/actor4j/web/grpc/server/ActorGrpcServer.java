@@ -38,7 +38,7 @@ public abstract class ActorGrpcServer {
 	}
 	
 	public void start(String name, int port, Runnable onStartup) {
-		service = new ActorService();
+		service = ActorService.create();
 		deploy(service);
 		ActorServiceConfig config = ActorServiceConfig.builder((ActorServiceConfig)service.getConfig())
 			.name(name)
