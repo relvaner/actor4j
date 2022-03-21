@@ -36,7 +36,7 @@ import io.actor4j.core.publish.subscribe.utils.PubSubActorManager;
 public class PubSubFeature {
 	@Test(timeout=5000)
 	public void test_pub_sub() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		CountDownLatch testDone = new CountDownLatch(2);
 		
@@ -101,7 +101,7 @@ public class PubSubFeature {
 	
 	@Test(timeout=5000)
 	public void test_pub_sub_with_manager() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		CountDownLatch testDone = new CountDownLatch(2);
 		
@@ -151,7 +151,7 @@ public class PubSubFeature {
 			protected int i = 1;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.source().equals(getSystem().SYSTEM_ID))
+				if (message.source().equals(getSystem().SYSTEM_ID()))
 					manager.publish(new Publish<Integer>("MyTopic", -1));
 				
 				ActorOptional<UUID> optional = manager.getTopic(message);
@@ -166,7 +166,7 @@ public class PubSubFeature {
 		});
 		
 		system.start();
-		system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, publisher));
+		system.send(ActorMessage.create(null, 0, system.SYSTEM_ID(), publisher));
 		
 		try {
 			testDone.await();

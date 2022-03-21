@@ -60,7 +60,7 @@ public class PodVolatileActorCacheManager<K, V> {
 				public void preStart() {
 					super.preStart();
 					UUID redirect = UUID.randomUUID();
-					getSystem().underlyingImpl().setAlias(redirect, cacheAlias+"-primary"); // workaround for setting second alias
+					getSystem().setAlias(redirect, cacheAlias+"-primary"); // workaround for setting second alias
 					getSystem().addRedirection(redirect, self());
 				}
 				
@@ -75,7 +75,7 @@ public class PodVolatileActorCacheManager<K, V> {
 				public void preStart() {
 					setAlias(cacheAlias);
 					if (context.hasPrimaryReplica()) {
-						primary = getSystem().underlyingImpl().getActorFromAlias(cacheAlias+"-primary");
+						primary = getSystem().getActorFromAlias(cacheAlias+"-primary");
 						primary = getSystem().getRedirectionDestination(primary); // ensures that secondary resolves primary original address
 						subscribeAsSecondary();
 					}

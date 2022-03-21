@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PersistentCacheFeature {
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
@@ -72,7 +72,7 @@ public class PersistentCacheFeature {
 			public void receive(ActorMessage<?> message) {
 				tell(new PersistentDataAccessObject<>(keys[i], "key", "test", self()), ActorWithCache.GET, "cache1");
 				
-				await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
+				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					@SuppressWarnings("unchecked")
 					VolatileDataAccessObject<String, TestObject> payload = ((VolatileDataAccessObject<String, TestObject>)msg.value());
 					if (payload.value!=null) {
@@ -95,7 +95,7 @@ public class PersistentCacheFeature {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, mediator));
+				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID(), mediator));
 			}
 		}, 0, 100);
 		
@@ -111,7 +111,7 @@ public class PersistentCacheFeature {
 	
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor_with_manager_imdb() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
@@ -140,7 +140,7 @@ public class PersistentCacheFeature {
 			public void receive(ActorMessage<?> message) {
 				manager.get(keys[i]);
 				
-				await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
+				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					Pair<String, TestObject> pair = manager.get(msg);
 					
 					if (pair!=null && pair.b()!=null) {
@@ -165,7 +165,7 @@ public class PersistentCacheFeature {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, mediator));
+				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID(), mediator));
 			}
 		}, 0, 100);
 		

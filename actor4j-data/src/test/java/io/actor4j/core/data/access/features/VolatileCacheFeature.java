@@ -41,7 +41,7 @@ public class VolatileCacheFeature {
 
 	@Test(timeout=5000)
 	public void test_primary_secondary_volatile_cache_actor() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(12);
@@ -69,7 +69,7 @@ public class VolatileCacheFeature {
 				if (i<4) {
 					tell(new VolatileDataAccessObject<>(keys[i], null, self()), ActorWithCache.GET, "vcache1");
 					
-					await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
 						if (payload.value!=null) {
@@ -88,7 +88,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<5) {
 							tell(new VolatileDataAccessObject<>(keys[2], null, self()), ActorWithCache.GET, "vcache1");
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
 								if (payload.value==null) {
@@ -109,7 +109,7 @@ public class VolatileCacheFeature {
 					if (i==7)
 						i++;
 					tell(new VolatileDataAccessObject<>(keys[i-5], null, self()), ActorWithCache.GET, "vcache1");
-					await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
 						if (payload.value!=null) {
@@ -126,7 +126,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<13) {
 							tell(new VolatileDataAccessObject<>(keys[i-9], null, self()), ActorWithCache.GET, "vcache1");
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
 								if (keys[i-9].equals(payload.key)) {
@@ -149,7 +149,7 @@ public class VolatileCacheFeature {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, mediator));
+				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID(), mediator));
 			}
 		}, 0, 100);
 		
@@ -165,7 +165,7 @@ public class VolatileCacheFeature {
 
 	@Test(timeout=5000)
 	public void test_primary_secondary_volatile_cache_actor_with_manager() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(12);
@@ -193,7 +193,7 @@ public class VolatileCacheFeature {
 				if (i<4) {
 					manager.get(keys[i]);
 					
-					await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
 						if (payload.value!=null) {
@@ -212,7 +212,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<5) {
 							manager.get(keys[2]);
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
 								if (payload.value==null) {
@@ -233,7 +233,7 @@ public class VolatileCacheFeature {
 					if (i==7)
 						i++;
 					manager.get(keys[i-5]);
-					await((msg) -> msg.source()!=system.SYSTEM_ID && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
 						if (payload.value!=null) {
@@ -250,7 +250,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<13) {
 							manager.get(keys[i-9]);
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
 								if (keys[i-9].equals(payload.key)) {
@@ -273,7 +273,7 @@ public class VolatileCacheFeature {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID, mediator));
+				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID(), mediator));
 			}
 		}, 0, 100);
 		
