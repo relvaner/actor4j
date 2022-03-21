@@ -35,7 +35,7 @@ public class FuturePatternFeature {
 	public void test() {
 		CountDownLatch testDone = new CountDownLatch(2);
 		
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		UUID parent = system.addActor(() -> new Actor("parent") {
 			protected Future<String> future;

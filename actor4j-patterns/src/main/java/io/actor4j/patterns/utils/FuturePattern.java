@@ -46,7 +46,7 @@ public final class FuturePattern {
 	
 	public static <T> Future<T> askWithMediator(T value, int tag, UUID mediator, ActorSystem system) {	
 		CompletableFuture<T> result = new CompletableFuture<>();
-		system.send(new FutureActorMessage<T>(result, value, tag, system.SYSTEM_ID, mediator));
+		system.send(new FutureActorMessage<T>(result, value, tag, system.SYSTEM_ID(), mediator));
 		
 		return result;
 	}
