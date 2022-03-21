@@ -19,58 +19,37 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import io.actor4j.core.ActorCell;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
-import io.actor4j.core.actors.PseudoActor;
 import io.actor4j.core.config.ActorSystemConfig;
-import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.testing.config.TestSystemConfig;
 import io.actor4j.testing.internal.TestSystemImpl;
 
-public class TestSystem extends ActorSystem {
-	public TestSystem() {
-		super((wrapper, c) -> new TestSystemImpl(wrapper, c), TestSystemConfig.create());
-		
-		((TestSystemImpl)system).createPseudoActor(() -> new PseudoActor(this, true) {
-			@Override
-			public void receive(ActorMessage<?> message) {
-				((TestSystemImpl)system).getActualMessage().complete(message);
-			}
-		});
+public interface TestSystem extends ActorSystem {
+	public static TestSystem create() {
+		return create(null);
+	}
+	
+	public static TestSystem create(TestSystemConfig config) {
+		return new TestSystemImpl(config!=null ? config : TestSystemConfig.create());
 	}
 	
 	@Deprecated
 	@Override
-	public boolean setConfig(ActorSystemConfig config) {
+	public default boolean setConfig(ActorSystemConfig config) {
 		return false;
 	}
 	
-	public boolean setConfig(TestSystemConfig config) {
-		return super.setConfig(config);
-	}
+	public boolean setConfig(TestSystemConfig config);
 	
-	public ActorCell underlyingCell(UUID id) {
-		return ((TestSystemImpl)system).underlyingCell(id);
-	}
+	public ActorCell underlyingCell(UUID id);
+	public Actor underlyingActor(UUID id);
 	
-	public Actor underlyingActor(UUID id) {
-		return ((TestSystemImpl)system).underlyingActor(id);
-	}
+	public void testActor(UUID id);
+	public void testAllActors();
 	
-	public void testActor(UUID id) {
-		((TestSystemImpl)system).testActor(id);
-	}
-	
-	public void testAllActors() {
-		((TestSystemImpl)system).testAllActors();
-	}
-	
-	public ActorMessage<?> awaitMessage(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
-		return ((TestSystemImpl)system).awaitMessage(timeout, unit);
-	}
-	
-	public void assertNoMessages() {
-		((TestSystemImpl)system).assertNoMessages();
-	}
+	public ActorMessage<?> awaitMessage(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException;
+	public void assertNoMessages();
 }

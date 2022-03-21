@@ -25,31 +25,44 @@ import java.util.function.Supplier;
 import java.util.Map.Entry;
 
 import io.actor4j.bdd.Story;
-import io.actor4j.core.ActorSystem;
+import io.actor4j.core.ActorCell;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
-import io.actor4j.core.config.ActorSystemConfig;
-import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
+import io.actor4j.core.internal.InternalActorCell;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.testing.ActorTest;
+import io.actor4j.testing.TestSystem;
+import io.actor4j.testing.config.TestSystemConfig;
 
 import static org.junit.Assert.*;
 
-public class TestSystemImpl extends DefaultActorSystemImpl  {
+public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem {
 	protected PseudoActor pseudoActor;
 	protected volatile UUID pseudoActorId;
 	protected volatile UUID testActorId;
 	protected volatile CompletableFuture<ActorMessage<?>> actualMessage;
 	
-	public TestSystemImpl(ActorSystem wrapper) {
-		this(wrapper, null);
+	public TestSystemImpl() {
+		this(null);
 	}
 
-	public TestSystemImpl(ActorSystem wrapper, ActorSystemConfig config) {
-		super(wrapper, config);
+	public TestSystemImpl(TestSystemConfig config) {
+		super(config);
 		
 		messageDispatcher = new TestActorMessageDispatcher(this);
+		
+		createPseudoActor(() -> new PseudoActor(this, true) {
+			@Override
+			public void receive(ActorMessage<?> message) {
+				getActualMessage().complete(message);
+			}
+		});
+	}
+	
+	@Override
+	public boolean setConfig(TestSystemConfig config) {
+		return super.setConfig(config);
 	}
 	
 	public void createPseudoActor(Supplier<PseudoActor> factory) {
@@ -61,12 +74,14 @@ public class TestSystemImpl extends DefaultActorSystemImpl  {
 		return actualMessage;
 	}
 
+	@Override
 	public ActorCell underlyingCell(UUID id) {
 		return getCells().get(id);
 	}
 	
+	@Override
 	public Actor underlyingActor(UUID id) {
-		ActorCell cell = getCells().get(id);
+		InternalActorCell cell = getCells().get(id);
 		return (cell!=null)? cell.getActor() : null;
 	}
 	
@@ -88,20 +103,24 @@ public class TestSystemImpl extends DefaultActorSystemImpl  {
 		}
 	}
 	
+	@Override
 	public void testActor(UUID id) {
 		testActor(underlyingActor(id));
 	}
 	
+	@Override
 	public void testAllActors() {
-		Iterator<Entry<UUID, ActorCell>> iterator = getCells().entrySet().iterator();
+		Iterator<Entry<UUID, InternalActorCell>> iterator = getCells().entrySet().iterator();
 		while (iterator.hasNext())
 			testActor(iterator.next().getValue().getActor());
 	}
 
+	@Override
 	public ActorMessage<?> awaitMessage(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
 		return pseudoActor.await(timeout, unit);
 	}
 	
+	@Override
 	public void assertNoMessages() {
 		assertFalse(pseudoActor.runOnce());
 	}

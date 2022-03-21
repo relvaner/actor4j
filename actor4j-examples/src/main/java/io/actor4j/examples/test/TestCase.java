@@ -58,7 +58,7 @@ public class TestCase {
 				.annotate("Sceneario: Sending and receiving a message String")
 				.annotate("Given a request message")
 				.given(() -> {
-					send(ActorMessage.create("Hello World!", 0, getSystem().SYSTEM_ID, self()));
+					send(ActorMessage.create("Hello World!", 0, getSystem().SYSTEM_ID(), self()));
 				})
 				.annotate("When the responded message was received")
 				.when(()-> {
@@ -86,7 +86,7 @@ public class TestCase {
 	
 	@Before
 	public void before() {
-		system = new TestSystem();
+		system = TestSystem.create();
 		
 		system.addActor(() -> new MyActor());
 
