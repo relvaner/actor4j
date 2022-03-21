@@ -24,26 +24,23 @@ import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.verification.config.ActorVerificationConfig;
 import io.actor4j.verification.internal.VerificatorActorSystemImpl;
 
-public class ActorVerificator extends ActorSystem {
-	public ActorVerificator() {
-		super((wrapper, c) -> new VerificatorActorSystemImpl(wrapper, c), ActorVerificationConfig.create());
+public interface ActorVerificator extends ActorSystem {
+	public static ActorVerificator create() {
+		return create(null);
+	}
+	
+	public static ActorVerificator create(ActorVerificationConfig config) {
+		return new VerificatorActorSystemImpl(config!=null ? config : ActorVerificationConfig.create());
 	}
 	
 	@Deprecated
 	@Override
-	public boolean setConfig(ActorSystemConfig config) {
+	public default boolean setConfig(ActorSystemConfig config) {
 		return false;
 	}
 	
-	public boolean setConfig(ActorVerificationConfig config) {
-		return super.setConfig(config);
-	}
+	public boolean setConfig(ActorVerificationConfig config);
 	
-	public void verify(Consumer<ActorVerificationSM> consumer) {
-		((VerificatorActorSystemImpl)system).verify(consumer);
-	}
-	
-	public void verifyAll(Consumer<ActorVerificationSM> consumer, Consumer<Graph<String, ActorVerificationEdge>> consumerAll) {
-		((VerificatorActorSystemImpl)system).verifyAll(consumer, consumerAll);
-	}
+	public void verify(Consumer<ActorVerificationSM> consumer);
+	public void verifyAll(Consumer<ActorVerificationSM> consumer, Consumer<Graph<String, ActorVerificationEdge>> consumerAll);
 }

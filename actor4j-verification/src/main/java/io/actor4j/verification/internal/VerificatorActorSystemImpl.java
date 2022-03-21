@@ -21,30 +21,37 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
-import io.actor4j.core.ActorSystem;
-import io.actor4j.core.config.ActorSystemConfig;
-import io.actor4j.core.internal.ActorCell;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
+import io.actor4j.core.internal.InternalActorCell;
 import io.actor4j.verification.ActorVerification;
 import io.actor4j.verification.ActorVerificationEdge;
 import io.actor4j.verification.ActorVerificationSM;
+import io.actor4j.verification.ActorVerificator;
+import io.actor4j.verification.config.ActorVerificationConfig;
 
-public class VerificatorActorSystemImpl extends DefaultActorSystemImpl {
-	public VerificatorActorSystemImpl(ActorSystem wrapper) {
-		super(wrapper);
+public class VerificatorActorSystemImpl extends DefaultActorSystemImpl implements ActorVerificator {
+	public VerificatorActorSystemImpl() {
+		this(null);
 	}
 
-	public VerificatorActorSystemImpl(ActorSystem wrapper, ActorSystemConfig config) {
-		super(wrapper, config);
+	public VerificatorActorSystemImpl(ActorVerificationConfig config) {
+		super(config);
 	}
 	
+	@Override
+	public boolean setConfig(ActorVerificationConfig config) {
+		return super.setConfig(config);
+	}
+	
+	@Override
 	public void verify(Consumer<ActorVerificationSM> consumer) {
 		if (consumer!=null)
-			for (ActorCell cell : cells.values())
+			for (InternalActorCell cell : cells.values())
 				if (cell.getActor() instanceof ActorVerification)
 					consumer.accept(((ActorVerification)cell.getActor()).verify());		
 	}
 	
+	@Override
 	public void verifyAll(Consumer<ActorVerificationSM> consumer, Consumer<Graph<String, ActorVerificationEdge>> consumerAll) {
 		Graph<String, ActorVerificationEdge> graph = new DefaultDirectedGraph<>(ActorVerificationEdge.class);
 		verify((sm) -> {
