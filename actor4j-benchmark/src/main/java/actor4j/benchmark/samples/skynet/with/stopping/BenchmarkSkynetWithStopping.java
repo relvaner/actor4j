@@ -56,7 +56,7 @@ public class BenchmarkSkynetWithStopping extends BenchmarkSampleActor4j {
 			
 			timeMeasurement.start();
 			UUID skynet = system.addActor(() -> new Skynet(0, 1_000_000, 10));
-			system.send(ActorMessage.create(null, Skynet.CREATE, system.SYSTEM_ID, skynet));
+			system.send(ActorMessage.create(null, Skynet.CREATE, system.SYSTEM_ID(), skynet));
 			try {
 				latch.await();
 			} catch (InterruptedException e) {

@@ -48,7 +48,7 @@ public class BenchmarkStateless extends BenchmarkSampleActor4j {
 				@Override
 				public void run() {
 					while (!Thread.currentThread().isInterrupted())
-						system.sendViaAlias(ActorMessage.create(new Object(), 0, system.SYSTEM_ID, null), "instances");
+						system.sendViaAlias(ActorMessage.create(new Object(), 0, system.SYSTEM_ID(), null), "instances");
 				}
 			}));
 		for (Thread t : threads)

@@ -27,6 +27,7 @@ import actor4j.benchmark.BenchmarkSampleActor4j;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
+import io.actor4j.core.internal.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
@@ -68,7 +69,7 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 			
 			timeMeasurement.start();
 			UUID skynet = system.addActor(() -> new Skynet(0, 1_000_000, 10));
-			system.send(ActorMessage.create(null, Skynet.CREATE, system.SYSTEM_ID, skynet));
+			system.send(ActorMessage.create(null, Skynet.CREATE, system.SYSTEM_ID(), skynet));
 			try {
 				latch.await();
 			} catch (InterruptedException e) {
@@ -100,7 +101,7 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 			pseudoActor.stop();
 			
 			if (!success)
-			System.out.println(system.underlyingImpl().getCells().get(skynet).getChildren().size());
+			System.out.println(((InternalActorSystem)system).getCells().get(skynet).getChildren().size());
 			
 			System.out.printf("#actors : %s%n", Skynet.count);
 			Skynet.count.getAndSet(0);

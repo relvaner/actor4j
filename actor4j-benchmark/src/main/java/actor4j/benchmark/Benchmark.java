@@ -24,6 +24,7 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import actor4j.benchmark.utils.MessageThroughputMeasurement;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
+import io.actor4j.core.internal.InternalActorSystem;
 import shared.benchmark.BenchmarkConfig;
 
 public class Benchmark {
@@ -60,24 +61,24 @@ public class Benchmark {
 				DecimalFormat decimalFormat = new DecimalFormat("###,###,###,###");
 				
 				int i=0;
-				for (long value : system.underlyingImpl().getExecuterService().getCounts()) {
+				for (long value : ((InternalActorSystem)system).getExecuterService().getCounts()) {
 					System.out.printf("actor4j-worker-thread-%d::count = %s%n", i, decimalFormat.format(value));
 					i++;
 				}
-				if (system.underlyingImpl() instanceof DefaultActorSystemImpl) {
+				if (system instanceof DefaultActorSystemImpl) {
 					i=0;
-					for (int value : ((DefaultActorSystemImpl)system.underlyingImpl()).getWorkerInnerQueueSizes()) {
+					for (int value : ((DefaultActorSystemImpl)system).getWorkerInnerQueueSizes()) {
 						System.out.printf("actor4j-worker-thread-%d::inner::queue::size = %s%n", i, decimalFormat.format(value));
 						i++;
 					}
 					i=0;
-					for (int value : ((DefaultActorSystemImpl)system.underlyingImpl()).getWorkerOuterQueueSizes()) {
+					for (int value : ((DefaultActorSystemImpl)system).getWorkerOuterQueueSizes()) {
 						System.out.printf("actor4j-worker-thread-%d::outer::queue::size = %s%n", i, decimalFormat.format(value));
 						i++;
 					}
 				}
-				System.out.printf("statistics::count         : %s%n", decimalFormat.format(system.underlyingImpl().getExecuterService().getCount()-warmupCount.get()));
-				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((system.underlyingImpl().getExecuterService().getCount()-warmupCount.get())/(benchmarkConfig.getDuration()/1000)));
+				System.out.printf("statistics::count         : %s%n", decimalFormat.format(((InternalActorSystem)system).getExecuterService().getCount()-warmupCount.get()));
+				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((((InternalActorSystem)system).getExecuterService().getCount()-warmupCount.get())/(benchmarkConfig.getDuration()/1000)));
 				System.out.printf("statistics::mean          : %s msg/s%n", decimalFormat.format(statistics.getMean()));
 				System.out.printf("statistics::sd            : %s msg/s%n", decimalFormat.format(statistics.getStandardDeviation()));
 				System.out.printf("statistics::median        : %s msg/s%n", decimalFormat.format(statistics.getPercentile(50)));
@@ -88,7 +89,7 @@ public class Benchmark {
 		messageTM = new MessageThroughputMeasurement(new Supplier<Long>() {
 			@Override
 			public Long get() {
-				return system.underlyingImpl().getExecuterService().getCount();
+				return ((InternalActorSystem)system).getExecuterService().getCount();
 			}
 		}, benchmarkConfig.warmupIterations, warmupCount, statistics, true);
 		messageTM.start();
