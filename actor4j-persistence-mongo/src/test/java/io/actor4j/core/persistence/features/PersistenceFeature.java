@@ -85,7 +85,7 @@ public class PersistenceFeature {
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.persistenceMode(new MongoDBPersistenceDriver("localhost", 27027, "actor4j-test"))
 			.build();
-		ActorSystem system = new ActorSystem(config);
+		ActorSystem system = ActorSystem.create(config);
 		
 		AtomicBoolean first = new AtomicBoolean(true);
 		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
@@ -154,7 +154,7 @@ public class PersistenceFeature {
 		
 		system.start();
 		
-		system.sendWhenActive(ActorMessage.create(null, 0, system.SYSTEM_ID, id));
+		system.sendWhenActive(ActorMessage.create(null, 0, system.SYSTEM_ID(), id));
 		
 		try {
 			testDone.await();
