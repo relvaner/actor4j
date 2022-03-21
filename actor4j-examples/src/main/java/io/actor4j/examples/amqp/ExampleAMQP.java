@@ -38,7 +38,7 @@ public class ExampleAMQP {
 	public ExampleAMQP() {
 		super();
 		
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		CountDownLatch done = new CountDownLatch(2);
 		
@@ -73,8 +73,8 @@ public class ExampleAMQP {
 		});
 		
 		system.send(ActorMessage.create("MyTopic", SUBSCRIBE, receiver, amqp));
-		system.send(ActorMessage.create(new AMQPPublish("MyTopic", "Hello World!".getBytes()), PUBLISH, system.SYSTEM_ID, amqp));
-		system.send(ActorMessage.create(new AMQPPublish("MyTopic", "Hello World Again!".getBytes()), PUBLISH, system.SYSTEM_ID, amqp));
+		system.send(ActorMessage.create(new AMQPPublish("MyTopic", "Hello World!".getBytes()), PUBLISH, system.SYSTEM_ID(), amqp));
+		system.send(ActorMessage.create(new AMQPPublish("MyTopic", "Hello World Again!".getBytes()), PUBLISH, system.SYSTEM_ID(), amqp));
 		
 		system.start();
 		

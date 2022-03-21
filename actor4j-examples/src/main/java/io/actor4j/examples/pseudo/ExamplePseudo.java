@@ -30,7 +30,7 @@ import io.actor4j.corex.actors.PseudoActorWithRx;
 
 public class ExamplePseudo {
 	public ExamplePseudo() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		PseudoActorWithRx main = new PseudoActorWithRx(system, false) {
 			@Override

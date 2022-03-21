@@ -31,7 +31,7 @@ import io.actor4j.core.publish.subscribe.Subscribe;
 
 public class ExamplePublishSubscribe {
 	public ExamplePublishSubscribe() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		UUID broker = system.addActor(() -> new BrokerActor());
 		

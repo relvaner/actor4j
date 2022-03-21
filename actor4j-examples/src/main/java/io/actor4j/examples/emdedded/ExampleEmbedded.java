@@ -28,7 +28,7 @@ public class ExampleEmbedded {
 	protected final int SWAP=22;
 	
 	public ExampleEmbedded() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		UUID host = system.addActor(() -> new EmbeddedHostActor("host") {
 			protected EmbeddedActor client;
@@ -61,10 +61,10 @@ public class ExampleEmbedded {
 			}
 		});
 		
-		system.send(ActorMessage.create(null, SWAP, system.SYSTEM_ID, host));
-		system.send(ActorMessage.create("Hello World!", 0, system.SYSTEM_ID, host));
-		system.send(ActorMessage.create(null, SWAP, system.SYSTEM_ID, host));
-		system.send(ActorMessage.create("Hello World Again!", 0, system.SYSTEM_ID, host));
+		system.send(ActorMessage.create(null, SWAP, system.SYSTEM_ID(), host));
+		system.send(ActorMessage.create("Hello World!", 0, system.SYSTEM_ID(), host));
+		system.send(ActorMessage.create(null, SWAP, system.SYSTEM_ID(), host));
+		system.send(ActorMessage.create("Hello World Again!", 0, system.SYSTEM_ID(), host));
 		system.start();
 		
 		try {

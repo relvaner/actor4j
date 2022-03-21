@@ -24,7 +24,7 @@ import io.actor4j.web.coap.server.COAPActorService;
 
 public class ExampleServerCoap {
 	public static void main(String[] args) {
-		ActorService actorService = new ActorService();
+		ActorService actorService = ActorService.create();
 		UUID coap = actorService.addActor(() -> new Actor() {
 			@Override
 			public void receive(ActorMessage<?> message) {

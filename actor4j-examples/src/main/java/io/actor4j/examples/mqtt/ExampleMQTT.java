@@ -35,7 +35,7 @@ public class ExampleMQTT {
 	public ExampleMQTT() {
 		super();
 		
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		
 		CountDownLatch done = new CountDownLatch(2);
 		
@@ -85,8 +85,8 @@ public class ExampleMQTT {
 		});
 		
 		system.send(ActorMessage.create("MyTopic", SUBSCRIBE, receiver, mqtt));
-		system.send(ActorMessage.create(new MQTTPublish("MyTopic", "Hello World!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID, mqtt));
-		system.send(ActorMessage.create(new MQTTPublish("MyTopic", "Hello World Again!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID, mqtt));
+		system.send(ActorMessage.create(new MQTTPublish("MyTopic", "Hello World!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID(), mqtt));
+		system.send(ActorMessage.create(new MQTTPublish("MyTopic", "Hello World Again!".getBytes(), 2, false), PUBLISH, system.SYSTEM_ID(), mqtt));
 		
 		system.start();
 		

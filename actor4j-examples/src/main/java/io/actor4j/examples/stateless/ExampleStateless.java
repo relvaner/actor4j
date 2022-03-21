@@ -30,7 +30,7 @@ public class ExampleStateless {
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.parallelism(2)
 			.build();
-		ActorSystem system = new ActorSystem(config);
+		ActorSystem system = ActorSystem.create(config);
 		
 		ActorGroup group = new ActorGroupSet();
 		system.setAlias(system.addActor(() -> new ActorWithDistributedGroup(group) {
@@ -44,7 +44,7 @@ public class ExampleStateless {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				system.sendViaAlias(ActorMessage.create(null, 0, system.SYSTEM_ID, null), "instances");
+				system.sendViaAlias(ActorMessage.create(null, 0, system.SYSTEM_ID(), null), "instances");
 			}
 		}, 0, 50);
 		

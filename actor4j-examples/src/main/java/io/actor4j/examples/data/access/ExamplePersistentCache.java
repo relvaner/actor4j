@@ -32,7 +32,7 @@ public class ExamplePersistentCache {
 		MongoClient mongoClient = new MongoClient("localhost", 27017);
 		mongoClient.getDatabase("actor4j-test").drop();
 		
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		final int INSTANCES = system.getConfig().parallelism*system.getConfig().parallelismFactor;
 		
 		system.addActor(() -> new Actor("manager") {

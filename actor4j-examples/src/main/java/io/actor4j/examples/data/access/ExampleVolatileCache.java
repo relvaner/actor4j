@@ -25,7 +25,7 @@ import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 
 public class ExampleVolatileCache {
 	public ExampleVolatileCache() {
-		ActorSystem system = new ActorSystem();
+		ActorSystem system = ActorSystem.create();
 		final int INSTANCES = system.getConfig().parallelism*system.getConfig().parallelismFactor;
 		
 		system.addActor(() -> new Actor("manager") {

@@ -86,7 +86,7 @@ public class ExampleVerification {
 	}
 
 	public static void main(String[] args) {
-		ActorVerificator verificator = new ActorVerificator();
+		ActorVerificator verificator = ActorVerificator.create();
 		
 		verificator.addActor(() -> new Ping("ping"));
 		verificator.addActor(() -> new Pong("pong"));

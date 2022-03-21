@@ -30,7 +30,7 @@ import io.actor4j.analyzer.DefaultActorAnalyzerThread;
 
 public class ExampleAnalyzer {
 	public ExampleAnalyzer() {
-		ActorSystem system = new ActorAnalyzer(new DefaultActorAnalyzerThread(2000, true));
+		ActorSystem system = ActorAnalyzer.create(new DefaultActorAnalyzerThread(2000, true));
 
 		final int size = 2;
 		ActorGroup group = new ActorGroupSet();
@@ -128,10 +128,10 @@ public class ExampleAnalyzer {
 		system
 			.start();
 		
-		system.timer().schedule(ActorMessage.create(null, 1, system.SYSTEM_ID, null), group, 0, 500, TimeUnit.MILLISECONDS);
-		system.timer().scheduleOnce(ActorMessage.create(null, Actor.RESTART, system.SYSTEM_ID, null), ping, 5, TimeUnit.SECONDS);
-		system.timer().scheduleOnce(ActorMessage.create(null, Actor.STOP, system.SYSTEM_ID, null), id, 15, TimeUnit.SECONDS);
-		system.timer().scheduleOnce(ActorMessage.create(null, Actor.STOP, system.SYSTEM_ID, null), system.USER_ID, 25, TimeUnit.SECONDS);
+		system.timer().schedule(ActorMessage.create(null, 1, system.SYSTEM_ID(), null), group, 0, 500, TimeUnit.MILLISECONDS);
+		system.timer().scheduleOnce(ActorMessage.create(null, Actor.RESTART, system.SYSTEM_ID(), null), ping, 5, TimeUnit.SECONDS);
+		system.timer().scheduleOnce(ActorMessage.create(null, Actor.STOP, system.SYSTEM_ID(), null), id, 15, TimeUnit.SECONDS);
+		system.timer().scheduleOnce(ActorMessage.create(null, Actor.STOP, system.SYSTEM_ID(), null), system.USER_ID(), 25, TimeUnit.SECONDS);
 		
 		try {
 			Thread.sleep(240000);

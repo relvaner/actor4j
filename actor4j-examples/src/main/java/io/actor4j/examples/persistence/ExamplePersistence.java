@@ -71,7 +71,7 @@ public class ExamplePersistence {
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.persistenceMode(new MongoDBPersistenceDriver("localhost", 27017, "actor4j"))
 			.build();
-		ActorSystem system = new ActorSystem(config);
+		ActorSystem system = ActorSystem.create(config);
 		
 		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
 			@Override
@@ -107,7 +107,7 @@ public class ExamplePersistence {
 		
 		system.start();
 		
-		system.sendWhenActive(ActorMessage.create(null, 0, system.SYSTEM_ID, id));
+		system.sendWhenActive(ActorMessage.create(null, 0, system.SYSTEM_ID(), id));
 		
 		try {
 			Thread.sleep(3000);
