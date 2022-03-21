@@ -15,50 +15,21 @@
  */
 package io.actor4j.apc.actor;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.ActorSystemImplFactory;
 import io.actor4j.core.config.ActorSystemConfig;
 
-public class APCActorSystem extends ActorSystem {
-	protected final Map<UUID, CompletableFuture<?>> futureMap = new ConcurrentHashMap<>();
-	
-	public APCActorSystem() {
-		super();
-	}
-
-	public APCActorSystem(ActorSystemImplFactory factory) {
-		super(factory);
-	}
-
-	public APCActorSystem(ActorSystemConfig config) {
-		super(config);
+public interface APCActorSystem extends ActorSystem {
+	public static APCActorSystem create() {
+		return new APCActorSystemImpl(ActorSystemConfig.builder().build());
 	}
 	
-	public APCActorSystem(ActorSystemImplFactory factory, ActorSystemConfig config) {
-		super(factory, config);
-	}
-
-	public <I, T extends I> APCActorRef<I> addAPCActor(Class<I> interf, T obj) {
-		UUID id = addActor(() -> new APCActor(interf, obj));
-		
-		return new APCActorRef<>(interf, this, id);
+	public static ActorSystem create(String name) {
+		return create(ActorSystemConfig.builder().name(name).build());
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected <T> Future<T> handleFuture(UUID futureId, Consumer<CompletableFuture<T>> consumer) {
-		CompletableFuture<?> result = futureMap.get(futureId);
-		if (result!=null) {
-			consumer.accept((CompletableFuture<T>)result);
-			futureMap.remove(futureId);
-		}
-		
-		return result!=null ? (Future<T>)result : null;
+	public static APCActorSystem create(ActorSystemConfig config) {
+		return new APCActorSystemImpl(config);
 	}
+	
+	public <I, T extends I> APCActorRef<I> addAPCActor(Class<I> interf, T obj);
 }

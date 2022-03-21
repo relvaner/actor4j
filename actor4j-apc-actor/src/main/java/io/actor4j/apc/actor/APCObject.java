@@ -33,6 +33,6 @@ public class APCObject {
 	}
 
 	protected <T> Future<T> handleFuture(Consumer<CompletableFuture<T>> consumer) {
-		return system.handleFuture(currentFutureId, consumer);
+		return ((APCActorSystemImpl)system).handleFuture(currentFutureId, consumer);
 	}
 }
