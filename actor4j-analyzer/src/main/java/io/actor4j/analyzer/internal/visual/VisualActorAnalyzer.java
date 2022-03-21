@@ -19,15 +19,15 @@ import java.awt.event.WindowEvent;
 import java.util.Map;
 import java.util.UUID;
 
-import io.actor4j.core.internal.ActorCell;
-import io.actor4j.core.internal.ActorSystemImpl;
+import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.internal.InternalActorSystem;
 import tools4j.utils.SwingSubApplication;
 
 public class VisualActorAnalyzer {
-	protected ActorSystemImpl system;
+	protected InternalActorSystem system;
 	protected SwingSubApplication application;
 	
-	public VisualActorAnalyzer(ActorSystemImpl system) {
+	public VisualActorAnalyzer(InternalActorSystem system) {
 		super();
 		
 		this.system = system;
@@ -43,11 +43,11 @@ public class VisualActorAnalyzer {
 		application.getFrame().dispatchEvent(new WindowEvent(application.getFrame(), WindowEvent.WINDOW_CLOSING));
 	}
 	
-	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		((VisualActorFrame)application.getFrame()).analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 	
-	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public void analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		((VisualActorFrame)application.getFrame()).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 	}
 }

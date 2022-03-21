@@ -24,16 +24,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.actor4j.core.internal.ActorCell;
-import io.actor4j.core.internal.ActorSystemImpl;
 import io.actor4j.core.internal.ActorThreadMode;
+import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.internal.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 
 public abstract class ActorAnalyzerThread extends Thread {
 	protected Queue<ActorMessage<?>> outerQueueL2;
 	protected Queue<ActorMessage<?>> outerQueueL1;
 	
-	protected ActorSystemImpl system;
+	protected InternalActorSystem system;
 	
 	protected AtomicLong counter;
 	
@@ -59,7 +59,7 @@ public abstract class ActorAnalyzerThread extends Thread {
 		this.period = period;
 	}
 	
-	protected void setSystem(ActorSystemImpl system) {
+	protected void setSystem(InternalActorSystem system) {
 		this.system = system;
 	}
 	
@@ -79,7 +79,7 @@ public abstract class ActorAnalyzerThread extends Thread {
 	
 	protected abstract void analyze(ActorMessage<?> message);
 	
-	protected abstract void update(Map<UUID, ActorCell> cells);
+	protected abstract void update(Map<UUID, InternalActorCell> cells);
 	
 	@Override
 	public void run() {

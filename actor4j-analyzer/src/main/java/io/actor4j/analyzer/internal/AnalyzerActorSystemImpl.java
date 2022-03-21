@@ -17,25 +17,32 @@ package io.actor4j.analyzer.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.actor4j.analyzer.ActorAnalyzer;
 import io.actor4j.analyzer.config.ActorAnalyzerConfig;
-import io.actor4j.core.ActorSystem;
 import io.actor4j.core.internal.ActorSystemImpl;
 import io.actor4j.core.internal.DefaultActorSystemImpl;
 
-public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl {
+public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl implements ActorAnalyzer {
 	protected AtomicBoolean analyzeMode;
 	protected ActorAnalyzerThread analyzerThread;
-
-	public AnalyzerActorSystemImpl(ActorSystem wrapper) {
-		this(wrapper, null);
-	}
 	
-	public AnalyzerActorSystemImpl (ActorSystem wrapper, ActorAnalyzerConfig config) {
-		super(wrapper, config!=null ? config : ActorAnalyzerConfig.create());
+	private AnalyzerActorSystemImpl (ActorAnalyzerConfig config) {
+		super(config!=null ? config : ActorAnalyzerConfig.create());
 		
 		analyzeMode = new AtomicBoolean(false);
 		
 		messageDispatcher = new AnalyzerActorMessageDispatcher(this);
+	}
+	
+	public AnalyzerActorSystemImpl(ActorAnalyzerThread analyzerThread, ActorAnalyzerConfig config) {
+		this(config);
+		
+		analyze(analyzerThread);
+	}
+	
+	@Override
+	public boolean setConfig(ActorAnalyzerConfig config) {
+		return super.setConfig(config);
 	}
 	
 	public ActorSystemImpl analyze(ActorAnalyzerThread analyzerThread) {

@@ -21,24 +21,20 @@ import io.actor4j.analyzer.internal.AnalyzerActorSystemImpl;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 
-public class ActorAnalyzer extends ActorSystem {
-	public ActorAnalyzer(ActorAnalyzerThread analyzerThread) {
-		this(analyzerThread, null);
+public interface ActorAnalyzer extends ActorSystem {
+	public static ActorAnalyzer create(ActorAnalyzerThread analyzerThread) {
+		return create(analyzerThread, null);
+	}
+	
+	public static ActorAnalyzer create(ActorAnalyzerThread analyzerThread, ActorAnalyzerConfig config) {
+		return new AnalyzerActorSystemImpl(analyzerThread, config);
 	}
 	
 	@Deprecated
 	@Override
-	public boolean setConfig(ActorSystemConfig config) {
+	public default boolean setConfig(ActorSystemConfig config) {
 		return false;
 	}
 	
-	public boolean setConfig(ActorAnalyzerConfig config) {
-		return super.setConfig(config);
-	}
-
-	public ActorAnalyzer(ActorAnalyzerThread analyzerThread, ActorAnalyzerConfig config) {
-		super((wrapper, c) -> new AnalyzerActorSystemImpl(wrapper, (ActorAnalyzerConfig)c), config);
-		
-		((AnalyzerActorSystemImpl)system).analyze(analyzerThread);
-	}
+	public boolean setConfig(ActorAnalyzerConfig config);
 }

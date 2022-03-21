@@ -29,8 +29,8 @@ import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 
-import io.actor4j.core.internal.ActorCell;
-import io.actor4j.core.internal.ActorSystemImpl;
+import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.internal.InternalActorSystem;
 
 public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 	protected static final long serialVersionUID = -1192782222987329027L;
@@ -44,7 +44,7 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 	
 	public static final AtomicInteger layoutIndex = new AtomicInteger(0);
 
-	public VisualActorStructureViewPanel(ActorSystemImpl system) {
+	public VisualActorStructureViewPanel(InternalActorSystem system) {
 		super(system);
 		
 		activeCells = new HashMap<>();
@@ -55,7 +55,7 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 		add("Structure", paDesign);
 	}
 			
-	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		Iterator<Entry<UUID, Boolean>> iteratorActiveCells = activeCells.entrySet().iterator();
 		while (iteratorActiveCells.hasNext())
 			iteratorActiveCells.next().setValue(false);
@@ -66,13 +66,13 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
         	if (showDefaultRoot && defaultRoot==null)
         		defaultRoot = addVertex("actor4j", ";fillColor=white");
         	
-        	analyzeRootActor(actorCells, actorCells.get(system.USER_ID), ";fillColor=yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, actorCells.get(system.USER_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
         	if (showRootSystem)
-        		analyzeRootActor(actorCells, actorCells.get(system.SYSTEM_ID), ";fillColor=yellow", showDefaultRoot, colorize);
+        		analyzeRootActor(actorCells, actorCells.get(system.SYSTEM_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
         	else
-        		showOnlyRootActor(actorCells, actorCells.get(system.SYSTEM_ID), ";fillColor=yellow", showDefaultRoot);
-        	analyzeRootActor(actorCells, actorCells.get(system.UNKNOWN_ID), ";fillColor=yellow", showDefaultRoot, colorize);
-        	analyzeRootActor(actorCells, actorCells.get(system.PSEUDO_ID), ";fillColor=yellow", showDefaultRoot, colorize);
+        		showOnlyRootActor(actorCells, actorCells.get(system.SYSTEM_ID()), ";fillColor=yellow", showDefaultRoot);
+        	analyzeRootActor(actorCells, actorCells.get(system.UNKNOWN_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, actorCells.get(system.PSEUDO_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
         	
         	iteratorActiveCells = activeCells.entrySet().iterator();
         	while (iteratorActiveCells.hasNext()) {
@@ -92,7 +92,7 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
         graphComponent.refresh();
 	}
 	
-	public void showOnlyRootActor(Map<UUID, ActorCell> actorCells, ActorCell root, String color, boolean showDefaultRoot) {
+	public void showOnlyRootActor(Map<UUID, InternalActorCell> actorCells, InternalActorCell root, String color, boolean showDefaultRoot) {
 		if (root!=null) {
 			if (activeCells.put(root.getId(), true)==null) {
 				Object rootVertex;
@@ -110,7 +110,7 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 		}
 	}
 	
-	public void analyzeRootActor(Map<UUID, ActorCell> actorCells, ActorCell root, String color, boolean showDefaultRoot, boolean colorize) {
+	public void analyzeRootActor(Map<UUID, InternalActorCell> actorCells, InternalActorCell root, String color, boolean showDefaultRoot, boolean colorize) {
 		if (root!=null) {
 			if (activeCells.put(root.getId(), true)==null) {
 				Object rootVertex;
@@ -130,10 +130,10 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 		}
 	}
 	
-	public void analyzeActor(Map<UUID, ActorCell> actorCells, ActorCell parent, Object parentVertex, boolean colorize) {
+	public void analyzeActor(Map<UUID, InternalActorCell> actorCells, InternalActorCell parent, Object parentVertex, boolean colorize) {
 		Iterator<UUID> iterator = parent.getChildren().iterator();
 		while (iterator.hasNext()) {
-			ActorCell child = actorCells.get(iterator.next());
+			InternalActorCell child = actorCells.get(iterator.next());
 			if (child!=null) {
 				if (activeCells.put(child.getId(), true)==null) {
 					Object childVertex;

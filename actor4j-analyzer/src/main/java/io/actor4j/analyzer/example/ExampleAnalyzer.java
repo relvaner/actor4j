@@ -37,7 +37,7 @@ public class ExampleAnalyzer {
 		ActorAnalyzerConfig config = ActorAnalyzerConfig.builder()
 			.parallelism(4)
 			.build();
-		ActorSystem system = new ActorAnalyzer(new DefaultActorAnalyzerThread(2000, true, true, true), config);
+		ActorSystem system = ActorAnalyzer.create(new DefaultActorAnalyzerThread(2000, true, true, true), config);
 		
 		ActorGroup distributedGroup = new ActorGroupSet();
 		final int size = 4;
@@ -145,7 +145,7 @@ public class ExampleAnalyzer {
 		system
 			.start();
 		
-		system.timer().schedule(ActorMessage.create(null, 1, system.SYSTEM_ID, null), group, 0, 500, TimeUnit.MILLISECONDS);
+		system.timer().schedule(ActorMessage.create(null, 1, system.SYSTEM_ID(), null), group, 0, 500, TimeUnit.MILLISECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.RESTART, system.SYSTEM_ID, null), ping, 5, TimeUnit.SECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.STOP, system.SYSTEM_ID, null), id, 15, TimeUnit.SECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.STOP, system.SYSTEM_ID, null), system.USER_ID, 25, TimeUnit.SECONDS);

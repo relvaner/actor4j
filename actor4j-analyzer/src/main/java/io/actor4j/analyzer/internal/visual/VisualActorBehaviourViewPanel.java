@@ -25,8 +25,8 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 
-import io.actor4j.core.internal.ActorCell;
-import io.actor4j.core.internal.ActorSystemImpl;
+import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.internal.InternalActorSystem;
 
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +44,7 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	
 	public static final AtomicInteger layoutIndex = new AtomicInteger(0);
 
-	public VisualActorBehaviourViewPanel(ActorSystemImpl system) {
+	public VisualActorBehaviourViewPanel(InternalActorSystem system) {
 		super(system);
 		
 		activeCells = new HashMap<>();
@@ -55,7 +55,7 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 		add("Behaviour", paDesign);
 	}
 	
-	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public void analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		Iterator<Entry<UUID, Boolean>> iteratorActiveCells = activeCells.entrySet().iterator();
 		while (iteratorActiveCells.hasNext())
 			iteratorActiveCells.next().setValue(false);
@@ -64,15 +64,15 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 		String color = null;
 		graph.getModel().beginUpdate();
 	    try {
-	    	Iterator<ActorCell> iterator = actorCells.values().iterator();
+	    	Iterator<InternalActorCell> iterator = actorCells.values().iterator();
 	        while (iterator.hasNext()) {
-	        	ActorCell actorCell = iterator.next(); 
+	        	InternalActorCell actorCell = iterator.next(); 
 	        	
 	        	if (!showRootSystem && actorCell.isRootInSystem())
 	        		continue;
 	        	
 	        	if (activeCells.put(actorCell.getId(), true)==null) {
-	        		if (actorCell.getId()==system.USER_ID || actorCell.getId()==system.SYSTEM_ID || actorCell.getId()==system.UNKNOWN_ID || actorCell.getId()==system.PSEUDO_ID)
+	        		if (actorCell.getId()==system.USER_ID() || actorCell.getId()==system.SYSTEM_ID() || actorCell.getId()==system.UNKNOWN_ID() || actorCell.getId()==system.PSEUDO_ID())
 	        			color = ";fillColor=yellow";
 	        		else {
 	        			if (colorize) {

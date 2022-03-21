@@ -26,13 +26,13 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import io.actor4j.core.internal.ActorCell;
-import io.actor4j.core.internal.ActorSystemImpl;
+import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.internal.InternalActorSystem;
 
 public class VisualActorFrame extends JFrame {
 	protected static final long serialVersionUID = 6808210435112913511L;
 	
-	protected ActorSystemImpl system;
+	protected InternalActorSystem system;
 
 	protected JPanel contentPane;
 	
@@ -41,7 +41,7 @@ public class VisualActorFrame extends JFrame {
 	protected VisualActorViewPanel leftViewPanel;
 	protected VisualActorViewPanel rightViewPanel;
 	
-	public VisualActorFrame(ActorSystemImpl system) {
+	public VisualActorFrame(InternalActorSystem system) {
 		super();
 		
 		this.system = system;
@@ -93,12 +93,12 @@ public class VisualActorFrame extends JFrame {
 		setJMenuBar(menuBar);
 	}
 	
-	public void analyzeStructure(Map<UUID, ActorCell> actorCells, boolean showDefaultParent, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultParent, boolean showRootSystem, boolean colorize) {
 		((VisualActorStructureViewPanel)leftViewPanel).analyzeStructure(actorCells, showDefaultParent, showRootSystem, colorize);
 		((VisualActorStructureViewPanel)leftViewPanel).updateStructure();
 	}
 	
-	public void analyzeBehaviour(Map<UUID, ActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public void analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		((VisualActorBehaviourViewPanel)rightViewPanel).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 		((VisualActorBehaviourViewPanel)rightViewPanel).updateStructure();
 	}

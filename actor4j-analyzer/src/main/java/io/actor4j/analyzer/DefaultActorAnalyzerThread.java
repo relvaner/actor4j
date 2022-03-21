@@ -23,8 +23,8 @@ import javax.swing.SwingUtilities;
 
 import io.actor4j.analyzer.internal.ActorAnalyzerThread;
 import io.actor4j.analyzer.internal.visual.VisualActorAnalyzer;
-import io.actor4j.core.internal.ActorCell;
-import io.actor4j.core.internal.ActorSystemImpl;
+import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.internal.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 
 public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
@@ -55,7 +55,7 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	}
 	
 	@Override
-	protected void setSystem(ActorSystemImpl system) {
+	protected void setSystem(InternalActorSystem system) {
 		super.setSystem(system);
 		
 		visualAnalyzer = new VisualActorAnalyzer(system);
@@ -67,9 +67,9 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 		UUID dest = message.dest();
 		
 		if (message.source()==null)
-			source = system.UNKNOWN_ID;
+			source = system.UNKNOWN_ID();
 		if (message.dest()==null)
-			dest = system.UNKNOWN_ID;
+			dest = system.UNKNOWN_ID();
 		
 		Map<UUID, Long> routes = deliveryRoutes.get(source);
 		if (routes==null) {
@@ -84,7 +84,7 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	}
 
 	@Override
-	protected void update(final Map<UUID, ActorCell> cells) {
+	protected void update(final Map<UUID, InternalActorCell> cells) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
