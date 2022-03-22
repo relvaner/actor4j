@@ -23,7 +23,29 @@ import io.actor4j.core.messages.ActorMessageUtils;
 import io.actor4j.core.utils.DeepCopyable;
 import io.actor4j.core.utils.Shareable;
 
-public record FutureActorMessage<T>(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest, UUID interaction, String protocol, String domain) implements ActorMessage<T> {
+public final class FutureActorMessage<T> implements ActorMessage<T> {
+	private final CompletableFuture<T> future;
+	private final T value;
+	private final int tag; 
+	private final UUID source; 
+	private final UUID dest; 
+	private final UUID interaction; 
+	private final String protocol; 
+	private final String domain;
+	
+	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest, UUID interaction,
+			String protocol, String domain) {
+		super();
+		this.future = future;
+		this.value = value;
+		this.tag = tag;
+		this.source = source;
+		this.dest = dest;
+		this.interaction = interaction;
+		this.protocol = protocol;
+		this.domain = domain;
+	}
+
 	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest) {
 		this(future, value, tag, source, dest, null, null, null);
 	}
@@ -77,7 +99,7 @@ public record FutureActorMessage<T>(CompletableFuture<T> future, T value, int ta
 	@Override
 	public ActorMessage<T> copy() {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
+			if (ActorMessageUtils.isSupportedType(value.getClass()) /*|| value instanceof Record*/ || value instanceof Shareable)
 				return this;
 			else if (value instanceof DeepCopyable)
 				return new FutureActorMessage<T>(future, ((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
@@ -94,7 +116,7 @@ public record FutureActorMessage<T>(CompletableFuture<T> future, T value, int ta
 	@Override
 	public ActorMessage<T> copy(UUID dest) {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
+			if (ActorMessageUtils.isSupportedType(value.getClass()) /*|| value instanceof Record*/ || value instanceof Shareable)
 				return !ActorMessageUtils.equals(this.dest, dest) ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
 			else if (value instanceof DeepCopyable)
 				return new FutureActorMessage<T>(future,((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
@@ -111,5 +133,108 @@ public record FutureActorMessage<T>(CompletableFuture<T> future, T value, int ta
 	public String toString() {
 		return "FutureActorMessage [value=" + value + ", tag=" + tag + ", source=" + source + ", dest=" + dest
 				+ ", interaction=" + interaction + ", protocol=" + protocol + ", domain=" + domain + "]";
+	}
+	
+	public CompletableFuture<T> future() {
+		return future;
+	}
+	
+	@Override
+	public T value() {
+		return value;
+	}
+
+	@Override
+	public int tag() {
+		return tag;
+	}
+
+	@Override
+	public UUID source() {
+		return source;
+	}
+
+	@Override
+	public UUID dest() {
+		return dest;
+	}
+
+	@Override
+	public UUID interaction() {
+		return interaction;
+	}
+
+	@Override
+	public String protocol() {
+		return protocol;
+	}
+
+	@Override
+	public String domain() {
+		return domain;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((dest == null) ? 0 : dest.hashCode());
+		result = prime * result + ((domain == null) ? 0 : domain.hashCode());
+		result = prime * result + ((future == null) ? 0 : future.hashCode());
+		result = prime * result + ((interaction == null) ? 0 : interaction.hashCode());
+		result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
+		result = prime * result + ((source == null) ? 0 : source.hashCode());
+		result = prime * result + tag;
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FutureActorMessage<?> other = (FutureActorMessage<?>) obj;
+		if (dest == null) {
+			if (other.dest != null)
+				return false;
+		} else if (!dest.equals(other.dest))
+			return false;
+		if (domain == null) {
+			if (other.domain != null)
+				return false;
+		} else if (!domain.equals(other.domain))
+			return false;
+		if (future == null) {
+			if (other.future != null)
+				return false;
+		} else if (!future.equals(other.future))
+			return false;
+		if (interaction == null) {
+			if (other.interaction != null)
+				return false;
+		} else if (!interaction.equals(other.interaction))
+			return false;
+		if (protocol == null) {
+			if (other.protocol != null)
+				return false;
+		} else if (!protocol.equals(other.protocol))
+			return false;
+		if (source == null) {
+			if (other.source != null)
+				return false;
+		} else if (!source.equals(other.source))
+			return false;
+		if (tag != other.tag)
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
 	}
 }
