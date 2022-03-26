@@ -50,7 +50,7 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 		*/
 		
 		System.out.printf("activeThreads: %d%n", config.parallelism());
-		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name);
+		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name());
 		
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() { 

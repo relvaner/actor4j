@@ -53,11 +53,11 @@ public abstract class COAPActorService extends CoapServer {
 	@Override
 	public void start() {
 		super.start();
-		systemLogger().log(INFO, String.format("%s - COAP-Service started...", service.getConfig().name));
+		systemLogger().log(INFO, String.format("%s - COAP-Service started...", service.getConfig().name()));
 	}
 	
 	public void shutdown() {
 		stop();
-		systemLogger().log(INFO, String.format("%s - COAP-Service stopped...", service.getConfig().name));
+		systemLogger().log(INFO, String.format("%s - COAP-Service stopped...", service.getConfig().name()));
 	}
 }

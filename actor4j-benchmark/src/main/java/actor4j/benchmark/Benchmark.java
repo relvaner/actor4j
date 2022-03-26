@@ -53,8 +53,8 @@ public class Benchmark {
 		final AtomicLong warmupCount = new AtomicLong();
 		
 		System.out.printf("Logical cores: %d%n", Runtime.getRuntime().availableProcessors());
-		System.out.printf("activeThreads: %d%n", system.getConfig().parallelism*system.getConfig().parallelismFactor);
-		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name);
+		System.out.printf("activeThreads: %d%n", system.getConfig().parallelism()*system.getConfig().parallelismFactor());
+		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name());
 		system.start(null, new Runnable() {
 			@Override
 			public void run() {

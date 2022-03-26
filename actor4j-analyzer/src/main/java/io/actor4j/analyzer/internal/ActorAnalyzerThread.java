@@ -98,11 +98,11 @@ public abstract class ActorAnalyzerThread extends Thread {
 			}
 			
 			if ((!hasNextOuter))
-				if (system.getConfig().threadMode==ActorThreadMode.YIELD)
+				if (system.getConfig().threadMode()==ActorThreadMode.YIELD)
 					Thread.yield();
 				else {
 					try {
-						sleep(system.getConfig().sleepTime);
+						sleep(system.getConfig().sleepTime());
 					} catch (InterruptedException e) {
 						interrupt();
 					}

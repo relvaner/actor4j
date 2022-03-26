@@ -37,7 +37,7 @@ public class BenchmarkSkynetWithStopping extends BenchmarkSampleActor4j {
 		ActorSystem system = createActorSystem("actor4j::SkynetWithStopping");
 		
 		System.out.printf("activeThreads: %d%n", config.parallelism());
-		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name);
+		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name());
 		
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() { 

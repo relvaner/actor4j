@@ -42,7 +42,7 @@ public abstract class ActorGrpcServer {
 		deploy(service);
 		ActorServiceConfig config = ActorServiceConfig.builder((ActorServiceConfig)service.getConfig())
 			.name(name)
-			.clientRunnable(new GrpcActorClientRunnable(service.getConfig().serviceNodes, service.getConfig().parallelism*service.getConfig().parallelismFactor, 10000))
+			.clientRunnable(new GrpcActorClientRunnable(service.getConfig().serviceNodes(), service.getConfig().parallelism()*service.getConfig().parallelismFactor(), 10000))
 			.build();
 		service.setConfig(config);
 		
@@ -50,10 +50,10 @@ public abstract class ActorGrpcServer {
 			server = ServerBuilder.forPort(port)
 				.addService(new ActorGrpcServiceImpl(service)).build()
 				.start();
-			logger().info(String.format("%s - gRPC-Server started...", service.getConfig().name));
+			logger().info(String.format("%s - gRPC-Server started...", service.getConfig().name()));
 			
 			onStartup.run();
-			logger().info(String.format("%s - Service started...", service.getConfig().name));
+			logger().info(String.format("%s - Service started...", service.getConfig().name()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -69,7 +69,7 @@ public abstract class ActorGrpcServer {
 		}
 		
 		service.shutdownWithActors(true);
-		((GrpcActorClientRunnable)service.getConfig().clientRunnable).closeAll();
-		logger().info(String.format("%s - Service stopped...", service.getConfig().name));
+		((GrpcActorClientRunnable)service.getConfig().clientRunnable()).closeAll();
+		logger().info(String.format("%s - Service stopped...", service.getConfig().name()));
 	}
 }

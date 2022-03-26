@@ -38,7 +38,7 @@ public class ExampleStateless {
 			public void receive(ActorMessage<?> message) {
 				System.out.printf("from thread %s of actor %s%n", Thread.currentThread().getName(), self());
 			}
-		}, system.getConfig().parallelism*system.getConfig().parallelismFactor), "instances");
+		}, system.getConfig().parallelism()*system.getConfig().parallelismFactor()), "instances");
 		
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {

@@ -80,7 +80,7 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	        				if (threadId!=null)
 	        					color = ";fillColor="+Utils.randomColorAsHex(
 	        						system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getThreadsList().indexOf(threadId), 
-	        						system.getConfig().parallelism*system.getConfig().parallelismFactor);
+	        						system.getConfig().parallelism()*system.getConfig().parallelismFactor());
 	        				else
 	        					color = ";fillColor=#F0F0F0";
 	        			}
