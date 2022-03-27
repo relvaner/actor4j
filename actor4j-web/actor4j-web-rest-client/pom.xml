@@ -40,12 +40,7 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-client</artifactId>
-			<version>4.4.2.Final</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.jaxrs</groupId>
-			<artifactId>jackson-jaxrs-json-provider</artifactId>
-			<version>2.10.2.1</version>
+			<version>4.4.3.Final</version>
 		</dependency>
 	</dependencies>
 </project>
