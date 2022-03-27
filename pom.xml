@@ -55,14 +55,15 @@
 		<module>actor4j-data-mongo</module>
 		<module>actor4j-testing</module>
 		<module>actor4j-analyzer</module>
-		<module>actor4j-verification</module>
+		
 		<module>actor4j-benchmark</module>
 		<module>actor4j-examples</module>
 		
 		<module>actor4j-patterns</module>
-		<module>actor4j-apc-actor</module>
 		<module>actor4j-web</module>
 		
 		<module>actor4j-persistence-mongo</module>
+		
+		<module>actor4j-poc</module>
 	</modules>
 </project>
