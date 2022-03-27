@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
 import io.actor4j.web.utils.RemoteActorMessage;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.actor4j.web.utils.rest.databind.RESTActorResponse;
 
 @Path("/sendMessage")
@@ -43,10 +43,10 @@ public class SendMessageResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
     public Response sendMessage(String json) {
-		TransferActorMessage message = null;
+		RemoteActorMessageDTO message = null;
 		String error = null;
 		try {
-			message = new ObjectMapper().readValue(json, TransferActorMessage.class);
+			message = new ObjectMapper().readValue(json, RemoteActorMessageDTO.class);
 		} catch (JsonParseException e) {
 			error =  e.getMessage();
 		} catch (JsonMappingException e) {
@@ -55,10 +55,10 @@ public class SendMessageResource {
 			error =  e.getMessage();
 		}
 		
-		if (message!=null && message.dest!=null)
-			service.sendAsServer(new RemoteActorMessage<Object>(message.value, message.tag, message.source, message.dest));
+		if (message!=null && message.dest()!=null)
+			service.sendAsServer(new RemoteActorMessage<Object>(message.value(), message.tag(), message.source(), message.dest()));
 		
-		if (error==null && message.dest!=null)
+		if (error==null && message.dest()!=null)
 			return Response.status(202).entity(
 					new RESTActorResponse(
 							RESTActorResponse.SUCCESS, 202, "", "The request was accepted and the message was send.")).build();

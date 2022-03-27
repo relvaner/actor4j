@@ -34,8 +34,8 @@ import javax.websocket.WebSocketContainer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.actor4j.web.utils.BulkTransferActorMessage;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.BulkRemoteActorMessageDTO;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.actor4j.web.websocket.endpoints.ActorServerEndpoint;
 
 // @See: https://blogs.oracle.com/pavelbucek/is-websocket-session-really-thread-safe
@@ -127,12 +127,12 @@ public class WebSocketActorClientManager {
 		return sendText(session, id, HAS_ACTOR, uuid);
 	}
 	
-	public static CompletableFuture<String> sendMessage(Session session, TransferActorMessage message) throws IOException, InterruptedException, ExecutionException  {
-		return sendText(session, message.id.toString(), SEND_MESSAGE, new ObjectMapper().writeValueAsString(message));
+	public static CompletableFuture<String> sendMessage(Session session, RemoteActorMessageDTO message) throws IOException, InterruptedException, ExecutionException  {
+		return sendText(session, message.id().toString(), SEND_MESSAGE, new ObjectMapper().writeValueAsString(message));
 	}
 	
-	public static CompletableFuture<String> sendMessage(Session session, BulkTransferActorMessage messages) throws IOException, InterruptedException, ExecutionException {
-		return sendText(session, messages.id.toString(), SEND_BULK_MESSAGE, new ObjectMapper().writeValueAsString(messages));
+	public static CompletableFuture<String> sendMessage(Session session, BulkRemoteActorMessageDTO messages) throws IOException, InterruptedException, ExecutionException {
+		return sendText(session, messages.id().toString(), SEND_BULK_MESSAGE, new ObjectMapper().writeValueAsString(messages));
 	}
 	
 	public static List<UUID> getActorsFromAliasSync(Session session, String id, String alias) throws IOException, InterruptedException, ExecutionException  {
@@ -149,7 +149,7 @@ public class WebSocketActorClientManager {
 		return hasActor(session, id, uuid).get().equals("1")? true:false;
 	}
 	
-	public static Boolean sendMessageSync(Session session, TransferActorMessage message) throws IOException, InterruptedException, ExecutionException  {
+	public static Boolean sendMessageSync(Session session, RemoteActorMessageDTO message) throws IOException, InterruptedException, ExecutionException  {
 		return sendMessage(session, message).get().equals("1")? true:false;
 	}
 }

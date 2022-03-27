@@ -41,7 +41,7 @@ import io.actor4j.core.ActorClientRunnable;
 import io.actor4j.core.ActorServiceNode;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCResponse;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.grpc.ManagedChannel;
 
 public class GrpcActorClientRunnable implements ActorClientRunnable {
@@ -135,7 +135,7 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 		if ((index=cache.getUnchecked(dest))!=-1) {
 			try {
 				ManagedChannel channel = getChannel(serviceNodes.get(index));
-				TransferActorMessage msg = new TransferActorMessage(message.value(), message.tag(), message.source(), dest);
+				RemoteActorMessageDTO msg = new RemoteActorMessageDTO(message.value(), message.tag(), message.source(), dest);
 				ActorGRPCResponse response = GrpcActorClientManager.sendMessage(channel, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.getMessage().equals("1"))
 					logger().log(DEBUG, "Message was not acknowledged.");
@@ -158,7 +158,7 @@ public class GrpcActorClientRunnable implements ActorClientRunnable {
 			dest = (!response.getMessage().equals("null")) ? new ObjectMapper().readValue(response.getMessage(), UUID.class) : null;
 				
 			if (dest!=null) {
-				TransferActorMessage msg = new TransferActorMessage(message.value(), message.tag(), message.source(), dest);
+				RemoteActorMessageDTO msg = new RemoteActorMessageDTO(message.value(), message.tag(), message.source(), dest);
 				response = GrpcActorClientManager.sendMessage(channel, msg).get(2000, TimeUnit.MILLISECONDS);
 				if (!response.getMessage().equals("1"))
 					logger().log(DEBUG, "Message was not acknowledged.");

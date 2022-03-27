@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
 import io.actor4j.web.utils.RemoteActorMessage;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.actor4j.web.utils.rest.databind.COAPActorResponse;
 
 public class SendMessageResource extends COAPActorResource {
@@ -39,10 +39,10 @@ public class SendMessageResource extends COAPActorResource {
 	}
 	
     public void handlePOST(CoapExchange exchange) {
-		TransferActorMessage message = null;
+		RemoteActorMessageDTO message = null;
 		String error = null;
 		try {
-			message = new ObjectMapper().readValue(exchange.getRequestText(), TransferActorMessage.class);
+			message = new ObjectMapper().readValue(exchange.getRequestText(), RemoteActorMessageDTO.class);
 		} catch (JsonParseException e) {
 			error =  e.getMessage();
 		} catch (JsonMappingException e) {
@@ -51,11 +51,11 @@ public class SendMessageResource extends COAPActorResource {
 			error =  e.getMessage();
 		}
 		
-		if (message!=null && message.dest!=null)
-			service.sendAsServer(new RemoteActorMessage<Object>(message.value, message.tag, message.source, message.dest));
+		if (message!=null && message.dest()!=null)
+			service.sendAsServer(new RemoteActorMessage<Object>(message.value(), message.tag(), message.source(), message.dest()));
 		
 		try {
-			if (error==null && message.dest!=null)
+			if (error==null && message.dest()!=null)
 				exchange.respond(
 					CoAP.ResponseCode.CONTENT, 
 					new ObjectMapper().writeValueAsString(new COAPActorResponse(COAPActorResponse.SUCCESS, 202, "", "The request was accepted and the message was send.")),

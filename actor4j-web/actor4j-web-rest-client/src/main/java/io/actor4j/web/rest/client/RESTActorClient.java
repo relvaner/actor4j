@@ -25,7 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.web.rest.client.utils.RESTClient;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.actor4j.web.utils.rest.databind.RESTActorResponse;
 
 public class RESTActorClient extends RESTClient {
@@ -49,7 +49,7 @@ public class RESTActorClient extends RESTClient {
 		return post(client, uri, "sendMessage", "application/json; charset=UTF-8", null, Entity.entity(request, MediaType.APPLICATION_JSON));
 	}
 	
-	public static Response sendMessage(Client client, String uri, TransferActorMessage request) {
+	public static Response sendMessage(Client client, String uri, RemoteActorMessageDTO request) {
 		Response result = null;
 		
 		try {

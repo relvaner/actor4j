@@ -27,7 +27,7 @@ import io.actor4j.web.grpc.ActorGrpcServiceGrpc.ActorGRPCServiceImplBase;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCResponse;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCResponse.Builder;
 import io.actor4j.web.utils.RemoteActorMessage;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.grpc.stub.StreamObserver;
 
 public class ActorGrpcServiceImpl extends ActorGRPCServiceImplBase {
@@ -68,15 +68,15 @@ public class ActorGrpcServiceImpl extends ActorGRPCServiceImplBase {
     			builder.setMessage((uuid!=null) ? uuid.toString() : "null");
     		}; break;
     		case SEND_MESSAGE : {
-    			TransferActorMessage buf = null;
+    			RemoteActorMessageDTO buf = null;
     			try {
-    				buf = new ObjectMapper().readValue(request.getMessage(), TransferActorMessage.class);
+    				buf = new ObjectMapper().readValue(request.getMessage(), RemoteActorMessageDTO.class);
     			} catch (Exception e) {
     				builder.setMessage("0");
     			}
     			
     			if (buf!=null) {
-    				service.sendAsServer(new RemoteActorMessage<Object>(buf.value, buf.tag, buf.source, buf.dest));
+    				service.sendAsServer(new RemoteActorMessage<Object>(buf.value(), buf.tag(), buf.source(), buf.dest()));
     			
     				builder.setMessage("1");
     			}

@@ -32,9 +32,9 @@ import javax.websocket.server.ServerEndpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
-import io.actor4j.web.utils.BulkTransferActorMessage;
+import io.actor4j.web.utils.BulkRemoteActorMessageDTO;
 import io.actor4j.web.utils.RemoteActorMessage;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 
 @ServerEndpoint(value = "/actor4j")
 public abstract class ActorServerEndpoint {
@@ -78,36 +78,36 @@ public abstract class ActorServerEndpoint {
     			result = CLIENT + id + result;
     		}; break;
     		case SEND_MESSAGE : {
-    			TransferActorMessage buf = null;
+    			RemoteActorMessageDTO buf = null;
     			try {
-    				buf = new ObjectMapper().readValue(data, TransferActorMessage.class);
+    				buf = new ObjectMapper().readValue(data, RemoteActorMessageDTO.class);
     			} catch (Exception e) {
     				result = CLIENT + id + "0";
     			}
     			
     			if (buf!=null) {
-    				service.sendAsServer(new RemoteActorMessage<Object>(buf.value, buf.tag, buf.source, buf.dest));
+    				service.sendAsServer(new RemoteActorMessage<Object>(buf.value(), buf.tag(), buf.source(), buf.dest()));
     			
     				result = CLIENT + id + "1";
     			}
     		}; break;
     		case SEND_BULK_MESSAGE : {
-    			BulkTransferActorMessage bulk_buf = null;
+    			BulkRemoteActorMessageDTO bulk_buf = null;
     			try {
-    				bulk_buf = new ObjectMapper().readValue(data, BulkTransferActorMessage.class);
+    				bulk_buf = new ObjectMapper().readValue(data, BulkRemoteActorMessageDTO.class);
     			} catch (Exception e) {
     				result = CLIENT + id + "0";
     			}
     			
     			if (bulk_buf!=null) {
-    				for (TransferActorMessage buf : bulk_buf.value) {
-    					if (buf.dest==null && buf.destPath!=null) {
-    						UUID dest = service.getActorFromPath(buf.destPath);
+    				for (RemoteActorMessageDTO buf : bulk_buf.value()) {
+    					if (buf.dest()==null && buf.destPath()!=null) {
+    						UUID dest = service.getActorFromPath(buf.destPath());
     		    			if (dest!=null)
-    		    				service.sendAsServer(new RemoteActorMessage<Object>(buf.value, buf.tag, buf.source, dest));
+    		    				service.sendAsServer(new RemoteActorMessage<Object>(buf.value(), buf.tag(), buf.source(), dest));
     					}
     					else
-    						service.sendAsServer(new RemoteActorMessage<Object>(buf.value, buf.tag, buf.source, buf.dest));
+    						service.sendAsServer(new RemoteActorMessage<Object>(buf.value(), buf.tag(), buf.source(), buf.dest()));
     				}
     			
     				result = CLIENT + id + "1";

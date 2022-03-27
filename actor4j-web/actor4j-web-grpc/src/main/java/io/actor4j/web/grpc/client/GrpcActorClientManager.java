@@ -33,7 +33,7 @@ import io.actor4j.web.grpc.ActorGrpcServiceGrpc.ActorGRPCServiceFutureStub;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCRequest;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCResponse;
 import io.actor4j.web.grpc.server.ActorGrpcServiceImpl;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -99,8 +99,8 @@ public class GrpcActorClientManager {
 		return sendText(channel, HAS_ACTOR, id, uuid);
 	}
 	
-	public static ListenableFuture<ActorGRPCResponse> sendMessage(ManagedChannel channel, TransferActorMessage message) throws IOException, InterruptedException, ExecutionException  {
-		return sendText(channel, SEND_MESSAGE, message.id.toString(), new ObjectMapper().writeValueAsString(message));
+	public static ListenableFuture<ActorGRPCResponse> sendMessage(ManagedChannel channel, RemoteActorMessageDTO message) throws IOException, InterruptedException, ExecutionException  {
+		return sendText(channel, SEND_MESSAGE, message.id().toString(), new ObjectMapper().writeValueAsString(message));
 	}
 	
 	public static List<UUID> getActorsFromAliasSync(ManagedChannel channel, String id, String alias) throws IOException, InterruptedException, ExecutionException  {
@@ -117,7 +117,7 @@ public class GrpcActorClientManager {
 		return hasActor(channel, id, uuid).get().getMessage().equals("1")? true:false;
 	}
 	
-	public static Boolean sendMessageSync(ManagedChannel channel, TransferActorMessage message) throws IOException, InterruptedException, ExecutionException  {
+	public static Boolean sendMessageSync(ManagedChannel channel, RemoteActorMessageDTO message) throws IOException, InterruptedException, ExecutionException  {
 		return sendMessage(channel, message).get().getMessage().equals("1")? true:false;
 	}
 }

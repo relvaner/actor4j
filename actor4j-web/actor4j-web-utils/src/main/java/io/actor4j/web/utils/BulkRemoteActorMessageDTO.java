@@ -19,25 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-public class BulkTransferActorMessage {
-	public List<TransferActorMessage> value;
-	
-	public UUID id;
-	
-	public BulkTransferActorMessage() {
-		super();
-		value = new LinkedList<>();
-		id = UUID.randomUUID();
+public record BulkRemoteActorMessageDTO(List<RemoteActorMessageDTO> value, UUID id) {
+	public BulkRemoteActorMessageDTO() {
+		this(new LinkedList<>(), UUID.randomUUID());
 	}
 	
-	public BulkTransferActorMessage(List<TransferActorMessage> value) {
-		super();
-		this.value = value;
-		id = UUID.randomUUID();
-	}
-
-	@Override
-	public String toString() {
-		return "BulkTransferActorMessage [value=" + value + ", id=" + id + "]";
+	public BulkRemoteActorMessageDTO(List<RemoteActorMessageDTO> value) {
+		this(value, UUID.randomUUID());
 	}
 }

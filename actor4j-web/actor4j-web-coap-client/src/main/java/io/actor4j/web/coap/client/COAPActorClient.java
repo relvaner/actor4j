@@ -25,7 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.web.coap.client.utils.COAPClient;
-import io.actor4j.web.utils.TransferActorMessage;
+import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.actor4j.web.utils.rest.databind.COAPActorResponse;
 
 public class COAPActorClient extends COAPClient {
@@ -49,7 +49,7 @@ public class COAPActorClient extends COAPClient {
 		return post(client, uri, "sendMessage", request, MediaTypeRegistry.APPLICATION_JSON);
 	}
 	
-	public static CoapResponse sendMessage(CoapClient client, String uri, TransferActorMessage request) {
+	public static CoapResponse sendMessage(CoapClient client, String uri, RemoteActorMessageDTO request) {
 		CoapResponse result = null;
 		
 		try {
