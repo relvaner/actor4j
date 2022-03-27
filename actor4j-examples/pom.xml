@@ -57,7 +57,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-verification</artifactId>
+			<artifactId>actor4j-poc-verification</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
 		<dependency>
@@ -89,7 +89,7 @@
 		
 		<dependency>
 			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-apc-actor</artifactId>
+			<artifactId>actor4j-poc-apc-actor</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
 		
