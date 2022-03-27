@@ -17,8 +17,8 @@
 	</dependencies>
 	
 	<modules>
-		<module>actor4j-verification</module>
+		<module>actor4j-poc-verification</module>
 		
-		<module>actor4j-apc-actor</module>
+		<module>actor4j-poc-apc-actor</module>
 	</modules>
 </project>
