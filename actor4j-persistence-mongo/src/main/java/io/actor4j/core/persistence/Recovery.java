@@ -15,20 +15,59 @@
  */
 package io.actor4j.core.persistence;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Recovery<S extends ActorPersistenceObject, E extends ActorPersistenceObject> extends ActorPersistenceRecoveryObject<S, E>{
-	public Recovery() {
-		super();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static <A extends ActorPersistenceObject, B extends ActorPersistenceObject> Recovery<A, B> convertValue(String json, TypeReference<?> valueTypeRef) {
-		return (Recovery<A, B>)ActorPersistenceRecoveryObject.convertValue(json, valueTypeRef);
-	}
-
+public record Recovery<S, E>(ActorPersistenceDTO<S> state, List<ActorPersistenceDTO<E>> events) {
 	@Override
 	public String toString() {
 		return "Recovery [state=" + state + ", events=" + events + "]";
+	}
+	
+	public static boolean isError(String json) {
+		boolean result = false;
+		try {
+			JSONObject obj = new JSONObject(json);
+			result = obj.has("error");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	public static String getErrorMsg(String json) {
+		String result = null;
+		try {
+			JSONObject obj = new JSONObject(json);
+			result = obj.getString("error");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <A, B> Recovery<A, B> convertValue(String json, TypeReference<?> valueTypeRef) {
+		Recovery<A, B> result = null;
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		try {
+			result = (Recovery<A, B>)objectMapper.readValue(json, valueTypeRef);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return result;
 	}
 }

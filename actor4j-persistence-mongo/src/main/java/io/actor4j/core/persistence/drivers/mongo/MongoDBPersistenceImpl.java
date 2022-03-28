@@ -34,7 +34,7 @@ import com.mongodb.client.model.WriteModel;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.persistence.ActorPersistenceObject;
+import io.actor4j.core.persistence.ActorPersistenceDTO;
 import io.actor4j.core.persistence.drivers.PersistenceDriver;
 import io.actor4j.core.persistence.drivers.PersistenceImpl;
 
@@ -82,7 +82,7 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 		if (message.tag()==PERSIST_EVENTS) {
 			try {
 				@SuppressWarnings("unchecked")
-				String json = new ObjectMapper().writeValueAsString(((ImmutableList<ActorPersistenceObject>)message.value()).get()); // temporary
+				String json = new ObjectMapper().writeValueAsString(((ImmutableList<ActorPersistenceDTO<?>>)message.value()).get()); // temporary
 				
 				JSONArray array = new JSONArray(json);
 				if (array.length()==1) {

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 package io.actor4j.examples.persistence;
+
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.drivers.mongo.MongoDBPersistenceDriver;
 
@@ -29,42 +29,10 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class ExamplePersistence {
-	static class MyState extends ActorPersistenceObject {
-		public String title;
-		
-		public MyState() {
-			super();
-		}
-
-		public MyState(String title) {
-			super();
-			this.title = title;
-		}
-
-		@Override
-		public String toString() {
-			return "MyState [title=" + title + ", persistenceId=" + persistenceId + ", timeStamp=" + timeStamp
-					+ ", index=" + index + "]";
-		}
+	static record MyState(String title) {
 	}
 	
-	static class MyEvent extends ActorPersistenceObject {
-		public String title;
-		
-		public MyEvent() {
-			super();
-		}
-
-		public MyEvent(String title) {
-			super();
-			this.title = title;
-		}
-
-		@Override
-		public String toString() {
-			return "MyEvent [title=" + title + ", persistenceId=" + persistenceId + ", timeStamp=" + timeStamp
-					+ ", index=" + index + "]";
-		}
+	static record MyEvent(String title) {
 	}
 	
 	public ExamplePersistence() {
@@ -91,7 +59,7 @@ public class ExamplePersistence {
 			public void recover(String json) {
 				if (!Recovery.isError(json)) {
 					logger().log(DEBUG, String.format("Recovery: %s", json));
-					Recovery<MyState, MyEvent> obj = Recovery.convertValue(json, new TypeReference<Recovery<MyState, MyEvent>>(){});
+					Recovery<MyState, MyEvent> obj =  Recovery.convertValue(json, new TypeReference<Recovery<MyState, MyEvent>>(){});
 					logger().log(DEBUG, String.format("Recovery: %s", obj.toString()));
 				}
 				else

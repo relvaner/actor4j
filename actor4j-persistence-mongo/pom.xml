@@ -30,7 +30,7 @@
 			<artifactId>actor4j-core</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
-		
+
 		<dependency>
       		<groupId>com.fasterxml.jackson.jaxrs</groupId>
       		<artifactId>jackson-jaxrs-json-provider</artifactId>

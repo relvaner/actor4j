@@ -20,7 +20,6 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.persistence.ActorPersistenceObject;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.drivers.mongo.MongoDBPersistenceDriver;
 
@@ -39,42 +38,10 @@ import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
 public class PersistenceFeature {
-	static class MyState extends ActorPersistenceObject {
-		public String title;
-		
-		public MyState() {
-			super();
-		}
-
-		public MyState(String title) {
-			super();
-			this.title = title;
-		}
-
-		@Override
-		public String toString() {
-			return "MyState [title=" + title + ", persistenceId=" + persistenceId + ", timeStamp=" + timeStamp
-					+ ", index=" + index + "]";
-		}
+	static record MyState(String title) {
 	}
 	
-	static class MyEvent extends ActorPersistenceObject {
-		public String title;
-		
-		public MyEvent() {
-			super();
-		}
-
-		public MyEvent(String title) {
-			super();
-			this.title = title;
-		}
-
-		@Override
-		public String toString() {
-			return "MyEvent [title=" + title + ", persistenceId=" + persistenceId + ", timeStamp=" + timeStamp
-					+ ", index=" + index + "]";
-		}
+	static record MyEvent(String title) {
 	}
 	
 	//@Ignore("Works only until MongoDB Java Driver 3.6.4, with Fongo 2.2.0-RC2")
@@ -124,11 +91,11 @@ public class PersistenceFeature {
 					if (first.get())
 						assertEquals("{\"state\":{}}", json);
 					else {
-						assertEquals("I am the second state!", obj.state.title);
-						assertTrue(obj.events.size()==3);
-						assertEquals("I am the second event!", obj.events.get(0).title);
-						assertEquals("I am the third event!", obj.events.get(1).title);
-						assertEquals("I am the fourth event!", obj.events.get(2).title);
+						assertEquals("I am the second state!", obj.state().value().title());
+						assertTrue(obj.events().size()==3);
+						assertEquals("I am the second event!", obj.events().get(0).value().title());
+						assertEquals("I am the third event!", obj.events().get(1).value().title());
+						assertEquals("I am the fourth event!", obj.events().get(2).value().title());
 					}
 					testDone.countDown();
 				}
