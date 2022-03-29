@@ -99,7 +99,7 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 	@Override
 	public ActorMessage<T> copy() {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) /*|| value instanceof Record*/ || value instanceof Shareable)
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
 				return this;
 			else if (value instanceof DeepCopyable)
 				return new FutureActorMessage<T>(future, ((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
@@ -116,7 +116,7 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 	@Override
 	public ActorMessage<T> copy(UUID dest) {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) /*|| value instanceof Record*/ || value instanceof Shareable)
+			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
 				return !ActorMessageUtils.equals(this.dest, dest) ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
 			else if (value instanceof DeepCopyable)
 				return new FutureActorMessage<T>(future,((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
