@@ -53,7 +53,7 @@ public class BrokerActor extends Actor {
 			if (message.value() instanceof Topic) {
 				int tag = message.tag();
 				
-				final String topic = ((Topic)message.value()).topic;
+				final String topic = ((Topic)message.value()).topic();
 				UUID dest = topics.get(topic);
 				if (dest==null) {
 					if (message.value() instanceof Unsubscribe)

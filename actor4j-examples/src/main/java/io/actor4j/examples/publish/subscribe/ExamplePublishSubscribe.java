@@ -38,13 +38,13 @@ public class ExamplePublishSubscribe {
 		UUID subscriberA = system.addActor(() -> new Actor("subscriberA") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value()));
 			}
 		});
 		UUID subscriberB = system.addActor(() -> new Actor("subscriberB") {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value()));
 			}
 		});
 		

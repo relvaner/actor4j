@@ -33,7 +33,7 @@ public class TopicActor extends Actor {
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null) {
-			String buf = ((Topic)message.value()).topic;
+			String buf = ((Topic)message.value()).topic();
 			if (topic.equals(buf)) {
 				if (message.value() instanceof Publish)
 					hub.broadcast(message);

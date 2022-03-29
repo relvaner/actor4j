@@ -47,8 +47,8 @@ public class PubSubFeature {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
-				assertEquals(values[i], ((Publish<?>)message.value()).value);
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value()));
+				assertEquals(values[i], ((Publish<?>)message.value()).value());
 				i++;
 				if (i==values.length)
 					testDone.countDown();
@@ -58,8 +58,8 @@ public class PubSubFeature {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value));
-				assertEquals(values[i], ((Publish<?>)message.value()).value);
+				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value()));
+				assertEquals(values[i], ((Publish<?>)message.value()).value());
 				i++;
 				if (i==values.length)
 					testDone.countDown();

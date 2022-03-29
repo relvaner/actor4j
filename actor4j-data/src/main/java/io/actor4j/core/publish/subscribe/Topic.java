@@ -15,13 +15,6 @@
  */
 package io.actor4j.core.publish.subscribe;
 
-import io.actor4j.core.utils.Shareable;
-
-public class Topic implements Shareable {
-	public final String topic;
-
-	public Topic(String topic) {
-		super();
-		this.topic = topic;
-	}
+public interface Topic {
+	public String topic();
 }

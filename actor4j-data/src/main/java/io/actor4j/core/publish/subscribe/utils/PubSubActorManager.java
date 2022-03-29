@@ -48,7 +48,7 @@ public class PubSubActorManager<T> {
 	@SuppressWarnings("unchecked")
 	public ActorOptional<T> get(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof Publish)
-			return ActorOptional.of(((Publish<T>)message.value()).value);
+			return ActorOptional.of(((Publish<T>)message.value()).value());
 		else
 			return ActorOptional.none();
 	}

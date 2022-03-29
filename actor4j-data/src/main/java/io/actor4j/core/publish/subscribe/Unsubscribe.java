@@ -15,8 +15,5 @@
  */
 package io.actor4j.core.publish.subscribe;
 
-public class Unsubscribe extends Topic {
-	public Unsubscribe(String topic) {
-		super(topic);
-	}
+public record Unsubscribe(String topic) implements Topic {
 }

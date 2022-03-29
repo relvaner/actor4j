@@ -15,11 +15,5 @@
  */
 package io.actor4j.core.publish.subscribe;
 
-public class Publish<T> extends Topic {
-	public final T value;
-	
-	public Publish(String topic, T value) {
-		super(topic);
-		this.value = value;
-	}
+public record Publish<T>(String topic, T value) implements Topic {
 }

@@ -15,8 +15,5 @@
  */
 package io.actor4j.core.publish.subscribe;
 
-public class Subscribe extends Topic {
-	public Subscribe(String topic) {
-		super(topic);
-	}
+public record Subscribe(String topic) implements Topic {
 }
