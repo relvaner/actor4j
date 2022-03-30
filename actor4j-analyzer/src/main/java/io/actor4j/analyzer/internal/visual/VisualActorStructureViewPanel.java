@@ -18,6 +18,8 @@ package io.actor4j.analyzer.internal.visual;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -153,8 +155,14 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 					
 					if (child.getActor().getName()!=null)
 						childVertex = addVertex(child.getActor().getName(), color);
-					else
-						childVertex = addVertex(child.getId().toString(), color);
+					else {
+    					Optional<Entry<String, Queue<UUID>>> optional = system.getAliases().entrySet()
+    						.stream().filter((entry) -> entry.getValue().contains(child.getId())).findFirst();
+    					if (optional.isPresent())
+    						childVertex = addVertex(optional.get().getKey(), color);
+    					else
+    						childVertex = addVertex(child.getId().toString(), color);
+    				}	
 				
 					addEdge(null, parentVertex, childVertex);
 					

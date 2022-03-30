@@ -29,6 +29,8 @@ import io.actor4j.core.internal.InternalActorCell;
 import io.actor4j.core.internal.InternalActorSystem;
 
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingConstants;
@@ -91,8 +93,14 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
     				Object vertex;
     				if (actorCell.getActor().getName()!=null)
     					vertex = addVertex(actorCell.getActor().getName(), color);
-    				else
-    					vertex = addVertex(actorCell.getId().toString(), color);
+    				else {
+    					Optional<Entry<String, Queue<UUID>>> optional = system.getAliases().entrySet()
+    						.stream().filter((entry) -> entry.getValue().contains(actorCell.getId())).findFirst();
+    					if (optional.isPresent())
+    						vertex = addVertex(optional.get().getKey(), color);
+    					else
+    						vertex = addVertex(actorCell.getId().toString(), color);
+    				}	
     			
     				cells.put(actorCell.getId(), vertex);
     				changed = true;
