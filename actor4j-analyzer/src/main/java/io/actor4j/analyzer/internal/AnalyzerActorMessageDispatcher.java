@@ -16,8 +16,8 @@
 package io.actor4j.analyzer.internal;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 
 import io.actor4j.core.internal.ActorSystemImpl;
@@ -32,38 +32,49 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 
 	@Override
 	public void post(ActorMessage<?> message, UUID source, String alias) {
+		
+		UUID dest = message.dest();
 		if (alias!=null) {
 			List<UUID> destinations = system.getActorsFromAlias(alias);
 
-			UUID dest = null;
+			dest = null;
 			if (!destinations.isEmpty()) {
 				if (destinations.size()==1)
 					dest = destinations.get(0);
-				else {
-					Random random = new Random();
-					dest = destinations.get(random.nextInt(destinations.size()));
-				}
+				else
+					dest = destinations.get(ThreadLocalRandom.current().nextInt(destinations.size()));
 			}
-			message = message.shallowCopy((dest!=null) ? dest : UUID_ALIAS);
+			if (dest==null)
+				dest = UUID_ALIAS;
 		}
-		analyze(message);
+		UUID redirect = system.getRedirector().get(dest);
+		if (redirect!=null) 
+			dest = redirect;
+		analyze(alias==null && redirect==null ? message.copy() : message.copy(dest));
+		
 		super.post(message, source, alias);
 	}
 	
 	@Override
 	protected void postQueue(ActorMessage<?> message, BiConsumer<ActorThread, ActorMessage<?>> biconsumer) {
-		analyze(message);
+		analyze(message.copy());
 		super.postQueue(message, biconsumer);
 	}
 	
 	@Override
 	public void postOuter(ActorMessage<?> message) {
-		analyze(message);
+		analyze(message.copy());
 		super.postOuter(message);
+	}
+	
+	@Override
+	public void postServer(ActorMessage<?> message) {
+		analyze(message.copy());
+		super.postServer(message);
 	}
 	
 	protected void analyze(ActorMessage<?> message) {
 		if (message!=null && ((AnalyzerActorSystemImpl)system).getAnalyzeMode().get())
-				((AnalyzerActorSystemImpl)system).getAnalyzerThread().getOuterQueue().offer(message.copy());
+				((AnalyzerActorSystemImpl)system).getAnalyzerThread().getOuterQueue().offer(message);
 	}
 }
