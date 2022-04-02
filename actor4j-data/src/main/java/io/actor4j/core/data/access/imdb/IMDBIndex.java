@@ -30,7 +30,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class IndexObject<K, V> {
+public class IMDBIndex<K, V> {
 	public String name;
 	
 	public Map<Object, Set<K>> map;
@@ -49,11 +49,11 @@ public class IndexObject<K, V> {
 	// removes entry of data of the index
 	public BiConsumer<K, V> removed;
 	 
-	public IndexObject(String name) {
+	public IMDBIndex(String name) {
 		this.name = name;
 	}
 
-	public IndexObject<K, V> create(BiFunction<K, V, Object> function) {
+	public IMDBIndex<K, V> create(BiFunction<K, V, Object> function) {
 		if (function!=null) {
 			create = (data) -> { 
 				Map<Object, Set<K>> map = new TreeMap<>();
@@ -79,37 +79,37 @@ public class IndexObject<K, V> {
 		return this;
 	}
 	
-	public IndexObject<K, V> get() {
+	public IMDBIndex<K, V> get() {
 		get = (data, key) -> map.get(key).stream().map((k) -> data.get(k));
 		
 		return this;
 	}
 	
-	public IndexObject<K, V> get(Function<K, V> function) {
+	public IMDBIndex<K, V> get(Function<K, V> function) {
 		get = (data, key) -> map.get(key).stream().map((k) -> function.apply(k));
 		
 		return this;
 	}
 	
-	public IndexObject<K, V> set() {
+	public IMDBIndex<K, V> set() {
 		set = (entry) -> map.put(entry.getKey(), entry.getValue());
 		
 		return this;
 	}
 	
-	public IndexObject<K, V> remove() {
+	public IMDBIndex<K, V> remove() {
 		remove = (key) -> map.remove(key);
 		
 		return this;
 	}
 	
-	public IndexObject<K, V> reduce(BiFunction<Object, Set<K>, Object> function, BinaryOperator<Object> accumulator) {
+	public IMDBIndex<K, V> reduce(BiFunction<Object, Set<K>, Object> function, BinaryOperator<Object> accumulator) {
 		reduce = () -> map.entrySet().stream().map((entry) -> function.apply(entry.getKey(), entry.getValue())).reduce(accumulator);
 		
 		return this;
 	}
 	
-	public IndexObject<K, V> setd(BiFunction<K, V, Object> function) {
+	public IMDBIndex<K, V> setd(BiFunction<K, V, Object> function) {
 		setd = (k, v) -> {
 			Object key = function.apply(k, v);
 			
@@ -126,7 +126,7 @@ public class IndexObject<K, V> {
 		return this;
 	}
 	
-	public IndexObject<K, V> removed(BiFunction<K, V, Object> function) {
+	public IMDBIndex<K, V> removed(BiFunction<K, V, Object> function) {
 		removed = (k, v) -> {
 			Object key = function.apply(k, v);
 			

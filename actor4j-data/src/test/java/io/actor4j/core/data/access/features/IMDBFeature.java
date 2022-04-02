@@ -18,7 +18,7 @@ package io.actor4j.core.data.access.features;
 import org.junit.Test;
 
 import io.actor4j.core.data.access.imdb.IMDB;
-import io.actor4j.core.data.access.imdb.IndexObject;
+import io.actor4j.core.data.access.imdb.IMDBIndex;
 
 import static org.junit.Assert.*;
 
@@ -31,7 +31,7 @@ public class IMDBFeature {
 		imdb.getData().put("3", "Erde");
 		imdb.getData().put("4", "Mond");
 		
-		IndexObject<String, String> soundex = new IndexObject<>("soundex");
+		IMDBIndex<String, String> soundex = new IMDBIndex<>("soundex");
 		soundex
 			.create((k, v) -> v.toUpperCase())
 			.get()
@@ -61,7 +61,7 @@ public class IMDBFeature {
 		imdb.getData().put("3", "Erde");
 		imdb.getData().put("4", "Mond");
 		
-		IndexObject<String, String> soundex = new IndexObject<>("soundex");
+		IMDBIndex<String, String> soundex = new IMDBIndex<>("soundex");
 		soundex
 			.create((k, v) -> v.toUpperCase())
 			.get()
