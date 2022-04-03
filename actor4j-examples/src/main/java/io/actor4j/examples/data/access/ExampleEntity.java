@@ -15,16 +15,5 @@
  */
 package io.actor4j.examples.data.access;
 
-public class ExampleObject {
-	public String key;
-	public String value;
-	
-	public ExampleObject() {
-		super();
-	}
-
-	public ExampleObject(String key, String value) {
-		this.key = key;
-		this.value = value;
-	}
+public record ExampleEntity(String key, String value) {
 }

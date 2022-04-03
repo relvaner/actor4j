@@ -36,17 +36,17 @@ public class ExamplePersistentCache {
 		final int INSTANCES = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		
 		system.addActor(() -> new Actor("manager") {
-			protected PersistentActorCacheManager<String, ExampleObject> manager;
+			protected PersistentActorCacheManager<String, ExampleEntity> manager;
 			@Override 
 			public void preStart() {
-				UUID dataAccess = addChild(() -> new MongoDataAccessActor<String, ExampleObject>("dc", mongoClient, "actor4j-test", ExampleObject.class));
+				UUID dataAccess = addChild(() -> new MongoDataAccessActor<String, ExampleEntity>("dc", mongoClient, "actor4j-test", ExampleEntity.class));
 				
-				manager = new PersistentActorCacheManager<String, ExampleObject>(this, "cache", "key", "cache");
+				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", "key", "cache");
 				addChild(manager.create(INSTANCES, 500, dataAccess));
 				
-				manager.set("key1", new ExampleObject("key1", "value1"));
-				manager.set("key2", new ExampleObject("key2", "value2"));
-				manager.set("key3", new ExampleObject("key3", "value3"));
+				manager.set("key1", new ExampleEntity("key1", "value1"));
+				manager.set("key2", new ExampleEntity("key2", "value2"));
+				manager.set("key3", new ExampleEntity("key3", "value3"));
 			}
 			
 			@Override
@@ -65,18 +65,18 @@ public class ExamplePersistentCache {
 		
 		CountDownLatch done = new CountDownLatch(1);
 		system.addActor(() -> new Actor("client") {
-			protected PersistentActorCacheManager<String, ExampleObject> manager;
+			protected PersistentActorCacheManager<String, ExampleEntity> manager;
 			@Override 
 			public void preStart() {
-				manager = new PersistentActorCacheManager<String, ExampleObject>(this, "cache", "key", "cache");
+				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", "key", "cache");
 				manager.get("key2");
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				Pair<String, ExampleObject> pair = manager.get(message);
+				Pair<String, ExampleEntity> pair = manager.get(message);
 				if (pair!=null) {
-					System.out.printf("value for '%s': %s%n", pair.a(), pair.b().value);
+					System.out.printf("value for '%s': %s%n", pair.a(), pair.b().value());
 					done.countDown();
 				}
 			}
