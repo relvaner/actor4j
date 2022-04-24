@@ -21,7 +21,6 @@ import java.io.IOException;
 
 import io.actor4j.core.ActorService;
 import io.actor4j.core.config.ActorServiceConfig;
-import io.actor4j.web.grpc.client.GrpcActorClientRunnable;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
@@ -29,20 +28,17 @@ public abstract class ActorGrpcServer {
 	protected ActorService service;
 	protected Server server;
 	
-	public ActorService getService() {
-		return service;
-	}
+	protected abstract ActorService getService();
 
 	public void start(String name, int port) {
 		this.start(name, port, () -> service.start());
 	}
 	
 	public void start(String name, int port, Runnable onStartup) {
-		service = ActorService.create();
+		service = getService();
 		deploy(service);
 		ActorServiceConfig config = ActorServiceConfig.builder((ActorServiceConfig)service.getConfig())
 			.name(name)
-			.clientRunnable(new GrpcActorClientRunnable(service.getConfig().serviceNodes(), service.getConfig().parallelism()*service.getConfig().parallelismFactor(), 10000))
 			.build();
 		service.setConfig(config);
 		
@@ -69,7 +65,6 @@ public abstract class ActorGrpcServer {
 		}
 		
 		service.shutdownWithActors(true);
-		((GrpcActorClientRunnable)service.getConfig().clientRunnable()).closeAll();
 		logger().info(String.format("%s - Service stopped...", service.getConfig().name()));
 	}
 }
