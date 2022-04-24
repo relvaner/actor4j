@@ -38,10 +38,10 @@ import io.actor4j.core.persistence.ActorPersistenceDTO;
 import io.actor4j.core.persistence.drivers.PersistenceDriver;
 import io.actor4j.core.persistence.drivers.PersistenceImpl;
 
-import static io.actor4j.core.internal.persistence.actor.PersistenceServiceActor.*;
-import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_FAILURE;
-import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_RECOVER;
-import static io.actor4j.core.internal.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
+import static io.actor4j.core.runtime.persistence.actor.PersistenceServiceActor.*;
+import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_FAILURE;
+import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_RECOVER;
+import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
 
 public class MongoDBPersistenceImpl extends PersistenceImpl {
 	protected MongoDatabase database;

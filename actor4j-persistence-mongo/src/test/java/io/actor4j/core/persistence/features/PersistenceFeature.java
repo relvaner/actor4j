@@ -15,6 +15,7 @@
  */
 package io.actor4j.core.persistence.features;
 
+import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PersistentActor;
@@ -52,7 +53,7 @@ public class PersistenceFeature {
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.persistenceMode(new MongoDBPersistenceDriver("localhost", 27027, "actor4j-test"))
 			.build();
-		ActorSystem system = ActorSystem.create(config);
+		ActorSystem system = ActorSystem.create(ActorRuntime.factory(), config);
 		
 		AtomicBoolean first = new AtomicBoolean(true);
 		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
