@@ -41,7 +41,7 @@ public class VolatileCacheFeature {
 
 	@Test(timeout=5000)
 	public void test_primary_secondary_volatile_cache_actor() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(AllFeaturesTest.factory());
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(12);
@@ -165,7 +165,7 @@ public class VolatileCacheFeature {
 
 	@Test(timeout=5000)
 	public void test_primary_secondary_volatile_cache_actor_with_manager() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(AllFeaturesTest.factory());
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(12);

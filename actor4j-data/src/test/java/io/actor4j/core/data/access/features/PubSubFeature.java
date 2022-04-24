@@ -36,7 +36,7 @@ import io.actor4j.core.publish.subscribe.utils.PubSubActorManager;
 public class PubSubFeature {
 	@Test(timeout=5000)
 	public void test_pub_sub() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(AllFeaturesTest.factory());
 		
 		CountDownLatch testDone = new CountDownLatch(2);
 		
@@ -101,7 +101,7 @@ public class PubSubFeature {
 	
 	@Test(timeout=5000)
 	public void test_pub_sub_with_manager() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(AllFeaturesTest.factory());
 		
 		CountDownLatch testDone = new CountDownLatch(2);
 		

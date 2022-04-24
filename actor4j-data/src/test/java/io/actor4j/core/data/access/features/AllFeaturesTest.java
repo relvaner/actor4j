@@ -17,6 +17,14 @@ package io.actor4j.core.data.access.features;
 
 import org.junit.runners.Suite;
 
+import io.actor4j.core.ActorRuntime;
+import io.actor4j.core.ActorSystemFactory;
+
+import static io.actor4j.core.logging.ActorLogger.ERROR;
+import static io.actor4j.core.logging.ActorLogger.logger;
+import static io.actor4j.core.logging.ActorLogger.systemLogger;
+
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 
 @RunWith(Suite.class)
@@ -27,5 +35,13 @@ import org.junit.runner.RunWith;
 	PubSubFeature.class
 })
 public class AllFeaturesTest {
-
+	@BeforeClass
+	public static void beforeClass() {
+		systemLogger().setLevel(ERROR);
+		logger().setLevel(ERROR);
+	}
+	
+	public static ActorSystemFactory factory() {
+		return ActorRuntime.factory();
+	}
 }
