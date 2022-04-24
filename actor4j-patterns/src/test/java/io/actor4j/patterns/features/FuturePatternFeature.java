@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
+import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
@@ -35,7 +36,7 @@ public class FuturePatternFeature {
 	public void test() {
 		CountDownLatch testDone = new CountDownLatch(2);
 		
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ActorRuntime.factory());
 		
 		UUID parent = system.addActor(() -> new Actor("parent") {
 			protected Future<String> future;
