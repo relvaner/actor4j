@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.testing.internal;
+package io.actor4j.testing.runtime;
 
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
-import io.actor4j.core.internal.ActorSystemImpl;
-import io.actor4j.core.internal.ActorThread;
-import io.actor4j.core.internal.DefaultActorMessageDispatcher;
+import io.actor4j.core.runtime.ActorSystemImpl;
+import io.actor4j.core.runtime.ActorThread;
+import io.actor4j.core.runtime.DefaultActorMessageDispatcher;
 import io.actor4j.core.messages.ActorMessage;
 
 public class TestActorMessageDispatcher extends DefaultActorMessageDispatcher {

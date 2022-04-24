@@ -25,7 +25,7 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.testing.config.TestSystemConfig;
-import io.actor4j.testing.internal.TestSystemImpl;
+import io.actor4j.testing.runtime.TestSystemImpl;
 
 public interface TestSystem extends ActorSystem {
 	public static TestSystem create() {

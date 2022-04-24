@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.testing.internal;
+package io.actor4j.testing.runtime;
 
 import java.util.Iterator;
 import java.util.List;
@@ -28,8 +28,8 @@ import io.actor4j.bdd.Story;
 import io.actor4j.core.ActorCell;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
-import io.actor4j.core.internal.DefaultActorSystemImpl;
-import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.runtime.DefaultActorSystemImpl;
+import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.testing.ActorTest;
 import io.actor4j.testing.TestSystem;
