@@ -24,6 +24,7 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.core.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
@@ -32,7 +33,7 @@ public class ExamplePersistentCache {
 		MongoClient mongoClient = new MongoClient("localhost", 27017);
 		mongoClient.getDatabase("actor4j-test").drop();
 		
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		final int INSTANCES = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		
 		system.addActor(() -> new Actor("manager") {

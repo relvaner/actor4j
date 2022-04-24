@@ -27,10 +27,11 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.corex.actors.PseudoActorWithRx;
+import io.actor4j.examples.shared.ExamplesSettings;
 
 public class ExamplePseudo {
 	public ExamplePseudo() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		PseudoActorWithRx main = new PseudoActorWithRx(system, false) {
 			@Override

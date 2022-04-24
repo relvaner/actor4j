@@ -31,6 +31,7 @@ import com.rabbitmq.client.Envelope;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.web.amqp.AMQPPublish;
 import io.actor4j.web.amqp.AMQPResourceActor;
 
@@ -38,7 +39,7 @@ public class ExampleAMQP {
 	public ExampleAMQP() {
 		super();
 		
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		CountDownLatch done = new CountDownLatch(2);
 		

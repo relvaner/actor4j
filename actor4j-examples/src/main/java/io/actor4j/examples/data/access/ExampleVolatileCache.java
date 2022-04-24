@@ -21,11 +21,12 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 
 public class ExampleVolatileCache {
 	public ExampleVolatileCache() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		final int INSTANCES = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		
 		system.addActor(() -> new Actor("manager") {

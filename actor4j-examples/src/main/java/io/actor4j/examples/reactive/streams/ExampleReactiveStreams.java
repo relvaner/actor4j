@@ -26,10 +26,11 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.reactive.streams.PublisherActor;
 import io.actor4j.core.reactive.streams.SubscriberActor;
+import io.actor4j.examples.shared.ExamplesSettings;
 
 public class ExampleReactiveStreams {
 	public ExampleReactiveStreams() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		UUID publisher = system.addActor(() -> new PublisherActor("publisher") {
 			@Override

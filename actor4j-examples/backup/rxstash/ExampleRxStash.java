@@ -22,13 +22,14 @@ import java.util.concurrent.TimeUnit;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.corex.actors.ActorWithRxStash;
+import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorMessageMatcher;
 
 public class ExampleRxStash {
 	public ExampleRxStash() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		UUID receiver = system.addActor(new ActorFactory() {
 			@Override

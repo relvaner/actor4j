@@ -21,6 +21,7 @@ import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.drivers.mongo.MongoDBPersistenceDriver;
+import io.actor4j.examples.shared.ExamplesSettings;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 
@@ -39,7 +40,7 @@ public class ExamplePersistence {
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.persistenceMode(new MongoDBPersistenceDriver("localhost", 27017, "actor4j"))
 			.build();
-		ActorSystem system = ActorSystem.create(config);
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
 		
 		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
 			@Override

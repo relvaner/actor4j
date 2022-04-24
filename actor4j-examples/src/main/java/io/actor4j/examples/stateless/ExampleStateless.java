@@ -24,13 +24,14 @@ import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
+import io.actor4j.examples.shared.ExamplesSettings;
 
 public class ExampleStateless {
 	public ExampleStateless() {
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.parallelism(2)
 			.build();
-		ActorSystem system = ActorSystem.create(config);
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
 		
 		ActorGroup group = new ActorGroupSet();
 		system.setAlias(system.addActor(() -> new ActorWithDistributedGroup(group) {

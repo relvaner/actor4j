@@ -28,6 +28,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.web.mqtt.MQTTPublish;
 import io.actor4j.web.mqtt.MQTTResourceActor;
 
@@ -35,7 +36,7 @@ public class ExampleMQTT {
 	public ExampleMQTT() {
 		super();
 		
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		CountDownLatch done = new CountDownLatch(2);
 		

@@ -20,11 +20,12 @@ import java.util.UUID;
 import io.actor4j.core.ActorService;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.web.coap.server.COAPActorService;
 
 public class ExampleServerCoap {
 	public static void main(String[] args) {
-		ActorService actorService = ActorService.create();
+		ActorService actorService = ActorService.create(ExamplesSettings.factory());
 		UUID coap = actorService.addActor(() -> new Actor() {
 			@Override
 			public void receive(ActorMessage<?> message) {

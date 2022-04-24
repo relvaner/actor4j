@@ -28,10 +28,11 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.publish.subscribe.BrokerActor;
 import io.actor4j.core.publish.subscribe.Publish;
 import io.actor4j.core.publish.subscribe.Subscribe;
+import io.actor4j.examples.shared.ExamplesSettings;
 
 public class ExamplePublishSubscribe {
 	public ExamplePublishSubscribe() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		UUID broker = system.addActor(() -> new BrokerActor());
 		

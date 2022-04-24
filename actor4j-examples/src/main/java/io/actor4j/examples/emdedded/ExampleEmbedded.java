@@ -23,12 +23,13 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.EmbeddedActor;
 import io.actor4j.core.actors.EmbeddedHostActor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.examples.shared.ExamplesSettings;
 
 public class ExampleEmbedded {
 	protected final int SWAP=22;
 	
 	public ExampleEmbedded() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		UUID host = system.addActor(() -> new EmbeddedHostActor("host") {
 			protected EmbeddedActor client;
