@@ -34,7 +34,6 @@
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core-runtime</artifactId>
 			<version>${actor4j.version}</version>
-			<scope>>test</scope>
 		</dependency>
 		
 		<dependency>
