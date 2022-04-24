@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 import io.actor4j.core.config.ActorSystemConfig;
-import io.actor4j.core.internal.DefaultActorSystemImpl;
+import io.actor4j.core.runtime.DefaultActorSystemImpl;
 
 public class APCActorSystemImpl extends DefaultActorSystemImpl implements APCActorSystem {
 	protected final Map<UUID, CompletableFuture<?>> futureMap = new ConcurrentHashMap<>();

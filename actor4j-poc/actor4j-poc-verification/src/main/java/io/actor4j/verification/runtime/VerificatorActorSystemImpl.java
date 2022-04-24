@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.verification.internal;
+package io.actor4j.verification.runtime;
 
 import java.util.function.Consumer;
 
@@ -21,8 +21,8 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
-import io.actor4j.core.internal.DefaultActorSystemImpl;
-import io.actor4j.core.internal.InternalActorCell;
+import io.actor4j.core.runtime.DefaultActorSystemImpl;
+import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.verification.ActorVerification;
 import io.actor4j.verification.ActorVerificationEdge;
 import io.actor4j.verification.ActorVerificationSM;

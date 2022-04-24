@@ -22,7 +22,7 @@ import org.jgrapht.Graph;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.verification.config.ActorVerificationConfig;
-import io.actor4j.verification.internal.VerificatorActorSystemImpl;
+import io.actor4j.verification.runtime.VerificatorActorSystemImpl;
 
 public interface ActorVerificator extends ActorSystem {
 	public static ActorVerificator create() {
