@@ -23,6 +23,7 @@ import com.mongodb.MongoClient;
 
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
+import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorWithCache;
@@ -71,7 +72,7 @@ public class PersistentCacheFeature {
 	
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ActorRuntime.factory());
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
@@ -139,7 +140,7 @@ public class PersistentCacheFeature {
 	
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor_with_manager() {
-		ActorSystem system = ActorSystem.create();
+		ActorSystem system = ActorSystem.create(ActorRuntime.factory());
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
