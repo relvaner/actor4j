@@ -17,7 +17,7 @@ package actor4j.benchmark.samples.ring.nfold.embedded;
 
 import io.actor4j.core.actors.EmbeddedActor;
 import io.actor4j.core.actors.EmbeddedHostActor;
-import io.actor4j.core.internal.ActorThread;
+import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.messages.ActorMessage;
 
 import java.util.UUID;
@@ -33,7 +33,7 @@ public class Forwarder extends EmbeddedActor {
 
 	@Override
 	public boolean receive(ActorMessage<?> message) {
-		((ActorThread)Thread.currentThread()).getCounter().getAndIncrement();
+		((ActorThread)Thread.currentThread()).getCounter().getAndIncrement(); // TODO: for other runtimes
 		if (next!=null)
 			send(message, next);
 		else 

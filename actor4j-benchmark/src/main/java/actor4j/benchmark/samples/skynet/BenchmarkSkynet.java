@@ -27,7 +27,7 @@ import actor4j.benchmark.BenchmarkSampleActor4j;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
-import io.actor4j.core.internal.InternalActorSystem;
+import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
@@ -57,6 +57,7 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 			@Override
 			public void run() {
 				System.out.printf("#actors : %s%n", Skynet.count);
+				System.out.printf("#cells  : %s%n", ((InternalActorSystem)system).getCells().size());
 			}
 		}, 0, 1000);
 		
@@ -75,7 +76,6 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			timeMeasurement.stop();
 			
 			PseudoActor pseudoActor = new PseudoActor(system, true) {
 				@Override
@@ -94,14 +94,16 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 				success = pseudoActor.await(
 						(msg) -> msg.tag()==Actor.TERMINATED, 
 						(msg) -> { System.out.println("Skynet stopped..."); return true;}, 
-						10_000, TimeUnit.MILLISECONDS);
+						120_000, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException | TimeoutException e) {
 				e.printStackTrace();
 			}
 			pseudoActor.stop();
+			timeMeasurement.stop();
 			
-			if (!success)
-			System.out.println(((InternalActorSystem)system).getCells().get(skynet).getChildren().size());
+			if (!success) {
+				System.out.println(((InternalActorSystem)system).getCells().get(skynet).getChildren().size());
+			}
 			
 			System.out.printf("#actors : %s%n", Skynet.count);
 			Skynet.count.getAndSet(0);

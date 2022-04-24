@@ -23,8 +23,8 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 import actor4j.benchmark.utils.MessageThroughputMeasurement;
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.internal.DefaultActorSystemImpl;
-import io.actor4j.core.internal.InternalActorSystem;
+import io.actor4j.core.runtime.DefaultActorSystemImpl;
+import io.actor4j.core.runtime.InternalActorSystem;
 import shared.benchmark.BenchmarkConfig;
 
 public class Benchmark {

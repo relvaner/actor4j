@@ -15,6 +15,7 @@
  */
 package actor4j.benchmark;
 
+import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.config.ActorSystemConfig.Builder;
@@ -43,6 +44,6 @@ public class BenchmarkSampleActor4j extends BenchmarkSample {
 		builder.watchdogSyncTime(Integer.MAX_VALUE); // disabled
 		
 		//return new io.actor4j.analyzer.ActorAnalyzer(new io.actor4j.analyzer.DefaultActorAnalyzerThread(2000, true, true, true), builder.build());
-		return ActorSystem.create(builder.build());
+		return ActorSystem.create(ActorRuntime.factory(), builder.build());
 	}
 }
