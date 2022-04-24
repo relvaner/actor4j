@@ -21,10 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.SwingUtilities;
 
-import io.actor4j.analyzer.internal.ActorAnalyzerThread;
-import io.actor4j.analyzer.internal.visual.VisualActorAnalyzer;
-import io.actor4j.core.internal.InternalActorCell;
-import io.actor4j.core.internal.InternalActorSystem;
+import io.actor4j.analyzer.runtime.ActorAnalyzerThread;
+import io.actor4j.analyzer.runtime.visual.VisualActorAnalyzer;
+import io.actor4j.core.runtime.InternalActorCell;
+import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 
 public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {

@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.internal;
+package io.actor4j.analyzer.runtime;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 
-import io.actor4j.core.internal.ActorSystemImpl;
-import io.actor4j.core.internal.ActorThread;
-import io.actor4j.core.internal.DefaultActorMessageDispatcher;
+import io.actor4j.core.runtime.ActorSystemImpl;
+import io.actor4j.core.runtime.ActorThread;
+import io.actor4j.core.runtime.DefaultActorMessageDispatcher;
 import io.actor4j.core.messages.ActorMessage;
 
 public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatcher {
@@ -45,7 +45,7 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 					dest = destinations.get(ThreadLocalRandom.current().nextInt(destinations.size()));
 			}
 			if (dest==null)
-				dest = UUID_ALIAS;
+				dest = ALIAS_ID;
 		}
 		UUID redirect = system.getRedirector().get(dest);
 		if (redirect!=null) 

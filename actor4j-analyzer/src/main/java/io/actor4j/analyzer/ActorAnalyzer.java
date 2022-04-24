@@ -16,8 +16,8 @@
 package io.actor4j.analyzer;
 
 import io.actor4j.analyzer.config.ActorAnalyzerConfig;
-import io.actor4j.analyzer.internal.ActorAnalyzerThread;
-import io.actor4j.analyzer.internal.AnalyzerActorSystemImpl;
+import io.actor4j.analyzer.runtime.ActorAnalyzerThread;
+import io.actor4j.analyzer.runtime.AnalyzerActorSystemImpl;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 

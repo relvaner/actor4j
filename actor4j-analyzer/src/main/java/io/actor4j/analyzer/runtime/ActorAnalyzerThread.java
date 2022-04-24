@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.internal;
+package io.actor4j.analyzer.runtime;
 
 import java.util.LinkedList;
 import java.util.Map;
@@ -24,9 +24,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.actor4j.core.internal.ActorThreadMode;
-import io.actor4j.core.internal.InternalActorCell;
-import io.actor4j.core.internal.InternalActorSystem;
+import io.actor4j.core.runtime.ActorThreadMode;
+import io.actor4j.core.runtime.InternalActorCell;
+import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 
 public abstract class ActorAnalyzerThread extends Thread {

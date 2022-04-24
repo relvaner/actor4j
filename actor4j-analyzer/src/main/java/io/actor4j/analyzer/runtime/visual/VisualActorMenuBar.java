@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.internal.visual;
+package io.actor4j.analyzer.runtime.visual;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

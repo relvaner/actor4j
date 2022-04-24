@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.internal.visual;
+package io.actor4j.analyzer.runtime.visual;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,8 +25,9 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 
-import io.actor4j.core.internal.InternalActorCell;
-import io.actor4j.core.internal.InternalActorSystem;
+import io.actor4j.core.runtime.InternalActorCell;
+import io.actor4j.core.runtime.InternalActorExecuterService;
+import io.actor4j.core.runtime.InternalActorSystem;
 
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -78,10 +79,10 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	        			color = ";fillColor=yellow";
 	        		else {
 	        			if (colorize) {
-	        				Long threadId = system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getCellsMap().get(actorCell.getId());
+	        				Long threadId = ((InternalActorExecuterService)system.getExecuterService()).getActorThreadPool().getActorThreadPoolHandler().getCellsMap().get(actorCell.getId());
 	        				if (threadId!=null)
 	        					color = ";fillColor="+Utils.randomColorAsHex(
-	        						system.getExecuterService().getActorThreadPool().getActorThreadPoolHandler().getThreadsList().indexOf(threadId), 
+	        						((InternalActorExecuterService)system.getExecuterService()).getActorThreadPool().getActorThreadPoolHandler().getProcessList().indexOf(threadId), 
 	        						system.getConfig().parallelism()*system.getConfig().parallelismFactor());
 	        				else
 	        					color = ";fillColor=#F0F0F0";
