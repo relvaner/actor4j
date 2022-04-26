@@ -20,9 +20,23 @@ import static io.actor4j.core.logging.ActorLogger.*;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import java.util.Map.Entry;
+
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 public final class Utils {
+	public static record Triple<A, B, C>(A a, B b, C c) {
+		public static <A, B, C> Triple<A, B, C> of(A a, B b, C c) {
+			return new Triple<A, B, C>(a, b, c);
+		}
+	};
+	
 	public static final List<String> colorPalette;
 	
 	static {
@@ -70,5 +84,48 @@ public final class Utils {
 			return colorPalette.get(index);
 		
 		return colorToHex(randomColor(index, parallelism));
+	}
+	
+	public static Triple<Integer, Integer, Double> complexity(Map<UUID, Map<UUID, Long>> deliveryRoutes, Set<UUID> filter) {
+		Iterator<Entry<UUID,Map<UUID,Long>>> iterator = deliveryRoutes.entrySet().iterator();
+		 
+		int countActors = 0;
+		int countEdges = 0;
+		while (iterator.hasNext()) {
+			Entry<UUID,Map<UUID,Long>> entry = iterator.next();
+			if (filter.contains(entry.getKey()))
+				continue;
+			
+			Map<UUID,Long> map = entry.getValue();
+			if (map!=null && map.size()>0) {
+				countEdges += map.size();
+				countActors += 1;
+			}
+		}
+		
+		return countActors>0 ? Triple.of(countActors, countEdges, countEdges/Math.pow(countActors, 2)) : Triple.of(0, 0, 0d);
+	}
+	
+	/*
+	 * Positive Skew: Mod<Median<Mean
+	 * Symmetric:     Mod=Median=Mean
+	 * Negative Skew: Mod>Median>Mean
+	 */
+	public static DescriptiveStatistics weightStatistics(Map<UUID, Map<UUID, Long>> deliveryRoutes, Set<UUID> filter) {
+		DescriptiveStatistics result = new DescriptiveStatistics();
+		
+		Iterator<Entry<UUID,Map<UUID,Long>>> iterator = deliveryRoutes.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Entry<UUID,Map<UUID,Long>> entry = iterator.next();
+			if (filter.contains(entry.getKey()))
+				continue;
+			
+			Map<UUID,Long> map = entry.getValue();
+			if (map!=null && map.size()>0)
+				for (long value : map.values())
+					result.addValue(value);
+		}
+		
+		return result;
 	}
 }

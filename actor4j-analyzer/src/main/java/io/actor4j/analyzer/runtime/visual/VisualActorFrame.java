@@ -16,6 +16,7 @@
 package io.actor4j.analyzer.runtime.visual;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,7 +24,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 
 import io.actor4j.core.runtime.InternalActorCell;
@@ -40,6 +44,8 @@ public class VisualActorFrame extends JFrame {
 	
 	protected VisualActorViewPanel leftViewPanel;
 	protected VisualActorViewPanel rightViewPanel;
+
+	protected JLabel statusLabel;
 	
 	public VisualActorFrame(InternalActorSystem system) {
 		super();
@@ -67,6 +73,18 @@ public class VisualActorFrame extends JFrame {
 		paContent.add(leftViewPanel);
 		paContent.add(rightViewPanel);
 		
+		JPanel statusPanel = new JPanel();
+		statusPanel.setLayout(new BorderLayout(0, 0));
+		statusPanel.setPreferredSize(new Dimension(getWidth(), 16));
+		JPanel statusLine = new JPanel();
+		statusLine.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		statusLine.setPreferredSize(new Dimension(getWidth(), 2));
+		statusLabel = new JLabel("");
+		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+		statusPanel.add(statusLine, BorderLayout.NORTH);
+		statusPanel.add(statusLabel, BorderLayout.CENTER);
+		contentPane.add(statusPanel, BorderLayout.SOUTH);
+		
 		menuBar = new VisualActorMenuBar();
 		menuBar.getCbStructure().addActionListener(new ActionListener() {
 	        public void actionPerformed(ActionEvent event) {
@@ -92,14 +110,20 @@ public class VisualActorFrame extends JFrame {
 		});
 		setJMenuBar(menuBar);
 	}
-	
+
+	public void setStatus(String status) {
+		statusLabel.setText(status);
+	}
+
 	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultParent, boolean showRootSystem, boolean colorize) {
 		((VisualActorStructureViewPanel)leftViewPanel).analyzeStructure(actorCells, showDefaultParent, showRootSystem, colorize);
 		((VisualActorStructureViewPanel)leftViewPanel).updateStructure();
 	}
 	
-	public void analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
-		((VisualActorBehaviourViewPanel)rightViewPanel).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
+	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+		String result = ((VisualActorBehaviourViewPanel)rightViewPanel).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 		((VisualActorBehaviourViewPanel)rightViewPanel).updateStructure();
+		
+		return result;
 	}
 }

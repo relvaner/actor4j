@@ -89,7 +89,8 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 			@Override
 			public void run() {
 				visualAnalyzer.analyzeStructure(cells, showDefaultRoot, showRootSystem, colorize);
-				visualAnalyzer.analyzeBehaviour(cells, deliveryRoutes, showRootSystem, colorize);
+				String status = visualAnalyzer.analyzeBehaviour(cells, deliveryRoutes, showRootSystem, colorize);
+				visualAnalyzer.setStatus(status);
 			}
 		});
 	}

@@ -16,6 +16,7 @@
 package io.actor4j.analyzer.runtime.visual;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 
+import io.actor4j.analyzer.runtime.visual.Utils.Triple;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorExecuterService;
 import io.actor4j.core.runtime.InternalActorSystem;
@@ -32,9 +34,12 @@ import io.actor4j.core.runtime.InternalActorSystem;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingConstants;
+
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 
 public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	protected static final long serialVersionUID = 9212208191147321764L;
@@ -58,7 +63,7 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 		add("Behaviour", paDesign);
 	}
 	
-	public void analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		Iterator<Entry<UUID, Boolean>> iteratorActiveCells = activeCells.entrySet().iterator();
 		while (iteratorActiveCells.hasNext())
 			iteratorActiveCells.next().setValue(false);
@@ -130,6 +135,19 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 			graph.getModel().endUpdate();
 		}
 	    graphComponent.refresh();
+	    
+	    Set<UUID> filter = new HashSet<>();
+	    filter.add(system.SYSTEM_ID());
+	    filter.addAll(system.getCells().get(system.SYSTEM_ID()).getChildren());
+	    Triple<Integer, Integer, Double> complexity = Utils.complexity(deliveryRoutes, filter);
+	    DescriptiveStatistics statistics = Utils.weightStatistics(deliveryRoutes, filter);
+	    double delta = statistics.getPercentile(50)/statistics.getMean();
+	    return String.format(
+	    	"View->Behaviour:  Active Actors: %d - Directed Edges: %d - Interactional Complexity: %.2f - "+
+	    	"Mean: %.2f - Min: %.2f - Max: %.2f - SD: %.2f - Median: %.2f - Skewness: %.2f - Weighted Interactional Complexity: %.2f",
+	    	complexity.a(), complexity.b(), complexity.c()*100, 
+	    	statistics.getMean(), statistics.getMin(), statistics.getMax(), statistics.getStandardDeviation(), statistics.getPercentile(50), statistics.getSkewness(),
+	    	complexity.c()*100*delta);
 	}
 	
 	public void analyzeDeliveryRoutes(Map<UUID, Map<UUID, Long>> deliveryRoutes, Entry<UUID, Object> entrySource) {

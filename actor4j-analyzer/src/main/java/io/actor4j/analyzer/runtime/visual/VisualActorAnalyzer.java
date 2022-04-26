@@ -47,7 +47,11 @@ public class VisualActorAnalyzer {
 		((VisualActorFrame)application.getFrame()).analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 	
-	public void analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
-		((VisualActorFrame)application.getFrame()).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
+	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+		return ((VisualActorFrame)application.getFrame()).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
+	}
+	
+	public void setStatus(String text) {
+		((VisualActorFrame)application.getFrame()).setStatus(text);
 	}
 }
