@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.ring.nfold.embedded;
+package actor4j.benchmark.samples.ring.nfold.embedded.queue;
 
 import java.util.UUID;
 
@@ -27,7 +27,7 @@ public class BenchmarkRingNfoldEmbedded extends BenchmarkSampleActor4j {
 	public BenchmarkRingNfoldEmbedded(BenchmarkConfig config) {
 		super(config);
  
-		ActorSystem system = createActorSystem("actor4j::NFoldRingEmbedded");// use -Xss1g
+		ActorSystem system = createActorSystem("actor4j::NFoldRingEmbedded");
 		
 		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
 		for (int j=0; j<config.parallelism(); j++) {

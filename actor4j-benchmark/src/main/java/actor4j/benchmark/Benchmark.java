@@ -49,6 +49,10 @@ public class Benchmark {
 	}
 	
 	public void start() {
+		start(null);
+	}
+	
+	public void start(Runnable onTermination) {
 		final DescriptiveStatistics statistics = new DescriptiveStatistics();
 		final AtomicLong warmupCount = new AtomicLong();
 		
@@ -101,6 +105,8 @@ public class Benchmark {
 		}
 		
 		messageTM.stop();
+		if (onTermination!=null)
+			onTermination.run();
 		system.shutdown(true);
 	}
 	
