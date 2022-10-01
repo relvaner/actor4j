@@ -25,7 +25,7 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.data.access.PrimaryVolatileCacheActor;
 import io.actor4j.core.data.access.SecondaryVolatileCacheActor;
-import io.actor4j.core.data.access.VolatileDataAccessObject;
+import io.actor4j.core.data.access.VolatileDTO;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 
 import static io.actor4j.core.logging.ActorLogger.*;
@@ -58,23 +58,23 @@ public class VolatileCacheFeature {
 				system.addActor(() -> new PrimaryVolatileCacheActor<String, String>(
 						"primary", group, "vcache1", (id) -> () -> new SecondaryVolatileCacheActor<String, String>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500));
 
-				tell(new VolatileDataAccessObject<>("key1", "value1", null), ActorWithCache.SET, "vcache1");
-				tell(new VolatileDataAccessObject<>("key2", "value2", null), ActorWithCache.SET, "vcache1");
-				tell(new VolatileDataAccessObject<>("key3", "value3", null), ActorWithCache.SET, "vcache1");
-				tell(new VolatileDataAccessObject<>("key4", "value4", null), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key1", "value1"), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key2", "value2"), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key3", "value3"), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key4", "value4"), ActorWithCache.SET, "vcache1");
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
 				if (i<4) {
-					tell(new VolatileDataAccessObject<>(keys[i], null, self()), ActorWithCache.GET, "vcache1");
+					tell(VolatileDTO.create(keys[i], self()), ActorWithCache.GET, "vcache1");
 					
 					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
-						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
-						if (payload.value!=null) {
-							assertEquals(values[i], payload.value);
-							logger().log(DEBUG, payload.value);
+						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
+						if (payload.value()!=null) {
+							assertEquals(values[i], payload.value());
+							logger().log(DEBUG, payload.value());
 							i++;
 							testDone.countDown();
 						}/*
@@ -84,16 +84,16 @@ public class VolatileCacheFeature {
 					});
 				}
 				else if (i==4) {
-					tell(new VolatileDataAccessObject<>(keys[2], null, null), ActorWithCache.DEL, "vcache1");
+					tell(VolatileDTO.create(keys[2]), ActorWithCache.DEL, "vcache1");
 					become((msg) -> {
 						if (i<5) {
-							tell(new VolatileDataAccessObject<>(keys[2], null, self()), ActorWithCache.GET, "vcache1");
+							tell(VolatileDTO.create(keys[2], self()), ActorWithCache.GET, "vcache1");
 							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
-								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
-								if (payload.value==null) {
-									assertNull(payload.value);
-									logger().log(DEBUG, payload.value);
+								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
+								if (payload.value()==null) {
+									assertNull(payload.value());
+									logger().log(DEBUG, payload.value());
 									i++;
 									testDone.countDown();
 								}
@@ -108,13 +108,13 @@ public class VolatileCacheFeature {
 				else if (i>4 && i<8) {
 					if (i==7)
 						i++;
-					tell(new VolatileDataAccessObject<>(keys[i-5], null, self()), ActorWithCache.GET, "vcache1");
+					tell(VolatileDTO.create(keys[i-5], self()), ActorWithCache.GET, "vcache1");
 					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
-						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
-						if (payload.value!=null) {
-							assertEquals(values[i-5], payload.value);
-							logger().log(DEBUG, payload.value);
+						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
+						if (payload.value()!=null) {
+							assertEquals(values[i-5], payload.value());
+							logger().log(DEBUG, payload.value());
 							i++;
 							testDone.countDown();
 						}
@@ -122,16 +122,16 @@ public class VolatileCacheFeature {
 					});
 				}
 				else if (i>8) {
-					tell(new VolatileDataAccessObject<>(null, null, null), ActorWithCache.DEL_ALL, "vcache1");
+					tell(VolatileDTO.create(), ActorWithCache.DEL_ALL, "vcache1");
 					become((msg) -> {
 						if (i<13) {
-							tell(new VolatileDataAccessObject<>(keys[i-9], null, self()), ActorWithCache.GET, "vcache1");
+							tell(VolatileDTO.create(keys[i-9], self()), ActorWithCache.GET, "vcache1");
 							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
-								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
-								if (keys[i-9].equals(payload.key)) {
-									assertNull(payload.value);
-									logger().log(DEBUG, payload.value);
+								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
+								if (keys[i-9].equals(payload.key())) {
+									assertNull(payload.value());
+									logger().log(DEBUG, payload.value());
 									i++;
 									testDone.countDown();
 								}
@@ -195,10 +195,10 @@ public class VolatileCacheFeature {
 					
 					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
-						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
-						if (payload.value!=null) {
-							assertEquals(values[i], payload.value);
-							logger().log(DEBUG, payload.value);
+						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
+						if (payload.value()!=null) {
+							assertEquals(values[i], payload.value());
+							logger().log(DEBUG, payload.value());
 							i++;
 							testDone.countDown();
 						}/*
@@ -214,10 +214,10 @@ public class VolatileCacheFeature {
 							manager.get(keys[2]);
 							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
-								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
-								if (payload.value==null) {
-									assertNull(payload.value);
-									logger().log(DEBUG, payload.value);
+								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
+								if (payload.value()==null) {
+									assertNull(payload.value());
+									logger().log(DEBUG, payload.value());
 									i++;
 									testDone.countDown();
 								}
@@ -235,10 +235,10 @@ public class VolatileCacheFeature {
 					manager.get(keys[i-5]);
 					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 						@SuppressWarnings("unchecked")
-						VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg.value());
-						if (payload.value!=null) {
-							assertEquals(values[i-5], payload.value);
-							logger().log(DEBUG, payload.value);
+						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
+						if (payload.value()!=null) {
+							assertEquals(values[i-5], payload.value());
+							logger().log(DEBUG, payload.value());
 							i++;
 							testDone.countDown();
 						}
@@ -252,10 +252,10 @@ public class VolatileCacheFeature {
 							manager.get(keys[i-9]);
 							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
 								@SuppressWarnings("unchecked")
-								VolatileDataAccessObject<String, String> payload = ((VolatileDataAccessObject<String, String>)msg2.value());
-								if (keys[i-9].equals(payload.key)) {
-									assertNull(payload.value);
-									logger().log(DEBUG, payload.value);
+								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
+								if (keys[i-9].equals(payload.key())) {
+									assertNull(payload.value());
+									logger().log(DEBUG, payload.value());
 									i++;
 									testDone.countDown();
 								}

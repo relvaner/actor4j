@@ -19,51 +19,36 @@ import java.util.UUID;
 
 import org.json.JSONObject;
 
-public class PersistentDataAccessObject<K, V> extends VolatileDataAccessObject<K, V> {
-	public final int hashCodeExpected;
-	public final String filter;
-	public final String update;
-	public final String collectionName;
-	
-	public Object reserved;
-	
+public record PersistentDataAccessObject<K, V>(K key, V value, int hashCodeExpected, String filter, String update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
 	public PersistentDataAccessObject(K key, V value, String keyname, String collectionName) {
-		this(key, value, 0, new JSONObject().put(keyname, key).toString(), null, collectionName, null);
+		this(key, value, 0, new JSONObject().put(keyname, key).toString(), null, collectionName, null, null);
 	}
 	
 	public PersistentDataAccessObject(K key, String keyname, String collectionName, UUID source) {
-		this(key, null, 0, new JSONObject().put(keyname, key).toString(), null, collectionName, source);
+		this(key, null, 0, new JSONObject().put(keyname, key).toString(), null, collectionName, source, null);
 	}
 	
 	public PersistentDataAccessObject(K key, V value, String keyname, String update, String collectionName) {
-		this(key, value, 0, keyname!=null ? new JSONObject().put(keyname, key).toString() : null, update, collectionName, null);
+		this(key, value, 0, keyname!=null ? new JSONObject().put(keyname, key).toString() : null, update, collectionName, null, null);
 	}
 	
 	public PersistentDataAccessObject(K key, V value, String filter, String update, String collectionName, UUID source) {
-		this(key, value, 0, filter, update, collectionName, source);
+		this(key, value, 0, filter, update, collectionName, source, null);
 	}
 	
 	public PersistentDataAccessObject(K key, V value, String collectionName) {
-		this(key, value, 0, null, null, collectionName, null);
+		this(key, value, 0, null, null, collectionName, null, null);
 	}
 	
 	public PersistentDataAccessObject(K key, String collectionName, UUID source) {
-		this(key, null, 0, null, null, collectionName, source);
+		this(key, null, 0, null, null, collectionName, source, null);
 	}
-
-	public PersistentDataAccessObject(K key, V value, int hashCodeExpected, String filter, String update,
-			String collectionName, UUID source) {
-		super(key, value, source);
-		this.hashCodeExpected = hashCodeExpected;
-		this.filter = filter;
-		this.update = update;
-		this.collectionName = collectionName;
+	
+	public PersistentDataAccessObject<K, V> shallowCopy(V value) {
+		return new PersistentDataAccessObject<K, V>(key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
 	}
-
-	@Override
-	public String toString() {
-		return "PersistentDataAccessObject [key=" + key + ", value=" + value + ", hashCodeExpected=" + hashCodeExpected
-				+ ", filter=" + filter + ", update=" + update + ", collectionName=" + collectionName + ", source="
-				+ source + ", reserved=" + reserved + "]";
+	
+	public PersistentDataAccessObject<K, V> shallowCopyWithReserved(Object reserved) {
+		return new PersistentDataAccessObject<K, V>(key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
 	}
 }

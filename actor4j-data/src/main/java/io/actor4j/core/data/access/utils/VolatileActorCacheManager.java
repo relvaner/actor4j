@@ -27,7 +27,7 @@ import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.core.data.access.PrimaryVolatileCacheActor;
 import io.actor4j.core.data.access.SecondaryVolatileCacheActor;
-import io.actor4j.core.data.access.VolatileDataAccessObject;
+import io.actor4j.core.data.access.VolatileDTO;
 
 public class VolatileActorCacheManager<K, V> {
 	protected ActorRef actorRef;
@@ -56,32 +56,32 @@ public class VolatileActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
-			VolatileDataAccessObject<K, V> obj = (VolatileDataAccessObject<K, V>)message.value();
-			return Pair.of(obj.key, obj.value);
+		if (message.value()!=null && message.value() instanceof VolatileDTO) {
+			VolatileDTO<K, V> dto = (VolatileDTO<K, V>)message.value();
+			return Pair.of(dto.key(), dto.value());
 		}
 		else
 			return null;
 	}
 	
 	public void get(K key) {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(key, actorRef.self()), GET, cacheAlias);
+		actorRef.tell(VolatileDTO.create(key, actorRef.self()), GET, cacheAlias);
 	}
 	
 	public void set(K key, V value) {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(key, value), SET, cacheAlias);
+		actorRef.tell(VolatileDTO.create(key, value), SET, cacheAlias);
 	}
 	
 	public void del(K key) {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(key), DEL, cacheAlias);
+		actorRef.tell(VolatileDTO.create(key), DEL, cacheAlias);
 	}
 	
 	public void delAll() {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(), DEL_ALL, cacheAlias);
+		actorRef.tell(VolatileDTO.create(), DEL_ALL, cacheAlias);
 	}
 	
 	public void clear() {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(), CLEAR, cacheAlias);
+		actorRef.tell(VolatileDTO.create(), CLEAR, cacheAlias);
 	}
 	
 	public void evict(long maxTime) {

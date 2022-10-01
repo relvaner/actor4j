@@ -40,37 +40,37 @@ public class IMDBDataAccessActor<K, V> extends Actor {
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
 			@SuppressWarnings("unchecked")
-			PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value();
+			PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
 			
 			if (message.tag()==GET) {
-				obj.value = findOne(obj.key, obj.filter, imdb, obj.collectionName);
-				tell(obj, FIND_ONE, message.source(), message.interaction());
+				V value = findOne(dto.key(), dto.filter(), imdb, dto.collectionName());
+				tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
 			}
 			else if (message.tag()==SET) {
-				if (obj.key!=null) 
-					put(obj.key, obj.value, imdb, obj.collectionName);
+				if (dto.key()!=null) 
+					put(dto.key(), dto.value(), imdb, dto.collectionName());
 				else {
-					if (!((boolean)obj.reserved) && !hasOne(obj.key, obj.filter, imdb, obj.collectionName))
-						insertOne(obj.key, obj.value, imdb, obj.collectionName);
+					if (!((boolean)dto.reserved()) && !hasOne(dto.key(), dto.filter(), imdb, dto.collectionName()))
+						insertOne(dto.key(), dto.value(), imdb, dto.collectionName());
 					else
-						replaceOne(obj.key, obj.filter, obj.value, imdb, obj.collectionName);
+						replaceOne(dto.key(), dto.filter(), dto.value(), imdb, dto.collectionName());
 				}
 			}
 			else if (message.tag()==UPDATE_ONE || message.tag()==UPDATE)
 				; // empty
 			else if (message.tag()==INSERT_ONE) {
-				if (obj.filter!=null) {
-					if (!hasOne(obj.key, obj.filter, imdb, obj.collectionName))
-						insertOne(obj.key, obj.value, imdb, obj.collectionName);
+				if (dto.filter()!=null) {
+					if (!hasOne(dto.key(), dto.filter(), imdb, dto.collectionName()))
+						insertOne(dto.key(), dto.value(), imdb, dto.collectionName());
 				}
 				else
-					insertOne(obj.key, obj.value, imdb, obj.collectionName);
+					insertOne(dto.key(), dto.value(), imdb, dto.collectionName());
 			}
 			else if (message.tag()==DELETE_ONE)
-				deleteOne(obj.key, obj.filter, imdb, obj.collectionName);
+				deleteOne(dto.key(), dto.filter(), imdb, dto.collectionName());
 			else if (message.tag()==HAS_ONE) {
-				obj.reserved = hasOne(obj.key, obj.filter, imdb, obj.collectionName);
-				tell(obj, FIND_ONE, message.source(), message.interaction());
+				Object reserved = hasOne(dto.key(), dto.filter(), imdb, dto.collectionName());
+				tell(dto.shallowCopyWithReserved(reserved), FIND_ONE, message.source(), message.interaction());
 			}
 			else
 				unhandled(message);

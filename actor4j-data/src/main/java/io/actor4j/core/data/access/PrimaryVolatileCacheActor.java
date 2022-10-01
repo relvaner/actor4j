@@ -46,23 +46,25 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
 			@SuppressWarnings("unchecked")
-			VolatileDataAccessObject<K,V> obj = (VolatileDataAccessObject<K,V>)message.value();
+			VolatileDataAccessObject<K,V> dto = (VolatileDataAccessObject<K,V>)message.value();
 			
-			if (message.tag()==GET)
-				tell(new VolatileDataAccessObject<K,V>(obj.key, cache.get(obj.key), null), GET, obj.source, message.interaction()); // normally deep copy necessary of obj.value
+			if (message.tag()==GET) {
+				V value = cache.get(dto.key());
+				tell(dto.shallowCopy(value), GET, dto.source(), message.interaction()); // normally deep copy necessary of dto.value()
+			}
 			else if (message.tag()==SET) {
-				cache.put(obj.key, obj.value);
-				publish(new VolatileDataAccessObject<K,V>(obj.key, obj.value, null), SET);
+				cache.put(dto.key(), dto.value());
+				publish(VolatileDTO.create(dto.key(), dto.value()), SET);
 			}
 			else if (message.tag()==UPDATE)
 				; // empty
 			else if (message.tag()==DEL) {
-				cache.remove(obj.key);
-				publish(new VolatileDataAccessObject<K,V>(obj.key, null, null), DEL);
+				cache.remove(dto.key());
+				publish(VolatileDTO.create(dto.key()), DEL);
 			}
 			else if (message.tag()==DEL_ALL || message.tag()==CLEAR) {
 				cache.clear();
-				publish(new VolatileDataAccessObject<K,V>(), DEL_ALL);
+				publish(VolatileDTO.create(), DEL_ALL);
 			}
 			else
 				unhandled(message);

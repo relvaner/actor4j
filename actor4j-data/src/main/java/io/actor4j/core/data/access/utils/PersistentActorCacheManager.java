@@ -28,7 +28,7 @@ import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
-import io.actor4j.core.data.access.PersistentDataAccessObject;
+import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
 
@@ -63,9 +63,9 @@ public class PersistentActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
-			PersistentDataAccessObject<K, V> obj = (PersistentDataAccessObject<K, V>)message.value();
-			return Pair.of(obj.key, obj.value);
+		if (message.value()!=null && message.value() instanceof PersistentDTO) {
+			PersistentDTO<K, V> dto = (PersistentDTO<K, V>)message.value();
+			return Pair.of(dto.key(), dto.value());
 		}
 		else
 			return null;
@@ -73,44 +73,44 @@ public class PersistentActorCacheManager<K, V> {
 
 	public void get(K key) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, keyname, collectionName, actorRef.self()), GET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, keyname, collectionName, actorRef.self()), GET, cacheAlias);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, collectionName, actorRef.self()), GET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, collectionName, actorRef.self()), GET, cacheAlias);
 	}
 	
 	public void set(K key, V value) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, keyname, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, collectionName), SET, cacheAlias);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, collectionName), SET, cacheAlias);
 	}
 	
 	public void update(K key, V value, JSONObject update) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, keyname, update!=null ? update.toString() : null, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update.toString() : null, collectionName), SET, cacheAlias);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, null, update!=null ? update.toString() : null, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, null, update!=null ? update.toString() : null, collectionName), SET, cacheAlias);
 	}
 	
 	public void del(K key) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, null, keyname, collectionName), DEL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, null, keyname, collectionName), DEL, cacheAlias);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, null, collectionName), DEL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, null, collectionName), DEL, cacheAlias);
 	}
 	
 	public void delAll() {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, keyname, collectionName), DEL_ALL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName), DEL_ALL, cacheAlias);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, collectionName), DEL_ALL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, collectionName), DEL_ALL, cacheAlias);
 	}
 	
 	public void clear() {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, keyname, collectionName), CLEAR, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName), CLEAR, cacheAlias);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, collectionName), CLEAR, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, collectionName), CLEAR, cacheAlias);
 	}
 	
 	public void evict(long maxTime) {

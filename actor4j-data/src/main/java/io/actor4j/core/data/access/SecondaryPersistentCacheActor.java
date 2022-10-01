@@ -45,12 +45,12 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 		if (message.value()!=null) {
 			if (message.value() instanceof PersistentDataAccessObject) {
 				@SuppressWarnings("unchecked")
-				PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value();
+				PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
 				
 				if (message.tag()==GET) {
-					obj.value = cache.get(obj.key);
-					if (obj.value!=null)
-						tell(obj, GET, obj.source, message.interaction()); // normally deep copy necessary of obj.value
+					V value = cache.get(dto.key());
+					if (value!=null)
+						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction()); // normally deep copy necessary of dto.value()
 					else
 						publish(message);
 				}
@@ -68,12 +68,12 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 			}
 			else if (message.value() instanceof VolatileDataAccessObject && message.source() == primary) {
 				@SuppressWarnings("unchecked")
-				VolatileDataAccessObject<K,V> obj = (VolatileDataAccessObject<K,V>)message.value();
+				VolatileDataAccessObject<K,V> dto = (VolatileDataAccessObject<K,V>)message.value();
 				
 				if (message.tag()==SET)
-					cache.put(obj.key, obj.value);
+					cache.put(dto.key(), dto.value());
 				else if (message.tag()==DEL)
-					cache.remove(obj.key);
+					cache.remove(dto.key());
 				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
 					cache.clear();
 				else

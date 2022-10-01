@@ -29,7 +29,7 @@ import io.actor4j.core.utils.Pair;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.data.access.PodPrimaryPersistentCacheActor;
 import io.actor4j.core.pods.data.access.PodSecondaryPersistentCacheActor;
-import io.actor4j.core.data.access.PersistentDataAccessObject;
+import io.actor4j.core.data.access.PersistentDTO;
 
 public class PodPersistentActorCacheManager<K, V> {
 	public static final UUID PRIMARY_FROM_CACHE_COORDINATOR = UUID.randomUUID();
@@ -98,9 +98,9 @@ public class PodPersistentActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
-			PersistentDataAccessObject<K, V> obj = (PersistentDataAccessObject<K, V>)message.value();
-			return Pair.of(obj.key, obj.value);
+		if (message.value()!=null && message.value() instanceof PersistentDTO) {
+			PersistentDTO<K, V> dto = (PersistentDTO<K, V>)message.value();
+			return Pair.of(dto.key(), dto.value());
 		}
 		else
 			return null;
@@ -108,51 +108,51 @@ public class PodPersistentActorCacheManager<K, V> {
 
 	public void get(K key) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, keyname, collectionName, actorRef.self()), GET, replica);
+			actorRef.tell(PersistentDTO.create(key, keyname, collectionName, actorRef.self()), GET, replica);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, collectionName, actorRef.self()), GET, replica);
+			actorRef.tell(PersistentDTO.create(key, collectionName, actorRef.self()), GET, replica);
 	}
 	
 	public void get(K key, UUID interaction) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, keyname, collectionName, actorRef.self()), GET, replica, interaction);
+			actorRef.tell(PersistentDTO.create(key, keyname, collectionName, actorRef.self()), GET, replica, interaction);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, collectionName, actorRef.self()), GET, replica, interaction);
+			actorRef.tell(PersistentDTO.create(key, collectionName, actorRef.self()), GET, replica, interaction);
 	}
 	
 	public void set(K key, V value) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, keyname, collectionName), SET, replica);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, collectionName), SET, replica);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, collectionName), SET, replica);
+			actorRef.tell(PersistentDTO.create(key, value, collectionName), SET, replica);
 	}
 	
 	public void update(K key, V value, JSONObject update) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, keyname, update!=null ? update.toString() : null, collectionName), SET, replica);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update.toString() : null, collectionName), SET, replica);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, value, null, update!=null ? update.toString() : null, collectionName), SET, replica);
+			actorRef.tell(PersistentDTO.create(key, value, null, update!=null ? update.toString() : null, collectionName), SET, replica);
 	}
 	
 	public void del(K key) {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, null, keyname, collectionName), DEL, replica);
+			actorRef.tell(PersistentDTO.create(key, null, keyname, collectionName), DEL, replica);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(key, null, collectionName), DEL, replica);
+			actorRef.tell(PersistentDTO.create(key, null, collectionName), DEL, replica);
 	}
 	
 	public void delAll() {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, keyname, collectionName), DEL_ALL, replica);
+			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName), DEL_ALL, replica);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, collectionName), DEL_ALL, replica);
+			actorRef.tell(PersistentDTO.create(null, null, collectionName), DEL_ALL, replica);
 	}
 	
 	public void clear() {
 		if (keyname!=null)
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, keyname, collectionName), CLEAR, replica);
+			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName), CLEAR, replica);
 		else
-			actorRef.tell(new PersistentDataAccessObject<K, V>(null, null, collectionName), CLEAR, replica);
+			actorRef.tell(PersistentDTO.create(null, null, collectionName), CLEAR, replica);
 	}
 	
 	public void evict(long maxTime) {

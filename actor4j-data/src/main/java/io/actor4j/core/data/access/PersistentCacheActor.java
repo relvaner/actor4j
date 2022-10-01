@@ -38,26 +38,26 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
 			@SuppressWarnings("unchecked")
-			PersistentDataAccessObject<K,V> obj = (PersistentDataAccessObject<K,V>)message.value();
+			PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
 			
 			if (message.tag()==GET) {
-				obj.value = cache.get(obj.key);
-				if (obj.value!=null)
-					tell(obj, GET, obj.source, message.interaction()); // normally deep copy necessary of obj.value
+				V value = cache.get(dto.key());
+				if (value!=null)
+					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction()); // normally deep copy necessary of dto.value()
 				else
 					tell(message.value(), GET, dataAccess, message.interaction());
 			}
 			else if (message.tag()==SET) {
-				obj.reserved = cache.get(obj.key) != null;
-				cache.put(obj.key, obj.value);
-				tell(message.value(), SET, dataAccess);
+				Object reserved = cache.get(dto.key()) != null;
+				cache.put(dto.key(), dto.value());
+				tell(dto.shallowCopyWithReserved(reserved), SET, dataAccess);
 			}
 			else if (message.tag()==UPDATE) {
-				cache.remove(obj.key);
+				cache.remove(dto.key());
 				tell(message.value(), UPDATE, dataAccess);
 			}
 			else if (message.tag()==DEL) {
-				cache.remove(obj.key);
+				cache.remove(dto.key());
 				tell(message.value(), DELETE_ONE, dataAccess);
 			}
 			else if (message.tag()==DEL_ALL) {
@@ -67,19 +67,19 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			else if (message.tag()==CLEAR)
 				cache.clear();
 			else if (message.source()==dataAccess && message.tag()==FIND_ONE) {
-				cache.put(obj.key, obj.value);
-				tell(obj, GET, obj.source, message.interaction());
+				cache.put(dto.key(), dto.value());
+				tell(dto, GET, dto.source(), message.interaction());
 			}
 			else if (message.tag()==CAS || message.tag()==CAU) {
-				V v = cache.get(obj.key);
-				if (v.hashCode()==obj.hashCodeExpected) {
+				V value = cache.get(dto.key());
+				if (value.hashCode()==dto.hashCodeExpected()) {
 					int tag = SET;
 					if (message.tag()==CAU)
 						tag = UPDATE;
 					receive(message.shallowCopy(tag));
 				}
 				else
-					tell(obj, message.tag(), obj.source, message.interaction());
+					tell(dto, message.tag(), dto.source(), message.interaction());
 			}
 			else
 				unhandled(message);

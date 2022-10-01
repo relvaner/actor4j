@@ -29,20 +29,20 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value()!=null && message.value() instanceof  VolatileDataAccessObject) {
+		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
 			@SuppressWarnings("unchecked")
-			 VolatileDataAccessObject<K,V> obj = ( VolatileDataAccessObject<K,V>)message.value();
+			VolatileDataAccessObject<K,V> dto = ( VolatileDataAccessObject<K,V>)message.value();
 			
 			if (message.tag()==GET) {
-				obj.value = cache.get(obj.key);
-				tell(obj, GET, obj.source, message.interaction()); // normally deep copy necessary of obj.value
+				V value = cache.get(dto.key());
+				tell(dto.shallowCopy(value), GET, dto.source(), message.interaction()); // normally deep copy necessary of dto.value()
 			}
 			else if (message.tag()==SET)
-				cache.put(obj.key, obj.value);
+				cache.put(dto.key(), dto.value());
 			else if (message.tag()==UPDATE)
 				; // empty
 			else if (message.tag()==DEL)
-				cache.remove(obj.key);
+				cache.remove(dto.key());
 			else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
 				cache.clear();
 			else

@@ -24,10 +24,9 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
-import io.actor4j.core.data.access.PersistentDataAccessObject;
+import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
-import io.actor4j.core.data.access.VolatileDataAccessObject;
 import io.actor4j.core.data.access.imdb.IMDBDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
@@ -62,22 +61,22 @@ public class PersistentCacheFeature {
 				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestObject>(
 						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestObject>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess));
 
-				tell(new PersistentDataAccessObject<>("key1", new TestObject("key1", "value1"), "key", "test"), ActorWithCache.SET, "cache1");
-				tell(new PersistentDataAccessObject<>("key2", new TestObject("key2", "value2"), "key", "test"), ActorWithCache.SET, "cache1");
-				tell(new PersistentDataAccessObject<>("key3", new TestObject("key3", "value3"), "key", "test"), ActorWithCache.SET, "cache1");
-				tell(new PersistentDataAccessObject<>("key4", new TestObject("key4", "value4"), "key", "test"), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key1", new TestObject("key1", "value1"), "key", "test"), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key2", new TestObject("key2", "value2"), "key", "test"), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key3", new TestObject("key3", "value3"), "key", "test"), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key4", new TestObject("key4", "value4"), "key", "test"), ActorWithCache.SET, "cache1");
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				tell(new PersistentDataAccessObject<>(keys[i], "key", "test", self()), ActorWithCache.GET, "cache1");
+				tell(PersistentDTO.create(keys[i], "key", "test", self()), ActorWithCache.GET, "cache1");
 				
 				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					@SuppressWarnings("unchecked")
-					VolatileDataAccessObject<String, TestObject> payload = ((VolatileDataAccessObject<String, TestObject>)msg.value());
-					if (payload.value!=null) {
-						assertEquals(values[i], payload.value.value);
-						logger().log(DEBUG, payload.value.value);
+					PersistentDTO<String, TestObject> payload = ((PersistentDTO<String, TestObject>)msg.value());
+					if (payload.value()!=null) {
+						assertEquals(values[i], payload.value().value);
+						logger().log(DEBUG, payload.value().value);
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();

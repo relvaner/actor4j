@@ -17,18 +17,9 @@ package io.actor4j.core.data.access;
 
 import java.util.UUID;
 
-import io.actor4j.core.utils.Shareable;
-
-public class VolatileDataAccessObject<K, V> implements Shareable  {
-	public final K key;
-	public V value;
-	
-	public UUID source;
-	
+public record VolatileDataAccessObject<K, V>(K key, V value, UUID source) implements VolatileDTO<K, V>  {
 	public VolatileDataAccessObject() {
-		super();
-		this.key = null;
-		this.source = null;
+		this(null, null, null);
 	}
 	
 	public VolatileDataAccessObject(K key) {
@@ -43,15 +34,7 @@ public class VolatileDataAccessObject<K, V> implements Shareable  {
 		this(key, null, source);
 	}
 	
-	public VolatileDataAccessObject(K key, V value, UUID source) {
-		super();
-		this.key = key;
-		this.value = value;
-		this.source = source;
-	}
-
-	@Override
-	public String toString() {
-		return "VolatileDataAccessObject [key=" + key + ", value=" + value + ", source=" + source + "]";
+	public VolatileDataAccessObject<K, V> shallowCopy(V value) {
+		return new VolatileDataAccessObject<K, V>(key, value, source);
 	}
 }

@@ -25,7 +25,7 @@ import static io.actor4j.core.actors.ActorWithCache.SET;
 import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
-import io.actor4j.core.data.access.VolatileDataAccessObject;
+import io.actor4j.core.data.access.VolatileDTO;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -96,36 +96,36 @@ public class PodVolatileActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
-			VolatileDataAccessObject<K, V> obj = (VolatileDataAccessObject<K, V>)message.value();
-			return Pair.of(obj.key, obj.value);
+		if (message.value()!=null && message.value() instanceof VolatileDTO) {
+			VolatileDTO<K, V> dto = (VolatileDTO<K, V>)message.value();
+			return Pair.of(dto.key(), dto.value());
 		}
 		else
 			return null;
 	}
 	
 	public void get(K key) {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(key, actorRef.self()), GET, replica);
+		actorRef.tell(VolatileDTO.create(key, actorRef.self()), GET, replica);
 	}
 	
 	public void get(K key, UUID intercation) {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(key, actorRef.self()), GET, replica, intercation);
+		actorRef.tell(VolatileDTO.create(key, actorRef.self()), GET, replica, intercation);
 	}
 	
 	public void set(K key, V value) {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(key, value), SET, replica);
+		actorRef.tell(VolatileDTO.create(key, value), SET, replica);
 	}
 	
 	public void del(K key) {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(key), DEL, replica);
+		actorRef.tell(VolatileDTO.create(key), DEL, replica);
 	}
 	
 	public void delAll() {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(), DEL_ALL, replica);
+		actorRef.tell(VolatileDTO.create(), DEL_ALL, replica);
 	}
 	
 	public void clear() {
-		actorRef.tell(new VolatileDataAccessObject<K, V>(), CLEAR, replica);
+		actorRef.tell(VolatileDTO.create(), CLEAR, replica);
 	}
 	
 	public void evict(long maxTime) {
