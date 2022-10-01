@@ -21,6 +21,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import io.actor4j.apc.actor.runtime.APCActorPair;
+import io.actor4j.apc.actor.runtime.APCActorSystemImpl;
 import io.actor4j.core.messages.ActorMessage;
 
 public class APCActorRef<I> {
@@ -47,7 +49,7 @@ public class APCActorRef<I> {
 						if (method.getReturnType()==Future.class) {
 							interaction = UUID.randomUUID();
 							result = new CompletableFuture<>();
-							((APCActorSystemImpl)system).futureMap.put(interaction, (CompletableFuture<?>)result);
+							((APCActorSystemImpl)system).getFutureMap().put(interaction, (CompletableFuture<?>)result);
 						}
 						
 						system.send(ActorMessage.create(new APCActorPair(method.getName(), args), 0, system.SYSTEM_ID(), id, interaction , null, null));

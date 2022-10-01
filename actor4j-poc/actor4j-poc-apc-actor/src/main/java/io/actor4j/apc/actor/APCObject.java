@@ -20,19 +20,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+import io.actor4j.apc.actor.runtime.APCActorSystemImpl;
+
 public class APCObject {
 	protected APCActorSystem system;
 	protected UUID currentFutureId;
 	
-	protected void setSystem(APCActorSystem system) {
+	public void setSystem(APCActorSystem system) {
 		this.system = system;
 	}
 
-	protected void setCurrentFutureId(UUID currentFutureId) {
+	public void setCurrentFutureId(UUID currentFutureId) {
 		this.currentFutureId = currentFutureId;
 	}
 
-	protected <T> Future<T> handleFuture(Consumer<CompletableFuture<T>> consumer) {
+	public <T> Future<T> handleFuture(Consumer<CompletableFuture<T>> consumer) {
 		return ((APCActorSystemImpl)system).handleFuture(currentFutureId, consumer);
 	}
 }

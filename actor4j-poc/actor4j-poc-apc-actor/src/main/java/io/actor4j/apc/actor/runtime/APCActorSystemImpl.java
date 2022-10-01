@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.apc.actor;
+package io.actor4j.apc.actor.runtime;
 
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
+import io.actor4j.apc.actor.APCActorRef;
+import io.actor4j.apc.actor.APCActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.runtime.DefaultActorSystemImpl;
 
@@ -36,6 +38,10 @@ public class APCActorSystemImpl extends DefaultActorSystemImpl implements APCAct
 		super(config);
 	}
 
+	public Map<UUID, CompletableFuture<?>> getFutureMap() {
+		return futureMap;
+	}
+
 	@Override
 	public <I, T extends I> APCActorRef<I> addAPCActor(Class<I> interf, T obj) {
 		UUID id = addActor(() -> new APCActor(interf, obj));
@@ -44,7 +50,7 @@ public class APCActorSystemImpl extends DefaultActorSystemImpl implements APCAct
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected <T> Future<T> handleFuture(UUID futureId, Consumer<CompletableFuture<T>> consumer) {
+	public <T> Future<T> handleFuture(UUID futureId, Consumer<CompletableFuture<T>> consumer) {
 		CompletableFuture<?> result = futureMap.get(futureId);
 		if (result!=null) {
 			consumer.accept((CompletableFuture<T>)result);

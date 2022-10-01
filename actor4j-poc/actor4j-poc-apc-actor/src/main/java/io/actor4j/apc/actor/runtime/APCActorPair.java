@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.apc.actor;
+package io.actor4j.apc.actor.runtime;
 
-import io.actor4j.core.utils.Shareable;
-
-public class APCActorPair implements Shareable {
-	protected final String methodName;
-	protected final Object[] methodParams;
-	
-	public APCActorPair(String methodName, Object[] methodParams) {
-		super();
-		this.methodName = methodName;
-		this.methodParams = methodParams;
-	}
+public record APCActorPair(String methodName, Object[] methodParams) {
 }

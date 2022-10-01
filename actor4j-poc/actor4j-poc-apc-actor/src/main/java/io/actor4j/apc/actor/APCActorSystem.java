@@ -15,6 +15,7 @@
  */
 package io.actor4j.apc.actor;
 
+import io.actor4j.apc.actor.runtime.APCActorSystemImpl;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 
