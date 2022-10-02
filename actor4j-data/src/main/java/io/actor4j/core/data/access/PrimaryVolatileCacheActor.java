@@ -26,6 +26,7 @@ import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.CacheLRUWithGC;
+import io.actor4j.core.utils.DeepCopyable;
 
 public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 	protected int cacheSize;
@@ -42,15 +43,17 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 		cache = new CacheLRUWithGC<>(cacheSize);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
-			@SuppressWarnings("unchecked")
 			VolatileDataAccessObject<K,V> dto = (VolatileDataAccessObject<K,V>)message.value();
 			
 			if (message.tag()==GET) {
 				V value = cache.get(dto.key());
-				tell(dto.shallowCopy(value), GET, dto.source(), message.interaction()); // normally deep copy necessary of dto.value()
+				if (value instanceof DeepCopyable)
+					value = ((DeepCopyable<V>)value).deepCopy();
+				tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
 			}
 			else if (message.tag()==SET) {
 				cache.put(dto.key(), dto.value());

@@ -17,6 +17,7 @@ package io.actor4j.core.data.access;
 
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.utils.DeepCopyable;
 
 import static io.actor4j.core.data.access.DataAccessActor.*;
 
@@ -34,16 +35,19 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 		this(null, cacheSize, dataAcess);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
-			@SuppressWarnings("unchecked")
 			PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
 			
 			if (message.tag()==GET) {
 				V value = cache.get(dto.key());
-				if (value!=null)
-					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction()); // normally deep copy necessary of dto.value()
+				if (value!=null) {
+					if (value instanceof DeepCopyable)
+						value = ((DeepCopyable<V>)value).deepCopy();
+					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+				}
 				else
 					tell(message.value(), GET, dataAccess, message.interaction());
 			}

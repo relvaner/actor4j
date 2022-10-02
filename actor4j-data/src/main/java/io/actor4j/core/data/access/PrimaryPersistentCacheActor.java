@@ -21,6 +21,7 @@ import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.CacheLRUWithGC;
+import io.actor4j.core.utils.DeepCopyable;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -47,17 +48,20 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 		this.dataAccess = dataAccess;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null) {
 			if (message.value() instanceof PersistentDataAccessObject) {
-				@SuppressWarnings("unchecked")
 				PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
 				
 				if (message.tag()==GET) {
 					V value = cache.get(dto.key());
-					if (value!=null)
-						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction()); // normally deep copy necessary of dto.value()
+					if (value!=null) {
+						if (value instanceof DeepCopyable)
+							value = ((DeepCopyable<V>)value).deepCopy();
+						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+					}
 					else
 						tell(message.value(), GET, dataAccess, message.interaction());
 				}
