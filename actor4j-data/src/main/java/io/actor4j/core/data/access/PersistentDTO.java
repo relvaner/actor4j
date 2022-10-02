@@ -23,27 +23,27 @@ public interface PersistentDTO<K, V> extends VolatileDTO<K, V> {
 	public String update();
 	public String collectionName();
 	
-	public static <K, V> PersistentDataAccessObject<K, V> create(K key, V value, String keyname, String collectionName) {
-		return new PersistentDataAccessObject<K, V>(key, value, keyname, collectionName);
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String keyname, String collectionName) {
+		return new PersistentDataAccessDTO<K, V>(key, value, keyname, collectionName);
 	}
 	
-	public static <K, V> PersistentDataAccessObject<K, V> create(K key, String keyname, String collectionName, UUID source) {
-		return new PersistentDataAccessObject<K, V>(key, keyname, collectionName, source);
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, String keyname, String collectionName, UUID source) {
+		return new PersistentDataAccessDTO<K, V>(key, keyname, collectionName, source);
 	}
 	
-	public static <K, V> PersistentDataAccessObject<K, V> create(K key, V value, String keyname, String update, String collectionName) {
-		return new PersistentDataAccessObject<K, V>(key, value, keyname, update, collectionName);
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String keyname, String update, String collectionName) {
+		return new PersistentDataAccessDTO<K, V>(key, value, keyname, update, collectionName);
 	}
 	
-	public static <K, V> PersistentDataAccessObject<K, V> create(K key, V value, String filter, String update, String collectionName, UUID source) {
-		return new PersistentDataAccessObject<K, V>(key, value, filter, update, collectionName, source);
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String filter, String update, String collectionName, UUID source) {
+		return new PersistentDataAccessDTO<K, V>(key, value, filter, update, collectionName, source);
 	}
 	
-	public static <K, V> PersistentDataAccessObject<K, V> create(K key, V value, String collectionName) {
-		return new PersistentDataAccessObject<K, V>(key, value, collectionName);
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String collectionName) {
+		return new PersistentDataAccessDTO<K, V>(key, value, collectionName);
 	}
 	
-	public static <K, V> PersistentDataAccessObject<K, V> create(K key, String collectionName, UUID source) {
-		return new PersistentDataAccessObject<K, V>(key, collectionName, source);
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, String collectionName, UUID source) {
+		return new PersistentDataAccessDTO<K, V>(key, collectionName, source);
 	}
 }

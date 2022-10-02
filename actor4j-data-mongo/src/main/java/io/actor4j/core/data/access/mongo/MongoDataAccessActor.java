@@ -19,7 +19,7 @@ import com.mongodb.MongoClient;
 
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.data.access.DataAccessActor;
-import io.actor4j.core.data.access.PersistentDataAccessObject;
+import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.core.data.access.mongo.MongoOperations.*;
@@ -64,9 +64,9 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
+		if (message.value()!=null && message.value() instanceof PersistentDataAccessDTO) {
 			@SuppressWarnings("unchecked")
-			PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
+			PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
 			
 			try {
 				MongoBufferedBulkWriter bulkWriter = null;

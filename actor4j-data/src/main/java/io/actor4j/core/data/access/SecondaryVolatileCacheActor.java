@@ -44,8 +44,8 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value()!=null && message.value() instanceof VolatileDataAccessObject) {
-			VolatileDataAccessObject<K,V> dto = (VolatileDataAccessObject<K,V>)message.value();
+		if (message.value()!=null && message.value() instanceof VolatileDataAccessDTO) {
+			VolatileDataAccessDTO<K,V> dto = (VolatileDataAccessDTO<K,V>)message.value();
 			
 			if (message.tag()==GET) {
 				V value = cache.get(dto.key());

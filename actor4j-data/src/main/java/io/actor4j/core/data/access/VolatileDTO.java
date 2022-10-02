@@ -22,19 +22,19 @@ public interface VolatileDTO<K, V> {
 	public V value();
 	public UUID source();
 
-	public static <K, V> VolatileDataAccessObject<K, V> create() {
-		return new VolatileDataAccessObject<K, V>();
+	public static <K, V> VolatileDataAccessDTO<K, V> create() {
+		return new VolatileDataAccessDTO<K, V>();
 	}
 	
-	public static <K, V> VolatileDataAccessObject<K, V> create(K key) {
-		return new VolatileDataAccessObject<K, V>(key);
+	public static <K, V> VolatileDataAccessDTO<K, V> create(K key) {
+		return new VolatileDataAccessDTO<K, V>(key);
 	}
 	
-	public static <K, V> VolatileDataAccessObject<K, V> create(K key, V value) {
-		return new VolatileDataAccessObject<K, V>(key, value);
+	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, V value) {
+		return new VolatileDataAccessDTO<K, V>(key, value);
 	}
 	
-	public static <K, V> VolatileDataAccessObject<K, V> create(K key, UUID source) {
-		return new VolatileDataAccessObject<K, V>(key, source);
+	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, UUID source) {
+		return new VolatileDataAccessDTO<K, V>(key, source);
 	}
 }

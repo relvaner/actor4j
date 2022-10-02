@@ -45,8 +45,8 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null) {
-			if (message.value() instanceof PersistentDataAccessObject) {
-				PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
+			if (message.value() instanceof PersistentDataAccessDTO) {
+				PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
 				
 				if (message.tag()==GET) {
 					V value = cache.get(dto.key());
@@ -70,8 +70,8 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 				else
 					unhandled(message);
 			}
-			else if (message.value() instanceof VolatileDataAccessObject && message.source() == primary) {
-				VolatileDataAccessObject<K,V> dto = (VolatileDataAccessObject<K,V>)message.value();
+			else if (message.value() instanceof VolatileDataAccessDTO && message.source() == primary) {
+				VolatileDataAccessDTO<K,V> dto = (VolatileDataAccessDTO<K,V>)message.value();
 				
 				if (message.tag()==SET)
 					cache.put(dto.key(), dto.value());

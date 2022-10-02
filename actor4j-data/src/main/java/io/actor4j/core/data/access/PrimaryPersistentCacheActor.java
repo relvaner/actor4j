@@ -52,8 +52,8 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null) {
-			if (message.value() instanceof PersistentDataAccessObject) {
-				PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
+			if (message.value() instanceof PersistentDataAccessDTO) {
+				PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
 				
 				if (message.tag()==GET) {
 					V value = cache.get(dto.key());

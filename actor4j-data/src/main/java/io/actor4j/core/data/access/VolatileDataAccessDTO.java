@@ -17,24 +17,24 @@ package io.actor4j.core.data.access;
 
 import java.util.UUID;
 
-public record VolatileDataAccessObject<K, V>(K key, V value, UUID source) implements VolatileDTO<K, V>  {
-	public VolatileDataAccessObject() {
+public record VolatileDataAccessDTO<K, V>(K key, V value, UUID source) implements VolatileDTO<K, V>  {
+	public VolatileDataAccessDTO() {
 		this(null, null, null);
 	}
 	
-	public VolatileDataAccessObject(K key) {
+	public VolatileDataAccessDTO(K key) {
 		this(key, null, null);
 	}
 	
-	public VolatileDataAccessObject(K key, V value) {
+	public VolatileDataAccessDTO(K key, V value) {
 		this(key, value, null);
 	}
 	
-	public VolatileDataAccessObject(K key, UUID source) {
+	public VolatileDataAccessDTO(K key, UUID source) {
 		this(key, null, source);
 	}
 	
-	public VolatileDataAccessObject<K, V> shallowCopy(V value) {
-		return new VolatileDataAccessObject<K, V>(key, value, source);
+	public VolatileDataAccessDTO<K, V> shallowCopy(V value) {
+		return new VolatileDataAccessDTO<K, V>(key, value, source);
 	}
 }
