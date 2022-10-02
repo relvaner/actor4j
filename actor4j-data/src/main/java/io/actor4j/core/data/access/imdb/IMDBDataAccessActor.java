@@ -17,6 +17,7 @@ package io.actor4j.core.data.access.imdb;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.utils.DeepCopyable;
 import io.actor4j.core.data.access.PersistentDataAccessObject;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
@@ -36,14 +37,16 @@ public class IMDBDataAccessActor<K, V> extends Actor {
 		this(null);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof PersistentDataAccessObject) {
-			@SuppressWarnings("unchecked")
 			PersistentDataAccessObject<K,V> dto = (PersistentDataAccessObject<K,V>)message.value();
 			
 			if (message.tag()==GET) {
 				V value = findOne(dto.key(), dto.filter(), imdb, dto.collectionName());
+				if (value instanceof DeepCopyable)
+					value = ((DeepCopyable<V>)value).deepCopy();
 				tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
 			}
 			else if (message.tag()==SET) {
