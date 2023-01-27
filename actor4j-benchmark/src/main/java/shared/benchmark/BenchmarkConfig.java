@@ -44,7 +44,7 @@ public class BenchmarkConfig {
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long durationTimes) {
-		this(100, warmupIterations, durationTimes, Runtime.getRuntime().availableProcessors(), 1);
+		this(numberOfActors, warmupIterations, durationTimes, Runtime.getRuntime().availableProcessors(), 1);
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long durationTimes, int parallelism, int parallelismFactor) {
