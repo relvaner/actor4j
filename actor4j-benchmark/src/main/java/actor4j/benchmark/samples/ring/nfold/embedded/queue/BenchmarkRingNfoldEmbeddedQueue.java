@@ -23,8 +23,8 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.BenchmarkConfig;
 
-public class BenchmarkRingNfoldEmbedded extends BenchmarkSampleActor4j {
-	public BenchmarkRingNfoldEmbedded(BenchmarkConfig config) {
+public class BenchmarkRingNfoldEmbeddedQueue extends BenchmarkSampleActor4j {
+	public BenchmarkRingNfoldEmbeddedQueue(BenchmarkConfig config) {
 		super(config);
  
 		ActorSystem system = createActorSystem("actor4j::NFoldRingEmbedded");
@@ -40,6 +40,6 @@ public class BenchmarkRingNfoldEmbedded extends BenchmarkSampleActor4j {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkRingNfoldEmbedded(new BenchmarkConfig(100));
+		new BenchmarkRingNfoldEmbeddedQueue(new BenchmarkConfig(100));
 	}
 }

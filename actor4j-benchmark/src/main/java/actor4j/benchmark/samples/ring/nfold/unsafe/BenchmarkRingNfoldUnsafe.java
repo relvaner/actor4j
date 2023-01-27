@@ -25,8 +25,8 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import shared.benchmark.BenchmarkConfig;
 
-public class BenchmarkRingNfold extends BenchmarkSampleActor4j {
-	public BenchmarkRingNfold(BenchmarkConfig config) {
+public class BenchmarkRingNfoldUnsafe extends BenchmarkSampleActor4j {
+	public BenchmarkRingNfoldUnsafe(BenchmarkConfig config) {
 		super(config);
 
 		ActorSystem system = createActorSystem("actor4j::NFoldRing::Unsafe");
@@ -55,6 +55,6 @@ public class BenchmarkRingNfold extends BenchmarkSampleActor4j {
 	
 	public static void main(String[] args) {
 		//new BenchmarkRingNfold(new BenchmarkConfig(100, 10, 60_000, 16, 1));
-		new BenchmarkRingNfold(new BenchmarkConfig(100));
+		new BenchmarkRingNfoldUnsafe(new BenchmarkConfig(100));
 	}
 }
