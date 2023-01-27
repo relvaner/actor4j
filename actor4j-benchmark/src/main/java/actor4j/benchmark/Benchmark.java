@@ -19,7 +19,7 @@ import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import actor4j.benchmark.utils.MessageThroughputMeasurement;
 import io.actor4j.core.ActorSystem;
