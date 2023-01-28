@@ -25,6 +25,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import io.actor4j.core.runtime.ActorThreadMode;
+
 public class BenchmarkSamplesApplication {
 	protected static final String VERSION = "1.0.0";
 	
@@ -54,6 +56,7 @@ public class BenchmarkSamplesApplication {
 		Option optionDuration = Option.builder("duration").hasArg().desc("the benchmark duration").argName("duration").build();
 		Option optionTimes = Option.builder("times").hasArg().desc("the number of iterations").argName("times").build();
 		
+		Option threadMode = Option.builder("mode").hasArg().desc("the thread mode").argName("mode").build();
 		Option optionParallelismMin = Option.builder("threads").hasArg().desc("the number of threads").argName("threads").build();
 		Option optionParallelismFactor = Option.builder("factor").hasArg().desc("the parallelism factor").argName("factor").build();
 		
@@ -72,6 +75,7 @@ public class BenchmarkSamplesApplication {
 		options.addOption(optionWarmupIterations);
 		options.addOption(optionDuration);
 		options.addOption(optionTimes);
+		options.addOption(threadMode);
 		options.addOption(optionParallelismMin);
 		options.addOption(optionParallelismFactor);
 		
@@ -104,6 +108,22 @@ public class BenchmarkSamplesApplication {
 				config.durationTimes = Long.valueOf(line.getOptionValue("duration"));
 			if (line.hasOption("times"))
 				config.durationTimes = Long.valueOf(line.getOptionValue("times"));
+			if (line.hasOption("mode")) {
+				switch (String.valueOf(line.getOptionValue("mode")).toLowerCase()) {
+					case "park": 
+						config.threadMode = ActorThreadMode.PARK;
+						break;
+					case "sleep": 
+						config.threadMode = ActorThreadMode.SLEEP;
+						break;
+					case "yield": 
+						config.threadMode = ActorThreadMode.YIELD;
+						break;
+					default:
+						config.threadMode = ActorThreadMode.SLEEP;
+						break;
+				}
+			}
 			if (line.hasOption("threads"))
 				config.parallelism = Integer.valueOf(line.getOptionValue("threads"));
 			if (line.hasOption("factor"))

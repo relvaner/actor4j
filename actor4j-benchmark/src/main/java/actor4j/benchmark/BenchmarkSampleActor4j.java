@@ -19,6 +19,7 @@ import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.config.ActorSystemConfig.Builder;
+import io.actor4j.core.runtime.ActorThreadMode;
 import shared.benchmark.BenchmarkConfig;
 import shared.benchmark.BenchmarkSample;
 
@@ -37,7 +38,12 @@ public class BenchmarkSampleActor4j extends BenchmarkSample {
 			builder.parallelismFactor(config.parallelismFactor);
 		
 		builder.name(name);
-		builder.sleepMode();
+		if (config.threadMode==ActorThreadMode.PARK)
+			builder.parkMode();
+		else if (config.threadMode==ActorThreadMode.SLEEP)
+			builder.sleepMode();
+		else if (config.threadMode==ActorThreadMode.YIELD)
+			builder.yieldMode();
 		builder.counterEnabled(true);
 		
 		builder.horizontalPodAutoscalerSyncTime(Integer.MAX_VALUE); // disabled

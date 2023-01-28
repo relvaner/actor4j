@@ -17,6 +17,8 @@ package shared.benchmark;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 
+import io.actor4j.core.runtime.ActorThreadMode;
+
 public class BenchmarkConfig {
 	static {
 		systemLogger().setLevel(ERROR); // default actor4j-core system logger
@@ -30,6 +32,8 @@ public class BenchmarkConfig {
 	
 	public int parallelism;
 	public int parallelismFactor; 
+	
+	public ActorThreadMode threadMode;
 		
 	public BenchmarkConfig() {
 		this(100);
@@ -48,6 +52,10 @@ public class BenchmarkConfig {
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long durationTimes, int parallelism, int parallelismFactor) {
+		this(numberOfActors, warmupIterations, durationTimes, parallelism, parallelismFactor, ActorThreadMode.SLEEP);
+	}
+	
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long durationTimes, int parallelism, int parallelismFactor, ActorThreadMode threadMode) {
 		super();
 		this.numberOfActors = numberOfActors;
 		
@@ -56,6 +64,8 @@ public class BenchmarkConfig {
 		
 		this.parallelism = parallelism;
 		this.parallelismFactor = parallelismFactor;
+		
+		this.threadMode = threadMode;
 	}
 
 	public int parallelism() {
