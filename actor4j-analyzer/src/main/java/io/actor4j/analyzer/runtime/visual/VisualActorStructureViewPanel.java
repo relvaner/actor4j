@@ -143,10 +143,10 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 					
 					String color = null;
 					if (colorize) {
-        				Long threadId = ((InternalActorExecuterService)system.getExecuterService()).getActorThreadPool().getActorThreadPoolHandler().getCellsMap().get(child.getId());
+        				Long threadId = ((InternalActorExecuterService<?>)system.getExecuterService()).getActorProcessPool().getActorProcessPoolHandler().getCellsMap().get(child.getId());
         				if (threadId!=null)
         					color = ";fillColor="+Utils.randomColorAsHex(
-        						((InternalActorExecuterService)system.getExecuterService()).getActorThreadPool().getActorThreadPoolHandler().getProcessList().indexOf(threadId), 
+        						((InternalActorExecuterService<?>)system.getExecuterService()).getActorProcessPool().getActorProcessPoolHandler().getProcessList().indexOf(threadId), 
         						system.getConfig().parallelism()*system.getConfig().parallelismFactor());
         				else
         					color = ";fillColor=#F0F0F0";
