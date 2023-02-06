@@ -27,6 +27,8 @@ import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 
 import io.actor4j.analyzer.runtime.visual.Utils.Triple;
+import io.actor4j.core.runtime.ActorProcessPoolHandler;
+import io.actor4j.core.runtime.DefaultActorProcessPoolHandler;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorExecuterService;
 import io.actor4j.core.runtime.InternalActorSystem;
@@ -84,11 +86,16 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	        			color = ";fillColor=yellow";
 	        		else {
 	        			if (colorize) {
-	        				Long threadId = ((InternalActorExecuterService<?>)system.getExecuterService()).getActorProcessPool().getActorProcessPoolHandler().getCellsMap().get(actorCell.getId());
-	        				if (threadId!=null)
-	        					color = ";fillColor="+Utils.randomColorAsHex(
-	        						((InternalActorExecuterService<?>)system.getExecuterService()).getActorProcessPool().getActorProcessPoolHandler().getProcessList().indexOf(threadId), 
-	        						system.getConfig().parallelism()*system.getConfig().parallelismFactor());
+	        				ActorProcessPoolHandler<?> poolHandler = ((InternalActorExecuterService<?>)system.getExecuterService()).getActorProcessPool().getActorProcessPoolHandler();
+	        				if (poolHandler instanceof DefaultActorProcessPoolHandler<?> ph) {
+	        					Long threadId = ph.getCellsMap().get(actorCell.getId());
+		        				if (threadId!=null)
+		        					color = ";fillColor="+Utils.randomColorAsHex(
+		        						ph.getProcessList().indexOf(threadId), 
+		        						system.getConfig().parallelism()*system.getConfig().parallelismFactor());
+		        				else
+		        					color = ";fillColor=#F0F0F0"; 
+	        				}
 	        				else
 	        					color = ";fillColor=#F0F0F0";
 	        			}
