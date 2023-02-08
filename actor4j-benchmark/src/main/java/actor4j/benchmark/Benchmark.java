@@ -65,7 +65,7 @@ public class Benchmark {
 				DecimalFormat decimalFormat = new DecimalFormat("###,###,###,###");
 				
 				int i=0;
-				for (long value : ((InternalActorSystem)system).getExecuterService().getCounts()) {
+				for (long value : ((InternalActorSystem)system).getExecutorService().getCounts()) {
 					System.out.printf("actor4j-worker-thread-%d::count = %s%n", i, decimalFormat.format(value));
 					i++;
 				}
@@ -81,8 +81,8 @@ public class Benchmark {
 						i++;
 					}
 				}
-				System.out.printf("statistics::count         : %s%n", decimalFormat.format(((InternalActorSystem)system).getExecuterService().getCount()-warmupCount.get()));
-				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((((InternalActorSystem)system).getExecuterService().getCount()-warmupCount.get())/(benchmarkConfig.getDuration()/1000)));
+				System.out.printf("statistics::count         : %s%n", decimalFormat.format(((InternalActorSystem)system).getExecutorService().getCount()-warmupCount.get()));
+				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((((InternalActorSystem)system).getExecutorService().getCount()-warmupCount.get())/(benchmarkConfig.getDuration()/1000)));
 				System.out.printf("statistics::mean          : %s msg/s%n", decimalFormat.format(statistics.getMean()));
 				System.out.printf("statistics::sd            : %s msg/s%n", decimalFormat.format(statistics.getStandardDeviation()));
 				System.out.printf("statistics::median        : %s msg/s%n", decimalFormat.format(statistics.getPercentile(50)));
@@ -93,7 +93,7 @@ public class Benchmark {
 		messageTM = new MessageThroughputMeasurement(new Supplier<Long>() {
 			@Override
 			public Long get() {
-				return ((InternalActorSystem)system).getExecuterService().getCount();
+				return ((InternalActorSystem)system).getExecutorService().getCount();
 			}
 		}, benchmarkConfig.warmupIterations, warmupCount, statistics, true);
 		messageTM.start();

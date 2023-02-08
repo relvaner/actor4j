@@ -30,7 +30,7 @@ import io.actor4j.analyzer.runtime.visual.Utils.Triple;
 import io.actor4j.core.runtime.ActorProcessPoolHandler;
 import io.actor4j.core.runtime.DefaultActorProcessPoolHandler;
 import io.actor4j.core.runtime.InternalActorCell;
-import io.actor4j.core.runtime.InternalActorExecuterService;
+import io.actor4j.core.runtime.InternalActorExecutorService;
 import io.actor4j.core.runtime.InternalActorSystem;
 
 import java.util.Map.Entry;
@@ -86,7 +86,7 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	        			color = ";fillColor=yellow";
 	        		else {
 	        			if (colorize) {
-	        				ActorProcessPoolHandler<?> poolHandler = ((InternalActorExecuterService<?>)system.getExecuterService()).getActorProcessPool().getActorProcessPoolHandler();
+	        				ActorProcessPoolHandler<?> poolHandler = ((InternalActorExecutorService<?>)system.getExecutorService()).getActorProcessPool().getActorProcessPoolHandler();
 	        				if (poolHandler instanceof DefaultActorProcessPoolHandler<?> ph) {
 	        					Long threadId = ph.getCellsMap().get(actorCell.getId());
 		        				if (threadId!=null)

@@ -34,7 +34,7 @@ import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import io.actor4j.core.runtime.ActorProcessPoolHandler;
 import io.actor4j.core.runtime.DefaultActorProcessPoolHandler;
 import io.actor4j.core.runtime.InternalActorCell;
-import io.actor4j.core.runtime.InternalActorExecuterService;
+import io.actor4j.core.runtime.InternalActorExecutorService;
 import io.actor4j.core.runtime.InternalActorSystem;
 
 public class VisualActorStructureViewPanel extends VisualActorViewPanel {
@@ -145,7 +145,7 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 					
 					String color = null;
 					if (colorize) {
-						ActorProcessPoolHandler<?> poolHandler = ((InternalActorExecuterService<?>)system.getExecuterService()).getActorProcessPool().getActorProcessPoolHandler();
+						ActorProcessPoolHandler<?> poolHandler = ((InternalActorExecutorService<?>)system.getExecutorService()).getActorProcessPool().getActorProcessPoolHandler();
         				if (poolHandler instanceof DefaultActorProcessPoolHandler<?> ph) {
 	        				Long threadId = ph.getCellsMap().get(child.getId());
 	        				if (threadId!=null)

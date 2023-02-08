@@ -46,7 +46,7 @@ public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl implements A
 	}
 	
 	public ActorSystemImpl analyze(ActorAnalyzerThread analyzerThread) {
-		if (!executerService.isStarted()) {
+		if (!executorService.isStarted()) {
 			this.analyzerThread = analyzerThread;
 			if (analyzerThread!=null) {
 				analyzerThread.setSystem(this);
@@ -67,7 +67,7 @@ public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl implements A
 	
 	@Override
 	public boolean start(Runnable onStartup, Runnable onTermination) {
-		if (!executerService.isStarted())
+		if (!executorService.isStarted())
 			if (analyzeMode.get())
 				analyzerThread.start();
 		return super.start(onStartup, onTermination);
@@ -75,7 +75,7 @@ public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl implements A
 	
 	@Override
 	public void shutdownWithActors(final boolean await) {
-		if (executerService.isStarted())
+		if (executorService.isStarted())
 			if (analyzeMode.get()) {
 				analyzeMode.set(false);
 				analyzerThread.interrupt();
@@ -85,7 +85,7 @@ public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl implements A
 	
 	@Override
 	public void shutdown(boolean await) {
-		if (executerService.isStarted())
+		if (executorService.isStarted())
 			if (analyzeMode.get()) {
 				analyzeMode.set(false);
 				analyzerThread.interrupt();
