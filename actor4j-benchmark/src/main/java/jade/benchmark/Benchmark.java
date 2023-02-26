@@ -56,7 +56,7 @@ public class Benchmark {
 		messageTM.start();
 		
 		try {
-			Thread.sleep(config.getDuration()+config.warmupIterations*1000);
+			Thread.sleep(config.duration+config.warmupIterations*1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -65,7 +65,7 @@ public class Benchmark {
 		jade.shutdown();
 		
 		System.out.printf("statistics::count         : %s%n", decimalFormat.format(counter.get()-warmupCount.get()));
-		System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((counter.get()-warmupCount.get())/(config.getDuration()/1000)));
+		System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((counter.get()-warmupCount.get())/(config.duration/1000)));
 		System.out.printf("statistics::mean          : %s msg/s%n", decimalFormat.format(statistics.getMean()));
 		System.out.printf("statistics::sd            : %s msg/s%n", decimalFormat.format(statistics.getStandardDeviation()));
 		System.out.printf("statistics::median        : %s msg/s%n", decimalFormat.format(statistics.getPercentile(50)));

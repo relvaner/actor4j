@@ -37,6 +37,8 @@ public class BenchmarkSampleActor4j extends BenchmarkSample {
 		if (config.parallelismFactor>0)
 			builder.parallelismFactor(config.parallelismFactor);
 		
+		builder.throughput(config.throughput);
+		
 		builder.name(name);
 		if (config.threadMode==ActorThreadMode.PARK)
 			builder.parkMode();

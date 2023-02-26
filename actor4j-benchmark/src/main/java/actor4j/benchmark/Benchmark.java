@@ -82,7 +82,7 @@ public class Benchmark {
 					}
 				}
 				System.out.printf("statistics::count         : %s%n", decimalFormat.format(((InternalActorSystem)system).getExecutorService().getCount()-warmupCount.get()));
-				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((((InternalActorSystem)system).getExecutorService().getCount()-warmupCount.get())/(benchmarkConfig.getDuration()/1000)));
+				System.out.printf("statistics::mean::derived : %s msg/s%n", decimalFormat.format((((InternalActorSystem)system).getExecutorService().getCount()-warmupCount.get())/(benchmarkConfig.duration/1000)));
 				System.out.printf("statistics::mean          : %s msg/s%n", decimalFormat.format(statistics.getMean()));
 				System.out.printf("statistics::sd            : %s msg/s%n", decimalFormat.format(statistics.getStandardDeviation()));
 				System.out.printf("statistics::median        : %s msg/s%n", decimalFormat.format(statistics.getPercentile(50)));
@@ -99,7 +99,7 @@ public class Benchmark {
 		messageTM.start();
 		
 		try {
-			Thread.sleep(benchmarkConfig.getDuration()+benchmarkConfig.warmupIterations*1000);
+			Thread.sleep(benchmarkConfig.duration+benchmarkConfig.warmupIterations*1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

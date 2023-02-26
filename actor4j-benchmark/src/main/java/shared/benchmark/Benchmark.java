@@ -46,7 +46,7 @@ public class Benchmark {
 		
 		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,###");
 		final TimeMeasurement timeMeasurement = new TimeMeasurement();
-		for (int i=1; i<=config.warmupIterations+config.getTimes(); i++) {
+		for (int i=1; i<=config.warmupIterations+config.duration/1000; i++) {
 			if (runnable!=null)
 				runnable.accept(timeMeasurement, i);
 			if (statistics!=null && i>config.warmupIterations)

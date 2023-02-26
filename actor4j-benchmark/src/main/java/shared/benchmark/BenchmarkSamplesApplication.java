@@ -54,11 +54,11 @@ public class BenchmarkSamplesApplication {
 
 		Option optionWarmupIterations = Option.builder("warmup").hasArg().desc("the warmup iterations for the benchmark").argName("warmup").build();
 		Option optionDuration = Option.builder("duration").hasArg().desc("the benchmark duration").argName("duration").build();
-		Option optionTimes = Option.builder("times").hasArg().desc("the number of iterations").argName("times").build();
 		
-		Option threadMode = Option.builder("mode").hasArg().desc("the thread mode").argName("mode").build();
+		Option optionThreadMode = Option.builder("mode").hasArg().desc("the thread mode").argName("mode").build();
 		Option optionParallelismMin = Option.builder("threads").hasArg().desc("the number of threads").argName("threads").build();
 		Option optionParallelismFactor = Option.builder("factor").hasArg().desc("the parallelism factor").argName("factor").build();
+		Option optionThroughput = Option.builder("throughput").hasArg().desc("the throughput").argName("throughput").build();
 		
 		Option optionPingPongGroupedBenchmark = Option.builder("b_pingpong").desc("PingPong-Grouped benchmark (Actor4j)").argName("b_pingpong").build();
 		Option optionNFoldRingBenchmark = Option.builder("b_ring").desc("NFoldRing benchmark (Actor4j)").argName("b_ring").build();
@@ -74,10 +74,10 @@ public class BenchmarkSamplesApplication {
 		options.addOption(optionActors);
 		options.addOption(optionWarmupIterations);
 		options.addOption(optionDuration);
-		options.addOption(optionTimes);
-		options.addOption(threadMode);
+		options.addOption(optionThreadMode);
 		options.addOption(optionParallelismMin);
 		options.addOption(optionParallelismFactor);
+		options.addOption(optionThroughput);
 		
 		options.addOption(optionPingPongGroupedBenchmark);
 		options.addOption(optionNFoldRingBenchmark);
@@ -105,9 +105,7 @@ public class BenchmarkSamplesApplication {
 			if (line.hasOption("warmup"))
 				config.warmupIterations = Integer.valueOf(line.getOptionValue("warmup"));
 			if (line.hasOption("duration"))
-				config.durationTimes = Long.valueOf(line.getOptionValue("duration"));
-			if (line.hasOption("times"))
-				config.durationTimes = Long.valueOf(line.getOptionValue("times"));
+				config.duration = Long.valueOf(line.getOptionValue("duration"));
 			if (line.hasOption("mode")) {
 				switch (String.valueOf(line.getOptionValue("mode")).toLowerCase()) {
 					case "park": 
@@ -128,6 +126,8 @@ public class BenchmarkSamplesApplication {
 				config.parallelism = Integer.valueOf(line.getOptionValue("threads"));
 			if (line.hasOption("factor"))
 				config.parallelismFactor = Integer.valueOf(line.getOptionValue("factor"));
+			if (line.hasOption("throughput"))
+				config.throughput = Integer.valueOf(line.getOptionValue("throughput"));
 			
 			
 			if (line.hasOption("class")) {

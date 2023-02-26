@@ -28,10 +28,12 @@ public class BenchmarkConfig {
 	public int numberOfActors;
 	
 	public int warmupIterations;
-	public long durationTimes;
+	public long duration;
 	
 	public int parallelism;
 	public int parallelismFactor; 
+	
+	public int throughput;
 	
 	public ActorThreadMode threadMode;
 		
@@ -43,40 +45,34 @@ public class BenchmarkConfig {
 		this(numberOfActors, 10, 60_000);
 	}
 	
-	public BenchmarkConfig(int warmupIterations, long durationTimes) {
-		this(100, warmupIterations, durationTimes);
+	public BenchmarkConfig(int warmupIterations, long duration) {
+		this(100, warmupIterations, duration);
 	}
 	
-	public BenchmarkConfig(int numberOfActors, int warmupIterations, long durationTimes) {
-		this(numberOfActors, warmupIterations, durationTimes, Runtime.getRuntime().availableProcessors(), 1);
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration) {
+		this(numberOfActors, warmupIterations, duration, Runtime.getRuntime().availableProcessors(), 1);
 	}
 	
-	public BenchmarkConfig(int numberOfActors, int warmupIterations, long durationTimes, int parallelism, int parallelismFactor) {
-		this(numberOfActors, warmupIterations, durationTimes, parallelism, parallelismFactor, ActorThreadMode.SLEEP);
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor) {
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.SLEEP);
 	}
 	
-	public BenchmarkConfig(int numberOfActors, int warmupIterations, long durationTimes, int parallelism, int parallelismFactor, ActorThreadMode threadMode) {
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, int throughput, ActorThreadMode threadMode) {
 		super();
 		this.numberOfActors = numberOfActors;
 		
 		this.warmupIterations = warmupIterations;
-		this.durationTimes = durationTimes;
+		this.duration = duration;
 		
 		this.parallelism = parallelism;
 		this.parallelismFactor = parallelismFactor;
+		
+		this.throughput = throughput;
 		
 		this.threadMode = threadMode;
 	}
 
 	public int parallelism() {
 		return parallelism*parallelismFactor;
-	}
-	
-	public long getDuration() {
-		return durationTimes;
-	}
-	
-	public long getTimes() {
-		return durationTimes;
 	}
 }

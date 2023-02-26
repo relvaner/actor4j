@@ -45,7 +45,7 @@ public class BenchmarkSampleAkka extends BenchmarkSample {
 					.append("parallelism-factor = "+config.parallelismFactor+newLine)
 					.append("parallelism-max = "+config.parallelism+newLine)
 				.append("}"+newLine)
-				.append("throughput = 100"+newLine)
+				.append("throughput = "+config.throughput+newLine)
 			.append("}"+newLine)
 			.toString();
 	}
