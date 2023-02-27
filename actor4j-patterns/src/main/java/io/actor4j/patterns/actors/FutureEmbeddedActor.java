@@ -19,7 +19,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import io.actor4j.core.actors.EmbeddedActor;
-import io.actor4j.core.actors.EmbeddedHostActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.patterns.messages.FutureActorMessage;
 
@@ -27,12 +26,12 @@ public class FutureEmbeddedActor extends EmbeddedActor {
 	protected CompletableFuture<Object> future;
 	protected UUID dest;
 	
-	public FutureEmbeddedActor(UUID dest, EmbeddedHostActor host) {
-		this(null, dest, host);
+	public FutureEmbeddedActor(UUID dest) {
+		this(null, dest);
 	}
 	
-	public FutureEmbeddedActor(String name, UUID dest, EmbeddedHostActor host) {
-		super(name, host);
+	public FutureEmbeddedActor(String name, UUID dest) {
+		super(name);
 		this.dest = dest;
 	}
 
@@ -43,7 +42,7 @@ public class FutureEmbeddedActor extends EmbeddedActor {
 		
 		if (message instanceof FutureActorMessage<?>) {
 			future = ((FutureActorMessage<Object>)message).future();
-			host.tell(message.value(), message.tag(), dest);
+			host().tell(message.value(), message.tag(), dest);
 		}
 		else if (message.source()==dest) {
 			future.complete(message.value());

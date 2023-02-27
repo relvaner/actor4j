@@ -13,30 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.ring.nfold.embedded.classic;
+package actor4j.benchmark.samples.ring.nfold.embedded.a;
 
-import io.actor4j.core.actors.EmbeddedActor;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.actor4j.core.actors.EmbeddedHostActor;
-import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.messages.ActorMessage;
 
-public class Forwarder extends EmbeddedActor {
-	protected EmbeddedActor next;
-
-	public Forwarder(EmbeddedHostActor host, EmbeddedActor next) {
-		super(host);
+public class Host extends EmbeddedHostActor {
+	protected int count;
+	protected UUID next;
+	
+	public static AtomicBoolean stop = new AtomicBoolean(false);
+	
+	public Host(Integer count) {
+		super();
 		
-		this.next = next;
+		this.count = count;
+	}
+	
+	@Override
+	public void preStart() {
+		next = addEmbeddedChild(() -> new Forwarder(null));
+		for(int i=0; i<count-2; i++) {
+			next = addEmbeddedChild(() -> new Forwarder(next));
+		}
 	}
 
 	@Override
-	public boolean receive(ActorMessage<?> message) {
-		((ActorThread)Thread.currentThread()).getCounter().getAndIncrement();  // TODO: for other runtimes
-		if (next!=null)
-			next.embedded(message);
-		else
-			return false; // no cycle allowed -> stack overflow
-		
-		return true;
+	public void receive(ActorMessage<?> message) {
+		while (!stop.get())
+			sendWithinHost(ActorMessage.create(next, 0, self(), next));
 	}
 }

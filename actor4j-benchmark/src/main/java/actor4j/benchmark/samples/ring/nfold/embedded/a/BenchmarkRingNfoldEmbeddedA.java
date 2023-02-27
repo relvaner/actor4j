@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.ring.nfold.embedded.classic;
+package actor4j.benchmark.samples.ring.nfold.embedded.a;
 
 import java.util.UUID;
 
@@ -23,11 +23,11 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.BenchmarkConfig;
 
-public class BenchmarkRingNfoldEmbeddedClassic extends BenchmarkSampleActor4j {
-	public BenchmarkRingNfoldEmbeddedClassic(BenchmarkConfig config) {
+public class BenchmarkRingNfoldEmbeddedA extends BenchmarkSampleActor4j {
+	public BenchmarkRingNfoldEmbeddedA(BenchmarkConfig config) {
 		super(config);
-
-		ActorSystem system = createActorSystem("actor4j::NFoldRingEmbeddedClassic"); // use -Xss1g
+ 
+		ActorSystem system = createActorSystem("actor4j::NFoldRingEmbeddedA");// use -Xss1g
 		
 		System.out.printf("#actors: %d%n", config.numberOfActors*config.parallelism());
 		for (int j=0; j<config.parallelism(); j++) {
@@ -36,11 +36,10 @@ public class BenchmarkRingNfoldEmbeddedClassic extends BenchmarkSampleActor4j {
 		}
 		
 		Benchmark benchmark = new Benchmark(system, config);
-		benchmark.start();
-		Host.stop.set(true);
+		benchmark.start(() -> Host.stop.set(true));
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkRingNfoldEmbeddedClassic(new BenchmarkConfig(100));
+		new BenchmarkRingNfoldEmbeddedA(new BenchmarkConfig(100));
 	}
 }

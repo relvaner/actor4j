@@ -13,37 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.ring.nfold.embedded.classic;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+package actor4j.benchmark.samples.ring.nfold.embedded.a;
 
 import io.actor4j.core.actors.EmbeddedActor;
-import io.actor4j.core.actors.EmbeddedHostActor;
+import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.messages.ActorMessage;
 
-public class Host extends EmbeddedHostActor {
-	protected int count;
-	protected EmbeddedActor next;
-	
-	public static AtomicBoolean stop = new AtomicBoolean(false);
-	
-	public Host(Integer count) {
+import java.util.UUID;
+
+public class Forwarder extends EmbeddedActor {
+	protected UUID next;
+
+	public Forwarder(UUID next) {
 		super();
 		
-		this.count = count;
-	}
-	
-	@Override
-	public void preStart() {
-		next = new Forwarder(this, null);
-		for(int i=0; i<count-2; i++) {
-			next = new Forwarder(this, next);
-		}
+		this.next = next;
 	}
 
 	@Override
-	public void receive(ActorMessage<?> message) {
-		while (!stop.get())
-			next.embedded(ActorMessage.create(next, 0, self(), self()));
+	public boolean receive(ActorMessage<?> message) {
+		((ActorThread)Thread.currentThread()).getCounter().getAndIncrement(); // TODO: for other runtimes
+		if (next!=null)
+			send(message, next);
+		else 
+			return false;  // no cycle allowed -> stack overflow
+		
+		return true;
 	}
 }

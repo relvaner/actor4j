@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.ring.nfold.embedded;
+package actor4j.benchmark.samples.ring.nfold.embedded.b;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import actor4j.benchmark.samples.ring.nfold.embedded.a.Forwarder;
 import io.actor4j.core.actors.EmbeddedHostActor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.runtime.embedded.InternalEmbeddedActorCell;
 
 public class Host extends EmbeddedHostActor {
 	protected int count;
@@ -35,15 +37,16 @@ public class Host extends EmbeddedHostActor {
 	
 	@Override
 	public void preStart() {
-		next = addEmbeddedChild(new Forwarder(this, null));
+		next = addEmbeddedChild(() -> new Forwarder(null));
 		for(int i=0; i<count-2; i++) {
-			next = addEmbeddedChild(new Forwarder(this, next));
+			next = addEmbeddedChild(() -> new Forwarder(next));
 		}
 	}
 
 	@Override
 	public void receive(ActorMessage<?> message) {
 		while (!stop.get())
-			sendWithinHost(ActorMessage.create(next, 0, self(), next));
+			underlyingImpl().sendUnsafeWithinHost(ActorMessage.create(next, 0, self(), next));
+			//next.embedded(ActorMessage.create(next, 0, self(), self()));
 	}
 }

@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.ring.nfold.embedded;
-
-import io.actor4j.core.actors.EmbeddedActor;
-import io.actor4j.core.actors.EmbeddedHostActor;
-import io.actor4j.core.runtime.ActorThread;
-import io.actor4j.core.messages.ActorMessage;
+package actor4j.benchmark.samples.ring.nfold.embedded.b;
 
 import java.util.UUID;
+
+import io.actor4j.core.actors.EmbeddedActor;
+import io.actor4j.core.runtime.ActorThread;
+import io.actor4j.core.runtime.embedded.InternalEmbeddedActorCell;
+import io.actor4j.core.messages.ActorMessage;
 
 public class Forwarder extends EmbeddedActor {
 	protected UUID next;
 
-	public Forwarder(EmbeddedHostActor host, UUID next) {
-		super(host);
+	public Forwarder(UUID next) {
+		super();
 		
 		this.next = next;
 	}
 
 	@Override
 	public boolean receive(ActorMessage<?> message) {
-		((ActorThread)Thread.currentThread()).getCounter().getAndIncrement(); // TODO: for other runtimes
+		((ActorThread)Thread.currentThread()).getCounter().getAndIncrement();  // TODO: for other runtimes
 		if (next!=null)
-			send(message, next);
-		else 
-			return false;  // no cycle allowed -> stack overflow
+			((InternalEmbeddedActorCell)cell).unsafe_send(message.shallowCopy(next));	
+			//next.embedded(message);
+		else
+			return false; // no cycle allowed -> stack overflow
 		
 		return true;
 	}

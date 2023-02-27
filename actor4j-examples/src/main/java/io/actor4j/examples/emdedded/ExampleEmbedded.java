@@ -32,10 +32,10 @@ public class ExampleEmbedded {
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
 		UUID host = system.addActor(() -> new EmbeddedHostActor("host") {
-			protected EmbeddedActor client;
+			protected UUID client;
 			@Override
 			public void preStart() {
-				client = new EmbeddedActor("host:client", this) {
+				client = addEmbeddedChild(() -> new EmbeddedActor("host:client") {
 					@Override
 					public boolean receive(ActorMessage<?> message) {
 						boolean result = false;
@@ -52,12 +52,12 @@ public class ExampleEmbedded {
 						
 						return result;
 					}
-				};
+				});
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (!client.embedded(message))
+				if (!embedded(message, client))
 					unhandled(message);
 			}
 		});

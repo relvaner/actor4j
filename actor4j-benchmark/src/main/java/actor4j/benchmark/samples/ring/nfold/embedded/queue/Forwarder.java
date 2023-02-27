@@ -16,7 +16,6 @@
 package actor4j.benchmark.samples.ring.nfold.embedded.queue;
 
 import io.actor4j.core.actors.EmbeddedActor;
-import io.actor4j.core.actors.EmbeddedHostActor;
 import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.messages.ActorMessage;
 
@@ -25,8 +24,8 @@ import java.util.UUID;
 public class Forwarder extends EmbeddedActor {
 	protected UUID next;
 
-	public Forwarder(EmbeddedHostActor host, UUID next) {
-		super(host);
+	public Forwarder(UUID next) {
+		super();
 		
 		this.next = next;
 	}

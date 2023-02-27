@@ -35,9 +35,9 @@ public class Host extends EmbeddedHostActor {
 	
 	@Override
 	public void preStart() {
-		next = addEmbeddedChild(new Forwarder(this, null));
+		next = addEmbeddedChild(() -> new Forwarder(null));
 		for(int i=0; i<count-2; i++) {
-			next = addEmbeddedChild(new Forwarder(this, next));
+			next = addEmbeddedChild(() -> new Forwarder(next));
 		}
 	}
 
