@@ -41,13 +41,13 @@
   			<artifactId>jgraphx</artifactId>
   			<version>4.2.2</version>
   			<scope>system</scope>
-			<systemPath>${basedir}/jar/jgraphx-4.2.2.jar</systemPath>
+			<systemPath>${project.basedir}/jar/jgraphx-4.2.2.jar</systemPath>
   		</dependency>
   		
   		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math</artifactId>
-			<version>2.2</version>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
 		</dependency>
 	</dependencies>
 </project>
