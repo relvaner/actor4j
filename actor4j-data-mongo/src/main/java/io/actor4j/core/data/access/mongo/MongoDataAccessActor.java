@@ -18,12 +18,12 @@ package io.actor4j.core.data.access.mongo;
 import com.mongodb.client.MongoClient;
 
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.mongo.MongoBufferedBulkWriter;
+import io.actor4j.database.mongo.MongoBufferedBulkWriter;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
-import static io.actor4j.core.mongo.MongoOperations.*;
+import static io.actor4j.database.mongo.MongoOperations.*;
 
 import java.util.HashMap;
 import java.util.Map;

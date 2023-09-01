@@ -15,6 +15,8 @@
  */
 package io.actor4j.cache.mongo;
 
+import static io.actor4j.database.mongo.MongoOperations.*;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +34,7 @@ import org.bson.Document;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.model.Filters;
 
-import io.actor4j.core.mongo.MongoBufferedBulkWriter;
-
-import static io.actor4j.core.mongo.MongoOperations.*;
+import io.actor4j.database.mongo.MongoBufferedBulkWriter;
 
 public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, CacheWriter<K, V> {
 	public static final String KEY_NAME   = "_id";
