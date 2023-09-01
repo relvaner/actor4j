@@ -15,7 +15,8 @@
  */
 package io.actor4j.core.persistence.drivers.mongo;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.persistence.drivers.PersistenceDriver;
@@ -31,7 +32,7 @@ public class MongoDBPersistenceDriver extends PersistenceDriver {
 	@Override
 	public void open() {
 		if (client==null)
-			client = new MongoClient(host, port);
+			client = MongoClients.create("mongodb://"+host+":"+port);
 	}
 
 	@Override

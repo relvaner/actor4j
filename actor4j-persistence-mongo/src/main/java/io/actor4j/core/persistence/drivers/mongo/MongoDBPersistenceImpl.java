@@ -130,7 +130,8 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 				if (document!=null) {
 					JSONObject stateValue = new JSONObject(document.toJson());
 					stateValue.remove("_id");
-					long stateTimeStamp = stateValue.getJSONObject("timeStamp").getLong("$numberLong");
+//					long stateTimeStamp = stateValue.getJSONObject("timeStamp").getLong("$numberLong");
+					long stateTimeStamp = stateValue.getLong("timeStamp");
 					int stateIndex = stateValue.getInt("index");
 					stateValue.put("timeStamp", stateTimeStamp);
 					obj.put("state", stateValue);
@@ -144,7 +145,8 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 						document = cursor.next();
 						JSONObject eventValue = new JSONObject(document.toJson());
 						eventValue.remove("_id");
-						long timeStamp = eventValue.getJSONObject("timeStamp").getLong("$numberLong");
+//						long timeStamp = eventValue.getJSONObject("timeStamp").getLong("$numberLong");
+						long timeStamp = eventValue.getLong("timeStamp");
 						int index = eventValue.getInt("index");
 						if (timeStamp==stateTimeStamp) {
 							if (index>stateIndex) {

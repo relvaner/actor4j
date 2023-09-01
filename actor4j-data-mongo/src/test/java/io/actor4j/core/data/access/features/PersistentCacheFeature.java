@@ -19,7 +19,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
@@ -54,14 +55,13 @@ public class PersistentCacheFeature {
 	@Before
 	public void before() {
 		/*
-		client = new MongoClient("localhost", 27017);
 		client.dropDatabase("actor4j-test");
 		*/
 		
 		mongoServer = new MongoServer(new MemoryBackend());
 		mongoServer.bind("localhost", 27027);
 		
-		client = new MongoClient("localhost", 27027);
+		client = MongoClients.create("mongodb://localhost:27027");
 	}
 	
 	@After

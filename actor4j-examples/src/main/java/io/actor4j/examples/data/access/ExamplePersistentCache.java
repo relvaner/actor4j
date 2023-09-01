@@ -18,7 +18,8 @@ package io.actor4j.examples.data.access;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
@@ -30,7 +31,7 @@ import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
 public class ExamplePersistentCache {
 	public ExamplePersistentCache() {
-		MongoClient mongoClient = new MongoClient("localhost", 27017);
+		MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
 		mongoClient.getDatabase("actor4j-test").drop();
 		
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());

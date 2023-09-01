@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 package io.actor4j.core.data.access.mongo;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.mongo.MongoBufferedBulkWriter;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
-import static io.actor4j.core.data.access.mongo.MongoOperations.*;
+import static io.actor4j.core.mongo.MongoOperations.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,30 +74,30 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 				if (bulkWrite) {
 					bulkWriter = bulkWriters.get(dto.collectionName());
 					if (bulkWriter==null) {
-						bulkWriter = new MongoBufferedBulkWriterImpl(client.getDatabase(databaseName).getCollection(dto.collectionName()), bulkOrdered, bulkSize);
+						bulkWriter = MongoBufferedBulkWriter.create(client, databaseName, dto.collectionName(), bulkOrdered, bulkSize);
 						bulkWriters.put(dto.collectionName(), bulkWriter);
 					}
 				}
 				
 				if (message.tag()==FIND_ONE || message.tag()==GET) {
-					V value = findOne(Document.parse(dto.filter()), client, databaseName, dto.collectionName(), valueType);
+					V value = convertToValue(findOne(Document.parse(dto.filter()), client, databaseName, dto.collectionName()), valueType);
 					tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
 				}
 				else if (message.tag()==SET) {
 					if (!((boolean)dto.reserved()) && !hasOne(Document.parse(dto.filter()), client, databaseName, dto.collectionName()))
-						insertOne(dto.value(), client, databaseName, dto.collectionName(), bulkWriter);
+						insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
 					else
-						replaceOne(Document.parse(dto.filter()), dto.value(), client, databaseName, dto.collectionName(), bulkWriter);
+						replaceOne(Document.parse(dto.filter()), convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
 				}
 				else if (message.tag()==UPDATE_ONE || message.tag()==UPDATE)
 					updateOne(Document.parse(dto.filter()), Document.parse(dto.update()), client, databaseName, dto.collectionName(), bulkWriter);
 				else if (message.tag()==INSERT_ONE) {
 					if (dto.filter()!=null) {
 						if (!hasOne(Document.parse(dto.filter()), client, databaseName, dto.collectionName()))
-							insertOne(dto.value(), client, databaseName, dto.collectionName(), bulkWriter);
+							insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
 					}
 					else
-						insertOne(dto.value(), client, databaseName, dto.collectionName(), bulkWriter);
+						insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
 				}
 				else if (message.tag()==DELETE_ONE)
 					deleteOne(Document.parse(dto.filter()), client, databaseName, dto.collectionName(), bulkWriter);

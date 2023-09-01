@@ -51,8 +51,15 @@
 	</properties>
 	
 	<modules>
+		<module>actor4j-cache</module>
+		<module>actor4j-cache-caffeine</module>
+		<module>actor4j-cache-mongo</module>
+		
 		<module>actor4j-data</module>
 		<module>actor4j-data-mongo</module>
+		
+		<module>actor4j-mongo</module>
+		
 		<module>actor4j-testing</module>
 		<module>actor4j-analyzer</module>
 		
@@ -65,5 +72,6 @@
 		<module>actor4j-persistence-mongo</module>
 		
 		<module>actor4j-poc</module>
+		<module>actor4j-analyzer-swing</module>
 	</modules>
 </project>

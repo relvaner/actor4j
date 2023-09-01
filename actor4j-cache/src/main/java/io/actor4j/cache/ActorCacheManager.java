@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.data.access.mongo;
+package io.actor4j.cache;
 
-import org.bson.Document;
-import com.mongodb.client.model.WriteModel;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.configuration.Configuration;
 
-public interface MongoBufferedBulkWriter {
-	public void write(WriteModel<Document> request);
-	public void flush();
+public class ActorCacheManager {
+	public static CacheManager cacheManager() {
+		return Caching.getCachingProvider().getCacheManager();
+	}
+	
+	public static <K, V, C extends Configuration<K, V>> Cache<K, V> createCache(String cacheName, C configuration) {
+		return cacheManager().createCache(cacheName, configuration);
+	}
 }
