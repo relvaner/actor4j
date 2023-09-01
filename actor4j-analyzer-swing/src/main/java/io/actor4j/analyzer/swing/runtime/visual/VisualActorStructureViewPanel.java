@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.runtime.visual;
+package io.actor4j.analyzer.swing.runtime.visual;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,6 +31,7 @@ import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 
+import io.actor4j.analyzer.runtime.visual.Utils;
 import io.actor4j.core.runtime.ActorProcessPoolHandler;
 import io.actor4j.core.runtime.DefaultActorProcessPoolHandler;
 import io.actor4j.core.runtime.InternalActorCell;

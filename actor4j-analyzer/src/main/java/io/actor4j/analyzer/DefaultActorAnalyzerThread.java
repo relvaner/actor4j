@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.SwingUtilities;
 
 import io.actor4j.analyzer.runtime.ActorAnalyzerThread;
-import io.actor4j.analyzer.runtime.visual.VisualActorAnalyzer;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
@@ -36,20 +35,21 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	protected boolean showRootSystem;
 	protected boolean colorize;
 	
-	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot) {
-		this(delay, showDefaultRoot, false, false);
+	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, VisualActorAnalyzer visualAnalyzer) {
+		this(delay, showDefaultRoot, false, false, visualAnalyzer);
 	}
 	
-	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem) {
-		this(delay, showDefaultRoot, showRootSystem, false);
+	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, VisualActorAnalyzer visualAnalyzer) {
+		this(delay, showDefaultRoot, showRootSystem, false, visualAnalyzer);
 	}
 	
-	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, boolean colorize, VisualActorAnalyzer visualAnalyzer) {
 		super(delay);
 		
 		this.showDefaultRoot = showDefaultRoot;
 		this.showRootSystem = showRootSystem;
 		this.colorize = colorize;
+		this.visualAnalyzer = visualAnalyzer;
 		
 		deliveryRoutes = new ConcurrentHashMap<>();
 	}
@@ -58,7 +58,7 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	protected void setSystem(InternalActorSystem system) {
 		super.setSystem(system);
 		
-		visualAnalyzer = new VisualActorAnalyzer(system);
+		visualAnalyzer.setSystem(system);
 	}
 	
 	@Override

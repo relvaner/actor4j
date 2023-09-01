@@ -13,44 +13,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.runtime.visual;
+package io.actor4j.analyzer.swing;
 
 import java.awt.event.WindowEvent;
 import java.util.Map;
 import java.util.UUID;
 
+import io.actor4j.analyzer.VisualActorAnalyzer;
+import io.actor4j.analyzer.swing.runtime.visual.SwingSubApplication;
+import io.actor4j.analyzer.swing.runtime.visual.VisualActorFrame;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
-import tools4j.utils.SwingSubApplication;
 
-public class VisualActorAnalyzer {
+public class SwingVisualActorAnalyzer implements VisualActorAnalyzer {
 	protected InternalActorSystem system;
 	protected SwingSubApplication application;
 	
-	public VisualActorAnalyzer(InternalActorSystem system) {
+	public SwingVisualActorAnalyzer() {
 		super();
-		
+	}
+	
+	@Override
+	public void setSystem(InternalActorSystem system) {
 		this.system = system;
 	}
 	
+	@Override
 	public void start() {
 		application = new SwingSubApplication();
 		application.setTitle("actor4j-analyzer (Structure & Behaviour)");
 		application.runApplication(new VisualActorFrame(system));
 	}
 	
+	@Override
 	public void stop() {
 		application.getFrame().dispatchEvent(new WindowEvent(application.getFrame(), WindowEvent.WINDOW_CLOSING));
 	}
 	
+	@Override
 	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		((VisualActorFrame)application.getFrame()).analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 	
+	@Override
 	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		return ((VisualActorFrame)application.getFrame()).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 	}
 	
+	@Override
 	public void setStatus(String text) {
 		((VisualActorFrame)application.getFrame()).setStatus(text);
 	}

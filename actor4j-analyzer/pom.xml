@@ -35,14 +35,6 @@
 			<artifactId>actor4j-core-runtime</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
-		
-		<dependency>
-  			<groupId>com.mxgraph</groupId>
-  			<artifactId>jgraphx</artifactId>
-  			<version>4.2.2</version>
-  			<scope>system</scope>
-			<systemPath>${project.basedir}/jar/jgraphx-4.2.2.jar</systemPath>
-  		</dependency>
   		
   		<dependency>
 			<groupId>org.apache.commons</groupId>

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.example;
+package io.actor4j.analyzer.swing.example;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +31,14 @@ import io.actor4j.core.utils.HubPattern;
 import io.actor4j.analyzer.ActorAnalyzer;
 import io.actor4j.analyzer.DefaultActorAnalyzerThread;
 import io.actor4j.analyzer.config.ActorAnalyzerConfig;
+import io.actor4j.analyzer.swing.SwingVisualActorAnalyzer;
 
 public class ExampleAnalyzer {
 	public ExampleAnalyzer() {
 		ActorAnalyzerConfig config = ActorAnalyzerConfig.builder()
 			.parallelism(4)
 			.build();
-		ActorSystem system = ActorAnalyzer.create(new DefaultActorAnalyzerThread(2000, true, true, true), config);
+		ActorSystem system = ActorAnalyzer.create(new DefaultActorAnalyzerThread(2000, true, true, true, new SwingVisualActorAnalyzer()), config);
 		
 		ActorGroup distributedGroup = new ActorGroupSet();
 		final int size = 4;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.example;
+package io.actor4j.analyzer.swing.example;
 
 import java.util.UUID;
 

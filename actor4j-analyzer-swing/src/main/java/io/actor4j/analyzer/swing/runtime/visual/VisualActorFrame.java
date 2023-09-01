@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.runtime.visual;
+package io.actor4j.analyzer.swing.runtime.visual;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
