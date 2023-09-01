@@ -17,6 +17,8 @@ package io.actor4j.cache.mongo.features;
 
 import static org.junit.Assert.assertEquals;
 
+import java.awt.Point;
+
 import javax.cache.Cache;
 import javax.cache.configuration.MutableConfiguration;
 
@@ -204,5 +206,38 @@ public class MongoCacheLoaderAndWriterFeature {
 		assertEquals(cache.get("key02"), "value02");
 		assertEquals(cache.get("key03"), "value03");
 		assertEquals(cache.get("key04"), "value04");
+	}
+	
+	@Test(timeout=5000)
+	public void test_point() {
+		MongoCacheLoaderAndWriter<Integer, Point> cacheLoaderAndWriter = new MongoCacheLoaderAndWriter<>(
+				client, 
+				"database",
+				"collection05", 
+				Point.class);
+		MutableConfiguration<Integer, Point> configuration = new MutableConfiguration<>();
+		configuration
+			.setReadThrough(true)
+			.setWriteThrough(true)
+			.setCacheLoaderFactory(() -> cacheLoaderAndWriter)
+			.setCacheWriterFactory(() -> cacheLoaderAndWriter);
+		Cache<Integer, Point> cache = ActorCacheManager.createCache("test_point", configuration);
+		
+		cache.put(100, new Point(12, 55));
+		cache.put(101, new Point(13, 56));
+		cache.put(102, new Point(14, 57));
+		
+		cache.clear();
+		
+		assertEquals(cache.get(100).x, 12);
+		assertEquals(cache.get(101).y, 56);
+		assertEquals(cache.get(102).x, 14);
+		
+		cacheLoaderAndWriter.write(DummyCacheEntry.create(103, new Point(15, 58)));
+		
+		assertEquals(cache.get(100).x, 12);
+		assertEquals(cache.get(101).y, 56);
+		assertEquals(cache.get(102).x, 14);
+		assertEquals(cache.get(103).y, 58);
 	}
 }
