@@ -44,6 +44,8 @@ import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSIS
 import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
 
 public class MongoDBPersistenceImpl extends PersistenceImpl {
+	private static final ObjectMapper objectMapper = new ObjectMapper();
+	
 	protected MongoDatabase database;
 	protected MongoCollection<Document> events;
 	protected MongoCollection<Document> states;
@@ -82,7 +84,7 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 		if (message.tag()==PERSIST_EVENTS) {
 			try {
 				@SuppressWarnings("unchecked")
-				String json = new ObjectMapper().writeValueAsString(((ImmutableList<ActorPersistenceDTO<?>>)message.value()).get()); // temporary
+				String json = objectMapper.writeValueAsString(((ImmutableList<ActorPersistenceDTO<?>>)message.value()).get());
 				
 				JSONArray array = new JSONArray(json);
 				if (array.length()==1) {
@@ -108,7 +110,7 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 		}
 		else if (message.tag()==PERSIST_STATE){
 			try {
-				String json = new ObjectMapper().writeValueAsString(message.value()); // temporary
+				String json = objectMapper.writeValueAsString(message.value());
 				
 				Document document = Document.parse(json);
 				checkTimeStamp(document);

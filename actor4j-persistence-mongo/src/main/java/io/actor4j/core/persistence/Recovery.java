@@ -25,6 +25,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public record Recovery<S, E>(ActorPersistenceDTO<S> state, List<ActorPersistenceDTO<E>> events) {
+	private static final ObjectMapper objectMapper;
+	
+	static {
+		objectMapper= new ObjectMapper();
+		
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+	}
+	
 	@Override
 	public String toString() {
 		return "Recovery [state=" + state + ", events=" + events + "]";
@@ -59,9 +67,7 @@ public record Recovery<S, E>(ActorPersistenceDTO<S> state, List<ActorPersistence
 	@SuppressWarnings("unchecked")
 	public static <A, B> Recovery<A, B> convertValue(String json, TypeReference<?> valueTypeRef) {
 		Recovery<A, B> result = null;
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 		try {
 			result = (Recovery<A, B>)objectMapper.readValue(json, valueTypeRef);
 		} catch (IOException e) {

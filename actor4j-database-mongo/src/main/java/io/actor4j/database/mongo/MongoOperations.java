@@ -33,6 +33,14 @@ import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 
 public final class MongoOperations {
+	private static final ObjectMapper objectMapper;
+	
+	static {
+		objectMapper= new ObjectMapper();
+		
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+	}
+	
 	public static boolean hasOne(Bson filter, MongoClient client, String databaseName, String collectionName) {
 		boolean result = false;
 		
@@ -174,7 +182,7 @@ public final class MongoOperations {
 	public static <V> Document convertToDocument(V value) {
 		Document result = null;
 		try {
-			result = Document.parse(new ObjectMapper().writeValueAsString(value));
+			result = Document.parse(objectMapper.writeValueAsString(value));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -187,9 +195,6 @@ public final class MongoOperations {
 		
 		if (json!=null)
 			try {
-				ObjectMapper objectMapper = new ObjectMapper();
-				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-				
 				result = objectMapper.readValue(json, valueType);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -213,9 +218,6 @@ public final class MongoOperations {
 		
 		for (Document document : documents)
 			try {
-				ObjectMapper objectMapper = new ObjectMapper();
-				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-				
 				result.add(objectMapper.readValue(document.toJson(), valueType));
 			} catch (Exception e) {
 				e.printStackTrace();
