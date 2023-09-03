@@ -36,7 +36,7 @@ import io.actor4j.core.runtime.InternalActorSystem;
 public class VisualActorFrame extends JFrame {
 	protected static final long serialVersionUID = 6808210435112913511L;
 	
-	protected InternalActorSystem system;
+	protected final InternalActorSystem system;
 
 	protected JPanel contentPane;
 	

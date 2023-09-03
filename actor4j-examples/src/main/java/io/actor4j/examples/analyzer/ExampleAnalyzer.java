@@ -26,12 +26,12 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.HubPattern;
 import io.actor4j.analyzer.ActorAnalyzer;
-import io.actor4j.analyzer.DefaultActorAnalyzerThread;
+import io.actor4j.analyzer.swing.SwingActorAnalyzerThread;
 import io.actor4j.analyzer.swing.SwingVisualActorAnalyzer;
 
 public class ExampleAnalyzer {
 	public ExampleAnalyzer() {
-		ActorSystem system = ActorAnalyzer.create(new DefaultActorAnalyzerThread(2000, true, new SwingVisualActorAnalyzer()));
+		ActorSystem system = ActorAnalyzer.create(new SwingActorAnalyzerThread(2000, true, new SwingVisualActorAnalyzer()));
 
 		final int size = 2;
 		ActorGroup group = new ActorGroupSet();

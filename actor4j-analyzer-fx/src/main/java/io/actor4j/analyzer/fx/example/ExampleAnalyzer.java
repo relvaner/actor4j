@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.analyzer.swing.example;
+package io.actor4j.analyzer.fx.example;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import io.actor4j.analyzer.ActorAnalyzer;
+import io.actor4j.analyzer.config.ActorAnalyzerConfig;
+import io.actor4j.analyzer.fx.FXActorAnalyzerThread;
+import io.actor4j.analyzer.fx.FXAnalyzerApplication;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.actors.ActorWithBothGroups;
 import io.actor4j.core.actors.ActorWithDistributedGroup;
 import io.actor4j.core.actors.ActorWithGroup;
-import io.actor4j.core.actors.ActorWithBothGroups;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.HubPattern;
-import io.actor4j.analyzer.ActorAnalyzer;
-import io.actor4j.analyzer.config.ActorAnalyzerConfig;
-import io.actor4j.analyzer.swing.SwingActorAnalyzerThread;
-import io.actor4j.analyzer.swing.SwingVisualActorAnalyzer;
+import javafx.stage.Stage;
 
-public class ExampleAnalyzer {
-	public ExampleAnalyzer() {
+public class ExampleAnalyzer extends FXAnalyzerApplication {
+	protected ActorSystem system;
+	
+	@Override
+	public void run(Stage primaryStage) {
+		super.run(primaryStage);
+		
+		initialize();
+	}
+	
+	public void initialize() {
 		ActorAnalyzerConfig config = ActorAnalyzerConfig.builder()
 			.parallelism(4)
 			.build();
-		ActorSystem system = ActorAnalyzer.create(new SwingActorAnalyzerThread(2000, true, true, true, new SwingVisualActorAnalyzer()), config);
+		
+		system = ActorAnalyzer.create(new FXActorAnalyzerThread(2000, true, true, true, getVisualActorAnalyzer()), config);
 		
 		ActorGroup distributedGroup = new ActorGroupSet();
 		final int size = 4;
@@ -150,16 +161,14 @@ public class ExampleAnalyzer {
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.RESTART, system.SYSTEM_ID, null), ping, 5, TimeUnit.SECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.STOP, system.SYSTEM_ID, null), id, 15, TimeUnit.SECONDS);
 		// system.timer().scheduleOnce(new ActorMessage<Object>(null, Actor.STOP, system.SYSTEM_ID, null), system.USER_ID, 25, TimeUnit.SECONDS);
-		
-		try {
-			Thread.sleep(240000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	}
+	
+	@Override
+	public void stop() {
 		system.shutdownWithActors(true);
 	}
 
-	public static void main(String[] args) {
-		new ExampleAnalyzer();
+	public static void main(String[] args){
+		launch(args);
 	}
 }

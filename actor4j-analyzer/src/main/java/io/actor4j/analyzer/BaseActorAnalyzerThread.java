@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.swing.SwingUtilities;
-
 import io.actor4j.analyzer.runtime.ActorAnalyzerThread;
-import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 
-public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
+public abstract class BaseActorAnalyzerThread extends ActorAnalyzerThread {
 	protected VisualActorAnalyzer visualAnalyzer;
 	
 	protected Map<UUID, Map<UUID, Long>> deliveryRoutes;
@@ -35,15 +32,15 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 	protected boolean showRootSystem;
 	protected boolean colorize;
 	
-	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, VisualActorAnalyzer visualAnalyzer) {
+	public BaseActorAnalyzerThread(long delay, boolean showDefaultRoot, VisualActorAnalyzer visualAnalyzer) {
 		this(delay, showDefaultRoot, false, false, visualAnalyzer);
 	}
 	
-	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, VisualActorAnalyzer visualAnalyzer) {
+	public BaseActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, VisualActorAnalyzer visualAnalyzer) {
 		this(delay, showDefaultRoot, showRootSystem, false, visualAnalyzer);
 	}
 	
-	public DefaultActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, boolean colorize, VisualActorAnalyzer visualAnalyzer) {
+	public BaseActorAnalyzerThread(long delay, boolean showDefaultRoot, boolean showRootSystem, boolean colorize, VisualActorAnalyzer visualAnalyzer) {
 		super(delay);
 		
 		this.showDefaultRoot = showDefaultRoot;
@@ -81,18 +78,6 @@ public class DefaultActorAnalyzerThread extends ActorAnalyzerThread {
 			routes.put(dest, 1L);
 		else
 			routes.put(dest, count+1);
-	}
-
-	@Override
-	protected void update(final Map<UUID, InternalActorCell> cells) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				visualAnalyzer.analyzeStructure(cells, showDefaultRoot, showRootSystem, colorize);
-				String status = visualAnalyzer.analyzeBehaviour(cells, deliveryRoutes, showRootSystem, colorize);
-				visualAnalyzer.setStatus(status);
-			}
-		});
 	}
 	
 	@Override

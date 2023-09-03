@@ -20,7 +20,16 @@
 		<artifactId>actor4j</artifactId>
 		<version>2.1.0</version>
 	</parent>
-	<artifactId>actor4j-analyzer-swing</artifactId>
+	<artifactId>actor4j-analyzer-fx</artifactId>
+	
+	<properties>
+		<maven.compiler.source>17</maven.compiler.source>
+  		<maven.compiler.target>17</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<javafx.version>21-ea+24</javafx.version>
+		<smartgraph.version>1.0.0</smartgraph.version>
+		<javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
+	</properties>
 	
 	<dependencies>
 		<dependency>
@@ -30,11 +39,27 @@
 		</dependency>
 		
 		<dependency>
-  			<groupId>com.mxgraph</groupId>
-  			<artifactId>jgraphx</artifactId>
-  			<version>4.2.2</version>
-  			<scope>system</scope>
-			<systemPath>${project.basedir}/jar/jgraphx-4.2.2.jar</systemPath>
-  		</dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.brunomnsilva</groupId>
+			<artifactId>smartgraph</artifactId>
+			<version>${smartgraph.version}</version>
+		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-maven-plugin</artifactId>
+				<version>${javafx.maven.plugin.version}</version>
+				<configuration>
+					<mainClass>io.actor4j.analyzer.fx.example.ExampleAnalyzer</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
