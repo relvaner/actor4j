@@ -18,9 +18,13 @@ package io.actor4j.analyzer.fx.runtime.visual;
 import io.actor4j.analyzer.runtime.VisualActorBehaviourView;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
+import io.actor4j.core.utils.Pair;
+import javafx.application.Platform;
 
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -41,21 +45,39 @@ public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 		super(text, system);
 		
 		visualActorBehaviourView = new VisualActorBehaviourView(system) {
+			final Queue<Pair<Vertex<VertexElement>, String>> styleUpdateQueue = new ConcurrentLinkedQueue<>();
+			
 			@SuppressWarnings("unchecked")
 			@Override
 			public void removeVertex(Object source) {
 				graph.removeVertex((Vertex<VertexElement>)source);
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Object addVertex(String name, String color) {
-				return graph.insertVertex(new VertexElement(name));
+				Object result = null;
+				
+				try {
+					result = graph.insertVertex(new VertexElement(name));
+					styleUpdateQueue.offer(Pair.of((Vertex<VertexElement>)result, color));
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+				}
+
+				return result;
 			}
 
 			@SuppressWarnings("unchecked")
 			@Override
 			public void addEdge(String value, Object source, Object target) {
-				graph.insertEdge((Vertex<VertexElement>)source, (Vertex<VertexElement>)target, new EdgeElement(value!=null ? value : ""));
+				try {
+					graph.insertEdge((Vertex<VertexElement>)source, (Vertex<VertexElement>)target, new EdgeElement(value!=null ? value : ""));
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 			@SuppressWarnings("unchecked")
@@ -86,6 +108,11 @@ public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 				runnable.run();
 				
 				graphView.update();
+				Platform.runLater(() -> {
+					Pair<Vertex<VertexElement>, String> pair = null;
+					for (; (pair=styleUpdateQueue.poll())!=null;)
+						graphView.getStylableVertex(pair.a()).setStyle("-fx-fill: "+pair.b()+";");
+				});
 			}
 
 			@Override

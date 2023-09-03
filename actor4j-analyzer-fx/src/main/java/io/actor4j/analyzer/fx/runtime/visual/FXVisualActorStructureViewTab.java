@@ -16,6 +16,8 @@
 package io.actor4j.analyzer.fx.runtime.visual;
 
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,6 +28,8 @@ import java.util.UUID;
 import io.actor4j.analyzer.runtime.VisualActorStructureView;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
+import io.actor4j.core.utils.Pair;
+import javafx.application.Platform;
 
 public class FXVisualActorStructureViewTab extends FXVisualActorViewTab {
 	protected static final long serialVersionUID = -1192782222987329027L;
@@ -40,19 +44,22 @@ public class FXVisualActorStructureViewTab extends FXVisualActorViewTab {
 		super(text, system);
 		
 		visualActorStructureView = new VisualActorStructureView(system) {
+			final Queue<Pair<Vertex<VertexElement>, String>> styleUpdateQueue = new ConcurrentLinkedQueue<>();
+			
 			@SuppressWarnings("unchecked")
 			@Override
 			public void removeVertex(Object source) {
 				graph.removeVertex((Vertex<VertexElement>)source);
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Object addVertex(String name, String color) {
 				Object result = null;
 				
 				try {
-					System.out.println(name);
 					result = graph.insertVertex(new VertexElement(name));
+					styleUpdateQueue.offer(Pair.of((Vertex<VertexElement>)result, color));
 				}
 				catch(Exception e) {
 					e.printStackTrace();
@@ -64,13 +71,12 @@ public class FXVisualActorStructureViewTab extends FXVisualActorViewTab {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void addEdge(String value, Object source, Object target) {
-				graph.insertEdge((Vertex<VertexElement>)source, (Vertex<VertexElement>)target, new EdgeElement(value!=null ? value : ""));
-//				try {
-//					graph.insertEdge((Vertex)source, (Vertex)target, new EdgeElement(value));
-//				}
-//				catch(Exception e) {
-//					e.printStackTrace();
-//				}
+				try {
+					graph.insertEdge((Vertex<VertexElement>)source, (Vertex<VertexElement>)target, new EdgeElement(value!=null ? value : ""));
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 
 			@Override
@@ -78,6 +84,11 @@ public class FXVisualActorStructureViewTab extends FXVisualActorViewTab {
 				runnable.run();
 				
 				graphView.update();
+				Platform.runLater(() -> {
+					Pair<Vertex<VertexElement>, String> pair = null;
+					for (; (pair=styleUpdateQueue.poll())!=null;)
+						graphView.getStylableVertex(pair.a()).setStyle("-fx-fill: "+pair.b()+";");
+				});
 			}
 
 			@Override

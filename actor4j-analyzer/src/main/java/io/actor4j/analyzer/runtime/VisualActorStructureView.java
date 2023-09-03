@@ -62,15 +62,15 @@ public abstract class VisualActorStructureView {
 		
 		graphUpdate(() -> {
         	if (showDefaultRoot && defaultRoot==null)
-        		defaultRoot = addVertex("actor4j", ";fillColor=white");
+        		defaultRoot = addVertex("actor4j", "white");
         	
-        	analyzeRootActor(actorCells, actorCells.get(system.get().USER_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, actorCells.get(system.get().USER_ID()), "yellow", showDefaultRoot, colorize);
         	if (showRootSystem)
-        		analyzeRootActor(actorCells, actorCells.get(system.get().SYSTEM_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
+        		analyzeRootActor(actorCells, actorCells.get(system.get().SYSTEM_ID()), "yellow", showDefaultRoot, colorize);
         	else
-        		showOnlyRootActor(actorCells, actorCells.get(system.get().SYSTEM_ID()), ";fillColor=yellow", showDefaultRoot);
-        	analyzeRootActor(actorCells, actorCells.get(system.get().UNKNOWN_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
-        	analyzeRootActor(actorCells, actorCells.get(system.get().PSEUDO_ID()), ";fillColor=yellow", showDefaultRoot, colorize);
+        		showOnlyRootActor(actorCells, actorCells.get(system.get().SYSTEM_ID()), "yellow", showDefaultRoot);
+        	analyzeRootActor(actorCells, actorCells.get(system.get().UNKNOWN_ID()), "yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, actorCells.get(system.get().PSEUDO_ID()), "yellow", showDefaultRoot, colorize);
         	
 //        	Iterator<Entry<UUID, Boolean>> iteratorActiveCells_ = activeCells.entrySet().iterator();
         	while (iteratorActiveCells.hasNext()) {
@@ -139,17 +139,17 @@ public abstract class VisualActorStructureView {
         				if (poolHandler instanceof DefaultActorProcessPoolHandler<?> ph) {
 	        				Long threadId = ph.getCellsMap().get(child.getId());
 	        				if (threadId!=null)
-	        					color = ";fillColor="+Utils.randomColorAsHex(
+	        					color = Utils.randomColorAsHex(
 	        						ph.getProcessList().indexOf(threadId), 
 	        						system.get().getConfig().parallelism()*system.get().getConfig().parallelismFactor());
 	        				else
-	        					color = ";fillColor=#F0F0F0";
+	        					color = "#F0F0F0";
         				}
         				else
-        					color = ";fillColor=#F0F0F0";
+        					color = "#F0F0F0";
         			}
         			else
-        				color = ";fillColor=#00FF00";
+        				color = "#00FF00";
 					
 					if (child.getActor().getName()!=null)
 						childVertex = addVertex(child.getActor().getName(), color);

@@ -120,7 +120,7 @@ public abstract class VisualActorViewPanel extends JPanel {
 	}
 	
 	public Object addVertex(String name, String color) {
-		Object result = graph.insertVertex(parent, null, name, 0, 0, 0, 0, "shape=ellipse;perimter=ellipsePerimeter;fontColor=black"+color);
+		Object result = graph.insertVertex(parent, null, name, 0, 0, 0, 0, "shape=ellipse;perimter=ellipsePerimeter;fontColor=black;fillColor="+color);
 		graph.updateCellSize(result);
 		return result;
 	}

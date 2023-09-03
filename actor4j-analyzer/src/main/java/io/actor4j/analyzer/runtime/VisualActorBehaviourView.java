@@ -77,24 +77,24 @@ public abstract class VisualActorBehaviourView {
 	        	
 	        	if (activeCells.put(actorCell.getId(), true)==null) {
 	        		if (actorCell.getId()==system.get().USER_ID() || actorCell.getId()==system.get().SYSTEM_ID() || actorCell.getId()==system.get().UNKNOWN_ID() || actorCell.getId()==system.get().PSEUDO_ID())
-	        			color = ";fillColor=yellow";
+	        			color = "yellow";
 	        		else {
 	        			if (colorize) {
 	        				ActorProcessPoolHandler<?> poolHandler = ((InternalActorExecutorService<?>)system.get().getExecutorService()).getActorProcessPool().getActorProcessPoolHandler();
 	        				if (poolHandler instanceof DefaultActorProcessPoolHandler<?> ph) {
 	        					Long threadId = ph.getCellsMap().get(actorCell.getId());
 		        				if (threadId!=null)
-		        					color = ";fillColor="+Utils.randomColorAsHex(
+		        					color = Utils.randomColorAsHex(
 		        						ph.getProcessList().indexOf(threadId), 
 		        						system.get().getConfig().parallelism()*system.get().getConfig().parallelismFactor());
 		        				else
-		        					color = ";fillColor=#F0F0F0"; 
+		        					color = "#F0F0F0"; 
 	        				}
 	        				else
-	        					color = ";fillColor=#F0F0F0";
+	        					color = "#F0F0F0";
 	        			}
 	        			else
-	        				color = ";fillColor=#00FF00";
+	        				color = "#00FF00";
 	        		}
 	        		
     				Object vertex;

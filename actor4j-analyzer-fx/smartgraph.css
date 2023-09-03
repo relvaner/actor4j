@@ -4,7 +4,7 @@
 
 .vertex {
     -fx-stroke-width: 3;
-    -fx-stroke: #61B5F1;
+    -fx-stroke: #808080;
     -fx-stroke-type: inside;
     -fx-fill: #B1DFF7;
 }
@@ -20,8 +20,8 @@
 
 .edge {
     -fx-stroke-width: 2;
-    -fx-stroke: #FF6D66;  
-    -fx-stroke-dash-array: 2 5 2 5;
+    -fx-stroke: #808080;  
+    /*-fx-stroke-dash-array: 2 5 2 5;*/
     -fx-fill: transparent;
     -fx-stroke-line-cap: round;
     -fx-opacity: 0.8;
@@ -33,7 +33,7 @@
 
 .arrow {
     -fx-stroke-width: 2;
-    -fx-stroke: #FF6D66;  
+    -fx-stroke: #808080;  
     -fx-opacity: 0.8;
 }
 
