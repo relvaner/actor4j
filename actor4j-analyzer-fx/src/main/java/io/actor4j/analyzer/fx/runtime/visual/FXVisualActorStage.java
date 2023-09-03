@@ -54,7 +54,7 @@ public class FXVisualActorStage {
 	}
 
 	public void initialize() {
-		menuBar = new FXVisualActorMenuBar();
+//		menuBar = new FXVisualActorMenuBar();
 		
 		leftTabPane = new TabPane();
 		leftTabPane.getStyleClass().add("bottom-tab-header");
@@ -73,7 +73,7 @@ public class FXVisualActorStage {
 		statusPane = new BorderPane();
 		statusPane.setLeft(statusBar);
 		
-		borderPane.setTop(menuBar);
+//		borderPane.setTop(menuBar);
 		borderPane.setCenter(splitPane);
 		borderPane.setBottom(statusPane);
 	}
