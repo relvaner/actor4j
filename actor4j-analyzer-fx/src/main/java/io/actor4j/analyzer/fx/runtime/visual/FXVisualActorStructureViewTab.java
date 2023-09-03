@@ -40,9 +40,10 @@ public class FXVisualActorStructureViewTab extends FXVisualActorViewTab {
 		super(text, system);
 		
 		visualActorStructureView = new VisualActorStructureView(system) {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void removeVertex(Object source) {
-				graph.removeVertex((Vertex)source);
+				graph.removeVertex((Vertex<VertexElement>)source);
 			}
 
 			@Override
@@ -60,9 +61,10 @@ public class FXVisualActorStructureViewTab extends FXVisualActorViewTab {
 				return result;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void addEdge(String value, Object source, Object target) {
-				graph.insertEdge((Vertex)source, (Vertex)target, new EdgeElement(value!=null ? value : ""));
+				graph.insertEdge((Vertex<VertexElement>)source, (Vertex<VertexElement>)target, new EdgeElement(value!=null ? value : ""));
 //				try {
 //					graph.insertEdge((Vertex)source, (Vertex)target, new EdgeElement(value));
 //				}

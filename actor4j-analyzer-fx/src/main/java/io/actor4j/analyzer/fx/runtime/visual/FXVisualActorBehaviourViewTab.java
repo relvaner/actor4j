@@ -20,13 +20,10 @@ import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
-
-import javax.swing.SwingConstants;
 
 import com.brunomnsilva.smartgraph.graph.Edge;
 import com.brunomnsilva.smartgraph.graph.Vertex;
@@ -44,9 +41,10 @@ public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 		super(text, system);
 		
 		visualActorBehaviourView = new VisualActorBehaviourView(system) {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void removeVertex(Object source) {
-				graph.removeVertex((Vertex)source);
+				graph.removeVertex((Vertex<VertexElement>)source);
 			}
 
 			@Override
@@ -54,11 +52,13 @@ public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 				return graph.insertVertex(new VertexElement(name));
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void addEdge(String value, Object source, Object target) {
-				graph.insertEdge((Vertex)source, (Vertex)target, new EdgeElement(value!=null ? value : ""));
+				graph.insertEdge((Vertex<VertexElement>)source, (Vertex<VertexElement>)target, new EdgeElement(value!=null ? value : ""));
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public boolean updateValue(Object edge, String newValue, Object source, Object dest) {
 				boolean result = false;
@@ -71,9 +71,10 @@ public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 				return result;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public Object[] getEdgesBetween(Object source, Object target) {
-				Stream<Edge<EdgeElement, VertexElement>> stream = graph.incidentEdges((Vertex)source).stream();
+				Stream<Edge<EdgeElement, VertexElement>> stream = graph.incidentEdges((Vertex<VertexElement>)source).stream();
 				Object[] found = stream
 					.filter((e) -> e.vertices()[0].equals(target) || e.vertices()[1].equals(target)).toArray();
 				
