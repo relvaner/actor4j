@@ -45,13 +45,6 @@ public class FXVisualActorViewTab extends Tab {
 	public void initialize() {
         graphProperties = new SmartGraphProperties(customGraphProperties);
         graph = new GraphEdgeList<>();
-        
-//        graph.insertVertex("actor01");
-//        graph.insertVertex("actor02");
-//        graph.insertVertex("actor03");
-//        
-//        graph.insertEdge("actor01", "actor02", "555");
-//        graph.insertEdge("actor01", "actor03", "80");
 
         graphView = new SmartGraphPanel<>(graph, graphProperties);
         setContent(new CustomContentZoomPane(graphView));

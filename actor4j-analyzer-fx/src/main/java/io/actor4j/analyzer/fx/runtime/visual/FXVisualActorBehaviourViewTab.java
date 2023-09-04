@@ -98,7 +98,7 @@ public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 			public Object[] getEdgesBetween(Object source, Object target) {
 				Stream<Edge<EdgeElement, VertexElement>> stream = graph.incidentEdges((Vertex<VertexElement>)source).stream();
 				Object[] found = stream
-					.filter((e) -> e.vertices()[0].equals(target) || e.vertices()[1].equals(target)).toArray();
+					.filter((e) -> e.vertices()[0].equals(source) && e.vertices()[1].equals(target)).toArray();
 				
 				return found;
 			}
