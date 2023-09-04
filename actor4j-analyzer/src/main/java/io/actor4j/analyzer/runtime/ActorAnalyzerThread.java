@@ -30,16 +30,16 @@ import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 
 public abstract class ActorAnalyzerThread extends Thread {
-	protected Queue<ActorMessage<?>> outerQueueL2;
-	protected Queue<ActorMessage<?>> outerQueueL1;
+	protected final Queue<ActorMessage<?>> outerQueueL2;
+	protected final Queue<ActorMessage<?>> outerQueueL1;
 	
 	protected InternalActorSystem system;
 	
-	protected AtomicLong counter;
+	protected final AtomicLong counter;
 	
-	protected Timer timer;
-	protected TimerTask timerTask;
-	protected long period;
+	protected final Timer timer;
+	protected final TimerTask timerTask;
+	protected final long period;
 	
 	public ActorAnalyzerThread(long period) {
 		super("actor4j-analyzer-thread");

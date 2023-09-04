@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.UUID;
 
@@ -35,13 +34,11 @@ import io.actor4j.core.runtime.InternalActorSystem;
 public abstract class VisualActorStructureView {
 	protected final AtomicReference<InternalActorSystem> system;
 	
-	protected Map<UUID, Boolean> activeCells;
-	protected Map<UUID, Object>  cells;
+	protected final Map<UUID, Boolean> activeCells;
+	protected final Map<UUID, Object>  cells;
 	
 	protected Object defaultRoot;
 	protected boolean changed;
-
-	public static final AtomicInteger layoutIndex = new AtomicInteger(0);
 
 	public VisualActorStructureView(AtomicReference<InternalActorSystem> system) {
 		this.system = system;

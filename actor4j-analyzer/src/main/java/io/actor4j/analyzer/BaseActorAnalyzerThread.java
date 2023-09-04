@@ -24,13 +24,13 @@ import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 
 public abstract class BaseActorAnalyzerThread extends ActorAnalyzerThread {
-	protected VisualActorAnalyzer visualAnalyzer;
+	protected final VisualActorAnalyzer visualAnalyzer;
 	
-	protected Map<UUID, Map<UUID, Long>> deliveryRoutes;
+	protected final Map<UUID, Map<UUID, Long>> deliveryRoutes;
 	
-	protected boolean showDefaultRoot;
-	protected boolean showRootSystem;
-	protected boolean colorize;
+	protected final boolean showDefaultRoot;
+	protected final boolean showRootSystem;
+	protected final boolean colorize;
 	
 	public BaseActorAnalyzerThread(long delay, boolean showDefaultRoot, VisualActorAnalyzer visualAnalyzer) {
 		this(delay, showDefaultRoot, false, false, visualAnalyzer);

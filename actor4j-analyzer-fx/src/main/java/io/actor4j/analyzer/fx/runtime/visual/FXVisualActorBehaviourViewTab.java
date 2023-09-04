@@ -35,7 +35,7 @@ import com.brunomnsilva.smartgraph.graph.Vertex;
 public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 	protected static final long serialVersionUID = 9212208191147321764L;
 	
-	protected VisualActorBehaviourView visualActorBehaviourView;
+	protected final VisualActorBehaviourView visualActorBehaviourView;
 
 	protected int lastLayoutIndex;
 	

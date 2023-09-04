@@ -34,7 +34,7 @@ import io.actor4j.core.runtime.InternalActorSystem;
 public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 	protected static final long serialVersionUID = -1192782222987329027L;
 	
-	protected VisualActorStructureView visualActorStructureView;
+	protected final VisualActorStructureView visualActorStructureView;
 
 	protected int lastLayoutIndex;
 	

@@ -34,7 +34,7 @@ import javax.swing.SwingConstants;
 public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 	protected static final long serialVersionUID = 9212208191147321764L;
 	
-	protected VisualActorBehaviourView visualActorBehaviourView;
+	protected final VisualActorBehaviourView visualActorBehaviourView;
 
 	protected int lastLayoutIndex;
 	

@@ -33,7 +33,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -41,12 +40,10 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 public abstract class VisualActorBehaviourView {
 	protected final AtomicReference<InternalActorSystem> system;
 	
-	protected Map<UUID, Boolean> activeCells;
-	protected Map<UUID, Object>  cells;
+	protected final Map<UUID, Boolean> activeCells;
+	protected final Map<UUID, Object>  cells;
 	
 	protected boolean changed;
-	
-	public static final AtomicInteger layoutIndex = new AtomicInteger(0);
 
 	public VisualActorBehaviourView(AtomicReference<InternalActorSystem> system) {
 		this.system = system;
