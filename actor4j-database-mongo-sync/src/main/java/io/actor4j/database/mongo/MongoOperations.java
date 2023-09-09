@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoClient;
@@ -74,6 +75,11 @@ public final class MongoOperations {
 		deleteOne(filter, client, databaseName, collectionName, null);
 	}
 	
+	public static void insertOne(Document document, MongoBufferedBulkWriter bulkWriter) {
+		if (bulkWriter!=null)
+			bulkWriter.write(new InsertOneModel<>(document));
+	}
+	
 	public static void insertOne(Document document, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
 		if (bulkWriter!=null)
 			bulkWriter.write(new InsertOneModel<>(document));
@@ -86,6 +92,11 @@ public final class MongoOperations {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void replaceOne(Bson filter, Document document, MongoBufferedBulkWriter bulkWriter) {
+		if (bulkWriter!=null)
+			bulkWriter.write(new ReplaceOneModel<>(filter, document));
 	}
 	
 	public static void replaceOne(Bson filter, Document document, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
@@ -102,6 +113,11 @@ public final class MongoOperations {
 		}
 	}
 	
+	public static void updateOne(Bson filter, Bson update, MongoBufferedBulkWriter bulkWriter) {
+		if (bulkWriter!=null)
+			bulkWriter.write(new UpdateOneModel<>(filter, update));
+	}
+	
 	public static void updateOne(Bson filter, Bson update, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
 		if (bulkWriter!=null)
 			bulkWriter.write(new UpdateOneModel<>(filter, update));
@@ -114,6 +130,11 @@ public final class MongoOperations {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void deleteOne(Bson filter, MongoBufferedBulkWriter bulkWriter) {
+		if (bulkWriter!=null)
+			bulkWriter.write(new DeleteOneModel<>(filter));
 	}
 	
 	public static void deleteOne(Bson filter, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
@@ -219,6 +240,42 @@ public final class MongoOperations {
 		for (Document document : documents)
 			try {
 				result.add(objectMapper.readValue(document.toJson(), valueType));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		
+		return result;
+	}
+	
+	public static <V> V convertToValue(String json, TypeReference<V> valueTypeReference) {
+		V result = null;
+		
+		if (json!=null)
+			try {
+				result = objectMapper.readValue(json, valueTypeReference);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		
+		
+		return result;
+	}
+	
+	public static <V> V convertToValue(Document document, TypeReference<V> valueTypeReference) {
+		V result = null;
+		
+		if (document!=null)
+			result = convertToValue(document.toJson(), valueTypeReference);
+
+		return result;
+	}
+	
+	public static <V> List<V> convertToValue(List<Document> documents, TypeReference<V> valueTypeReference) {
+		List<V> result = new LinkedList<>();
+		
+		for (Document document : documents)
+			try {
+				result.add(objectMapper.readValue(document.toJson(), valueTypeReference));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

@@ -32,6 +32,7 @@ import com.mongodb.client.MongoClients;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import io.actor4j.cache.ActorCacheManager;
+import io.actor4j.cache.mongo.MongoCacheConfiguration;
 import io.actor4j.cache.mongo.MongoCacheLoaderAndWriter;
 import io.actor4j.cache.utils.DummyCacheEntry;
 
@@ -210,17 +211,11 @@ public class MongoCacheLoaderAndWriterFeature {
 	
 	@Test(timeout=5000)
 	public void test_point() {
-		MongoCacheLoaderAndWriter<Integer, Point> cacheLoaderAndWriter = new MongoCacheLoaderAndWriter<>(
-				client, 
-				"database",
-				"collection05", 
-				Point.class);
-		MutableConfiguration<Integer, Point> configuration = new MutableConfiguration<>();
-		configuration
-			.setReadThrough(true)
-			.setWriteThrough(true)
-			.setCacheLoaderFactory(() -> cacheLoaderAndWriter)
-			.setCacheWriterFactory(() -> cacheLoaderAndWriter);
+		MongoCacheConfiguration<Integer, Point> configuration = new MongoCacheConfiguration<>(
+			client, 
+			"database",
+			"collection05", 
+			Point.class);
 		Cache<Integer, Point> cache = ActorCacheManager.createCache("test_point", configuration);
 		
 		cache.put(100, new Point(12, 55));
@@ -233,7 +228,7 @@ public class MongoCacheLoaderAndWriterFeature {
 		assertEquals(cache.get(101).y, 56);
 		assertEquals(cache.get(102).x, 14);
 		
-		cacheLoaderAndWriter.write(DummyCacheEntry.create(103, new Point(15, 58)));
+		configuration.getCacheLoaderAndWriter().write(DummyCacheEntry.create(103, new Point(15, 58)));
 		
 		assertEquals(cache.get(100).x, 12);
 		assertEquals(cache.get(101).y, 56);

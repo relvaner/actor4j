@@ -51,7 +51,7 @@
 	</properties>
 	
 	<modules>
-		<module>actor4j-database-mongo</module>
+		<module>actor4j-database-mongo-sync</module>
 		
 		<module>actor4j-cache</module>
 		<module>actor4j-cache-caffeine</module>
