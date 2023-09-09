@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public abstract class MQTTResourceActor extends ResourceActor {
 	
 	public void publish(MQTTPublish publish) {
 		try {
-			client.publish(publish.topic, publish.payload, publish.qos, publish.retained);
+			client.publish(publish.topic(), publish.payload(), publish.qos(), publish.retained());
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}

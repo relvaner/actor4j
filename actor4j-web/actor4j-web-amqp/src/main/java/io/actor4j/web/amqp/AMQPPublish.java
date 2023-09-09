@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,5 @@
  */
 package io.actor4j.web.amqp;
 
-import java.util.Arrays;
-
-import io.actor4j.core.utils.Shareable;
-
-public class AMQPPublish implements Shareable {
-	public final String topic;
-	public final byte[] payload;
-	
-	public AMQPPublish(String topic, byte[] payload) {
-		super();
-		this.topic = topic;
-		this.payload = payload;
-	}
-
-	@Override
-	public String toString() {
-		return "AMQPPublish [topic=" + topic + ", payload=" + Arrays.toString(payload) + "]";
-	}
+public record AMQPPublish(String topic, byte[] payload) {
 }

@@ -18,7 +18,6 @@ package io.actor4j.web.coap.server;
 import static io.actor4j.core.logging.ActorLogger.*;
 
 import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.network.config.NetworkConfig;
 
 import io.actor4j.core.ActorService;
 import io.actor4j.web.coap.server.resources.CoffeeResource;
@@ -30,14 +29,18 @@ import io.actor4j.web.coap.server.resources.SendMessageResource;
 import io.actor4j.web.coap.server.resources.VersionResource;
 
 public abstract class COAPActorService extends CoapServer {
-	public static final int COAP_PORT = NetworkConfig.getStandard().getInt(NetworkConfig.Keys.COAP_PORT);
+	public static final int COAP_PORT = 5683;
 	
 	protected final ActorService service;
 
 	public abstract ActorService getService();
 	
 	public COAPActorService() {
-		super();
+		this(COAP_PORT);
+	}
+	
+	public COAPActorService(int port) {
+		super(port);
 		
 		service = getService();
 

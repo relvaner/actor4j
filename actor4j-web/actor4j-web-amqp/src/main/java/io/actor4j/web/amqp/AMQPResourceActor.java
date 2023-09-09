@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public abstract class AMQPResourceActor extends ResourceActor {
 	public void publish(AMQPPublish publish) {
 		try {
 			Channel channel = connection.createChannel();
-			channel.basicPublish("amq.topic", publish.topic, null, publish.payload);
+			channel.basicPublish("amq.topic", publish.topic(), null, publish.payload());
 			channel.close();
 		} catch (IOException | TimeoutException e) {
 			e.printStackTrace();
