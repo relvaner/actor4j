@@ -27,7 +27,7 @@ import io.actor4j.core.utils.Pair;
 import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
-import io.actor4j.core.data.access.imdb.IMDBDataAccessActor;
+import io.actor4j.core.data.access.ims.IMSDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
 import static io.actor4j.core.logging.ActorLogger.*;
@@ -54,7 +54,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMDBDataAccessActor<String, TestObject>("dc"));
+				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
@@ -124,7 +124,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMDBDataAccessActor<String, TestObject>("dc"));
+				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess));

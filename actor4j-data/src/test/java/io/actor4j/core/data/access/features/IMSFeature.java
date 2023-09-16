@@ -17,21 +17,21 @@ package io.actor4j.core.data.access.features;
 
 import org.junit.Test;
 
-import io.actor4j.core.data.access.imdb.IMDB;
-import io.actor4j.core.data.access.imdb.IMDBIndex;
+import io.actor4j.core.data.access.ims.IMS;
+import io.actor4j.core.data.access.ims.IMSIndex;
 
 import static org.junit.Assert.*;
 
-public class IMDBFeature {
+public class IMSFeature {
 	@Test(timeout=5000)
 	public void test_basic() {
-		IMDB<String, String> imdb = new IMDB<>();
+		IMS<String, String> imdb = new IMS<>();
 		imdb.getData().put("1", "Insel");
 		imdb.getData().put("2", "Sonne");
 		imdb.getData().put("3", "Erde");
 		imdb.getData().put("4", "Mond");
 		
-		IMDBIndex<String, String> soundex = new IMDBIndex<>("soundex");
+		IMSIndex<String, String> soundex = new IMSIndex<>("soundex");
 		soundex
 			.create((k, v) -> v.toUpperCase())
 			.get()
@@ -55,13 +55,13 @@ public class IMDBFeature {
 	
 	@Test(timeout=5000)
 	public void test_more() {
-		IMDB<String, String> imdb = new IMDB<>();
+		IMS<String, String> imdb = new IMS<>();
 		imdb.getData().put("1", "Insel");
 		imdb.getData().put("2", "Sonne");
 		imdb.getData().put("3", "Erde");
 		imdb.getData().put("4", "Mond");
 		
-		IMDBIndex<String, String> soundex = new IMDBIndex<>("soundex");
+		IMSIndex<String, String> soundex = new IMSIndex<>("soundex");
 		soundex
 			.create((k, v) -> v.toUpperCase())
 			.get()

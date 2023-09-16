@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.data.access.imdb;
+package io.actor4j.core.data.access.ims;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
@@ -22,18 +22,18 @@ import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.core.data.access.DataAccessActor.*;
-import static io.actor4j.core.data.access.imdb.IMDBUtils.*;
+import static io.actor4j.core.data.access.ims.IMSUtils.*;
 
-public class IMDBDataAccessActor<K, V> extends Actor {
-	protected IMDB<K, V> imdb;
+public class IMSDataAccessActor<K, V> extends Actor {
+	protected IMS<K, V> ims;
 	
-	public IMDBDataAccessActor(String name) {
+	public IMSDataAccessActor(String name) {
 		super(name);
 		
-		imdb = new IMDB<>();
+		ims = new IMS<>();
 	}
 	
-	public IMDBDataAccessActor() {
+	public IMSDataAccessActor() {
 		this(null);
 	}
 
@@ -44,35 +44,35 @@ public class IMDBDataAccessActor<K, V> extends Actor {
 			PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
 			
 			if (message.tag()==GET) {
-				V value = findOne(dto.key(), dto.filter(), imdb, dto.collectionName());
+				V value = findOne(dto.key(), dto.filter(), ims, dto.collectionName());
 				if (value instanceof DeepCopyable)
 					value = ((DeepCopyable<V>)value).deepCopy();
 				tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
 			}
 			else if (message.tag()==SET) {
 				if (dto.key()!=null) 
-					put(dto.key(), dto.value(), imdb, dto.collectionName());
+					put(dto.key(), dto.value(), ims, dto.collectionName());
 				else {
-					if (!((boolean)dto.reserved()) && !hasOne(dto.key(), dto.filter(), imdb, dto.collectionName()))
-						insertOne(dto.key(), dto.value(), imdb, dto.collectionName());
+					if (!((boolean)dto.reserved()) && !hasOne(dto.key(), dto.filter(), ims, dto.collectionName()))
+						insertOne(dto.key(), dto.value(), ims, dto.collectionName());
 					else
-						replaceOne(dto.key(), dto.filter(), dto.value(), imdb, dto.collectionName());
+						replaceOne(dto.key(), dto.filter(), dto.value(), ims, dto.collectionName());
 				}
 			}
 			else if (message.tag()==UPDATE_ONE || message.tag()==UPDATE)
 				; // empty
 			else if (message.tag()==INSERT_ONE) {
 				if (dto.filter()!=null) {
-					if (!hasOne(dto.key(), dto.filter(), imdb, dto.collectionName()))
-						insertOne(dto.key(), dto.value(), imdb, dto.collectionName());
+					if (!hasOne(dto.key(), dto.filter(), ims, dto.collectionName()))
+						insertOne(dto.key(), dto.value(), ims, dto.collectionName());
 				}
 				else
-					insertOne(dto.key(), dto.value(), imdb, dto.collectionName());
+					insertOne(dto.key(), dto.value(), ims, dto.collectionName());
 			}
 			else if (message.tag()==DELETE_ONE)
-				deleteOne(dto.key(), dto.filter(), imdb, dto.collectionName());
+				deleteOne(dto.key(), dto.filter(), ims, dto.collectionName());
 			else if (message.tag()==HAS_ONE) {
-				Object reserved = hasOne(dto.key(), dto.filter(), imdb, dto.collectionName());
+				Object reserved = hasOne(dto.key(), dto.filter(), ims, dto.collectionName());
 				tell(dto.shallowCopyWithReserved(reserved), FIND_ONE, message.source(), message.interaction());
 			}
 			else

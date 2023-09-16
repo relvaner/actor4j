@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 @Suite.SuiteClasses({
 	VolatileCacheFeature.class,
 	PersistentCacheFeature.class,
-	IMDBFeature.class,
+	IMSFeature.class,
 	PubSubFeature.class
 })
 public class AllFeaturesTest {

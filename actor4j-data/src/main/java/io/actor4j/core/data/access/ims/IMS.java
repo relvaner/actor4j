@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.data.access.imdb;
+package io.actor4j.core.data.access.ims;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-// In-memory database
-public class IMDB<K, V> {
+// In-Memory Storage (IMS)
+public class IMS<K, V> {
 	protected Map<K, V> data;
-	protected Map<String, IMDBIndex<K, V>> indexMap;
+	protected Map<String, IMSIndex<K, V>> indexMap;
 
-	public IMDB() {
+	public IMS() {
 		data = new HashMap<>();
 		indexMap = new HashMap<>();
 	}
@@ -38,29 +38,29 @@ public class IMDB<K, V> {
 		this.data = data;
 	}
 
-	public Map<String, IMDBIndex<K, V>> getIndexMap() {
+	public Map<String, IMSIndex<K, V>> getIndexMap() {
 		return indexMap;
 	}
 
-	public void setIndexMap(Map<String, IMDBIndex<K, V>> indexMap) {
+	public void setIndexMap(Map<String, IMSIndex<K, V>> indexMap) {
 		this.indexMap = indexMap;
 	}
 
-	public void create(IMDBIndex<K, V> indexObject) {
+	public void create(IMSIndex<K, V> indexObject) {
 		indexObject.map = indexObject.create.apply(data);
 	}
 	
-	public void add(IMDBIndex<K, V> indexObject) {
+	public void add(IMSIndex<K, V> indexObject) {
 		indexMap.put(indexObject.name, indexObject);
 	}
 	
-	public void put(K key, V value, IMDBIndex<K, V> indexObject) {
+	public void put(K key, V value, IMSIndex<K, V> indexObject) {
 		data.put(key, value);
 		if (indexObject.setd!=null)
 			indexObject.setd.accept(key, value);
 	}
 	
-	public void remove(K key, IMDBIndex<K, V> indexObject) {
+	public void remove(K key, IMSIndex<K, V> indexObject) {
 		if (indexObject.removed!=null)
 			indexObject.removed.accept(key, data.get(key));
 		
@@ -70,18 +70,18 @@ public class IMDB<K, V> {
 	public void put(K key, V value) {
 		data.put(key, value);
 		
-		Iterator<Entry<String, IMDBIndex<K, V>>> iterator = indexMap.entrySet().iterator();
+		Iterator<Entry<String, IMSIndex<K, V>>> iterator = indexMap.entrySet().iterator();
 		while (iterator.hasNext()) {
-			Entry<String, IMDBIndex<K, V>> entry = iterator.next();
+			Entry<String, IMSIndex<K, V>> entry = iterator.next();
 			if (entry.getValue().setd!=null)
 				entry.getValue().setd.accept(key, value);
 		}
 	}
 	
 	public void remove(K key) {
-		Iterator<Entry<String, IMDBIndex<K, V>>> iterator = indexMap.entrySet().iterator();
+		Iterator<Entry<String, IMSIndex<K, V>>> iterator = indexMap.entrySet().iterator();
 		while (iterator.hasNext()) {
-			Entry<String, IMDBIndex<K, V>> entry = iterator.next();
+			Entry<String, IMSIndex<K, V>> entry = iterator.next();
 			if (entry.getValue().removed!=null)
 				entry.getValue().removed.accept(key, data.get(key));
 		}
