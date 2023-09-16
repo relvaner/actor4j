@@ -18,6 +18,7 @@ package io.actor4j.core.pods.data.access.utils;
 import static io.actor4j.core.actors.ActorWithCache.*;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 
@@ -155,7 +156,11 @@ public class PodPersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(null, null, collectionName), CLEAR, replica);
 	}
 	
-	public void evict(long maxTime) {
-		actorRef.tell(maxTime, GC, replica);
+	public void evict(long duration) {
+		actorRef.tell(duration, EVICT, replica);
+	}
+	
+	public void evict(long duration, TimeUnit unit) {
+		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, replica);
 	}
 }

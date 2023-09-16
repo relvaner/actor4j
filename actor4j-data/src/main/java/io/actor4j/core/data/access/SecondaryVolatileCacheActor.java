@@ -23,7 +23,7 @@ import io.actor4j.core.actors.SecondaryActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
-import io.actor4j.core.utils.CacheLRUWithGC;
+import io.actor4j.core.utils.CacheLRUWithExpiration;
 import io.actor4j.core.utils.DeepCopyable;
 
 public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
@@ -38,7 +38,7 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 		super(name, group, primary);
 		
 		this.cacheSize = cacheSize;
-		cache = new CacheLRUWithGC<>(cacheSize);
+		cache = new CacheLRUWithExpiration<>(cacheSize);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -60,8 +60,8 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 					cache.remove(dto.key());
 				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
 					cache.clear();
-				else if (message.tag()==GC)
-					cache.gc(message.valueAsLong());
+				else if (message.tag()==EVICT)
+					cache.evict(message.valueAsLong());
 				else
 					unhandled(message);
 			}
@@ -78,8 +78,8 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 					unhandled(message);
 			}
 		}
-		else if (message.tag()==GC)
-			publish(null, GC);
+		else if (message.tag()==EVICT)
+			publish(null, EVICT);
 		else
 			unhandled(message);
 	}

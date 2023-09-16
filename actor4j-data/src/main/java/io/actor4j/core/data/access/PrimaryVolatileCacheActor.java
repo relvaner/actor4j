@@ -25,7 +25,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
-import io.actor4j.core.utils.CacheLRUWithGC;
+import io.actor4j.core.utils.CacheLRUWithExpiration;
 import io.actor4j.core.utils.DeepCopyable;
 
 public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
@@ -40,7 +40,7 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 		super(name, group, alias, secondary, instances);
 		
 		this.cacheSize = cacheSize;
-		cache = new CacheLRUWithGC<>(cacheSize);
+		cache = new CacheLRUWithExpiration<>(cacheSize);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -74,9 +74,9 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 		}
 		else if (message.tag()==SUBSCRIBE_SECONDARY)
 			hub.add(message.source());
-		else if (message.tag()==GC) {
-			cache.gc(message.valueAsLong());
-			publish(null, GC);
+		else if (message.tag()==EVICT) {
+			cache.evict(message.valueAsLong());
+			publish(null, EVICT);
 		}
 		else
 			unhandled(message);

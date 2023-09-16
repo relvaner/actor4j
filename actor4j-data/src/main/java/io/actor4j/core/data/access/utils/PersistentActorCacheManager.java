@@ -18,6 +18,7 @@ package io.actor4j.core.data.access.utils;
 import static io.actor4j.core.actors.ActorWithCache.*;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONObject;
@@ -113,7 +114,11 @@ public class PersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(null, null, collectionName), CLEAR, cacheAlias);
 	}
 	
-	public void evict(long maxTime) {
-		actorRef.tell(maxTime, GC, cacheAlias);
+	public void evict(long duration) {
+		actorRef.tell(duration, EVICT, cacheAlias);
+	}
+	
+	public void evict(long duration, TimeUnit unit) {
+		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, cacheAlias);
 	}
 }

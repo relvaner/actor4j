@@ -17,6 +17,7 @@ package io.actor4j.core.data.access.utils;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.actor4j.core.actors.ActorRef;
@@ -84,7 +85,11 @@ public class VolatileActorCacheManager<K, V> {
 		actorRef.tell(VolatileDTO.create(), CLEAR, cacheAlias);
 	}
 	
-	public void evict(long maxTime) {
-		actorRef.tell(maxTime, GC, cacheAlias);
+	public void evict(long duration) {
+		actorRef.tell(duration, EVICT, cacheAlias);
+	}
+	
+	public void evict(long duration, TimeUnit unit) {
+		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, cacheAlias);
 	}
 }

@@ -88,8 +88,8 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			else
 				unhandled(message);
 		}
-		else if (message.tag()==GC)
-			cache.gc(message.valueAsLong());
+		else if (message.tag()==EVICT)
+			cache.evict(message.valueAsLong());
 		else
 			unhandled(message);
 	}

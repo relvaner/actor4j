@@ -19,7 +19,7 @@ import io.actor4j.core.actors.SecondaryActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
-import io.actor4j.core.utils.CacheLRUWithGC;
+import io.actor4j.core.utils.CacheLRUWithExpiration;
 import io.actor4j.core.utils.DeepCopyable;
 
 import java.util.UUID;
@@ -38,7 +38,7 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 		super(name, group, primary);
 		
 		this.cacheSize = cacheSize;
-		cache = new CacheLRUWithGC<>(cacheSize);
+		cache = new CacheLRUWithExpiration<>(cacheSize);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -65,7 +65,7 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 					     message.tag()==CLEAR ||
 					     message.tag()==CAS || 
 					     message.tag()==CAU || 
-					     message.tag()==GC)
+					     message.tag()==EVICT)
 					publish(message);
 				else
 					unhandled(message);
@@ -83,8 +83,8 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 					unhandled(message);
 			}
 		}
-		else if (message.tag()==GC)
-			cache.gc(message.valueAsLong());
+		else if (message.tag()==EVICT)
+			cache.evict(message.valueAsLong());
 		else
 			unhandled(message);
 	}

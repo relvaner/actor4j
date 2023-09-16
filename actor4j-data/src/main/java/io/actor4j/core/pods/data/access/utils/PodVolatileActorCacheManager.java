@@ -18,11 +18,12 @@ package io.actor4j.core.pods.data.access.utils;
 import static io.actor4j.core.actors.ActorWithCache.CLEAR;
 import static io.actor4j.core.actors.ActorWithCache.DEL;
 import static io.actor4j.core.actors.ActorWithCache.DEL_ALL;
-import static io.actor4j.core.actors.ActorWithCache.GC;
+import static io.actor4j.core.actors.ActorWithCache.EVICT;
 import static io.actor4j.core.actors.ActorWithCache.GET;
 import static io.actor4j.core.actors.ActorWithCache.SET;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.data.access.VolatileDTO;
@@ -128,7 +129,11 @@ public class PodVolatileActorCacheManager<K, V> {
 		actorRef.tell(VolatileDTO.create(), CLEAR, replica);
 	}
 	
-	public void evict(long maxTime) {
-		actorRef.tell(maxTime, GC, replica);
+	public void evict(long duration) {
+		actorRef.tell(duration, EVICT, replica);
+	}
+	
+	public void evict(long duration, TimeUnit unit) {
+		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, replica);
 	}
 }
