@@ -23,7 +23,7 @@ import io.actor4j.core.actors.SecondaryActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
-import io.actor4j.core.utils.CacheLRUWithExpiration;
+import io.actor4j.core.utils.CacheVolatileLRU;
 import io.actor4j.core.utils.DeepCopyable;
 
 public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
@@ -38,7 +38,7 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 		super(name, group, primary);
 		
 		this.cacheSize = cacheSize;
-		cache = new CacheLRUWithExpiration<>(cacheSize);
+		cache = new CacheVolatileLRU<>(cacheSize);
 	}
 
 	@SuppressWarnings("unchecked")

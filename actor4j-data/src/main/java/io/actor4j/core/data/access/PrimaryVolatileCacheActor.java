@@ -25,7 +25,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
-import io.actor4j.core.utils.CacheLRUWithExpiration;
+import io.actor4j.core.utils.CacheVolatileLRU;
 import io.actor4j.core.utils.DeepCopyable;
 
 public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
@@ -40,7 +40,7 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 		super(name, group, alias, secondary, instances);
 		
 		this.cacheSize = cacheSize;
-		cache = new CacheLRUWithExpiration<>(cacheSize);
+		cache = new CacheVolatileLRU<>(cacheSize);
 	}
 
 	@SuppressWarnings("unchecked")
