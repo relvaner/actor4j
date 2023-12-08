@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.eclipse.californium</groupId>
 			<artifactId>californium-core</artifactId>
-			<version>3.9.0</version>
+			<version>3.9.1</version>
 		</dependency>
 	</dependencies>
 </project>
