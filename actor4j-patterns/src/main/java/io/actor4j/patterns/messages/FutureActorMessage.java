@@ -95,6 +95,12 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 			new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
 	
+	@Override
+	public ActorMessage<T> shallowCopy(int tag, UUID dest) {
+		return this.tag!=tag || !ActorMessageUtils.equals(this.dest, dest) ?
+			new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public ActorMessage<T> copy() {

@@ -126,6 +126,12 @@ public record RemoteActorMessage<T>(T value, int tag, UUID source, UUID dest, UU
 		return !ActorMessageUtils.equals(this.dest, dest) ? 
 			new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
 	}
+	
+	@Override
+	public ActorMessage<T> shallowCopy(int tag, UUID dest) {
+		return this.tag!=tag || !ActorMessageUtils.equals(this.dest, dest) ? 
+			new RemoteActorMessage<T>(value, tag, source, dest, interaction, protocol, domain) : this;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
