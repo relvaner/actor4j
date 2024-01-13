@@ -72,5 +72,7 @@
 		<module>actor4j-poc</module>
 		
 		<module>actor4j-web</module>
+		<module>actor4j-json-jackson</module>
+		<module>actor4j-json</module>
 	</modules>
 </project>
