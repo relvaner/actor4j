@@ -43,6 +43,11 @@ public class JsonFactoryProvider implements JsonFactoryService {
 	public JsonArray createJsonArray() {
 		return new JsonArrayImpl();
 	}
+	
+	@Override
+	public JsonArray createJsonArray(Object obj) {
+		return new JsonArrayImpl(obj);
+	}
 
 	@Override
 	public JsonArray createJsonArray(List<?> list) {

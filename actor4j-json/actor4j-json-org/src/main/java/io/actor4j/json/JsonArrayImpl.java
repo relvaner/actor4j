@@ -33,6 +33,15 @@ public class JsonArrayImpl implements JsonArray {
 		jsonArray = new JSONArray();
 	}
 	
+	public JsonArrayImpl(Object obj) {
+		super();
+		
+		if (obj instanceof JSONArray)
+			jsonArray = (JSONArray)obj;
+		else
+			jsonArray = new JSONArray();
+	}
+	
 	public JsonArrayImpl(List<?> list) {
 		super();
 		

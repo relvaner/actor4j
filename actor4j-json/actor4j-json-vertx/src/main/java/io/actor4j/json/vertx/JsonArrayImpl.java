@@ -29,6 +29,15 @@ public class JsonArrayImpl implements JsonArray {
 		jsonArray = new io.vertx.core.json.JsonArray();
 	}
 	
+	public JsonArrayImpl(Object obj) {
+		super();
+		
+		if (obj instanceof io.vertx.core.json.JsonArray)
+			jsonArray = (io.vertx.core.json.JsonArray)obj;
+		else
+			jsonArray = new io.vertx.core.json.JsonArray();
+	}
+	
 	public JsonArrayImpl(List<?> list) {
 		super();
 		
