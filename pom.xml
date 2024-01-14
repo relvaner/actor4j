@@ -74,5 +74,7 @@
 		<module>actor4j-web</module>
 		<module>actor4j-json-jackson</module>
 		<module>actor4j-json</module>
+		<module>actor4j-json-gson</module>
+		<module>actor4j-json-vertx</module>
 	</modules>
 </project>
