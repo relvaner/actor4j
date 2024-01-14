@@ -8,6 +8,7 @@
 		<version>2.1.0</version>
 	</parent>
 	<artifactId>actor4j-json</artifactId>
+	<packaging>pom</packaging>
 	
 	<dependencies>
 		<dependency>
@@ -15,11 +16,12 @@
 			<artifactId>actor4j-core-sdk</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
+	</dependencies>
 
-    	<dependency>
-    		<groupId>org.json</groupId>
-    		<artifactId>json</artifactId>
-    		<version>20231013</version>
-		</dependency>
-    </dependencies>
+	<modules>
+		<module>actor4j-json-org</module>
+		<module>actor4j-json-jackson</module>
+		<module>actor4j-json-gson</module>
+		<module>actor4j-json-vertx</module>
+	</modules>
 </project>
