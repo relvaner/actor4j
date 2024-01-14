@@ -15,13 +15,13 @@
  */
 package io.actor4j.json.jackson.spi;
 
-import io.actor4j.core.json.ActorObjectMapper;
-import io.actor4j.core.json.spi.ActorObjectMapperProvider;
-import io.actor4j.json.jackson.DefaultActorObjectMapper;
+import io.actor4j.core.json.ObjectMapper;
+import io.actor4j.core.json.api.ObjectMapperService;
+import io.actor4j.json.jackson.ObjectMapperImpl;
 
-public class DefaultActorObjectMapperProvider implements ActorObjectMapperProvider {
+public class ObjectMapperProvider implements ObjectMapperService {
 	@Override
-	public ActorObjectMapper create() {
-		return new DefaultActorObjectMapper();
+	public ObjectMapper create() {
+		return new ObjectMapperImpl();
 	}
 }

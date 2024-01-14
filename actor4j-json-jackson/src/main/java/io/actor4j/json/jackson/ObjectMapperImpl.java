@@ -18,15 +18,14 @@ package io.actor4j.json.jackson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.actor4j.core.json.ActorObjectMapper;
+import io.actor4j.core.json.ObjectMapper;
 
-public class DefaultActorObjectMapper implements ActorObjectMapper {
-	private static final ObjectMapper objectMapper;
+public class ObjectMapperImpl implements ObjectMapper {
+	private static final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 	
 	static {
-		objectMapper= new ObjectMapper();
+		objectMapper= new com.fasterxml.jackson.databind.ObjectMapper();
 		
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 	}

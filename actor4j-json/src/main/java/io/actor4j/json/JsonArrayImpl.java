@@ -21,19 +21,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.actor4j.core.json.ActorJsonArray;
-import io.actor4j.core.json.ActorJsonObject;
+import io.actor4j.core.json.JsonArray;
+import io.actor4j.core.json.JsonObject;
 
-public class DefaultActorJsonArray implements ActorJsonArray {
+public class JsonArrayImpl implements JsonArray {
 	protected JSONArray jsonArray;
 	
-	public DefaultActorJsonArray() {
+	public JsonArrayImpl() {
 		super();
 		
 		jsonArray = new JSONArray();
 	}
 	
-	public DefaultActorJsonArray(List<?> list) {
+	public JsonArrayImpl(List<?> list) {
 		super();
 		
 		try {
@@ -44,7 +44,7 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 		}
 	}
 	
-	public DefaultActorJsonArray(String json) {
+	public JsonArrayImpl(String json) {
 		super();
 		
 		try {
@@ -55,7 +55,7 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 		}
 	}
 	
-	public DefaultActorJsonArray(JSONArray arr) {
+	public JsonArrayImpl(JSONArray arr) {
 		super();
 		
 		if (arr!=null)
@@ -137,7 +137,7 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 	}
 
 	@Override
-	public ActorJsonObject getJsonObject(int pos) {
+	public JsonObject getJsonObject(int pos) {
 		JSONObject result = null;
 		try {
 			result = jsonArray.getJSONObject(pos);
@@ -145,11 +145,11 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 			e.printStackTrace();
 		}
 		
-		return result!=null ? new DefaultActorJsonObject(result) : null;
+		return result!=null ? new JsonObjectImpl(result) : null;
 	}
 
 	@Override
-	public ActorJsonArray getJsonArray(int pos) {
+	public JsonArray getJsonArray(int pos) {
 		JSONArray result = null;
 		try {
 			result = jsonArray.getJSONArray(pos);
@@ -157,11 +157,11 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 			e.printStackTrace();
 		}
 		
-		return result!=null ? new DefaultActorJsonArray(result) : null;
+		return result!=null ? new JsonArrayImpl(result) : null;
 	}
 
 	@Override
-	public ActorJsonArray add(Object value) {
+	public JsonArray add(Object value) {
 		try {
 			jsonArray.put(value);
 		} catch(JSONException e) {
@@ -172,7 +172,7 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 	}
 
 	@Override
-	public ActorJsonArray add(int pos, Object value) {
+	public JsonArray add(int pos, Object value) {
 		try {
 			jsonArray.put(pos, value);
 		} catch(JSONException e) {
@@ -183,8 +183,8 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 	}
 
 	@Override
-	public ActorJsonArray addAll(ActorJsonArray array) {
-		if (array!=null && array instanceof DefaultActorJsonArray array_)
+	public JsonArray addAll(JsonArray array) {
+		if (array!=null && array instanceof JsonArrayImpl array_)
 			for (Object value : array_.jsonArray.toList()) {
 				try {
 					jsonArray.put(value);
@@ -197,7 +197,7 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 	}
 
 	@Override
-	public ActorJsonArray set(int pos, Object value) {
+	public JsonArray set(int pos, Object value) {
 		try {
 			jsonArray.put(pos, value);
 		} catch(JSONException e) {
@@ -238,7 +238,7 @@ public class DefaultActorJsonArray implements ActorJsonArray {
 	}
 
 	@Override
-	public ActorJsonArray clear() {
+	public JsonArray clear() {
 		jsonArray.clear();
 		
 		return this;

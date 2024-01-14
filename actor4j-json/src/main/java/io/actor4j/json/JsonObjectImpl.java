@@ -22,19 +22,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.actor4j.core.json.ActorJsonArray;
-import io.actor4j.core.json.ActorJsonObject;
+import io.actor4j.core.json.JsonArray;
+import io.actor4j.core.json.JsonObject;
 
-public class DefaultActorJsonObject implements ActorJsonObject {
+public class JsonObjectImpl implements JsonObject {
 	protected JSONObject jsonObject;
 	
-	public DefaultActorJsonObject() {
+	public JsonObjectImpl() {
 		super();
 		
 		jsonObject = new JSONObject();
 	}
 	
-	public DefaultActorJsonObject(Object obj) {
+	public JsonObjectImpl(Object obj) {
 		super();
 		
 		try {
@@ -45,7 +45,7 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 		}
 	}
 	
-	public DefaultActorJsonObject(String json) {
+	public JsonObjectImpl(String json) {
 		super();
 		
 		try {
@@ -56,7 +56,7 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 		}
 	}
 	
-	public DefaultActorJsonObject(JSONObject obj) {
+	public JsonObjectImpl(JSONObject obj) {
 		super();
 		
 		if (obj!=null)
@@ -65,17 +65,17 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 			jsonObject = new JSONObject();
 	}
 	
-	public static ActorJsonObject of() {
-		return new DefaultActorJsonObject();
+	public static JsonObject of() {
+		return new JsonObjectImpl();
 	}
 	
-	public static ActorJsonObject of(String key, Object value) {
-		return new DefaultActorJsonObject().put(key, value);
+	public static JsonObject of(String key, Object value) {
+		return new JsonObjectImpl().put(key, value);
 	}
 
 	@Override
-	public ActorJsonObject mapFrom(Object obj) {
-		return new DefaultActorJsonObject(obj);
+	public JsonObject mapFrom(Object obj) {
+		return new JsonObjectImpl(obj);
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 	}
 
 	@Override
-	public ActorJsonObject getJsonObject(String key) {
+	public JsonObject getJsonObject(String key) {
 		JSONObject result = null;
 		try {
 			result = jsonObject.getJSONObject(key);
@@ -159,11 +159,11 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 			e.printStackTrace();
 		}
 		
-		return result!=null ? new DefaultActorJsonObject(result) : null;
+		return result!=null ? new JsonObjectImpl(result) : null;
 	}
 
 	@Override
-	public ActorJsonArray getJsonArray(String key) {
+	public JsonArray getJsonArray(String key) {
 		JSONArray result = null;
 		try {
 			result = jsonObject.getJSONArray(key);
@@ -171,7 +171,7 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 			e.printStackTrace();
 		}
 		
-		return result!=null ? new DefaultActorJsonArray(result) : null;
+		return result!=null ? new JsonArrayImpl(result) : null;
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 	}
 
 	@Override
-	public ActorJsonObject put(String key, Object value) {
+	public JsonObject put(String key, Object value) {
 		try {
 			jsonObject.put(key, value);
 		} catch (JSONException | NullPointerException e) {
@@ -201,8 +201,8 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 	}
 
 	@Override
-	public ActorJsonObject mergeIn(ActorJsonObject other) {
-		if (other!=null && other instanceof DefaultActorJsonObject other_)
+	public JsonObject mergeIn(JsonObject other) {
+		if (other!=null && other instanceof JsonObjectImpl other_)
 			for (String key : other_.jsonObject.keySet()) {
 				try {
 					jsonObject.put(key, other.getValue(key));
@@ -242,7 +242,7 @@ public class DefaultActorJsonObject implements ActorJsonObject {
 	}
 
 	@Override
-	public ActorJsonObject clear() {
+	public JsonObject clear() {
 		jsonObject.clear();
 		
 		return this;
