@@ -37,11 +37,15 @@ public class JsonObjectImpl implements JsonObject {
 	public JsonObjectImpl(Object obj) {
 		super();
 		
-		try {
-			jsonObject = new JSONObject(obj);
-		} catch(JSONException e) {
-			jsonObject = new JSONObject();
-			e.printStackTrace();
+		if (obj instanceof JSONObject)
+			jsonObject = (JSONObject)obj;
+		else {
+			try {
+				jsonObject = new JSONObject(obj);
+			} catch(JSONException e) {
+				jsonObject = new JSONObject();
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -56,26 +60,12 @@ public class JsonObjectImpl implements JsonObject {
 		}
 	}
 	
-	public JsonObjectImpl(JSONObject obj) {
-		super();
-		
-		if (obj!=null)
-			jsonObject = obj;
-		else
-			jsonObject = new JSONObject();
-	}
-	
 	public static JsonObject of() {
 		return new JsonObjectImpl();
 	}
 	
 	public static JsonObject of(String key, Object value) {
 		return new JsonObjectImpl().put(key, value);
-	}
-
-	@Override
-	public JsonObject mapFrom(Object obj) {
-		return new JsonObjectImpl(obj);
 	}
 
 	@Override
