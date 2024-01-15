@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,65 +15,38 @@
  */
 package io.actor4j.core.persistence;
 
-import java.io.IOException;
 import java.util.List;
 
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.actor4j.core.json.JsonObject;
+import io.actor4j.core.json.ObjectMapper;
+import io.actor4j.core.utils.GenericType;
 
 public record Recovery<S, E>(ActorPersistenceDTO<S> state, List<ActorPersistenceDTO<E>> events) {
-	private static final ObjectMapper objectMapper;
-	
-	static {
-		objectMapper= new ObjectMapper();
-		
-		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-	}
+	private static final ObjectMapper objectMapper = ObjectMapper.create();
 	
 	@Override
 	public String toString() {
 		return "Recovery [state=" + state + ", events=" + events + "]";
 	}
 	
-	public static boolean isError(String json) {
-		boolean result = false;
-		try {
-			JSONObject obj = new JSONObject(json);
-			result = obj.has("error");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+	public static boolean isError(JsonObject value) {		
+		return value!=null ? value.containsKey("error") : false;
 	}
 	
-	public static String getErrorMsg(String json) {
-		String result = null;
-		try {
-			JSONObject obj = new JSONObject(json);
-			result = obj.getString("error");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+	public static String getErrorMsg(JsonObject value) {
+		return value!=null ? value.getString("error") : null;
 	}
-	
-	@SuppressWarnings("unchecked")
-	public static <A, B> Recovery<A, B> convertValue(String json, TypeReference<?> valueTypeRef) {
+
+	public static <A, B> Recovery<A, B> convertValue(JsonObject value, GenericType<Recovery<A, B>> valueTypeRef) {
 		Recovery<A, B> result = null;
 
-		try {
-			result = (Recovery<A, B>)objectMapper.readValue(json, valueTypeRef);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+		if (value!=null && valueTypeRef!=null)
+			try {
+				result = (Recovery<A, B>)objectMapper.mapTo(value.encode(), valueTypeRef);
+			} catch (ClassCastException e) {
+				e.printStackTrace();
+			}
+
 		return result;
 	}
 }

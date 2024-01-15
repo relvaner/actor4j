@@ -20,10 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bson.Document;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -33,6 +30,9 @@ import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.immutable.ImmutableList;
+import io.actor4j.core.json.JsonArray;
+import io.actor4j.core.json.JsonObject;
+import io.actor4j.core.json.ObjectMapper;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.ActorPersistenceDTO;
 import io.actor4j.core.persistence.drivers.PersistenceDriver;
@@ -44,7 +44,7 @@ import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSIS
 import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
 
 public class MongoDBPersistenceImpl extends PersistenceImpl {
-	private static final ObjectMapper objectMapper = new ObjectMapper();
+	private static final ObjectMapper objectMapper = ObjectMapper.create();
 	
 	protected MongoDatabase database;
 	protected MongoCollection<Document> events;
@@ -84,11 +84,10 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 		if (message.tag()==PERSIST_EVENTS) {
 			try {
 				@SuppressWarnings("unchecked")
-				String json = objectMapper.writeValueAsString(((ImmutableList<ActorPersistenceDTO<?>>)message.value()).get());
-				
-				JSONArray array = new JSONArray(json);
-				if (array.length()==1) {
-					Document document = Document.parse(array.get(0).toString());
+				String json = objectMapper.mapFrom(((ImmutableList<ActorPersistenceDTO<?>>)message.value()).get());
+				JsonArray array = JsonArray.create(json);
+				if (array.size()==1) {
+					Document document = Document.parse(array.getValue(0).toString());
 					checkTimeStamp(document);
 					events.insertOne(document);
 				}
@@ -110,7 +109,7 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 		}
 		else if (message.tag()==PERSIST_STATE){
 			try {
-				String json = objectMapper.writeValueAsString(message.value());
+				String json = objectMapper.mapFrom(message.value());
 				
 				Document document = Document.parse(json);
 				checkTimeStamp(document);
@@ -124,56 +123,56 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 		}
 		else if (message.tag()==RECOVER) {
 			try {
-				JSONObject obj = new JSONObject();
+				JsonObject obj = JsonObject.create();
 				Document document = null;
 				
 				FindIterable<Document> statesIterable = states.find(new Document("persistenceId", message.valueAsString())).sort(new Document("timeStamp", -1).append("index", -1)).limit(1);
 				document = statesIterable.first();
 				if (document!=null) {
-					JSONObject stateValue = new JSONObject(document.toJson());
+					JsonObject stateValue = JsonObject.create(document.toJson());
 					stateValue.remove("_id");
 //					long stateTimeStamp = stateValue.getJSONObject("timeStamp").getLong("$numberLong");
 					long stateTimeStamp = stateValue.getLong("timeStamp");
-					int stateIndex = stateValue.getInt("index");
+					int stateIndex = stateValue.getInteger("index");
 					stateValue.put("timeStamp", stateTimeStamp);
 					obj.put("state", stateValue);
 					
 					FindIterable<Document> eventsIterable = events
 							.find(new Document("persistenceId", message.valueAsString()).append("timeStamp", new Document("$gte", stateTimeStamp)))
 							.sort(new Document("timeStamp", 1).append("index", 1));
-					JSONArray array = new JSONArray();
+					JsonArray array = JsonArray.create();
 					MongoCursor<Document> cursor = eventsIterable.iterator();
 					while (cursor.hasNext()) {
 						document = cursor.next();
-						JSONObject eventValue = new JSONObject(document.toJson());
+						JsonObject eventValue = JsonObject.create(document.toJson());
 						eventValue.remove("_id");
-//						long timeStamp = eventValue.getJSONObject("timeStamp").getLong("$numberLong");
+//						long timeStamp = eventValue.getJsonObject("timeStamp").getLong("$numberLong");
 						long timeStamp = eventValue.getLong("timeStamp");
-						int index = eventValue.getInt("index");
+						int index = eventValue.getInteger("index");
 						if (timeStamp==stateTimeStamp) {
 							if (index>stateIndex) {
 								eventValue.put("timeStamp", timeStamp);
-								array.put(eventValue);
+								array.add(eventValue);
 							}
 						}
 						else {
 							eventValue.put("timeStamp", timeStamp);
-							array.put(eventValue);
+							array.add(eventValue);
 						}
 					}
 					cursor.close();
 					obj.put("events", array);
 				}
 				else
-					obj.put("state", new JSONObject());
+					obj.put("state", JsonObject.empty());
 				
-				parent.send(ActorMessage.create(obj.toString(), INTERNAL_PERSISTENCE_RECOVER, self(), message.source()));
+				parent.send(ActorMessage.create(obj, INTERNAL_PERSISTENCE_RECOVER, self(), message.source()));
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				JSONObject obj = new JSONObject();
+				JsonObject obj = JsonObject.create();
 				obj.put("error", e.getMessage());
-				parent.send(ActorMessage.create(obj.toString(), INTERNAL_PERSISTENCE_RECOVER, self(), message.source()));
+				parent.send(ActorMessage.create(obj, INTERNAL_PERSISTENCE_RECOVER, self(), message.source()));
 			}
 		}
 	}

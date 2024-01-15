@@ -20,17 +20,17 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.drivers.mongo.MongoDBPersistenceDriver;
+import io.actor4j.core.utils.GenericType;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
@@ -84,13 +84,13 @@ public class PersistenceFeature {
 			}
 
 			@Override
-			public void recover(String json) {
-				if (!Recovery.isError(json)) {
-					logger().log(DEBUG, String.format("Recovery: %s", json));
-					Recovery<MyState, MyEvent> obj = Recovery.convertValue(json, new TypeReference<Recovery<MyState, MyEvent>>(){});
+			public void recover(JsonObject value) {
+				if (!Recovery.isError(value)) {
+					logger().log(DEBUG, String.format("Recovery: %s", value.encodePrettily()));
+					Recovery<MyState, MyEvent> obj = Recovery.convertValue(value, new GenericType<Recovery<MyState, MyEvent>>(){});
 					logger().log(DEBUG, String.format("Recovery: %s", obj.toString()));
 					if (first.get())
-						assertEquals("{\"state\":{}}", json);
+						assertEquals("{\"state\":{}}", value.encode());
 					else {
 						assertEquals("I am the second state!", obj.state().value().title());
 						assertTrue(obj.events().size()==3);
@@ -101,7 +101,7 @@ public class PersistenceFeature {
 					testDone.countDown();
 				}
 				else
-					logger().log(ERROR, String.format("Error: %s", Recovery.getErrorMsg(json)));
+					logger().log(ERROR, String.format("Error: %s", Recovery.getErrorMsg(value)));
 			}
 			
 			@Override
