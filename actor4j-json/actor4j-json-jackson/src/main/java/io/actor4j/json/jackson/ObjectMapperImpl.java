@@ -16,10 +16,10 @@
 package io.actor4j.json.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import io.actor4j.core.json.ObjectMapper;
+import io.actor4j.core.utils.GenericType;
 
 public class ObjectMapperImpl implements ObjectMapper {
 	private static final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
@@ -56,11 +56,12 @@ public class ObjectMapperImpl implements ObjectMapper {
 		return result;
 	}
 
-	public <T> T mapTo(String json, TypeReference<T> typeRef) {
+	@Override
+	public <T> T mapTo(String json, GenericType<T> type) {
 		T result = null;
 		
 		try {
-			result = objectMapper.readValue(json, typeRef);
+			result = objectMapper.readValue(json, TypeReferenceGenerator.generate(type));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}

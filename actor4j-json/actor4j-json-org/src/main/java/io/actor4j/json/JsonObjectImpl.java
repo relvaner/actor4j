@@ -177,7 +177,12 @@ public class JsonObjectImpl implements JsonObject {
 	@Override
 	public JsonObject put(String key, Object value) {
 		try {
-			jsonObject.put(key, value);
+			if (value instanceof JsonObjectImpl impl)
+				jsonObject.put(key, impl.jsonObject);
+			else if (value instanceof JsonArrayImpl impl)
+				jsonObject.put(key, impl.jsonArray);
+			else
+				jsonObject.put(key, value);
 		} catch (JSONException | NullPointerException e) {
 			e.printStackTrace();
 		}

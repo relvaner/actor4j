@@ -15,19 +15,21 @@
  */
 package io.actor4j.json.gson;
 
-import java.lang.reflect.Type;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.ToNumberPolicy;
 
 import io.actor4j.core.json.ObjectMapper;
+import io.actor4j.core.utils.GenericType;
 
 public class ObjectMapperImpl implements ObjectMapper {
 	private static final Gson gson;
 	
 	static {
-		gson = new GsonBuilder().create();
+		gson = new GsonBuilder()
+			.setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+			.create();
 	}
 
 	@Override
@@ -48,11 +50,11 @@ public class ObjectMapperImpl implements ObjectMapper {
 		return result;
 	}
 
-	public <T> T mapTo(String json, Type typeRef) {
+	public <T> T mapTo(String json, GenericType<T> type) {
 		T result = null;
 		
 		try {
-			result = gson.fromJson(json, typeRef);
+			result = gson.fromJson(json, TypeTokenGenerator.generate(type));
 		} catch (JsonSyntaxException e) {
 			e.printStackTrace();
 		}

@@ -172,7 +172,12 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonArray add(Object value) {
 		try {
-			jsonArray.put(value);
+			if (value instanceof JsonObjectImpl impl)
+				jsonArray.put(impl.jsonObject);
+			else if (value instanceof JsonArrayImpl impl)
+				jsonArray.put(impl.jsonArray);
+			else
+				jsonArray.put(value);
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
@@ -183,7 +188,12 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonArray add(int pos, Object value) {
 		try {
-			jsonArray.put(pos, value);
+			if (value instanceof JsonObjectImpl impl)
+				jsonArray.put(pos, impl.jsonObject);
+			else if (value instanceof JsonArrayImpl impl)
+				jsonArray.put(pos, impl.jsonArray);
+			else
+				jsonArray.put(pos, value);
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
@@ -208,7 +218,12 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonArray set(int pos, Object value) {
 		try {
-			jsonArray.put(pos, value);
+			if (value instanceof JsonObjectImpl impl)
+				jsonArray.put(pos, impl.jsonObject);
+			else if (value instanceof JsonArrayImpl impl)
+				jsonArray.put(pos, impl.jsonArray);
+			else
+				jsonArray.put(pos, value);
 		} catch(JSONException e) {
 			e.printStackTrace();
 		}
