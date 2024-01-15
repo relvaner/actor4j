@@ -247,4 +247,9 @@ public class JsonObjectImpl implements JsonObject {
 	public boolean isEmpty() {
 		return jsonObject.isEmpty();
 	}
+
+	@Override
+	public String toString() {
+		return jsonObject.toString();
+	}
 }

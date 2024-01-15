@@ -15,6 +15,7 @@
  */
 package io.actor4j.json;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -283,5 +284,15 @@ public class JsonArrayImpl implements JsonArray {
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		return jsonArray.toString();
+	}
+
+	@Override
+	public Iterator<Object> iterator() {
+		return jsonArray.iterator();
 	}
 }

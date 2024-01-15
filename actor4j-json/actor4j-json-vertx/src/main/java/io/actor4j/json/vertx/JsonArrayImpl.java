@@ -15,6 +15,7 @@
  */
 package io.actor4j.json.vertx;
 
+import java.util.Iterator;
 import java.util.List;
 
 import io.actor4j.core.json.JsonArray;
@@ -183,5 +184,10 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public String encodePrettily() {
 		return jsonArray.encodePrettily();
+	}
+
+	@Override
+	public Iterator<Object> iterator() {
+		return jsonArray.iterator();
 	}
 }
