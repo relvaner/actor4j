@@ -22,7 +22,11 @@ import io.actor4j.core.json.ObjectMapper;
 import io.actor4j.core.utils.GenericType;
 
 public record Recovery<S, E>(ActorPersistenceDTO<S> state, List<ActorPersistenceDTO<E>> events) {
-	private static final ObjectMapper objectMapper = ObjectMapper.create();
+	private static final ObjectMapper objectMapper;
+	
+	static {
+		objectMapper = ObjectMapper.create();
+	}
 	
 	@Override
 	public String toString() {

@@ -18,16 +18,16 @@ package io.actor4j.examples.persistence;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.Recovery;
 import io.actor4j.core.persistence.drivers.mongo.MongoDBPersistenceDriver;
+import io.actor4j.core.utils.GenericType;
 import io.actor4j.examples.shared.ExamplesSettings;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.util.UUID;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 public class ExamplePersistence {
 	static record MyState(String title) {
@@ -57,14 +57,14 @@ public class ExamplePersistence {
 			}
 
 			@Override
-			public void recover(String json) {
-				if (!Recovery.isError(json)) {
-					logger().log(DEBUG, String.format("Recovery: %s", json));
-					Recovery<MyState, MyEvent> obj =  Recovery.convertValue(json, new TypeReference<Recovery<MyState, MyEvent>>(){});
+			public void recover(JsonObject value) {
+				if (!Recovery.isError(value)) {
+					logger().log(DEBUG, String.format("Recovery: %s", value.encodePrettily()));
+					Recovery<MyState, MyEvent> obj =  Recovery.convertValue(value, new GenericType<Recovery<MyState, MyEvent>>(){});
 					logger().log(DEBUG, String.format("Recovery: %s", obj.toString()));
 				}
 				else
-					logger().log(ERROR, String.format("Error: %s", Recovery.getErrorMsg(json)));
+					logger().log(ERROR, String.format("Error: %s", Recovery.getErrorMsg(value)));
 			}
 			
 			@Override

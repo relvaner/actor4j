@@ -9,14 +9,14 @@
 	</parent>
 	<artifactId>actor4j-json</artifactId>
 	<packaging>pom</packaging>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core-sdk</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.junit.vintage</groupId>
 			<artifactId>junit-vintage-engine</artifactId>

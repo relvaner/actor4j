@@ -44,7 +44,7 @@ import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSIS
 import static io.actor4j.core.runtime.protocols.ActorProtocolTag.INTERNAL_PERSISTENCE_SUCCESS;
 
 public class MongoDBPersistenceImpl extends PersistenceImpl {
-	private static final ObjectMapper objectMapper = ObjectMapper.create();
+	private static final ObjectMapper objectMapper;
 	
 	protected MongoDatabase database;
 	protected MongoCollection<Document> events;
@@ -52,6 +52,10 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 	
 	protected long lastTimeStamp;
 	protected int indexIfEqualTimeStamp;
+	
+	static {
+		objectMapper = ObjectMapper.create();
+	}
 	
 	public MongoDBPersistenceImpl(ActorSystem parent, PersistenceDriver driver) {
 		super(parent, driver);

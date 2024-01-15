@@ -35,6 +35,16 @@
 			<artifactId>actor4j-core-runtime</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-json-org</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-json-jackson</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>io.actor4j</groupId>
