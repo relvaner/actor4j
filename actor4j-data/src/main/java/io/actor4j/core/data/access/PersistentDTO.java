@@ -17,10 +17,12 @@ package io.actor4j.core.data.access;
 
 import java.util.UUID;
 
+import io.actor4j.core.json.JsonObject;
+
 public interface PersistentDTO<K, V> extends VolatileDTO<K, V> {
 	public int hashCodeExpected();
-	public String filter();
-	public String update();
+	public JsonObject filter();
+	public JsonObject update();
 	public String collectionName();
 	
 	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String keyname, String collectionName) {
@@ -31,11 +33,11 @@ public interface PersistentDTO<K, V> extends VolatileDTO<K, V> {
 		return new PersistentDataAccessDTO<K, V>(key, keyname, collectionName, source);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String keyname, String update, String collectionName) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String keyname, JsonObject update, String collectionName) {
 		return new PersistentDataAccessDTO<K, V>(key, value, keyname, update, collectionName);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, String filter, String update, String collectionName, UUID source) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, JsonObject filter, JsonObject update, String collectionName, UUID source) {
 		return new PersistentDataAccessDTO<K, V>(key, value, filter, update, collectionName, source);
 	}
 	

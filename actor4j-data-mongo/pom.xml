@@ -16,6 +16,12 @@
 			<version>${actor4j.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-json-org</artifactId>
+			<version>${actor4j.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>io.actor4j</groupId>

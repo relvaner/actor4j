@@ -20,8 +20,6 @@ import static io.actor4j.core.actors.ActorWithCache.*;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.json.JSONObject;
-
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
@@ -31,6 +29,7 @@ import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.data.access.PodPrimaryPersistentCacheActor;
 import io.actor4j.core.pods.data.access.PodSecondaryPersistentCacheActor;
 import io.actor4j.core.data.access.PersistentDTO;
+import io.actor4j.core.json.JsonObject;
 
 public class PodPersistentActorCacheManager<K, V> {
 	public static final UUID PRIMARY_FROM_CACHE_COORDINATOR = UUID.randomUUID();
@@ -128,11 +127,11 @@ public class PodPersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(key, value, collectionName), SET, replica);
 	}
 	
-	public void update(K key, V value, JSONObject update) {
+	public void update(K key, V value, JsonObject update) {
 		if (keyname!=null)
-			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update.toString() : null, collectionName), SET, replica);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update : null, collectionName), SET, replica);
 		else
-			actorRef.tell(PersistentDTO.create(key, value, null, update!=null ? update.toString() : null, collectionName), SET, replica);
+			actorRef.tell(PersistentDTO.create(key, value, null, update!=null ? update : null, collectionName), SET, replica);
 	}
 	
 	public void del(K key) {

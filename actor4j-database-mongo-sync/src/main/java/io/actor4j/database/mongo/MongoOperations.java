@@ -22,9 +22,6 @@ import java.util.function.Consumer;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -33,14 +30,11 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 
+import io.actor4j.core.json.ObjectMapper;
+import io.actor4j.core.utils.GenericType;
+
 public final class MongoOperations {
-	private static final ObjectMapper objectMapper;
-	
-	static {
-		objectMapper= new ObjectMapper();
-		
-		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-	}
+	private static final ObjectMapper objectMapper = ObjectMapper.create();
 	
 	public static boolean hasOne(Bson filter, MongoClient client, String databaseName, String collectionName) {
 		boolean result = false;
@@ -203,7 +197,7 @@ public final class MongoOperations {
 	public static <V> Document convertToDocument(V value) {
 		Document result = null;
 		try {
-			result = Document.parse(objectMapper.writeValueAsString(value));
+			result = Document.parse(objectMapper.mapFrom(value));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -216,7 +210,7 @@ public final class MongoOperations {
 		
 		if (json!=null)
 			try {
-				result = objectMapper.readValue(json, valueType);
+				result = objectMapper.mapTo(json, valueType);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -239,7 +233,7 @@ public final class MongoOperations {
 		
 		for (Document document : documents)
 			try {
-				result.add(objectMapper.readValue(document.toJson(), valueType));
+				result.add(objectMapper.mapTo(document.toJson(), valueType));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -247,12 +241,12 @@ public final class MongoOperations {
 		return result;
 	}
 	
-	public static <V> V convertToValue(String json, TypeReference<V> valueTypeReference) {
+	public static <V> V convertToValue(String json, GenericType<V> valueTypeRef) {
 		V result = null;
 		
 		if (json!=null)
 			try {
-				result = objectMapper.readValue(json, valueTypeReference);
+				result = objectMapper.mapTo(json, valueTypeRef);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -261,21 +255,21 @@ public final class MongoOperations {
 		return result;
 	}
 	
-	public static <V> V convertToValue(Document document, TypeReference<V> valueTypeReference) {
+	public static <V> V convertToValue(Document document, GenericType<V> valueTypeRef) {
 		V result = null;
 		
 		if (document!=null)
-			result = convertToValue(document.toJson(), valueTypeReference);
+			result = convertToValue(document.toJson(), valueTypeRef);
 
 		return result;
 	}
 	
-	public static <V> List<V> convertToValue(List<Document> documents, TypeReference<V> valueTypeReference) {
+	public static <V> List<V> convertToValue(List<Document> documents, GenericType<V> valueTypeRef) {
 		List<V> result = new LinkedList<>();
 		
 		for (Document document : documents)
 			try {
-				result.add(objectMapper.readValue(document.toJson(), valueTypeReference));
+				result.add(objectMapper.mapTo(document.toJson(), valueTypeRef));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

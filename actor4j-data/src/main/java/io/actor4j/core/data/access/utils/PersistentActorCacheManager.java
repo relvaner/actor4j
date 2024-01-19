@@ -21,8 +21,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.json.JSONObject;
-
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
@@ -32,6 +30,7 @@ import io.actor4j.core.utils.Pair;
 import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
+import io.actor4j.core.json.JsonObject;
 
 public class PersistentActorCacheManager<K, V> {
 	protected ActorRef actorRef;
@@ -86,11 +85,11 @@ public class PersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(key, value, collectionName), SET, cacheAlias);
 	}
 	
-	public void update(K key, V value, JSONObject update) {
+	public void update(K key, V value, JsonObject update) {
 		if (keyname!=null)
-			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update.toString() : null, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update : null, collectionName), SET, cacheAlias);
 		else
-			actorRef.tell(PersistentDTO.create(key, value, null, update!=null ? update.toString() : null, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, null, update!=null ? update : null, collectionName), SET, cacheAlias);
 	}
 	
 	public void del(K key) {

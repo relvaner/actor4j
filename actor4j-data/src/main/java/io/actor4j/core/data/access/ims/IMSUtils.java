@@ -15,13 +15,15 @@
  */
 package io.actor4j.core.data.access.ims;
 
+import io.actor4j.core.json.JsonObject;
+
 // collectionName not used; filter, update not implemented 
 public final class IMSUtils {
 	protected static <K, V> void put(K key, V value, IMS<K, V> imdb, String collectionName) {
 		imdb.put(key, value);
 	}
 	
-	public static <K, V> boolean hasOne(K key, String filter, IMS<K, V> imdb, String collectionName) {
+	public static <K, V> boolean hasOne(K key, JsonObject filter, IMS<K, V> imdb, String collectionName) {
 		boolean result = false;
 		
 		if (key!=null)
@@ -30,7 +32,7 @@ public final class IMSUtils {
 		return result;
 	}
 	
-	public static <K, V> void updateOne(K key, String filter, String update, IMS<K, V> imdb, String collectionName) {
+	public static <K, V> void updateOne(K key, JsonObject filter, JsonObject update, IMS<K, V> imdb, String collectionName) {
 		// not implemented
 	}
 	
@@ -38,16 +40,16 @@ public final class IMSUtils {
 		put(key, value, imdb, collectionName);
 	}
 	
-	public static <K, V> void replaceOne(K key, String filter, V value, IMS<K, V> imdb, String collectionName) {
+	public static <K, V> void replaceOne(K key, JsonObject filter, V value, IMS<K, V> imdb, String collectionName) {
 		put(key, value, imdb, collectionName);
 	}
 	
-	public static <K, V> void deleteOne(K key, String filter, IMS<K, V> imdb, String collectionName) {
+	public static <K, V> void deleteOne(K key, JsonObject filter, IMS<K, V> imdb, String collectionName) {
 		if (key!=null)
 			imdb.remove(key);
 	}
 	
-	public static <K, V> V findOne(K key, String filter, IMS<K, V> imdb, String collectionName) {
+	public static <K, V> V findOne(K key, JsonObject filter, IMS<K, V> imdb, String collectionName) {
 		V result = null;
 		
 		if (key!=null)

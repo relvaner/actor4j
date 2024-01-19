@@ -63,11 +63,11 @@
 			<version>${actor4j.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
-    		<groupId>org.json</groupId>
-    		<artifactId>json</artifactId>
-    		<version>20231013</version>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-json-org</artifactId>
+			<version>${actor4j.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
