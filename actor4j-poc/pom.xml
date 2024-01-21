@@ -12,5 +12,6 @@
 		<module>actor4j-poc-verification</module>
 		
 		<module>actor4j-poc-apc-actor</module>
+		<module>actor4j-poc-apc-channels</module>
 	</modules>
 </project>
