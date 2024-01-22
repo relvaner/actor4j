@@ -51,10 +51,7 @@
 	</properties>
 	
 	<modules>
-		<module>actor4j-json-jackson</module>
-		<module>actor4j-json-gson</module>
-		<module>actor4j-json-org</module>
-		<module>actor4j-json-vertx</module>
+		<module>actor4j-json</module>
 		
 		<module>actor4j-database-mongo-sync</module>
 		
