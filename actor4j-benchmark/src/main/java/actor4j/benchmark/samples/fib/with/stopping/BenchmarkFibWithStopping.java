@@ -56,8 +56,8 @@ public class BenchmarkFibWithStopping extends BenchmarkSampleActor4j {
 			latch = new CountDownLatch(1);
 			
 			timeMeasurement.start();
-			UUID skynet = system.addActor(() -> new Fibonacci(Long.valueOf(config.param1)));
-			system.send(ActorMessage.create(null, Fibonacci.CREATE, system.SYSTEM_ID(), skynet));
+			UUID fibonacci = system.addActor(() -> new Fibonacci(Long.valueOf(config.param1)));
+			system.send(ActorMessage.create(null, Fibonacci.CREATE, system.SYSTEM_ID(), fibonacci));
 			try {
 				latch.await();
 			} catch (InterruptedException e) {

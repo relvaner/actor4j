@@ -60,8 +60,8 @@ public class BenchmarkFib extends BenchmarkSampleActor4j {
 			latch = new CountDownLatch(1);
 			
 			timeMeasurement.start();
-			UUID skynet = system.addActor(() -> new Fibonacci(Long.valueOf(config.param1)));
-			system.send(ActorMessage.create(null, Fibonacci.CREATE, system.SYSTEM_ID(), skynet));
+			UUID fibonacci = system.addActor(() -> new Fibonacci(Long.valueOf(config.param1)));
+			system.send(ActorMessage.create(null, Fibonacci.CREATE, system.SYSTEM_ID(), fibonacci));
 			try {
 				latch.await();
 			} catch (InterruptedException e) {
@@ -71,7 +71,7 @@ public class BenchmarkFib extends BenchmarkSampleActor4j {
 			PseudoActor pseudoActor = new PseudoActor(system, true) {
 				@Override
 				public void preStart() {
-					watch(skynet);
+					watch(fibonacci);
 				}
 				@Override
 				public void receive(ActorMessage<?> message) {
@@ -79,7 +79,7 @@ public class BenchmarkFib extends BenchmarkSampleActor4j {
 				}
 			};
 			
-			system.send(ActorMessage.create(null, Actor.POISONPILL, null, skynet)); // stop all actors from parent
+			system.send(ActorMessage.create(null, Actor.POISONPILL, null, fibonacci)); // stop all actors from parent
 			boolean success = false;
 			try {
 				success = pseudoActor.await(
@@ -93,7 +93,7 @@ public class BenchmarkFib extends BenchmarkSampleActor4j {
 			timeMeasurement.stop();
 			
 			if (!success) {
-				System.out.println(((InternalActorSystem)system).getCells().get(skynet).getChildren().size());
+				System.out.println(((InternalActorSystem)system).getCells().get(fibonacci).getChildren().size());
 			}
 			
 			System.out.printf("#actors : %s%n", Fibonacci.count);
