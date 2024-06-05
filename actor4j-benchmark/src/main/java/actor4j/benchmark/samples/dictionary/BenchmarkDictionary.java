@@ -91,6 +91,6 @@ public class BenchmarkDictionary extends BenchmarkSampleActor4j {
 	}
 
 	public static void main(String[] args) {
-		new BenchmarkDictionary(new BenchmarkConfig(-1, 10, 60_000, 4, 1));
+		new BenchmarkDictionary(new BenchmarkConfig(-1, 10, 60, 4, 1)); // 10 + 60 iterations!
 	}
 }

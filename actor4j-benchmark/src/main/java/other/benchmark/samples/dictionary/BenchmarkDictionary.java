@@ -49,6 +49,6 @@ public class BenchmarkDictionary extends BenchmarkSample {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkDictionary(new BenchmarkConfig(10, 60));
+		new BenchmarkDictionary(new BenchmarkConfig(10, 60)); // 10 + 60 iterations!
 	}
 }

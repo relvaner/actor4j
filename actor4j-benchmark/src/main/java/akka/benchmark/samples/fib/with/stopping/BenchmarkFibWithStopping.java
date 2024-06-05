@@ -74,6 +74,6 @@ public class BenchmarkFibWithStopping extends BenchmarkSampleAkka {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkFibWithStopping(new BenchmarkConfig(10, 60_000, "30")); // 10 + 60 iterations!
+		new BenchmarkFibWithStopping(new BenchmarkConfig(10, 60, "30")); // 10 + 60 iterations!
 	}
 }

@@ -84,6 +84,6 @@ public class BenchmarkSkynetWithStopping extends BenchmarkSampleAkka {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkSkynetWithStopping(new BenchmarkConfig(10, 60_000)); // 10 + 60 iterations!
+		new BenchmarkSkynetWithStopping(new BenchmarkConfig(10, 60)); // 10 + 60 iterations!
 	}
 }
