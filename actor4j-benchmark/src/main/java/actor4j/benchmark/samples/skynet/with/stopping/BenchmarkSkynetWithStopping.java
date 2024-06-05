@@ -95,6 +95,6 @@ public class BenchmarkSkynetWithStopping extends BenchmarkSampleActor4j {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkSkynetWithStopping(new BenchmarkConfig(10, 60_000));
+		new BenchmarkSkynetWithStopping(new BenchmarkConfig(10, 60_000)); // 10 + 60 iterations!
 	}
 }
