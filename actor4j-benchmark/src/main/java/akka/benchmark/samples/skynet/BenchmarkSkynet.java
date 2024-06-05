@@ -45,7 +45,7 @@ public class BenchmarkSkynet extends BenchmarkSampleAkka {
 			public void run() {
 				System.out.printf("#actors : %s%n", Skynet.count);
 			}
-		}, 0, 1000);
+		}, 1000, 1000);
 		
 		Benchmark benchmark = new Benchmark(config);
 		

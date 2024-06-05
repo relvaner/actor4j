@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class BenchmarkFib extends BenchmarkSampleAkka {
 			public void run() {
 				System.out.printf("#actors : %s%n", Fibonacci.count);
 			}
-		}, 0, 1000);
+		}, 1000, 1000);
 		
 		Benchmark benchmark = new Benchmark(config);
 		

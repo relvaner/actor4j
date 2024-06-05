@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package akka.benchmark.samples.skynet.with.stopping;
+package akka.benchmark.samples.fib.with.stopping;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,29 +30,22 @@ import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.Router;
 
-// @see https://github.com/atemerev/skynet
-// @see https://github.com/atemerev/skynet/blob/master/java-quasar/src/main/java/Skynet.java
-public class Skynet extends UntypedAbstractActor {
-	public static final int CREATE = 10000;
+public class Fibonacci extends UntypedAbstractActor {
+	public static final int CREATE = 10_000;
 	
 	public static AtomicInteger count = new AtomicInteger(0);
 	
-	protected long num;
-	protected int size;
-	protected int div;
-	
-	protected long sum;
+	protected long number;
+	protected long result;
 	
 	protected Set<ActorRef> children;
 	protected List<Routee> routees;
 	
-	public Skynet(long num, int size, int div) {
+	public Fibonacci(long number) {
 		super();
-		this.num = num;
-		this.size = size;
-		this.div = div;
+		this.number = number;
 		
-		sum = 0L;
+		result = 0L;
 		
 		children = new HashSet<>();
 		routees = new ArrayList<Routee>();
@@ -64,29 +57,34 @@ public class Skynet extends UntypedAbstractActor {
 	public void onReceive(Object message) {
 		if (message instanceof ActorMessage) {
 			if (((ActorMessage) message).tag == CREATE) {
-				if (size == 1)
-					context().parent().tell(new ActorMessage(num, 0), getSelf());
+				if (number==0) {
+					result = 0;
+					context().parent().tell(new ActorMessage(result, 0), getSelf());
+				}
+				else if (number==1) {
+					result = 1;
+					context().parent().tell(new ActorMessage(result, 0), getSelf());
+				}
 				else {	
-					for (int i = 0; i < div; i++) {
-						long subNum = num + i * (size / div);
-						ActorRef child = 
-								context().actorOf(Props.create(Skynet.class, subNum, size / div, div).withDispatcher("my-dispatcher"));
-						children.add(child);
-						routees.add(new ActorRefRoutee(child));
-					}
+					ActorRef fib1 = context().actorOf(Props.create(Fibonacci.class, number-1).withDispatcher("my-dispatcher"));
+					ActorRef fib2 = context().actorOf(Props.create(Fibonacci.class, number-2).withDispatcher("my-dispatcher"));
+					children.add(fib1);
+					children.add(fib2);
+					routees.add(new ActorRefRoutee(fib1));
+					routees.add(new ActorRefRoutee(fib2));
 					new Router(new BroadcastRoutingLogic(), routees).route(new ActorMessage(null, CREATE), getSelf());
 				}
 			}
 			else if (children.remove(getSender())) {
-				sum += ((ActorMessage) message).valueAsLong();
+				result += ((ActorMessage) message).valueAsLong();
 				
 				if (children.isEmpty()) {
 					if (context().parent().path().toString().equals("akka://"+context().system().name()+"/user")/*is user guardian*/) {
-						System.out.println("result: "+sum);
-						BenchmarkSkynetWithStopping.latch.countDown();
+						System.out.println("result: "+result);
+						BenchmarkFibWithStopping.latch.countDown();
 					}
 					else {
-						context().parent().tell(new ActorMessage(sum, 0), getSelf());
+						context().parent().tell(new ActorMessage(result, 0), getSelf());
 						context().stop(getSelf()); // with immediate stopping the actor
 					}
 				}
