@@ -36,6 +36,9 @@ public class BenchmarkConfig {
 	public int throughput;
 	
 	public ActorThreadMode threadMode;
+	
+	public String param1;
+	public String param2;
 		
 	public BenchmarkConfig() {
 		this(100);
@@ -47,6 +50,16 @@ public class BenchmarkConfig {
 	
 	public BenchmarkConfig(int warmupIterations, long duration) {
 		this(100, warmupIterations, duration);
+	}
+	
+	public BenchmarkConfig(int warmupIterations, long duration, String param1) {
+		this(100, warmupIterations, duration);
+		this.param1 = param1;
+	}
+	
+	public BenchmarkConfig(int warmupIterations, long duration, String param1, String param2) {
+		this(warmupIterations, duration, param1);
+		this.param2 = param2;
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration) {

@@ -63,6 +63,9 @@ public class BenchmarkSamplesApplication {
 		Option optionPingPongGroupedBenchmark = Option.builder("b_pingpong").desc("PingPong-Grouped benchmark (Actor4j)").argName("b_pingpong").build();
 		Option optionNFoldRingBenchmark = Option.builder("b_ring").desc("NFoldRing benchmark (Actor4j)").argName("b_ring").build();
 		
+		Option optionParam1 = Option.builder("param1").desc("the first parameter").argName("param1").build();
+		Option optionParam2 = Option.builder("param2").desc("the second parameter").argName("param2").build();
+		
 		options.addOption("?", "help", false, "print this message");
 		options.addOption("version", false, "print the version information and exit");
 		
@@ -81,6 +84,9 @@ public class BenchmarkSamplesApplication {
 		
 		options.addOption(optionPingPongGroupedBenchmark);
 		options.addOption(optionNFoldRingBenchmark);
+		
+		options.addOption(optionParam1);
+		options.addOption(optionParam2);
 		
 		CommandLineParser parser = new DefaultParser();
 
@@ -128,7 +134,10 @@ public class BenchmarkSamplesApplication {
 				config.parallelismFactor = Integer.valueOf(line.getOptionValue("factor"));
 			if (line.hasOption("throughput"))
 				config.throughput = Integer.valueOf(line.getOptionValue("throughput"));
-			
+			if (line.hasOption("param1"))
+				config.param1 = line.getOptionValue("param1");
+			if (line.hasOption("param2"))
+				config.param2 = line.getOptionValue("param2");
 			
 			if (line.hasOption("class")) {
 				Class<?> clazz;

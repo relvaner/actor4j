@@ -26,7 +26,7 @@ import io.actor4j.core.utils.HubPattern;
 // @see https://github.com/atemerev/skynet
 // @see https://github.com/atemerev/skynet/blob/master/java-quasar/src/main/java/Skynet.java
 public class Skynet extends Actor {
-	public static final int CREATE = 10000;
+	public static final int CREATE = 10_000;
 	
 	public static AtomicInteger count = new AtomicInteger(0);
 	
