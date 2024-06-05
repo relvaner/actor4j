@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package akka.benchmark.samples.skynet;
+package akka.benchmark.samples.fib;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,31 +31,29 @@ import scala.concurrent.duration.Duration;
 import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
 
-// @see https://github.com/atemerev/skynet
-// @see https://dzone.com/articles/go-and-quasar-a-comparison-of-style-and-performanc
-public class BenchmarkSkynet extends BenchmarkSampleAkka {
+public class BenchmarkFib extends BenchmarkSampleAkka {
 	public static CountDownLatch latch;
 	
-	public BenchmarkSkynet(BenchmarkConfig config) {
+	public BenchmarkFib(BenchmarkConfig config) {
 		super(config);
 		
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() { 
 			@Override
 			public void run() {
-				System.out.printf("#actors : %s%n", Skynet.count);
+				System.out.printf("#actors : %s%n", Fibonacci.count);
 			}
 		}, 0, 1000);
 		
 		Benchmark benchmark = new Benchmark(config);
 		
 		benchmark.start((timeMeasurement, iteration) -> {
-			ActorSystem system = ActorSystem.create("akka-benchmark-skynet", akkaConfig);
+			ActorSystem system = ActorSystem.create("akka-benchmark-fibonacci", akkaConfig);
 			latch = new CountDownLatch(1);
 			
 			timeMeasurement.start();
-			ActorRef skynet = system.actorOf(Props.create(Skynet.class, 0l, 1_000_000, 10).withDispatcher("my-dispatcher"));
-			skynet.tell(new ActorMessage(null, Skynet.CREATE), skynet);
+			ActorRef fibonacci = system.actorOf(Props.create(Fibonacci.class, Long.valueOf(config.param1)).withDispatcher("my-dispatcher"));
+			fibonacci.tell(new ActorMessage(null, Fibonacci.CREATE), fibonacci);
 			try {
 				latch.await();
 			} catch (InterruptedException e) {
@@ -63,10 +61,10 @@ public class BenchmarkSkynet extends BenchmarkSampleAkka {
 			}
 			timeMeasurement.stop();
 
-			System.out.printf("#actors : %s%n", Skynet.count);
-			Skynet.count.getAndSet(0);
+			System.out.printf("#actors : %s%n", Fibonacci.count);
+			Fibonacci.count.getAndSet(0);
 			
-			skynet.tell(PoisonPill.getInstance(), skynet);
+			fibonacci.tell(PoisonPill.getInstance(), fibonacci); // stop all actors from parent
 			try {
 				Await.result(system.terminate(), Duration.create(30, TimeUnit.SECONDS));
 			} catch (Exception e) {
@@ -78,6 +76,6 @@ public class BenchmarkSkynet extends BenchmarkSampleAkka {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkSkynet(new BenchmarkConfig(10, 60_000)); // 10 + 60 iterations!
+		new BenchmarkFib(new BenchmarkConfig(10, 60_000, "30")); // 10 + 60 iterations!
 	}
 }
