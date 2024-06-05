@@ -14,31 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.fib;
+package actor4j.benchmark.samples.fib.with.stopping;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import actor4j.benchmark.BenchmarkSampleActor4j;
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.actors.Actor;
-import io.actor4j.core.actors.PseudoActor;
-import io.actor4j.core.runtime.InternalActorSystem;
+//import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.messages.ActorMessage;
 import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
 
-public class BenchmarkFib extends BenchmarkSampleActor4j {
+public class BenchmarkFibWithStopping extends BenchmarkSampleActor4j {
 	public static CountDownLatch latch;
 	
-	public BenchmarkFib(BenchmarkConfig config) {
+	public BenchmarkFibWithStopping(BenchmarkConfig config) {
 		super(config);
 
-		ActorSystem system = createActorSystem("actor4j::Fibonacci");
+		ActorSystem system = createActorSystem("actor4j::FibonacciWithStopping");
 		
 		System.out.printf("activeThreads: %d%n", config.parallelism());
 		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name());
@@ -67,34 +63,7 @@ public class BenchmarkFib extends BenchmarkSampleActor4j {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-			PseudoActor pseudoActor = new PseudoActor(system, true) {
-				@Override
-				public void preStart() {
-					watch(skynet);
-				}
-				@Override
-				public void receive(ActorMessage<?> message) {
-					System.out.println(message);
-				}
-			};
-			
-			system.send(ActorMessage.create(null, Actor.POISONPILL, null, skynet)); // stop all actors from parent
-			boolean success = false;
-			try {
-				success = pseudoActor.await(
-						(msg) -> msg.tag()==Actor.TERMINATED, 
-						(msg) -> { System.out.println("Fibonacci stopped..."); return true;}, 
-						120_000, TimeUnit.MILLISECONDS);
-			} catch (InterruptedException | TimeoutException e) {
-				e.printStackTrace();
-			}
-			pseudoActor.stop();
 			timeMeasurement.stop();
-			
-			if (!success) {
-				System.out.println(((InternalActorSystem)system).getCells().get(skynet).getChildren().size());
-			}
 			
 			System.out.printf("#actors : %s%n", Fibonacci.count);
 			Fibonacci.count.getAndSet(0);
@@ -105,6 +74,6 @@ public class BenchmarkFib extends BenchmarkSampleActor4j {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkFib(new BenchmarkConfig(10, 60_000, "30"));
+		new BenchmarkFibWithStopping(new BenchmarkConfig(10, 60_000, "30"));
 	}
 }

@@ -57,7 +57,7 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 			@Override
 			public void run() {
 				System.out.printf("#actors : %s%n", Skynet.count);
-				System.out.printf("#cells  : %s%n", ((InternalActorSystem)system).getCells().size());
+//				System.out.printf("#cells  : %s%n", ((InternalActorSystem)system).getCells().size());
 			}
 		}, 0, 1000);
 		
@@ -88,7 +88,7 @@ public class BenchmarkSkynet extends BenchmarkSampleActor4j {
 				}
 			};
 			
-			system.send(ActorMessage.create(null, Actor.POISONPILL, null, skynet));
+			system.send(ActorMessage.create(null, Actor.POISONPILL, null, skynet)); // stop all actors from parent
 			boolean success = false;
 			try {
 				success = pseudoActor.await(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.skynet.with.stopping;
+package actor4j.benchmark.samples.fib.with.stopping;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,57 +23,54 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.HubPattern;
 
-// @see https://github.com/atemerev/skynet
-// @see https://github.com/atemerev/skynet/blob/master/java-quasar/src/main/java/Skynet.java
-public class Skynet extends Actor {
+public class Fibonacci extends Actor {
 	public static final int CREATE = 10_000;
 	
 	public static AtomicInteger count = new AtomicInteger(0);
 	
-	protected long num;
-	protected int size;
-	protected int div;
-	
-	protected long sum;
+	protected long number;
+	protected long result;
 	
 	protected ActorGroup children;
 	
-	public Skynet(long num, int size, int div) {
-		super(String.valueOf(num));
-		this.num = num;
-		this.size = size;
-		this.div = div;
+	public Fibonacci(long number) {
+		super(String.valueOf(number));
+		this.number = number;
 		
-		sum = 0L;
+		result = 0L;
 		
 		children = new ActorGroupSet();
 		
 		count.incrementAndGet();
 	}
-	
+
 	@Override
 	public void receive(ActorMessage<?> message) {
 		if (message.tag() == CREATE) {
-			if (size == 1)
-				tell(num, 0, getParent());
+			if (number==0) {
+				result = 0;
+				tell(result, 0, getParent());
+			}
+			else if (number==1) {
+				result = 1;
+				tell(result, 0, getParent());
+			}
 			else {	
-				for (int i = 0; i < div; i++) {
-					long subNum = num + i * (size / div);
-					children.add(addChild(() -> new Skynet(subNum, size / div, div)));
-				}
+				children.add(addChild(() -> new Fibonacci(number-1)));
+				children.add(addChild(() -> new Fibonacci(number-2)));
 				new HubPattern(this, children).broadcast(null, CREATE);
 			}
 		}
 		else if (children.remove(message.source())) {
-			sum += message.valueAsLong();
+			result += message.valueAsLong();
 			
 			if (children.isEmpty()) {
 				if (isRootInUser()) {
-					System.out.println("result: "+sum);
-					BenchmarkSkynetWithStopping.latch.countDown();
+					System.out.println("result: "+result);
+					BenchmarkFibWithStopping.latch.countDown();
 				}
 				else {
-					tell(sum, 0, getParent());
+					tell(result, 0, getParent());
 					tell(null, POISONPILL, self()); // with immediate stopping the actor
 				}
 			}
