@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package actor4j.benchmark.samples.actor.ring.intra;
+package actor4j.benchmark.samples.actor.ring.inter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,13 +38,13 @@ import shared.benchmark.BenchmarkConfig;
 // @see https://salsa.debian.org/benchmarksgame-team/archive-alioth-benchmarksgame/-/blob/master/contributed-source-code/benchmarksgame/threadring/threadring.java-3.java?ref_type=heads
 // @see https://github.com/shamsimam/savina/blob/master/src/main/java/edu/rice/habanero/benchmarks/threadring/ThreadRingConfig.java
 // @see https://github.com/shamsimam/savina/blob/master/src/main/scala/edu/rice/habanero/benchmarks/threadring/ThreadRingAkkaActorBenchmark.scala
-public class BenchmarkActorRingIntra extends BenchmarkSampleActor4j {
+public class BenchmarkActorRingInter extends BenchmarkSampleActor4j {
 	public static CountDownLatch latch;
 	
-	public BenchmarkActorRingIntra(BenchmarkConfig config) {
+	public BenchmarkActorRingInter(BenchmarkConfig config) {
 		super(config);
 
-		ActorSystem system = createActorSystem("actor4j::ActorRing-Intra");
+		ActorSystem system = createActorSystem("actor4j::ActorRing-Inter");
 		
 		System.out.printf("activeThreads: %d%n", config.parallelism());
 		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name());
@@ -123,6 +123,6 @@ public class BenchmarkActorRingIntra extends BenchmarkSampleActor4j {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkActorRingIntra(new BenchmarkConfig(8, 10, 60, 8, 1, String.valueOf(10_000_000))); // 10 + 60 iterations!
+		new BenchmarkActorRingInter(new BenchmarkConfig(8, 10, 60, 8, 1, String.valueOf(5_000_000))); // 10 + 60 iterations!
 	}
 }
