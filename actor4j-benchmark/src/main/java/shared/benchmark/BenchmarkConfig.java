@@ -53,24 +53,42 @@ public class BenchmarkConfig {
 	}
 	
 	public BenchmarkConfig(int warmupIterations, long duration, String param1) {
-		this(100, warmupIterations, duration);
-		this.param1 = param1;
+		this(100, warmupIterations, duration, param1);
 	}
 	
 	public BenchmarkConfig(int warmupIterations, long duration, String param1, String param2) {
-		this(warmupIterations, duration, param1);
-		this.param2 = param2;
+		this(100, warmupIterations, duration, param1, param2);
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration) {
 		this(numberOfActors, warmupIterations, duration, Runtime.getRuntime().availableProcessors(), 1);
 	}
 	
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, String param1) {
+		this(numberOfActors, warmupIterations, duration, Runtime.getRuntime().availableProcessors(), 1, param1, null);
+	}
+	
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, String param1, String param2) {
+		this(numberOfActors, warmupIterations, duration, Runtime.getRuntime().availableProcessors(), 1, param1, param2);
+	}
+	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor) {
-		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.SLEEP);
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.PARK);
+	}
+	
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, String param1) {
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.PARK, param1, null);
+	}
+	
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, String param1, String param2) {
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.PARK, param1, param2);
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, int throughput, ActorThreadMode threadMode) {
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, throughput, threadMode, null, null);
+	}
+	
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, int throughput, ActorThreadMode threadMode, String param1, String param2) {
 		super();
 		this.numberOfActors = numberOfActors;
 		
@@ -83,6 +101,9 @@ public class BenchmarkConfig {
 		this.throughput = throughput;
 		
 		this.threadMode = threadMode;
+		
+		this.param1 = param1;
+		this.param2 = param2;
 	}
 
 	public int parallelism() {
