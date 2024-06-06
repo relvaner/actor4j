@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 
 import actor4j.benchmark.BenchmarkSampleActor4j;
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
 import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.runtime.protocols.ActorProtocolTag;
@@ -88,8 +87,7 @@ public class BenchmarkActorRingIntra extends BenchmarkSampleActor4j {
 			PseudoActor pseudoActor = new PseudoActor(system, true) {
 				@Override
 				public void preStart() {
-					for (UUID sender : ringList)
-						watch(sender);
+					watch(system.USER_ID());
 				}
 				@Override
 				public void receive(ActorMessage<?> message) {
@@ -98,31 +96,28 @@ public class BenchmarkActorRingIntra extends BenchmarkSampleActor4j {
 			};
 			
 			system.send(ActorMessage.create(null, ActorProtocolTag.INTERNAL_STOP_USER_SPACE, null, system.USER_ID())); // stop all actors within user
-			boolean success = true;
-			for (int j=0; j<config.parallelism(); j++)
-				try {
-					boolean temp = pseudoActor.await(
-							(msg) -> msg.tag()==Actor.TERMINATED, 
-							(msg) -> true, 
-							120_000, TimeUnit.MILLISECONDS);
-					if (!temp)
-						success = false;
-				} catch (InterruptedException | TimeoutException e) {
-					e.printStackTrace();
-				}
+			boolean success = false;
+			try {
+				success = pseudoActor.await(
+						(msg) -> msg.tag()==ActorProtocolTag.INTERNAL_STOP_USER_SPACE_SUCCESS, 
+						(msg) -> true, 
+						120_000, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException | TimeoutException e) {
+				e.printStackTrace();
+			} finally {
+				pseudoActor.unwatch(system.USER_ID());
+			}
 			System.out.println("All rings stopped...");
 			pseudoActor.stop();
 			
-			if (!success) {
-				for (UUID sender : ringList)
-					System.out.println(((InternalActorSystem)system).getCells().get(sender).getChildren().size());
-			}
+			if (!success)
+				System.out.println(((InternalActorSystem)system).getCells().get(system.USER_ID()).getChildren().size());
 		});
 		
 		system.shutdown();
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkActorRingIntra(new BenchmarkConfig(8, 10, 60, 8, 1, String.valueOf(10_000_000))); // 10 + 60 iterations!
+		new BenchmarkActorRingIntra(new BenchmarkConfig(8, 10, 60, 8, 1, String.valueOf(5_000_000))); // 10 + 60 iterations!
 	}
 }
