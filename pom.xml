@@ -74,5 +74,7 @@
 		<module>actor4j-poc</module>
 		
 		<module>actor4j-web</module>
+		
+		<module>actor4j-streams</module>
 	</modules>
 </project>
