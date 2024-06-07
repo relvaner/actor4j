@@ -26,34 +26,34 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import io.actor4j.streams.core.runtime.Node;
+import io.actor4j.streams.core.runtime.ActorStreamNode;
 import io.reactivex.rxjava3.core.Observable;
 
-public class Process<T, R> {
-	protected Node<T, R> node;
+public class ActorStream<T, R> {
+	protected ActorStreamNode<T, R> node;
 	
 	protected Map<UUID, List<?>> data;   // initial set over ProcessManager
 	protected Map<UUID, List<?>> result; // initial set over ProcessManager
 	protected Map<String, UUID> aliases; // initial set over ProcessManager
 	
-	protected ProcessOperations<T, R> processOperations;
+	protected ActorStreamOperations<T, R> processOperations;
 	
-	public Process() {
+	public ActorStream() {
 		this(null);
 	}
 	
-	public Process(String alias) {
+	public ActorStream(String alias) {
 		super();
 		
-		node = new Node<>(alias);
+		node = new ActorStreamNode<>(alias);
 		node.id = UUID.randomUUID();
 		node.sucs = new HashSet<>();
 		node.pres = new HashSet<>();
 		
-		processOperations = new ProcessOperations<>(this);
+		processOperations = new ActorStreamOperations<>(this);
 	}
 	
-	public Process(Function<List<T>, List<R>> flatMapOp, BinaryOperator<List<R>> reduceOp) {
+	public ActorStream(Function<List<T>, List<R>> flatMapOp, BinaryOperator<List<R>> reduceOp) {
 		this();
 		
 		node.operations.flatMapOp = flatMapOp;
@@ -64,51 +64,51 @@ public class Process<T, R> {
 		return node.id;
 	}
 	
-	public ProcessOperations<T, R> data(List<T> data, int min_range) {
+	public ActorStreamOperations<T, R> data(List<T> data, int min_range) {
 		return processOperations.data(data, min_range);
 	}
 	
-	public ProcessOperations<T, R> data(List<T> data) {
+	public ActorStreamOperations<T, R> data(List<T> data) {
 		return processOperations.data(data);
 	}
 	
-	public ProcessOperations<T, R> filter(Predicate<T> filterOp) {
+	public ActorStreamOperations<T, R> filter(Predicate<T> filterOp) {
 		return processOperations.filter(filterOp);
 	}
 	
-	public ProcessOperations<T, R> map(Function<T, R> mapOp) {
+	public ActorStreamOperations<T, R> map(Function<T, R> mapOp) {
 		return processOperations.map(mapOp);
 	}
 	
-	public ProcessOperations<T, R> forEach(Consumer<T> forEachOp) {
+	public ActorStreamOperations<T, R> forEach(Consumer<T> forEachOp) {
 		return processOperations.forEach(forEachOp);
 	}
 	
-	public ProcessOperations<T, R> flatMap(Function<List<T>, List<R>> flatMapOp) {
+	public ActorStreamOperations<T, R> flatMap(Function<List<T>, List<R>> flatMapOp) {
 		return processOperations.flatMap(flatMapOp);
 	}
 	
-	public ProcessOperations<T, R> stream(Function<Stream<T>, Stream<R>> streamOp) {
+	public ActorStreamOperations<T, R> stream(Function<Stream<T>, Stream<R>> streamOp) {
 		return processOperations.stream(streamOp);
 	}
 	
-	public ProcessOperations<T, R> streamRx(Function<Observable<T>, Observable<R>> streamRxOp) {
+	public ActorStreamOperations<T, R> streamRx(Function<Observable<T>, Observable<R>> streamRxOp) {
 		return processOperations.streamRx(streamRxOp);
 	}
 	
-	public ProcessOperations<T, R> reduce(BinaryOperator<List<R>> reduceOp) {
+	public ActorStreamOperations<T, R> reduce(BinaryOperator<List<R>> reduceOp) {
 		return processOperations.reduce(reduceOp);
 	}	
 	
-	public ProcessOperations<?, ?> sortedASC() {
+	public ActorStreamOperations<?, ?> sortedASC() {
 		return processOperations.sortedASC();
 	}
 	
-	public ProcessOperations<?, ?> sortedDESC() {
+	public ActorStreamOperations<?, ?> sortedDESC() {
 		return processOperations.sortedDESC();
 	}
 			
-	public <S> Process<R, S> sequence(Process<R, S> process) {
+	public <S> ActorStream<R, S> sequence(ActorStream<R, S> process) {
 		node.sucs.add(process.node);
 		process.data = data;
 		process.result = result;
@@ -116,10 +116,10 @@ public class Process<T, R> {
 		return process;
 	}
 	
-	public Process<?, ?> sequence(List<Process<?, ?>> processes) {
-		Process<?, ?> parent = this;
+	public ActorStream<?, ?> sequence(List<ActorStream<?, ?>> processes) {
+		ActorStream<?, ?> parent = this;
 		if (processes!=null) {
-			for (Process<?, ?> p : processes) {
+			for (ActorStream<?, ?> p : processes) {
 				parent.node.sucs.add(p.node);
 				p.node.pres.add(parent.node);
 				parent = p;
@@ -131,30 +131,30 @@ public class Process<T, R> {
 		return parent;
 	}
 	
-	public Process<?, ?> sequence(Process<?, ?>... processes) {
+	public ActorStream<?, ?> sequence(ActorStream<?, ?>... processes) {
 		return sequence(Arrays.asList(processes));
 	}
 	
-	public List<Process<R, ?>> parallel(List<Process<R, ?>> processes) {
+	public List<ActorStream<R, ?>> parallel(List<ActorStream<R, ?>> processes) {
 		if (processes!=null)
-			for (Process<R, ?> p : processes)
+			for (ActorStream<R, ?> p : processes)
 				sequence(p);
 		
 		return processes;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<Process<R, ?>> parallel(Process<R, ?>... processes) {
+	public List<ActorStream<R, ?>> parallel(ActorStream<R, ?>... processes) {
 		return parallel(Arrays.asList(processes));
 	}
 	
-	public Process<T, R> merge(List<Process<?, ?>> processes) {
+	public ActorStream<T, R> merge(List<ActorStream<?, ?>> processes) {
 		if (processes!=null) {
 			if (processes.size()>0) {
 				data = processes.get(0).data;
 				result = processes.get(0).result;
 			}
-			for (Process<?, ?> p : processes) {
+			for (ActorStream<?, ?> p : processes) {
 				node.pres.add(p.node);
 				p.node.sucs.add(node);
 			}
@@ -163,7 +163,7 @@ public class Process<T, R> {
 		return this;
 	}
 	
-	public Process<T, R> merge(Process<?, ?>... processes) {
+	public ActorStream<T, R> merge(ActorStream<?, ?>... processes) {
 		return merge(Arrays.asList(processes));
 	}
 	

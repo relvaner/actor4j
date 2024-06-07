@@ -31,9 +31,9 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
-import io.actor4j.streams.core.runtime.NodeActor;
+import io.actor4j.streams.core.runtime.StreamNodeActor;
 
-public class ProcessManager {
+public class ActorStreamManager {
 	protected ActorSystem system;
 	protected Runnable onTermination;
 	
@@ -43,11 +43,11 @@ public class ProcessManager {
 	
 	protected boolean debugDataEnabled;
 	
-	public ProcessManager() {
+	public ActorStreamManager() {
 		this(false);
 	}
 	
-	public ProcessManager(boolean debugDataEnabled) {
+	public ActorStreamManager(boolean debugDataEnabled) {
 		super();
 		
 		data = new ConcurrentHashMap<>();
@@ -57,13 +57,13 @@ public class ProcessManager {
 		this.debugDataEnabled = debugDataEnabled;
 	}
 	
-	public ProcessManager onTermination(Runnable onTermination) {
+	public ActorStreamManager onTermination(Runnable onTermination) {
 		this.onTermination = onTermination;
 		
 		return this;
 	}
 	
-	public void start(ActorSystemFactory factory, Process<?, ?> process) {
+	public void start(ActorSystemFactory factory, ActorStream<?, ?> process) {
 		data.clear();
 		result.clear();
 		aliases.clear();
@@ -81,7 +81,7 @@ public class ProcessManager {
 		UUID root = system.addActor(new ActorFactory() {
 			@Override
 			public Actor create() {
-				return new NodeActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data);
+				return new StreamNodeActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data);
 			}
 		});
 
@@ -89,18 +89,18 @@ public class ProcessManager {
 		system.start(null, onTermination);
 	}
 	
-	public void start(ActorSystemFactory factory, List<Process<?, ?>> processes) {
+	public void start(ActorSystemFactory factory, List<ActorStream<?, ?>> processes) {
 		data.clear();
 		result.clear();
 		aliases.clear();
 		
 		ActorSystemConfig config = ActorSystemConfig.builder()
-			.name("nodes4j")
+			.name("actor4j-streams")
 			.build();
 		system = ActorSystem.create(factory, config);
 		int nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
 		ActorGroup group = new ActorGroupSet();
-		for (Process<?, ?> process : processes) {
+		for (ActorStream<?, ?> process : processes) {
 			process.node.nTasks = nTasks;
 			process.node.isRoot = true;
 			process.data = data;
@@ -110,7 +110,7 @@ public class ProcessManager {
 			group.add(system.addActor(new ActorFactory() {
 				@Override
 				public Actor create() {
-					return new NodeActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data);
+					return new StreamNodeActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data);
 				}
 			}));
 		}
@@ -119,7 +119,7 @@ public class ProcessManager {
 		system.start(null, onTermination);
 	}
 	
-	public void start(ActorSystemFactory factory, Process<?, ?>... processes) {
+	public void start(ActorSystemFactory factory, ActorStream<?, ?>... processes) {
 		start(factory, Arrays.asList(processes));
 	}
 	

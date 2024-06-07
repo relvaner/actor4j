@@ -15,6 +15,6 @@
  */
 package io.actor4j.streams.core.utils;
 
-public enum SortType {
+public enum SortStreamType {
 	SORT_ASCENDING, SORT_DESCENDING;
 }

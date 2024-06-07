@@ -25,15 +25,15 @@ import org.junit.Test;
 
 import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystemFactory;
-import io.actor4j.streams.core.Process;
-import io.actor4j.streams.core.ProcessManager;
-import io.actor4j.streams.core.utils.SortProcess;
-import io.actor4j.streams.core.utils.SortType;
+import io.actor4j.streams.core.ActorStream;
+import io.actor4j.streams.core.ActorStreamManager;
+import io.actor4j.streams.core.utils.SortStream;
+import io.actor4j.streams.core.utils.SortStreamType;
 
 import static org.junit.Assert.*;
 import static io.actor4j.core.logging.ActorLogger.*;
 
-public class ProcessFeature {
+public class StreamsFeature {
 	protected CountDownLatch testDone = new CountDownLatch(1);
 	
 	protected final Integer[] precondition_numbers = { 3, 2, 1, 1, 0, 2, 45, 78, 99, 34, 31, 8, 1, 123, 14, 9257, -10, -15 };
@@ -57,7 +57,7 @@ public class ProcessFeature {
 		List<Double> postConditionList = new ArrayList<>();
 		postConditionList.addAll(Arrays.asList(postcondition_numbers));
 		
-		Process<Integer, Double> process = new Process<>();
+		ActorStream<Integer, Double> process = new ActorStream<>();
 		process
 			.data(preConditionList)
 			.filter(v -> v>0)
@@ -65,7 +65,7 @@ public class ProcessFeature {
 			//.forEach(System.out::println)
 			.sortedDESC();
 			
-		ProcessManager manager = new ProcessManager();
+		ActorStreamManager manager = new ActorStreamManager();
 		manager
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
@@ -86,7 +86,7 @@ public class ProcessFeature {
 		List<Double> postConditionList = new ArrayList<>();
 		postConditionList.addAll(Arrays.asList(postcondition_numbers));
 		
-		Process<Integer, Double> process = new Process<>();
+		ActorStream<Integer, Double> process = new ActorStream<>();
 		process
 			.data(preConditionList)
 			.filter(v -> v>0)
@@ -94,7 +94,7 @@ public class ProcessFeature {
 			//.forEach(System.out::println)
 			.sortedASC();
 			
-		ProcessManager manager = new ProcessManager();
+		ActorStreamManager manager = new ActorStreamManager();
 		manager
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
@@ -115,13 +115,13 @@ public class ProcessFeature {
 		List<Integer> postConditionList = new ArrayList<>();
 		postConditionList.addAll(Arrays.asList(postcondition_numbers));
 		
-		Process<Integer, Integer> process = new Process<>();
+		ActorStream<Integer, Integer> process = new ActorStream<>();
 		process
 			.data(preConditionList, 5);
 		
-		process.sequence(new SortProcess<>(SortType.SORT_ASCENDING));
+		process.sequence(new SortStream<>(SortStreamType.SORT_ASCENDING));
 			
-		ProcessManager manager = new ProcessManager();
+		ActorStreamManager manager = new ActorStreamManager();
 		manager
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
@@ -142,13 +142,13 @@ public class ProcessFeature {
 		List<Integer> postConditionList = new ArrayList<>();
 		postConditionList.addAll(Arrays.asList(postcondition_numbers));
 		
-		Process<Integer, Integer> process = new Process<>("process_main");
+		ActorStream<Integer, Integer> process = new ActorStream<>("process_main");
 		process
 			.data(preConditionList, 5);
 		
-		process.sequence(new SortProcess<>("process_sort_asc", SortType.SORT_ASCENDING));
+		process.sequence(new SortStream<>("process_sort_asc", SortStreamType.SORT_ASCENDING));
 			
-		ProcessManager manager = new ProcessManager(true);
+		ActorStreamManager manager = new ActorStreamManager(true);
 		manager
 			.onTermination(() -> { 
 				logger().log(DEBUG, "Data (process_main): "+manager.getData("process_main"));
@@ -178,20 +178,20 @@ public class ProcessFeature {
 		List<Integer> postConditionList3 = new ArrayList<>();
 		postConditionList3.addAll(Arrays.asList(postcondition_numbers3));
 		
-		Process<Integer, Integer> process = new Process<>("process_main");
+		ActorStream<Integer, Integer> process = new ActorStream<>("process_main");
 		process
 			.data(preConditionList, 5);
 		
-		Process<Integer, Integer> process_sort1 = new SortProcess<Integer>("process_sort_asc1", SortType.SORT_ASCENDING);
-		Process<Integer, Integer> process_sort2 = new SortProcess<Integer>("process_sort_asc2", SortType.SORT_DESCENDING);
+		ActorStream<Integer, Integer> process_sort1 = new SortStream<Integer>("process_sort_asc1", SortStreamType.SORT_ASCENDING);
+		ActorStream<Integer, Integer> process_sort2 = new SortStream<Integer>("process_sort_asc2", SortStreamType.SORT_DESCENDING);
 		
 		process.parallel(process_sort1, process_sort2);
 		
-		Process<Integer, Integer> process_filter = new Process<>("process_filter");
+		ActorStream<Integer, Integer> process_filter = new ActorStream<>("process_filter");
 		process_filter.filter((v) -> v>5);
 		process_sort2.sequence(process_filter);
 			
-		ProcessManager manager = new ProcessManager(true);
+		ActorStreamManager manager = new ActorStreamManager(true);
 		manager
 			.onTermination(() -> { 
 				//logger().debug("Data (process_main): "+manager.getData("process_main"));
@@ -225,24 +225,24 @@ public class ProcessFeature {
 		List<Integer> postConditionList3 = new ArrayList<>();
 		postConditionList3.addAll(Arrays.asList(postcondition_numbers3));
 		
-		Process<Integer, Integer> process_main = new Process<>("process_main");
+		ActorStream<Integer, Integer> process_main = new ActorStream<>("process_main");
 		process_main
 			.data(preConditionList);
 		
-		Process<Integer, Integer> process_a = new Process<>("process_a");
+		ActorStream<Integer, Integer> process_a = new ActorStream<>("process_a");
 		process_a
 			.filter((v) -> v>50 && v<100)
 			.map((v) -> v+2);
-		Process<Integer, Integer> process_b = new Process<>("process_b");
+		ActorStream<Integer, Integer> process_b = new ActorStream<>("process_b");
 		process_b
 			.filter((v) -> v>0 && v<=50)
 			.map((v) -> v+1);
-		Process<Integer, Integer> process_sort_asc = new SortProcess<Integer>("process_sort_asc", SortType.SORT_ASCENDING);
+		ActorStream<Integer, Integer> process_sort_asc = new SortStream<Integer>("process_sort_asc", SortStreamType.SORT_ASCENDING);
 		
 		process_main.parallel(process_a, process_b);
 		process_sort_asc.merge(process_a, process_b);
 		
-		ProcessManager manager = new ProcessManager(true);
+		ActorStreamManager manager = new ActorStreamManager(true);
 		manager
 			.onTermination(() -> { 
 				logger().log(DEBUG, "Data (process_a): "+manager.getData("process_a")); 
@@ -280,17 +280,17 @@ public class ProcessFeature {
 		List<Integer> postConditionList = new ArrayList<>();
 		postConditionList.addAll(Arrays.asList(postcondition_numbers));
 		
-		Process<Integer, Integer> process_a = new Process<>("process_a");
+		ActorStream<Integer, Integer> process_a = new ActorStream<>("process_a");
 		process_a
 			.data(preConditionList1);
-		Process<Integer, Integer> process_b = new Process<>("process_b");
+		ActorStream<Integer, Integer> process_b = new ActorStream<>("process_b");
 		process_b
 			.data(preConditionList2);
 		
-		Process<Integer, Integer> process_sort_asc = new SortProcess<Integer>("process_sort_asc", SortType.SORT_ASCENDING);
+		ActorStream<Integer, Integer> process_sort_asc = new SortStream<Integer>("process_sort_asc", SortStreamType.SORT_ASCENDING);
 		process_sort_asc.merge(process_a, process_b);
 		
-		ProcessManager manager = new ProcessManager(true);
+		ActorStreamManager manager = new ActorStreamManager(true);
 		manager
 			.onTermination(() -> { 
 				logger().log(DEBUG, "Data (process_a): "+manager.getData("process_a")); 
@@ -317,13 +317,13 @@ public class ProcessFeature {
 		List<Double> postConditionList = new ArrayList<>();
 		postConditionList.addAll(Arrays.asList(postcondition_numbers));
 		
-		Process<Integer, Double> process = new Process<>();
+		ActorStream<Integer, Double> process = new ActorStream<>();
 		process
 			.data(preConditionList)
 			.stream(s -> s.filter(v -> v>0).map(v -> v+100d))
 			.sortedDESC();
 			
-		ProcessManager manager = new ProcessManager();
+		ActorStreamManager manager = new ActorStreamManager();
 		manager
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
@@ -344,13 +344,13 @@ public class ProcessFeature {
 		List<Double> postConditionList = new ArrayList<>();
 		postConditionList.addAll(Arrays.asList(postcondition_numbers));
 		
-		Process<Integer, Double> process = new Process<>();
+		ActorStream<Integer, Double> process = new ActorStream<>();
 		process
 			.data(preConditionList)
 			.streamRx(o -> o.filter(v -> v>0).map(v -> v+100d))
 			.sortedDESC();
 			
-		ProcessManager manager = new ProcessManager();
+		ActorStreamManager manager = new ActorStreamManager();
 		manager
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 

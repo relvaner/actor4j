@@ -22,19 +22,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import io.actor4j.streams.core.exceptions.DataException;
-import io.actor4j.streams.core.utils.SortProcess;
-import io.actor4j.streams.core.utils.SortType;
+import io.actor4j.streams.core.exceptions.ActorStreamDataException;
+import io.actor4j.streams.core.utils.SortStream;
+import io.actor4j.streams.core.utils.SortStreamType;
 import io.reactivex.rxjava3.core.Observable;
 
-public class ProcessOperations<T, R> {
-	protected final Process<T, R> process;
+public class ActorStreamOperations<T, R> {
+	protected final ActorStream<T, R> process;
 	
-	public ProcessOperations(Process<T, R> process) {
+	public ActorStreamOperations(ActorStream<T, R> process) {
 		this.process = process;
 	}
 	
-	public ProcessOperations<T, R> data(List<T> data, int min_range) {
+	public ActorStreamOperations<T, R> data(List<T> data, int min_range) {
 		checkData(data);
 		
 		process.node.data = data;
@@ -43,57 +43,57 @@ public class ProcessOperations<T, R> {
 		return this;
 	}
 	
-	public ProcessOperations<T, R> data(List<T> data) {
+	public ActorStreamOperations<T, R> data(List<T> data) {
 		return data(data, -1);
 	}
 	
-	public ProcessOperations<T, R> filter(Predicate<T> filterOp) {
+	public ActorStreamOperations<T, R> filter(Predicate<T> filterOp) {
 		process.node.operations.filterOp = filterOp;
 		return this;
 	}
 	
-	public ProcessOperations<T, R> map(Function<T, R> mapOp) {
+	public ActorStreamOperations<T, R> map(Function<T, R> mapOp) {
 		process.node.operations.mapOp = mapOp;
 		return this;
 	}
 	
-	public ProcessOperations<T, R> forEach(Consumer<T> forEachOp) {
+	public ActorStreamOperations<T, R> forEach(Consumer<T> forEachOp) {
 		process.node.operations.forEachOp = forEachOp;
 		return this;
 	}
 
-	public ProcessOperations<T, R> flatMap(Function<List<T>, List<R>> flatMapOp) {
+	public ActorStreamOperations<T, R> flatMap(Function<List<T>, List<R>> flatMapOp) {
 		process.node.operations.flatMapOp = flatMapOp;
 		return this;
 	}
 
-	public ProcessOperations<T, R> stream(Function<Stream<T>, Stream<R>> streamOp) {
+	public ActorStreamOperations<T, R> stream(Function<Stream<T>, Stream<R>> streamOp) {
 		process.node.operations.streamOp = streamOp;
 		return this;
 	}
 	
-	public ProcessOperations<T, R> streamRx(Function<Observable<T>, Observable<R>> streamRxOp) {
+	public ActorStreamOperations<T, R> streamRx(Function<Observable<T>, Observable<R>> streamRxOp) {
 		process.node.operations.streamRxOp = streamRxOp;
 		return this;
 	}
 	
-	public ProcessOperations<T, R> reduce(BinaryOperator<List<R>> reduceOp) {
+	public ActorStreamOperations<T, R> reduce(BinaryOperator<List<R>> reduceOp) {
 		process.node.operations.reduceOp = reduceOp;
 		return this;
 	}	
 	
-	public ProcessOperations<?, ?> sortedASC() {
-		process.sequence(new SortProcess<>(SortType.SORT_ASCENDING));
+	public ActorStreamOperations<?, ?> sortedASC() {
+		process.sequence(new SortStream<>(SortStreamType.SORT_ASCENDING));
 		return this;
 	}
 	
-	public ProcessOperations<?, ?> sortedDESC() {
-		process.sequence(new SortProcess<>(SortType.SORT_DESCENDING));
+	public ActorStreamOperations<?, ?> sortedDESC() {
+		process.sequence(new SortStream<>(SortStreamType.SORT_DESCENDING));
 		return this;
 	}
 	
 	protected void checkData(List<T> data) {
 		if (data==null)
-			throw new DataException();
+			throw new ActorStreamDataException();
 	}
 }

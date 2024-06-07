@@ -18,26 +18,29 @@ package io.actor4j.streams.core.runtime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
-public class Node<T, R> {
+public class ActorStreamNode<T, R> {
 	public UUID id;
 	public String alias;
 	public List<T> data;
-	public final NodeOperations<T, R> operations;
+	public final ActorStreamNodeOperations<T, R> operations;
 	public int nTasks;
 	public int min_range;
-	public Set<Node<?, ?>> sucs; // Set<Node<R, ?>>
-	public Set<Node<?, ?>> pres; // Set<Node<?, T>>
+	public Set<ActorStreamNode<?, ?>> sucs; // Set<Node<R, ?>>
+	public Set<ActorStreamNode<?, ?>> pres; // Set<Node<?, T>>
 	public boolean isRoot;
 	
-	public Node(String alias) {
+	public CountDownLatch rootCountDownLatch;
+	
+	public ActorStreamNode(String alias) {
 		super();
 		
 		this.alias = alias;
-		operations = new NodeOperations<>();
+		operations = new ActorStreamNodeOperations<>();
 	}
 	
-	public Node() {
+	public ActorStreamNode() {
 		this(null);
 	}
 }

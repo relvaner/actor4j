@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import io.reactivex.rxjava3.core.Observable;
 
-public class NodeOperations<T, R> {
+public class ActorStreamNodeOperations<T, R> {
 	/* lazy  */
 	public Predicate<T> filterOp;
 	public Function<T, R> mapOp;

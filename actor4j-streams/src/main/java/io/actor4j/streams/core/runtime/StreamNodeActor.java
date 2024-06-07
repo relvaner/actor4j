@@ -29,13 +29,13 @@ import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
 import io.actor4j.core.utils.ActorGroupSet;
-import io.actor4j.streams.core.exceptions.DataException;
+import io.actor4j.streams.core.exceptions.ActorStreamDataException;
 
 import static io.actor4j.core.utils.CommPattern.*;
 import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
 
-public class NodeActor<T, R> extends Actor {
-	protected final Node<T, R> node;
+public class StreamNodeActor<T, R> extends Actor {
+	protected final ActorStreamNode<T, R> node;
 	protected final ActorGroup hubGroup;
 	protected int dest_tag;
 	
@@ -52,7 +52,7 @@ public class NodeActor<T, R> extends Actor {
 	
 	protected static final Object lock = new Object();
 	
-	public NodeActor(String name, Node<T, R> node, Map<UUID, List<?>> result, Map<String, UUID> aliases, boolean debugDataEnabled, Map<UUID, List<?>> debugData) {
+	public StreamNodeActor(String name, ActorStreamNode<T, R> node, Map<UUID, List<?>> result, Map<String, UUID> aliases, boolean debugDataEnabled, Map<UUID, List<?>> debugData) {
 		super(name);
 		
 		this.node = node;
@@ -68,7 +68,7 @@ public class NodeActor<T, R> extends Actor {
 		hubGroup = new ActorGroupSet();
 	}
 	
-	public NodeActor(String name, Node<T, R> node, Map<UUID, List<?>> result, Map<String, UUID> aliases) {
+	public StreamNodeActor(String name, ActorStreamNode<T, R> node, Map<UUID, List<?>> result, Map<String, UUID> aliases) {
 		this(name, node, result, aliases, false, null);
 	}
 	
@@ -85,7 +85,7 @@ public class NodeActor<T, R> extends Actor {
 			node.data = new LinkedList<>();
 
 		if (node.sucs!=null)
-			for (Node<?, ?> suc : node.sucs) {
+			for (ActorStreamNode<?, ?> suc : node.sucs) {
 				UUID ref = null;
 				if (suc.pres.size()>1) {
 					// uses Double-Check-Idiom a la Bloch
@@ -98,7 +98,7 @@ public class NodeActor<T, R> extends Actor {
 								ref = addChild(new ActorFactory() {
 									@Override
 									public Actor create() {
-										return new NodeActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData);
+										return new StreamNodeActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData);
 									}
 								});
 							}
@@ -110,7 +110,7 @@ public class NodeActor<T, R> extends Actor {
 					ref = addChild(new ActorFactory() {
 						@Override
 						public Actor create() {
-							return new NodeActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData);
+							return new StreamNodeActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData);
 						}
 					});
 				}
@@ -158,7 +158,7 @@ public class NodeActor<T, R> extends Actor {
 				checkData(node.data);
 				node.nTasks = adjustSize(node.nTasks, node.data.size(), node.min_range);
 				for (int i=0; i<node.nTasks; i++) {
-					UUID task = addChild(() -> new TaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag));
+					UUID task = addChild(() -> new StreamNodeTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag));
 					group.add(task);
 				}
 				scatter(node.data, TASK, this, new ActorGroupSet(group));
@@ -172,7 +172,7 @@ public class NodeActor<T, R> extends Actor {
 				getSystem().shutdown();
 			else {
 				if (!node.pres.isEmpty()) // has more parents
-					for (Node<?, ?> pre : node.pres) 
+					for (ActorStreamNode<?, ?> pre : node.pres) 
 						sendViaAlias(ActorMessage.create(null, SHUTDOWN, self(), null), "node-"+pre.id.toString());
 				else
 					send(ActorMessage.create(null, SHUTDOWN, self(), getParent()));
@@ -192,6 +192,6 @@ public class NodeActor<T, R> extends Actor {
 	
 	protected void checkData(List<T> data) {
 		if (data==null)
-			throw new DataException();
+			throw new ActorStreamDataException();
 	}
 }

@@ -15,10 +15,10 @@
  */
 package io.actor4j.streams.core.exceptions;
 
-public class DataException extends RuntimeException {
+public class ActorStreamDataException extends RuntimeException {
 	protected static final long serialVersionUID = 4074182809583815660L;
 
-	public DataException() {
+	public ActorStreamDataException() {
 		super("data is undefined");
 	}
 }

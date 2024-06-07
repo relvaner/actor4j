@@ -21,14 +21,14 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
-import io.actor4j.streams.core.Process;
+import io.actor4j.streams.core.ActorStream;
 
-public class SortProcess<T extends Comparable<? super T>> extends Process<T, T> {
-	public SortProcess(final SortType type) {
+public class SortStream<T extends Comparable<? super T>> extends ActorStream<T, T> {
+	public SortStream(final SortStreamType type) {
 		this(null, type);
 	}
 	
-	public SortProcess(String name, final SortType type) {
+	public SortStream(String name, final SortStreamType type) {
 		super(name);
 
 		flatMap(new Function<List<T>, List<T>>() {
@@ -36,7 +36,7 @@ public class SortProcess<T extends Comparable<? super T>> extends Process<T, T> 
 			public List<T> apply(List<T> list) {
 				List<T> result = new ArrayList<>(list);
 				
-				if (type == SortType.SORT_ASCENDING)
+				if (type == SortStreamType.SORT_ASCENDING)
 					Collections.sort(result);
 				else
 					Collections.sort(result, Collections.reverseOrder());
@@ -50,7 +50,7 @@ public class SortProcess<T extends Comparable<? super T>> extends Process<T, T> 
 				List<T> result = new ArrayList<>(left.size()+right.size());
 						
 				if (left.size()>0 && right.size()>0)
-					if (type == SortType.SORT_ASCENDING) {
+					if (type == SortStreamType.SORT_ASCENDING) {
 						if (left.get(left.size()-1).compareTo(right.get(0)) < 0) {
 							result.addAll(left);
 							result.addAll(right);
@@ -67,7 +67,7 @@ public class SortProcess<T extends Comparable<? super T>> extends Process<T, T> 
 										
 				int leftPos = 0, rightPos = 0;
 				for (int i=0; i<left.size()+right.size(); i++) {
-					if (type == SortType.SORT_ASCENDING) {
+					if (type == SortStreamType.SORT_ASCENDING) {
 						if ( (leftPos<left.size()) && (rightPos==right.size() || left.get(leftPos).compareTo(right.get(rightPos))<0) ) {
 							result.add(left.get(leftPos));
 							leftPos++;
