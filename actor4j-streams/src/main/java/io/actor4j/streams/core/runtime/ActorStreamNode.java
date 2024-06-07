@@ -37,7 +37,7 @@ public class ActorStreamNode<T, R> {
 		super();
 		
 		this.alias = alias;
-		operations = new ActorStreamNodeOperations<>();
+		this.operations = new ActorStreamNodeOperations<>();
 	}
 	
 	public ActorStreamNode() {

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.ActorSystemFactory;
@@ -68,12 +69,14 @@ public class ActorStreamManager {
 		result.clear();
 		aliases.clear();
 		
+		final CountDownLatch countDownLatch = new CountDownLatch(1);
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.name("nodes4j")
 			.build();
 		system = ActorSystem.create(factory, config);
 		process.node.nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
 		process.node.isRoot = true;
+		process.node.rootCountDownLatch = countDownLatch;
 		process.data = data;
 		process.result = result;
 		process.aliases = aliases;
@@ -87,6 +90,12 @@ public class ActorStreamManager {
 
 		system.send(ActorMessage.create(null, DATA, root, root));
 		system.start(null, onTermination);
+		try {
+			countDownLatch.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		system.shutdown();
 	}
 	
 	public void start(ActorSystemFactory factory, List<ActorStream<?, ?>> processes) {
@@ -94,6 +103,7 @@ public class ActorStreamManager {
 		result.clear();
 		aliases.clear();
 		
+		final CountDownLatch countDownLatch = new CountDownLatch(processes.size());
 		ActorSystemConfig config = ActorSystemConfig.builder()
 			.name("actor4j-streams")
 			.build();
@@ -103,6 +113,7 @@ public class ActorStreamManager {
 		for (ActorStream<?, ?> process : processes) {
 			process.node.nTasks = nTasks;
 			process.node.isRoot = true;
+			process.node.rootCountDownLatch = countDownLatch;
 			process.data = data;
 			process.result = result;
 			process.aliases = aliases;
@@ -117,6 +128,12 @@ public class ActorStreamManager {
 		
 		system.broadcast(ActorMessage.create(null, DATA, system.SYSTEM_ID(), null), group);
 		system.start(null, onTermination);
+		try {
+			countDownLatch.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		system.shutdown();
 	}
 	
 	public void start(ActorSystemFactory factory, ActorStream<?, ?>... processes) {

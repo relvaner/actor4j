@@ -182,8 +182,8 @@ public class StreamNodeActor<T, R> extends Actor {
 			waitForChildren.remove(message.source());
 			
 			if (waitForChildren.isEmpty()) {
-				if (node.isRoot)
-					getSystem().shutdown(); // TODO: unsafe
+				if (node.isRoot && node.rootCountDownLatch!=null)
+					node.rootCountDownLatch.countDown();
 				else
 					send(ActorMessage.create(null, SHUTDOWN, self(), getParent()));
 			}
