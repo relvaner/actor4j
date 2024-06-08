@@ -76,7 +76,7 @@ public class ActorStreamManager {
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		process.node.nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
+		process.node.nTasks = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		process.node.isRoot = true;
 		process.node.rootCountDownLatch = countDownLatch;
 		process.data = data;
@@ -98,6 +98,7 @@ public class ActorStreamManager {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.send(ActorMessage.create(null, Actor.POISONPILL, system.SYSTEM_ID(), root));
 		if (onTermination!=null)
 			onTermination.run();
 	}
@@ -108,7 +109,7 @@ public class ActorStreamManager {
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(processes.size());
-		int nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
+		int nTasks = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		ActorGroup group = new ActorGroupSet();
 		for (ActorStream<?, ?> process : processes) {
 			process.node.nTasks = nTasks;
@@ -134,6 +135,7 @@ public class ActorStreamManager {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.broadcast(ActorMessage.create(null, Actor.POISONPILL, system.SYSTEM_ID(), null), group);
 		if (onTermination!=null)
 			onTermination.run();
 	}

@@ -18,7 +18,6 @@ package io.actor4j.streams.core.features;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +34,6 @@ import static org.junit.Assert.*;
 import static io.actor4j.core.logging.ActorLogger.*;
 
 public class StreamsFeature {
-	protected CountDownLatch testDone = new CountDownLatch(1);
-	
 	protected final Integer[] precondition_numbers = { 3, 2, 1, 1, 0, 2, 45, 78, 99, 34, 31, 8, 1, 123, 14, 9257, -10, -15 };
 	protected List<Integer> preConditionList;
 	
@@ -44,8 +41,6 @@ public class StreamsFeature {
 	
 	@Before
 	public void before() {
-		testDone = new CountDownLatch(1);
-		
 		preConditionList = new ArrayList<>();
 		preConditionList.addAll(Arrays.asList(precondition_numbers));
 
@@ -77,14 +72,9 @@ public class StreamsFeature {
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
-				testDone.countDown();})
+			})
 			.start(process);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 
@@ -108,14 +98,9 @@ public class StreamsFeature {
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
-				testDone.countDown();})
+			})
 			.start(process);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 
@@ -137,14 +122,9 @@ public class StreamsFeature {
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
-				testDone.countDown();})
+			})
 			.start(process);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 	
@@ -168,14 +148,9 @@ public class StreamsFeature {
 				logger().log(DEBUG, "Data (process_sort_asc): "+manager.getData("process_sort_asc"));
 				assertEquals(postConditionList, manager.getResult("process_sort_asc")); 
 				logger().log(DEBUG, "Result (process_sort_asc): "+manager.getResult("process_sort_asc")); 
-				testDone.countDown();})
+			})
 			.start(process);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 	
@@ -217,14 +192,9 @@ public class StreamsFeature {
 				logger().log(DEBUG, "Result (process_sort_asc1): "+manager.getResult("process_sort_asc1")); 
 				logger().log(DEBUG, "Result (process_sort_asc2): "+manager.getData("process_filter")); 
 				logger().log(DEBUG, "Result (process_filter): "+manager.getResult("process_filter")); 
-				testDone.countDown();})
+			})
 			.start(process);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 	
@@ -275,14 +245,9 @@ public class StreamsFeature {
 //				assertTrue(postConditionList2.containsAll(manager.getResult("process_b")));
 //				assertEquals(postConditionList3, manager.getResult("process_sort_asc")); 
 //				assertEquals(postConditionList3, process_sort_asc.getResult());
-				testDone.countDown();})
+			})
 			.start(process_main);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 	
@@ -320,14 +285,9 @@ public class StreamsFeature {
 				assertTrue(preConditionList1.containsAll(manager.getData("process_a")));
 				assertTrue(preConditionList2.containsAll(manager.getData("process_b")));
 				assertEquals(postConditionList, manager.getResult("process_sort_asc")); 
-				testDone.countDown();})
+			})
 			.start(process_a, process_b);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 	
@@ -349,14 +309,9 @@ public class StreamsFeature {
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
-				testDone.countDown();})
+			})
 			.start(process);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 	
@@ -378,24 +333,9 @@ public class StreamsFeature {
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
-				testDone.countDown();})
+			})
 			.start(process);
 		
-		try {
-			testDone.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		system.shutdown();
 	}
 }
-
-/*
-try {
-	BufferedWriter writer = new BufferedWriter(new FileWriter("result.txt"));
-    writer.write(manager.getFirstResult().toString());
-    writer.close();
-} catch (IOException e) {
-	e.printStackTrace();
-}
-*/
