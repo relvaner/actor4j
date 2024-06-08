@@ -86,6 +86,8 @@ public class Benchmark {
 				System.out.printf("statistics::mean          : %s msg/s%n", decimalFormat.format(statistics.getMean()));
 				System.out.printf("statistics::sd            : %s msg/s%n", decimalFormat.format(statistics.getStandardDeviation()));
 				System.out.printf("statistics::median        : %s msg/s%n", decimalFormat.format(statistics.getPercentile(50)));
+				System.out.printf("statistics::min           : %s msg/s%n", decimalFormat.format(statistics.getMin()));
+				System.out.printf("statistics::max           : %s msg/s%n", decimalFormat.format(statistics.getMax()));
 				System.out.println("Benchmark finished...");
 			}
 		});

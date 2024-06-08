@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.io.FileUtils;
@@ -34,8 +33,6 @@ import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
 
 public class BenchmarkQuicksort extends BenchmarkSampleActor4j {
-	public static CountDownLatch latch;
-	
 	public BenchmarkQuicksort(BenchmarkConfig config) {
 		super(config);
 
