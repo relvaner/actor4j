@@ -168,8 +168,8 @@ public class StreamNodeActor<T, R> extends Actor {
 			if (result!=null)
 				result.put(node.id, ((ImmutableList<R>)message.value()).get());
 			
-			if (node.isRoot)
-				getSystem().shutdown();
+			if (node.isRoot && node.rootCountDownLatch!=null)
+				node.rootCountDownLatch.countDown();
 			else {
 				if (!node.pres.isEmpty()) // has more parents
 					for (ActorStreamNode<?, ?> pre : node.pres) 

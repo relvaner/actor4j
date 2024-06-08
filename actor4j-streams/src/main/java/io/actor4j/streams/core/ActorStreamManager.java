@@ -28,6 +28,7 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.ActorSystemFactory;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.config.ActorSystemConfig.Builder;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
@@ -65,15 +66,22 @@ public class ActorStreamManager {
 	}
 	
 	public void start(ActorSystemFactory factory, ActorStream<?, ?> process) {
+		start(factory, null, process);
+	}
+	
+	public void start(ActorSystemFactory factory, ActorSystemConfig config, ActorStream<?, ?> process) {
 		data.clear();
 		result.clear();
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		ActorSystemConfig config = ActorSystemConfig.builder()
-			.name("nodes4j")
-			.build();
-		system = ActorSystem.create(factory, config);
+		Builder<?> builder = null;
+		if (config!=null)
+			builder = ActorSystemConfig.builder(config);
+		else
+			builder = ActorSystemConfig.builder();
+		builder.name("actor4j-streams");	
+		system = ActorSystem.create(factory, builder.build());
 		process.node.nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
 		process.node.isRoot = true;
 		process.node.rootCountDownLatch = countDownLatch;
@@ -99,15 +107,22 @@ public class ActorStreamManager {
 	}
 	
 	public void start(ActorSystemFactory factory, List<ActorStream<?, ?>> processes) {
+		start(factory, null, processes);
+	}
+	
+	public void start(ActorSystemFactory factory, ActorSystemConfig config, List<ActorStream<?, ?>> processes) {
 		data.clear();
 		result.clear();
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(processes.size());
-		ActorSystemConfig config = ActorSystemConfig.builder()
-			.name("actor4j-streams")
-			.build();
-		system = ActorSystem.create(factory, config);
+		Builder<?> builder = null;
+		if (config!=null)
+			builder = ActorSystemConfig.builder(config);
+		else
+			builder = ActorSystemConfig.builder();
+		builder.name("actor4j-streams");	
+		system = ActorSystem.create(factory, builder.build());
 		int nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
 		ActorGroup group = new ActorGroupSet();
 		for (ActorStream<?, ?> process : processes) {
@@ -138,6 +153,10 @@ public class ActorStreamManager {
 	
 	public void start(ActorSystemFactory factory, ActorStream<?, ?>... processes) {
 		start(factory, Arrays.asList(processes));
+	}
+	
+	public void start(ActorSystemFactory factory, ActorSystemConfig config, ActorStream<?, ?>... processes) {
+		start(factory, config, Arrays.asList(processes));
 	}
 	
 	/*
