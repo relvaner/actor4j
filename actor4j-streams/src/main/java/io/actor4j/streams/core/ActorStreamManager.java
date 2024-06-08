@@ -25,10 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 import io.actor4j.core.ActorSystem;
-import io.actor4j.core.ActorSystemFactory;
 import io.actor4j.core.actors.Actor;
-import io.actor4j.core.config.ActorSystemConfig;
-import io.actor4j.core.config.ActorSystemConfig.Builder;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
@@ -37,6 +34,7 @@ import io.actor4j.streams.core.runtime.StreamNodeActor;
 
 public class ActorStreamManager {
 	protected ActorSystem system;
+	protected Runnable onStartup;
 	protected Runnable onTermination;
 	
 	protected final Map<UUID, List<?>> data;
@@ -45,18 +43,25 @@ public class ActorStreamManager {
 	
 	protected boolean debugDataEnabled;
 	
-	public ActorStreamManager() {
-		this(false);
+	public ActorStreamManager(ActorSystem system) {
+		this(system, false);
 	}
 	
-	public ActorStreamManager(boolean debugDataEnabled) {
+	public ActorStreamManager(ActorSystem system, boolean debugDataEnabled) {
 		super();
+		
+		this.system = system;
+		this.debugDataEnabled = debugDataEnabled;
 		
 		data = new ConcurrentHashMap<>();
 		result = new ConcurrentHashMap<>();
 		aliases = new ConcurrentHashMap<>();
+	}
+	
+	public ActorStreamManager onStartup(Runnable onStartup) {
+		this.onStartup = onStartup;
 		
-		this.debugDataEnabled = debugDataEnabled;
+		return this;
 	}
 	
 	public ActorStreamManager onTermination(Runnable onTermination) {
@@ -65,23 +70,12 @@ public class ActorStreamManager {
 		return this;
 	}
 	
-	public void start(ActorSystemFactory factory, ActorStream<?, ?> process) {
-		start(factory, null, process);
-	}
-	
-	public void start(ActorSystemFactory factory, ActorSystemConfig config, ActorStream<?, ?> process) {
+	public void start(ActorStream<?, ?> process) {
 		data.clear();
 		result.clear();
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		Builder<?> builder = null;
-		if (config!=null)
-			builder = ActorSystemConfig.builder(config);
-		else
-			builder = ActorSystemConfig.builder();
-		builder.name("actor4j-streams");	
-		system = ActorSystem.create(factory, builder.build());
 		process.node.nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
 		process.node.isRoot = true;
 		process.node.rootCountDownLatch = countDownLatch;
@@ -97,32 +91,23 @@ public class ActorStreamManager {
 		});
 
 		system.send(ActorMessage.create(null, DATA, root, root));
-		system.start(null, onTermination);
+		if (onStartup!=null)
+			onStartup.run();
 		try {
 			countDownLatch.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		system.shutdown();
+		if (onTermination!=null)
+			onTermination.run();
 	}
 	
-	public void start(ActorSystemFactory factory, List<ActorStream<?, ?>> processes) {
-		start(factory, null, processes);
-	}
-	
-	public void start(ActorSystemFactory factory, ActorSystemConfig config, List<ActorStream<?, ?>> processes) {
+	public void start(List<ActorStream<?, ?>> processes) {
 		data.clear();
 		result.clear();
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(processes.size());
-		Builder<?> builder = null;
-		if (config!=null)
-			builder = ActorSystemConfig.builder(config);
-		else
-			builder = ActorSystemConfig.builder();
-		builder.name("actor4j-streams");	
-		system = ActorSystem.create(factory, builder.build());
 		int nTasks = Runtime.getRuntime().availableProcessors()/*stand-alone*/;
 		ActorGroup group = new ActorGroupSet();
 		for (ActorStream<?, ?> process : processes) {
@@ -142,29 +127,20 @@ public class ActorStreamManager {
 		}
 		
 		system.broadcast(ActorMessage.create(null, DATA, system.SYSTEM_ID(), null), group);
-		system.start(null, onTermination);
+		if (onStartup!=null)
+			onStartup.run();
 		try {
 			countDownLatch.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		system.shutdown();
+		if (onTermination!=null)
+			onTermination.run();
 	}
 	
-	public void start(ActorSystemFactory factory, ActorStream<?, ?>... processes) {
-		start(factory, Arrays.asList(processes));
+	public void start(ActorStream<?, ?>... processes) {
+		start(Arrays.asList(processes));
 	}
-	
-	public void start(ActorSystemFactory factory, ActorSystemConfig config, ActorStream<?, ?>... processes) {
-		start(factory, config, Arrays.asList(processes));
-	}
-	
-	/*
-	public void stop() {
-		if (system!=null)
-			system.shutdownWithActors(true);
-	}
-	*/
 	
 	public List<?> getData(UUID id) { 
 		return data.get(id);

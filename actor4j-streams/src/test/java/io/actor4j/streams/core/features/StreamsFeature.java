@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.actor4j.core.ActorRuntime;
-import io.actor4j.core.ActorSystemFactory;
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.streams.core.ActorStream;
 import io.actor4j.streams.core.ActorStreamManager;
@@ -40,8 +40,7 @@ public class StreamsFeature {
 	protected final Integer[] precondition_numbers = { 3, 2, 1, 1, 0, 2, 45, 78, 99, 34, 31, 8, 1, 123, 14, 9257, -10, -15 };
 	protected List<Integer> preConditionList;
 	
-	protected ActorSystemFactory actorRuntime;
-	protected ActorSystemConfig actorConfig;
+	protected ActorSystem system;
 	
 	@Before
 	public void before() {
@@ -50,11 +49,12 @@ public class StreamsFeature {
 		preConditionList = new ArrayList<>();
 		preConditionList.addAll(Arrays.asList(precondition_numbers));
 
-		actorRuntime = ActorRuntime.factory();
-		actorConfig = ActorSystemConfig
+		ActorSystemConfig config = ActorSystemConfig
 			.builder()
 			.parallelism(4)
 			.build();
+		system = ActorRuntime.create(config);
+		
 	}
 
 	@Test(timeout=5000)
@@ -71,19 +71,21 @@ public class StreamsFeature {
 			//.forEach(System.out::println)
 			.sortedDESC();
 			
-		ActorStreamManager manager = new ActorStreamManager();
+		ActorStreamManager manager = new ActorStreamManager(system);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process);
+			.start(process);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 
 	@Test(timeout=5000)
@@ -100,19 +102,21 @@ public class StreamsFeature {
 			//.forEach(System.out::println)
 			.sortedASC();
 			
-		ActorStreamManager manager = new ActorStreamManager();
+		ActorStreamManager manager = new ActorStreamManager(system);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process);
+			.start(process);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 
 	@Test(timeout=5000)
@@ -127,19 +131,21 @@ public class StreamsFeature {
 		
 		process.sequence(new SortStream<>(SortStreamType.SORT_ASCENDING));
 			
-		ActorStreamManager manager = new ActorStreamManager();
+		ActorStreamManager manager = new ActorStreamManager(system);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process);
+			.start(process);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 	
 	@Test(timeout=5000)
@@ -154,21 +160,23 @@ public class StreamsFeature {
 		
 		process.sequence(new SortStream<>("process_sort_asc", SortStreamType.SORT_ASCENDING));
 			
-		ActorStreamManager manager = new ActorStreamManager(true);
+		ActorStreamManager manager = new ActorStreamManager(system, true);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				logger().log(DEBUG, "Data (process_main): "+manager.getData("process_main"));
 				logger().log(DEBUG, "Data (process_sort_asc): "+manager.getData("process_sort_asc"));
 				assertEquals(postConditionList, manager.getResult("process_sort_asc")); 
 				logger().log(DEBUG, "Result (process_sort_asc): "+manager.getResult("process_sort_asc")); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process);
+			.start(process);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -197,8 +205,9 @@ public class StreamsFeature {
 		process_filter.filter((v) -> v>5);
 		process_sort2.sequence(process_filter);
 			
-		ActorStreamManager manager = new ActorStreamManager(true);
+		ActorStreamManager manager = new ActorStreamManager(system, true);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				logger().log(DEBUG, "Data (process_main): "+manager.getData("process_main"));
 				logger().log(DEBUG, "Data (process_sort_asc): "+manager.getData("process_sort_asc"));
@@ -209,13 +218,14 @@ public class StreamsFeature {
 				logger().log(DEBUG, "Result (process_sort_asc2): "+manager.getData("process_filter")); 
 				logger().log(DEBUG, "Result (process_filter): "+manager.getResult("process_filter")); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process);
+			.start(process);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -248,8 +258,9 @@ public class StreamsFeature {
 		process_main.parallel(process_a, process_b);
 		process_sort_asc.merge(process_a, process_b);
 		
-		ActorStreamManager manager = new ActorStreamManager(true);
+		ActorStreamManager manager = new ActorStreamManager(system, true);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				logger().log(DEBUG, "Data (process_a): "+manager.getData("process_a")); 
 				logger().log(DEBUG, "Data (process_a): "+process_a.getData()); 
@@ -265,13 +276,14 @@ public class StreamsFeature {
 //				assertEquals(postConditionList3, manager.getResult("process_sort_asc")); 
 //				assertEquals(postConditionList3, process_sort_asc.getResult());
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process_main);
+			.start(process_main);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 	
 	@Test(timeout=5000)
@@ -296,8 +308,9 @@ public class StreamsFeature {
 		ActorStream<Integer, Integer> process_sort_asc = new SortStream<Integer>("process_sort_asc", SortStreamType.SORT_ASCENDING);
 		process_sort_asc.merge(process_a, process_b);
 		
-		ActorStreamManager manager = new ActorStreamManager(true);
+		ActorStreamManager manager = new ActorStreamManager(system, true);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				logger().log(DEBUG, "Data (process_a): "+manager.getData("process_a")); 
 				logger().log(DEBUG, "Data (process_a): "+process_a.getData()); 
@@ -308,13 +321,14 @@ public class StreamsFeature {
 				assertTrue(preConditionList2.containsAll(manager.getData("process_b")));
 				assertEquals(postConditionList, manager.getResult("process_sort_asc")); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process_a, process_b);
+			.start(process_a, process_b);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 	
 	@Test(timeout=5000)
@@ -329,19 +343,21 @@ public class StreamsFeature {
 			.stream(s -> s.filter(v -> v>0).map(v -> v+100d))
 			.sortedDESC();
 			
-		ActorStreamManager manager = new ActorStreamManager();
+		ActorStreamManager manager = new ActorStreamManager(system);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process);
+			.start(process);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 	
 	@Test(timeout=5000)
@@ -356,19 +372,21 @@ public class StreamsFeature {
 			.streamRx(o -> o.filter(v -> v>0).map(v -> v+100d))
 			.sortedDESC();
 			
-		ActorStreamManager manager = new ActorStreamManager();
+		ActorStreamManager manager = new ActorStreamManager(system);
 		manager
+			.onStartup(() -> system.start())
 			.onTermination(() -> { 
 				assertEquals(postConditionList, manager.getFirstResult()); 
 				logger().log(DEBUG, manager.getFirstResult().toString()); 
 				testDone.countDown();})
-			.start(actorRuntime, actorConfig, process);
+			.start(process);
 		
 		try {
 			testDone.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		system.shutdown();
 	}
 }
 
