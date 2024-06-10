@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,38 +18,23 @@ package io.actor4j.streams.core.runtime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.UUID;
 import java.util.function.BinaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.mutable.MutableObject;
-
-import io.actor4j.core.actors.Actor;
-import io.actor4j.core.actors.ActorDistributedGroupMember;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
-import io.reactivex.rxjava3.core.Observable;
 
 import static io.actor4j.core.utils.CommPattern.*;
 import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
 
-public class StreamMapReduceTaskActor<T, R> extends Actor implements ActorDistributedGroupMember {
-	protected final ActorStreamDecompOperations<T, R> operations;
+public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> {
 	protected final BinaryOperator<List<R>> defaultReduceOp;
-	protected final ActorGroupList group;
-	protected final ActorGroup hubGroup;
-	protected int dest_tag;
-	
-	protected final MutableObject<List<R>> result;
 	protected int level;
 	
 	public StreamMapReduceTaskActor(String name, ActorStreamDecompOperations<T, R> operations, ActorGroupList group, ActorGroup hubGroup, int dest_tag) {
-		super(name);
+		super(name, operations, group, hubGroup, dest_tag);
 		
-		this.operations = operations;
 		defaultReduceOp = new BinaryOperator<List<R>>() {
 			@Override
 			public List<R> apply(List<R> left, List<R> right) {
@@ -59,11 +44,7 @@ public class StreamMapReduceTaskActor<T, R> extends Actor implements ActorDistri
 				return result;
 			}
 		};
-		this.group = group;
-		this.hubGroup = hubGroup;
-		this.dest_tag = dest_tag;
-		
-		result = new MutableObject<>();
+
 		level = -1;
 		
 		stash = new PriorityQueue<ActorMessage<?>>(11, (m1, m2) -> { 
@@ -110,50 +91,9 @@ public class StreamMapReduceTaskActor<T, R> extends Actor implements ActorDistri
 	public void receive(ActorMessage<?> message) {
 		if (level<0) {
 			if (message.tag()==TASK && message.value()!=null && message.value() instanceof ImmutableList) {
-				ImmutableList<T> immutableList = (ImmutableList<T>)message.value();
+				executeOperations((ImmutableList<T>)message.value());
 				
-				if (operations.streamOp!=null) {
-					Stream<R> stream = operations.streamOp.apply(immutableList.get().stream());
-					if (stream!=null)
-						result.setValue(stream.collect(Collectors.toList()));
-					else
-						result.setValue(new ArrayList<R>());
-				}
-				else if (operations.streamRxOp!=null) {
-					Observable<R> observable = operations.streamRxOp.apply(Observable.fromIterable(immutableList.get()));
-					if (observable!=null)
-						observable.toList().subscribe(list -> result.setValue(list));
-					else
-						result.setValue(new ArrayList<R>());
-					/*
-					 * result.setValue(observable.toList().blockingGet());
-					 */
-				}
-				else if (operations.flatMapOp!=null) {
-					List<R> list = operations.flatMapOp.apply(immutableList.get());
-					if (list!=null)
-						result.setValue(list);
-					else
-						result.setValue(new ArrayList<R>());
-				}
-				else {
-					List<R> list = new ArrayList<>(immutableList.get().size());
-					for (T t : immutableList.get()) {
-						if (operations.filterOp!=null)
-							if (!operations.filterOp.test(t))
-								continue;
-						if (operations.mapOp!=null)
-							list.add(operations.mapOp.apply(t));
-						else
-							list.add((R)t);
-						if (operations.forEachOp!=null)
-							operations.forEachOp.accept(t);	
-					}
-					result.setValue(list);
-				}
-
 				level = 0;
-				
 				//System.out.printf("[level: %d] rank %d has got a message (%s) from manager %n", level, group.indexOf(self()), result.getValue().toString());
 				
 				treeReduction(message);
@@ -177,10 +117,5 @@ public class StreamMapReduceTaskActor<T, R> extends Actor implements ActorDistri
 			else
 				break;
 		}
-	}
-
-	@Override
-	public UUID getDistributedGroupId() {
-		return group.getId();
 	}
 }
