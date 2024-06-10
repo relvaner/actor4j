@@ -27,7 +27,7 @@ public class ActorStreamDecompNode<T, R> {
 	public List<T> data;
 	public final ActorStreamDecompOperations<T, R> operations;
 	public int nTasks;
-	public int min_range;
+	public int threshold;
 	public final Set<ActorStreamDecompNode<?, ?>> sucs; // Set<Node<R, ?>>
 	public final Set<ActorStreamDecompNode<?, ?>> pres; // Set<Node<?, T>>
 	public boolean isRoot;

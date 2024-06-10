@@ -113,9 +113,9 @@ public class StreamDecompActor<T, R> extends Actor {
 			}
 	}
 
-	protected int adjustSize(int size, int arr_size, int min_range) {
-		if (min_range>0) {
-			int max_size  = arr_size/min_range;
+	protected int adjustSize(int size, int arr_size, int threshold) {
+		if (threshold>0) {
+			int max_size  = arr_size/threshold;
 			if (max_size==0)
 				max_size = 1;
 			size = (size>max_size ? max_size : size);
@@ -149,7 +149,7 @@ public class StreamDecompActor<T, R> extends Actor {
 				
 				ActorGroupList group = new ActorGroupList();
 				checkData(node.data);
-				node.nTasks = adjustSize(node.nTasks, node.data.size(), node.min_range);
+				node.nTasks = adjustSize(node.nTasks, node.data.size(), node.threshold);
 				for (int i=0; i<node.nTasks; i++) {
 					UUID task = addChild(() -> 
 						new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag)

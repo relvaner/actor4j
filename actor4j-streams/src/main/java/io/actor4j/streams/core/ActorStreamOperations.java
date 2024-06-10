@@ -34,11 +34,11 @@ public class ActorStreamOperations<T, R> {
 		this.process = process;
 	}
 	
-	public ActorStreamOperations<T, R> data(List<T> data, int min_range) {
+	public ActorStreamOperations<T, R> data(List<T> data, int threshold) {
 		checkData(data);
 		
 		process.node.data = data;
-		process.node.min_range = min_range;
+		process.node.threshold = threshold;
 		
 		return this;
 	}
