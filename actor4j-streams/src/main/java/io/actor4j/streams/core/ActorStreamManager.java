@@ -27,7 +27,6 @@ import java.util.concurrent.CountDownLatch;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.streams.core.runtime.StreamDecompActor;
@@ -80,12 +79,9 @@ public class ActorStreamManager {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 		process.configureAsRoot(this, countDownLatch);
 		
-		UUID root = system.addActor(new ActorFactory() {
-			@Override
-			public Actor create() {
-				return new StreamDecompActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data);
-			}
-		});
+		UUID root = system.addActor(() ->
+			new StreamDecompActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data)
+		);
 
 		system.send(ActorMessage.create(null, DATA, root, root));
 		if (onStartup!=null)
@@ -110,12 +106,9 @@ public class ActorStreamManager {
 		for (ActorStream<?, ?> process : processes) {
 			process.configureAsRoot(this, countDownLatch);
 			
-			group.add(system.addActor(new ActorFactory() {
-				@Override
-				public Actor create() {
-					return new StreamDecompActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data);
-				}
-			}));
+			group.add(system.addActor(() ->
+				new StreamDecompActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data))
+			);
 		}
 		
 		system.broadcast(ActorMessage.create(null, DATA, system.SYSTEM_ID(), null), group);

@@ -25,7 +25,6 @@ import java.util.UUID;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -95,24 +94,18 @@ public class StreamDecompActor<T, R> extends Actor {
 							ref = getSystem().getActorFromAlias("node-"+suc.id.toString());
 							if (ref==null) {
 								suc.nTasks = node.nTasks; // ATTENTION
-								ref = addChild(new ActorFactory() {
-									@Override
-									public Actor create() {
-										return new StreamDecompActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData);
-									}
-								});
+								ref = addChild(() ->
+									new StreamDecompActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData)
+								);
 							}
 						}
 					}
 				}
 				else {
 					suc.nTasks = node.nTasks; // ATTENTION
-					ref = addChild(new ActorFactory() {
-						@Override
-						public Actor create() {
-							return new StreamDecompActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData);
-						}
-					});
+					ref = addChild(() ->
+						new StreamDecompActor<>("node-"+suc.id.toString(), suc, result, aliases, debugDataEnabled, debugData)
+					);
 				}
 				
 				hubGroup.add(ref);
@@ -158,7 +151,9 @@ public class StreamDecompActor<T, R> extends Actor {
 				checkData(node.data);
 				node.nTasks = adjustSize(node.nTasks, node.data.size(), node.min_range);
 				for (int i=0; i<node.nTasks; i++) {
-					UUID task = addChild(() -> new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag));
+					UUID task = addChild(() -> 
+						new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag)
+					);
 					group.add(task);
 				}
 				scatter(node.data, TASK, this, new ActorGroupSet(group));
