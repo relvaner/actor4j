@@ -54,14 +54,14 @@ public class ActorStream<T, R> {
 		processOperations = new ActorStreamOperations<>(this);
 	}
 	
-	public void configure(ActorStreamManager manager, CountDownLatch countDownLatch, boolean isRoot) {
+	public void configureAsRoot(ActorStreamManager manager, CountDownLatch countDownLatch) {
 		data    = manager.data;
 		result  = manager.result;
 		aliases = manager.aliases;
 		
 		node.nTasks = manager.nTasks;
 		node.rootCountDownLatch = countDownLatch;
-		node.isRoot = isRoot;
+		node.isRoot = true;
 	}
 	
 	public ActorStream(Function<List<T>, List<R>> flatMapOp, BinaryOperator<List<R>> reduceOp) {

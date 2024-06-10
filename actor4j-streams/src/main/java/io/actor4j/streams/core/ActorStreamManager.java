@@ -78,7 +78,7 @@ public class ActorStreamManager {
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		process.configure(this, countDownLatch, true);
+		process.configureAsRoot(this, countDownLatch);
 		
 		UUID root = system.addActor(new ActorFactory() {
 			@Override
@@ -108,7 +108,7 @@ public class ActorStreamManager {
 		final CountDownLatch countDownLatch = new CountDownLatch(processes.size());
 		ActorGroup group = new ActorGroupSet();
 		for (ActorStream<?, ?> process : processes) {
-			process.configure(this, countDownLatch, true);
+			process.configureAsRoot(this, countDownLatch);
 			
 			group.add(system.addActor(new ActorFactory() {
 				@Override
