@@ -43,7 +43,7 @@ public class StreamMapReduceTaskActor<T, R> extends Actor implements ActorDistri
 	protected final ActorGroup hubGroup;
 	protected int dest_tag;
 	
-	protected MutableObject<List<R>> result;
+	protected final MutableObject<List<R>> result;
 	protected int level;
 	
 	public StreamMapReduceTaskActor(String name, ActorStreamDecompOperations<T, R> operations, ActorGroupList group, ActorGroup hubGroup, int dest_tag) {

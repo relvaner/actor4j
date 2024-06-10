@@ -29,7 +29,7 @@ public class SortStream<T extends Comparable<? super T>> extends ActorStream<T, 
 	}
 	
 	public SortStream(String name, final SortStreamType type) {
-		super(name);
+		super(name, false);
 
 		flatMap(new Function<List<T>, List<T>>() {
 			@Override

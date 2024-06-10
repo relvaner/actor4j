@@ -39,7 +39,7 @@ public class StreamDecompActor<T, R> extends Actor {
 	protected final ActorGroup hubGroup;
 	protected int dest_tag;
 	
-	protected boolean debugDataEnabled;
+	protected final boolean debugDataEnabled;
 	// ThreadSafe
 	protected final Map<UUID, List<?>> debugData;
 	// ThreadSafe

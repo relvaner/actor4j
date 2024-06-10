@@ -16,10 +16,10 @@
 package io.actor4j.streams.core;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,27 +30,38 @@ import io.actor4j.streams.core.runtime.ActorStreamDecompNode;
 import io.reactivex.rxjava3.core.Observable;
 
 public class ActorStream<T, R> {
-	protected ActorStreamDecompNode<T, R> node;
+	protected final ActorStreamDecompNode<T, R> node;
 	
-	protected Map<UUID, List<?>> data;   // initial set over ProcessManager
-	protected Map<UUID, List<?>> result; // initial set over ProcessManager
-	protected Map<String, UUID> aliases; // initial set over ProcessManager
+	protected /*quasi final*/ Map<UUID, List<?>> data;   // initially set over ActorStreamManager
+	protected /*quasi final*/ Map<UUID, List<?>> result; // initially set over ActorStreamManager
+	protected /*quasi final*/ Map<String, UUID> aliases; // initially set over ActorStreamManager
 	
-	protected ActorStreamOperations<T, R> processOperations;
+	protected final ActorStreamOperations<T, R> processOperations;
 	
 	public ActorStream() {
-		this(null);
+		this(null, false);
 	}
 	
 	public ActorStream(String alias) {
+		this(alias, false);
+	}
+	
+	public ActorStream(String alias, boolean recursiveDecomp) {
 		super();
 		
-		node = new ActorStreamDecompNode<>(alias);
-		node.id = UUID.randomUUID();
-		node.sucs = new HashSet<>();
-		node.pres = new HashSet<>();
+		node = new ActorStreamDecompNode<>(alias, recursiveDecomp);
 		
 		processOperations = new ActorStreamOperations<>(this);
+	}
+	
+	public void configure(ActorStreamManager manager, CountDownLatch countDownLatch, boolean isRoot) {
+		data    = manager.data;
+		result  = manager.result;
+		aliases = manager.aliases;
+		
+		node.nTasks = manager.nTasks;
+		node.rootCountDownLatch = countDownLatch;
+		node.isRoot = isRoot;
 	}
 	
 	public ActorStream(Function<List<T>, List<R>> flatMapOp, BinaryOperator<List<R>> reduceOp) {

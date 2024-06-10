@@ -33,15 +33,16 @@ import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.streams.core.runtime.StreamDecompActor;
 
 public class ActorStreamManager {
-	protected ActorSystem system;
-	protected Runnable onStartup;
-	protected Runnable onTermination;
+	protected final ActorSystem system;
+	protected /*quasi final*/ Runnable onStartup;
+	protected /*quasi final*/ Runnable onTermination;
 	
 	protected final Map<UUID, List<?>> data;
 	protected final Map<UUID, List<?>> result;
 	protected final Map<String, UUID> aliases;
 	
-	protected boolean debugDataEnabled;
+	protected final int nTasks;
+	protected final boolean debugDataEnabled;
 	
 	public ActorStreamManager(ActorSystem system) {
 		this(system, false);
@@ -51,6 +52,7 @@ public class ActorStreamManager {
 		super();
 		
 		this.system = system;
+		this.nTasks = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		this.debugDataEnabled = debugDataEnabled;
 		
 		data = new ConcurrentHashMap<>();
@@ -76,13 +78,7 @@ public class ActorStreamManager {
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
-		int nTasks = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
-		process.node.nTasks = nTasks;
-		process.node.isRoot = true;
-		process.node.rootCountDownLatch = countDownLatch;
-		process.data = data;
-		process.result = result;
-		process.aliases = aliases;
+		process.configure(this, countDownLatch, true);
 		
 		UUID root = system.addActor(new ActorFactory() {
 			@Override
@@ -110,15 +106,9 @@ public class ActorStreamManager {
 		aliases.clear();
 		
 		final CountDownLatch countDownLatch = new CountDownLatch(processes.size());
-		int nTasks = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		ActorGroup group = new ActorGroupSet();
 		for (ActorStream<?, ?> process : processes) {
-			process.node.nTasks = nTasks;
-			process.node.isRoot = true;
-			process.node.rootCountDownLatch = countDownLatch;
-			process.data = data;
-			process.result = result;
-			process.aliases = aliases;
+			process.configure(this, countDownLatch, true);
 			
 			group.add(system.addActor(new ActorFactory() {
 				@Override
