@@ -26,11 +26,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import io.actor4j.streams.core.runtime.ActorStreamNode;
+import io.actor4j.streams.core.runtime.ActorStreamDecompNode;
 import io.reactivex.rxjava3.core.Observable;
 
 public class ActorStream<T, R> {
-	protected ActorStreamNode<T, R> node;
+	protected ActorStreamDecompNode<T, R> node;
 	
 	protected Map<UUID, List<?>> data;   // initial set over ProcessManager
 	protected Map<UUID, List<?>> result; // initial set over ProcessManager
@@ -45,7 +45,7 @@ public class ActorStream<T, R> {
 	public ActorStream(String alias) {
 		super();
 		
-		node = new ActorStreamNode<>(alias);
+		node = new ActorStreamDecompNode<>(alias);
 		node.id = UUID.randomUUID();
 		node.sucs = new HashSet<>();
 		node.pres = new HashSet<>();

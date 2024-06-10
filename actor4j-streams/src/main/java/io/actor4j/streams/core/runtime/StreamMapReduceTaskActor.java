@@ -36,8 +36,8 @@ import io.reactivex.rxjava3.core.Observable;
 import static io.actor4j.core.utils.CommPattern.*;
 import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
 
-public class StreamNodeTaskActor<T, R> extends Actor implements ActorDistributedGroupMember {
-	protected final ActorStreamNodeOperations<T, R> operations;
+public class StreamMapReduceTaskActor<T, R> extends Actor implements ActorDistributedGroupMember {
+	protected final ActorStreamDecompOperations<T, R> operations;
 	protected final BinaryOperator<List<R>> defaultReduceOp;
 	protected final ActorGroupList group;
 	protected final ActorGroup hubGroup;
@@ -46,7 +46,7 @@ public class StreamNodeTaskActor<T, R> extends Actor implements ActorDistributed
 	protected MutableObject<List<R>> result;
 	protected int level;
 	
-	public StreamNodeTaskActor(String name, ActorStreamNodeOperations<T, R> operations, ActorGroupList group, ActorGroup hubGroup, int dest_tag) {
+	public StreamMapReduceTaskActor(String name, ActorStreamDecompOperations<T, R> operations, ActorGroupList group, ActorGroup hubGroup, int dest_tag) {
 		super(name);
 		
 		this.operations = operations;

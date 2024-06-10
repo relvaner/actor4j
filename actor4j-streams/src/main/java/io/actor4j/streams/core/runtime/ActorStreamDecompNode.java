@@ -20,27 +20,27 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-public class ActorStreamNode<T, R> {
+public class ActorStreamDecompNode<T, R> {
 	public UUID id;
 	public String alias;
 	public List<T> data;
-	public final ActorStreamNodeOperations<T, R> operations;
+	public final ActorStreamDecompOperations<T, R> operations;
 	public int nTasks;
 	public int min_range;
-	public Set<ActorStreamNode<?, ?>> sucs; // Set<Node<R, ?>>
-	public Set<ActorStreamNode<?, ?>> pres; // Set<Node<?, T>>
+	public Set<ActorStreamDecompNode<?, ?>> sucs; // Set<Node<R, ?>>
+	public Set<ActorStreamDecompNode<?, ?>> pres; // Set<Node<?, T>>
 	public boolean isRoot;
 	
 	public CountDownLatch rootCountDownLatch;
 	
-	public ActorStreamNode(String alias) {
+	public ActorStreamDecompNode(String alias) {
 		super();
 		
 		this.alias = alias;
-		this.operations = new ActorStreamNodeOperations<>();
+		this.operations = new ActorStreamDecompOperations<>();
 	}
 	
-	public ActorStreamNode() {
+	public ActorStreamDecompNode() {
 		this(null);
 	}
 }
