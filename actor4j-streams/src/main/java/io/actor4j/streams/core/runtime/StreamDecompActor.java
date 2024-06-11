@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import io.actor4j.core.actors.Actor;
@@ -28,7 +29,10 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
 import io.actor4j.core.utils.ActorGroupSet;
+import io.actor4j.core.utils.ConcurrentActorGroupQueue;
+import io.actor4j.core.utils.Pair;
 import io.actor4j.streams.core.exceptions.ActorStreamDataException;
+import io.actor4j.streams.core.utils.SortRecursiveStream;
 
 import static io.actor4j.core.utils.CommPattern.*;
 import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
@@ -113,7 +117,7 @@ public class StreamDecompActor<T, R> extends Actor {
 			}
 	}
 
-	protected int adjustSize(int size, int arr_size, int threshold) {
+	protected int adjustSizeForMapReduce(int size, int arr_size, int threshold/*min_range*/) {
 		if (threshold>0) {
 			int max_size  = arr_size/threshold;
 			if (max_size==0)
@@ -125,6 +129,80 @@ public class StreamDecompActor<T, R> extends Actor {
 			size = arr_size;
 		
 		return size;
+	}
+	
+	protected void partitionForMapReduce() {
+		ActorGroup group = new ConcurrentActorGroupQueue();
+		checkData(node.data);
+		node.nTasks = adjustSizeForMapReduce(node.nTasks, node.data.size(), node.threshold);
+		for (int i=0; i<node.nTasks; i++) {
+			UUID task = addChild(() -> 
+				new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag)
+			);
+			group.add(task);
+		}
+		scatter(node.data, TASK, this, new ActorGroupSet(group));
+	}
+	
+	protected void partitionForRecursiveDecomp() {
+		ActorGroup group = new ConcurrentActorGroupQueue();
+		ActorGroup scatter_group = new ActorGroupList();
+		checkData(node.data);
+		if (node.data.size()<node.threshold) {
+			UUID task = addChild(() -> 
+				new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, group, hubGroup, dest_tag, 1)
+			);
+			scatter_group.add(task);
+			scatter(node.data, TASK, this, scatter_group);
+		}
+		else {
+			final Pair<Object, List<T>> pair;
+			if (node.operations.partitionOp!=null) {
+				pair = node.operations.partitionOp.apply(node.data);
+				node.data = pair.b();
+				checkData(node.data);
+				
+				node.nTasks = node.recursiveDecomp;
+				// Guardian
+				addChild(() -> new Actor() {
+					protected Set<UUID> waitForChildren;
+					protected Map<Long, List<R>> resultMap;
+					protected Object criterion = pair.b().get((int)pair.a()); // temporary
+					
+					public void preStart() {
+						waitForChildren = new HashSet<>();
+						resultMap = new TreeMap<>();
+						
+						for (int i=0; i<node.nTasks; i++) {
+							final int i_ = i;
+							UUID task = addChild(() -> 
+								new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, group, null, dest_tag, i_+1)
+							);
+							waitForChildren.add(task);
+							scatter_group.add(task);
+						}
+						// temporary
+						SortRecursiveStream.scatter(node.data, pair.a(), TASK, this, scatter_group);
+					}
+					
+					public void receive(ActorMessage<?> message) {
+						waitForChildren.remove(message.source());
+						
+						if (message.value() instanceof Pair) {
+							@SuppressWarnings("unchecked")
+							Pair<Long, ImmutableList<R>> pair = (Pair<Long, ImmutableList<R>>)message.value();
+							resultMap.put(pair.a(), pair.b().get());
+						}
+						
+						if (waitForChildren.isEmpty()) {
+							List<R> result = node.operations.mergeOp.apply(resultMap, criterion);
+							broadcast(ActorMessage.create(new ImmutableList<R>(result), dest_tag, self(), null), this, hubGroup);
+							stop();
+						}
+					}
+				});
+			}
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -147,16 +225,10 @@ public class StreamDecompActor<T, R> extends Actor {
 				if (debugDataEnabled && debugData!=null)
 					debugData.put(node.id, node.data);
 				
-				ActorGroupList group = new ActorGroupList();
-				checkData(node.data);
-				node.nTasks = adjustSize(node.nTasks, node.data.size(), node.threshold);
-				for (int i=0; i<node.nTasks; i++) {
-					UUID task = addChild(() -> 
-						new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag)
-					);
-					group.add(task);
-				}
-				scatter(node.data, TASK, this, new ActorGroupSet(group));
+				if (node.recursiveDecomp>0)
+					partitionForRecursiveDecomp();
+				else
+					partitionForMapReduce();
 			}
 		}
 		else if (message.tag()==RESULT) {

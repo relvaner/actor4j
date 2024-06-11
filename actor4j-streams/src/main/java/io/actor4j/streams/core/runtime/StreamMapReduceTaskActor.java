@@ -32,7 +32,9 @@ public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 	protected final BinaryOperator<List<R>> defaultReduceOp;
 	protected int level;
 	
-	public StreamMapReduceTaskActor(String name, ActorStreamDecompOperations<T, R> operations, ActorGroupList group, ActorGroup hubGroup, int dest_tag) {
+	protected ActorGroupList groupList;
+	
+	public StreamMapReduceTaskActor(String name, ActorStreamDecompOperations<T, R> operations, ActorGroup group, ActorGroup hubGroup, int dest_tag) {
 		super(name, operations, group, hubGroup, dest_tag);
 		
 		defaultReduceOp = new BinaryOperator<List<R>>() {
@@ -54,11 +56,11 @@ public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 
 	@SuppressWarnings("unchecked")
 	protected void treeReduction(ActorMessage<?> message) {
-		int grank = group.indexOf(self());
+		int grank = groupList.indexOf(self());
 		if (grank%(1<<(level+1))>0) { 
 			int dest = grank-(1<<level);
 			//System.out.printf("[level: %d] rank %d has sended a message (%s) to rank %d%n", level, group.indexOf(self()), result.getValue().toString(), dest);
-			send(ActorMessage.create(new ImmutableList<R>(result.getValue()), REDUCE, self(), group.get(dest), null, String.valueOf(level+1), null));
+			send(ActorMessage.create(new ImmutableList<R>(result.getValue()), REDUCE, self(), groupList.get(dest), null, String.valueOf(level+1), null));
 			stop();
 		}
 		else if (message.tag()==REDUCE && message.value()!=null && message.value() instanceof ImmutableList){
@@ -91,6 +93,7 @@ public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 	public void receive(ActorMessage<?> message) {
 		if (level<0) {
 			if (message.tag()==TASK && message.value()!=null && message.value() instanceof ImmutableList) {
+				groupList = new ActorGroupList(group); // Transform to LinkedList for treeReduction()
 				executeOperations((ImmutableList<T>)message.value());
 				
 				level = 0;

@@ -27,7 +27,7 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.streams.core.ActorStream;
 import io.actor4j.streams.core.ActorStreamManager;
-import io.actor4j.streams.core.utils.SortStream;
+import io.actor4j.streams.core.utils.SortMapReduceStream;
 import io.actor4j.streams.core.utils.SortStreamType;
 
 import static org.junit.Assert.*;
@@ -114,7 +114,7 @@ public class StreamsFeature {
 		process
 			.data(preConditionList, 5);
 		
-		process.sequence(new SortStream<>(SortStreamType.SORT_ASCENDING));
+		process.sequence(new SortMapReduceStream<>(SortStreamType.SORT_ASCENDING));
 			
 		ActorStreamManager manager = new ActorStreamManager(system);
 		manager
@@ -138,7 +138,7 @@ public class StreamsFeature {
 		process
 			.data(preConditionList, 5);
 		
-		process.sequence(new SortStream<>("process_sort_asc", SortStreamType.SORT_ASCENDING));
+		process.sequence(new SortMapReduceStream<>("process_sort_asc", SortStreamType.SORT_ASCENDING));
 			
 		ActorStreamManager manager = new ActorStreamManager(system, true);
 		manager
@@ -171,8 +171,8 @@ public class StreamsFeature {
 		process
 			.data(preConditionList, 5);
 		
-		ActorStream<Integer, Integer> process_sort1 = new SortStream<Integer>("process_sort_asc1", SortStreamType.SORT_ASCENDING);
-		ActorStream<Integer, Integer> process_sort2 = new SortStream<Integer>("process_sort_asc2", SortStreamType.SORT_DESCENDING);
+		ActorStream<Integer, Integer> process_sort1 = new SortMapReduceStream<Integer>("process_sort_asc1", SortStreamType.SORT_ASCENDING);
+		ActorStream<Integer, Integer> process_sort2 = new SortMapReduceStream<Integer>("process_sort_asc2", SortStreamType.SORT_DESCENDING);
 		
 		process.parallel(process_sort1, process_sort2);
 		
@@ -223,7 +223,7 @@ public class StreamsFeature {
 		process_b
 			.filter((v) -> v>0 && v<=50)
 			.map((v) -> v+1);
-		ActorStream<Integer, Integer> process_sort_asc = new SortStream<Integer>("process_sort_asc", SortStreamType.SORT_ASCENDING);
+		ActorStream<Integer, Integer> process_sort_asc = new SortMapReduceStream<Integer>("process_sort_asc", SortStreamType.SORT_ASCENDING);
 		
 		process_main.parallel(process_a, process_b);
 		process_sort_asc.merge(process_a, process_b);
@@ -270,7 +270,7 @@ public class StreamsFeature {
 		process_b
 			.data(preConditionList2);
 		
-		ActorStream<Integer, Integer> process_sort_asc = new SortStream<Integer>("process_sort_asc", SortStreamType.SORT_ASCENDING);
+		ActorStream<Integer, Integer> process_sort_asc = new SortMapReduceStream<Integer>("process_sort_asc", SortStreamType.SORT_ASCENDING);
 		process_sort_asc.merge(process_a, process_b);
 		
 		ActorStreamManager manager = new ActorStreamManager(system, true);

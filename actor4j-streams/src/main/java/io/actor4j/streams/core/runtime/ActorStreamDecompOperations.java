@@ -16,12 +16,15 @@
 package io.actor4j.streams.core.runtime;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import io.actor4j.core.utils.Pair;
 import io.reactivex.rxjava3.core.Observable;
 
 public class ActorStreamDecompOperations<T, R> {
@@ -29,6 +32,9 @@ public class ActorStreamDecompOperations<T, R> {
 	public Predicate<T> filterOp;
 	public Function<T, R> mapOp;
 	public Consumer<T> forEachOp;
+	
+	public Function<List<T>, Pair<Object/*criterion*/, List<T>>> partitionOp;
+	public BiFunction<Map<Long, List<R>>, Object/*criterion*/, List<R>> mergeOp;
 	/* eager */
 	public Function<List<T>, List<R>> flatMapOp;
 	public BinaryOperator<List<R>> reduceOp;

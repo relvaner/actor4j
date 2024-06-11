@@ -27,18 +27,17 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorDistributedGroupMember;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.utils.ActorGroup;
-import io.actor4j.core.utils.ActorGroupList;
 import io.reactivex.rxjava3.core.Observable;
 
 public abstract class StreamDecompTaskActor<T, R> extends Actor implements ActorDistributedGroupMember {
 	protected final ActorStreamDecompOperations<T, R> operations;
-	protected final ActorGroupList group;
+	protected final ActorGroup group;
 	protected final ActorGroup hubGroup;
 	protected final int dest_tag;
 	
 	protected final MutableObject<List<R>> result;
 	
-	public StreamDecompTaskActor(String name, ActorStreamDecompOperations<T, R> operations, ActorGroupList group, ActorGroup hubGroup, int dest_tag) {
+	public StreamDecompTaskActor(String name, ActorStreamDecompOperations<T, R> operations, ActorGroup group, ActorGroup hubGroup, int dest_tag) {
 		super(name);
 		
 		this.operations = operations;

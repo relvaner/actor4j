@@ -16,14 +16,17 @@
 package io.actor4j.streams.core;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import io.actor4j.core.utils.Pair;
 import io.actor4j.streams.core.exceptions.ActorStreamDataException;
-import io.actor4j.streams.core.utils.SortStream;
+import io.actor4j.streams.core.utils.SortMapReduceStream;
 import io.actor4j.streams.core.utils.SortStreamType;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -77,18 +80,28 @@ public class ActorStreamOperations<T, R> {
 		return this;
 	}
 	
+	public ActorStreamOperations<T, R> partition(Function<List<T>, Pair<Object, List<T>>> partitionOp) {
+		process.node.operations.partitionOp = partitionOp;
+		return this;
+	}	
+	
 	public ActorStreamOperations<T, R> reduce(BinaryOperator<List<R>> reduceOp) {
 		process.node.operations.reduceOp = reduceOp;
 		return this;
 	}	
 	
+	public ActorStreamOperations<T, R> merge(BiFunction<Map<Long, List<R>>, Object, List<R>> mergeOp) {
+		process.node.operations.mergeOp = mergeOp;
+		return this;
+	}	
+	
 	public ActorStreamOperations<?, ?> sortedASC() {
-		process.sequence(new SortStream<>(SortStreamType.SORT_ASCENDING));
+		process.sequence(new SortMapReduceStream<>(SortStreamType.SORT_ASCENDING));
 		return this;
 	}
 	
 	public ActorStreamOperations<?, ?> sortedDESC() {
-		process.sequence(new SortStream<>(SortStreamType.SORT_DESCENDING));
+		process.sequence(new SortMapReduceStream<>(SortStreamType.SORT_DESCENDING));
 		return this;
 	}
 	

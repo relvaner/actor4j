@@ -23,14 +23,23 @@ import java.util.function.Function;
 
 import io.actor4j.streams.core.ActorStream;
 
-public class SortStream<T extends Comparable<? super T>> extends ActorStream<T, T> {
-	public SortStream(final SortStreamType type) {
-		this(null, type);
+public class SortMapReduceStream<T extends Comparable<? super T>> extends ActorStream<T, T> {
+	public SortMapReduceStream(final SortStreamType type) {
+		this(null, type, -1);
 	}
 	
-	public SortStream(String name, final SortStreamType type) {
-		super(name, false);
-
+	public SortMapReduceStream(final SortStreamType type, final int threshold) {
+		this(null, type, threshold);
+	}
+	
+	public SortMapReduceStream(String name, final SortStreamType type) {
+		this(name, type, -1);
+	}
+	
+	public SortMapReduceStream(String name, final SortStreamType type, final int threshold) {
+		super(name);
+		node.threshold = threshold;
+		
 		flatMap(new Function<List<T>, List<T>>() {
 			@Override
 			public List<T> apply(List<T> list) {

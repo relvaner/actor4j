@@ -31,11 +31,11 @@ public class ActorStreamDecompNode<T, R> {
 	public final Set<ActorStreamDecompNode<?, ?>> sucs; // Set<Node<R, ?>>
 	public final Set<ActorStreamDecompNode<?, ?>> pres; // Set<Node<?, T>>
 	public boolean isRoot;
-	public final boolean recursiveDecomp;
+	public final int recursiveDecomp;
 
 	public CountDownLatch rootCountDownLatch;
 	
-	public ActorStreamDecompNode(String alias, boolean recursiveDecomp) {
+	public ActorStreamDecompNode(String alias, int recursiveDecomp) {
 		super();
 		
 		this.id = UUID.randomUUID();
@@ -46,10 +46,14 @@ public class ActorStreamDecompNode<T, R> {
 		this.sucs = new HashSet<>();
 		this.pres = new HashSet<>();
 		
-		this.recursiveDecomp = false;
+		this.recursiveDecomp = recursiveDecomp;
+	}
+	
+	public ActorStreamDecompNode(String alias) {
+		this(alias, -1);
 	}
 	
 	public ActorStreamDecompNode() {
-		this(null, false);
+		this(null, -1);
 	}
 }

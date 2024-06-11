@@ -20,12 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import io.actor4j.core.utils.Pair;
 import io.actor4j.streams.core.runtime.ActorStreamDecompNode;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -39,14 +41,14 @@ public class ActorStream<T, R> {
 	protected final ActorStreamOperations<T, R> processOperations;
 	
 	public ActorStream() {
-		this(null, false);
+		this(null, -1);
 	}
 	
 	public ActorStream(String alias) {
-		this(alias, false);
+		this(alias, -1);
 	}
 	
-	public ActorStream(String alias, boolean recursiveDecomp) {
+	public ActorStream(String alias, int recursiveDecomp) {
 		super();
 		
 		node = new ActorStreamDecompNode<>(alias, recursiveDecomp);
@@ -107,8 +109,16 @@ public class ActorStream<T, R> {
 		return processOperations.streamRx(streamRxOp);
 	}
 	
+	public ActorStreamOperations<T, R> partition(Function<List<T>, Pair<Object, List<T>>> partitionOp) {
+		return processOperations.partition(partitionOp);
+	}	
+	
 	public ActorStreamOperations<T, R> reduce(BinaryOperator<List<R>> reduceOp) {
 		return processOperations.reduce(reduceOp);
+	}	
+	
+	public ActorStreamOperations<T, R> merge(BiFunction<Map<Long, List<R>>, Object, List<R>> mergeOp) {
+		return processOperations.merge(mergeOp);
 	}	
 	
 	public ActorStreamOperations<?, ?> sortedASC() {
