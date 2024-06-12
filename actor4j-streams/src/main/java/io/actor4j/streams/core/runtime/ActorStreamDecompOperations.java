@@ -24,7 +24,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import io.actor4j.core.utils.Pair;
+import io.actor4j.core.utils.Triple;
 import io.reactivex.rxjava3.core.Observable;
 
 public class ActorStreamDecompOperations<T, R> {
@@ -33,7 +33,7 @@ public class ActorStreamDecompOperations<T, R> {
 	public Function<T, R> mapOp;
 	public Consumer<T> forEachOp;
 	
-	public Function<List<T>, Pair<Object/*criterion*/, List<T>>> partitionOp;
+	public Function<List<T>, Triple<Object/*criterionIndex*/, Object/*criterion*/, List<T>>> partitionOp;
 	public BiFunction<Map<Long, List<R>>, Object/*criterion*/, List<R>> mergeOp;
 	/* eager */
 	public Function<List<T>, List<R>> flatMapOp;

@@ -32,6 +32,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.utils.SortRecursiveStream;
 
 public class StreamRecursiveTaskActor<T, R> extends StreamDecompTaskActor<T, R> {
@@ -70,21 +71,21 @@ public class StreamRecursiveTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 			}
 			else {
 				ActorGroup scatter_group = new ActorGroupList();
-				Pair<Object, List<T>> pair = null;
+				Triple<Object, Object, List<T>> triple = null;
 				if (operations.partitionOp!=null) {
-					pair = operations.partitionOp.apply(new ArrayList<>(immutableList.get()));
-					criterion = pair.b().get((int)pair.a()); // temporary
+					triple = operations.partitionOp.apply(new ArrayList<>(immutableList.get()));
+					criterion = triple.b();
 				}
 				for (int i=0; i<recursiveDecomp; i++) {
 					final int i_ = i;
 					UUID task = addChild(() -> 
-						new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), operations, recursiveDecomp, threshold, group, hubGroup, dest_tag, (rank<<1)+i_+1)
+						new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), operations, recursiveDecomp, threshold, group, hubGroup, dest_tag, (rank<<recursiveDecomp/2)+i_+1)
 					);
 					waitForChildren.add(task);
 					scatter_group.add(task);
 				}
 				// temporary
-				SortRecursiveStream.scatter(pair.b(), pair.a(), TASK, this, scatter_group);
+				SortRecursiveStream.scatter(triple.c(), triple.a()/*criterionIndex*/, TASK, this, scatter_group);
 			}
 		}
 		else if (message.tag()==RESULT) {

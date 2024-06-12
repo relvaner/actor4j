@@ -21,11 +21,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.mutable.MutableObject;
-
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorDistributedGroupMember;
 import io.actor4j.core.immutable.ImmutableList;
+import io.actor4j.core.mutable.MutableObject;
 import io.actor4j.core.utils.ActorGroup;
 import io.reactivex.rxjava3.core.Observable;
 

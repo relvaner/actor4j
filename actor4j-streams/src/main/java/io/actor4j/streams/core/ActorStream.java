@@ -27,7 +27,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import io.actor4j.core.utils.Pair;
+import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.runtime.ActorStreamDecompNode;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -109,7 +109,7 @@ public class ActorStream<T, R> {
 		return processOperations.streamRx(streamRxOp);
 	}
 	
-	public ActorStreamOperations<T, R> partition(Function<List<T>, Pair<Object, List<T>>> partitionOp) {
+	public ActorStreamOperations<T, R> partition(Function<List<T>, Triple<Object, Object, List<T>>> partitionOp) {
 		return processOperations.partition(partitionOp);
 	}	
 	

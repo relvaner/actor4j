@@ -31,6 +31,7 @@ import io.actor4j.core.utils.ActorGroupList;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.ConcurrentActorGroupQueue;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.exceptions.ActorStreamDataException;
 import io.actor4j.streams.core.utils.SortRecursiveStream;
 
@@ -156,10 +157,10 @@ public class StreamDecompActor<T, R> extends Actor {
 			scatter(node.data, TASK, this, scatter_group);
 		}
 		else {
-			final Pair<Object, List<T>> pair;
+			final Triple<Object, Object, List<T>> triple;
 			if (node.operations.partitionOp!=null) {
-				pair = node.operations.partitionOp.apply(node.data);
-				node.data = pair.b();
+				triple = node.operations.partitionOp.apply(node.data);
+				node.data = triple.c();
 				checkData(node.data);
 				
 				node.nTasks = node.recursiveDecomp;
@@ -167,7 +168,7 @@ public class StreamDecompActor<T, R> extends Actor {
 				addChild(() -> new Actor() {
 					protected Set<UUID> waitForChildren;
 					protected Map<Long, List<R>> resultMap;
-					protected Object criterion = pair.b().get((int)pair.a()); // temporary
+					protected Object criterion = triple.b();
 					
 					public void preStart() {
 						waitForChildren = new HashSet<>();
@@ -182,7 +183,7 @@ public class StreamDecompActor<T, R> extends Actor {
 							scatter_group.add(task);
 						}
 						// temporary
-						SortRecursiveStream.scatter(node.data, pair.a(), TASK, this, scatter_group);
+						SortRecursiveStream.scatter(node.data, triple.a()/*criterionIndex*/, TASK, this, scatter_group);
 					}
 					
 					public void receive(ActorMessage<?> message) {

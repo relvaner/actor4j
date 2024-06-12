@@ -20,14 +20,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.mutable.MutableObject;
-
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.mutable.MutableObject;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
-import io.actor4j.core.utils.Pair;
+import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.ActorStream;
 
 public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorStream<T, T> {
@@ -66,7 +65,7 @@ public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorS
 			}
 			swap(list, i+1, list.size()-1);
 			
-			return Pair.of(i+1, list);
+			return Triple.of(i+1, list.get(i+1), list);
 		});
 
 		flatMap(new Function<List<T>, List<T>>() {
