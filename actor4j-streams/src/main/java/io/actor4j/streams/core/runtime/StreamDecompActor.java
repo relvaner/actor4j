@@ -33,7 +33,6 @@ import io.actor4j.core.utils.ConcurrentActorGroupQueue;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.exceptions.ActorStreamDataException;
-import io.actor4j.streams.core.utils.SortRecursiveStream;
 
 import static io.actor4j.core.utils.CommPattern.*;
 import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
@@ -151,7 +150,8 @@ public class StreamDecompActor<T, R> extends Actor {
 		checkData(node.data);
 		if (node.data.size()<node.threshold) {
 			UUID task = addChild(() -> 
-				new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, group, hubGroup, dest_tag, 1)
+				new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, 
+					group, hubGroup, dest_tag, 1, node.recursiveDecompScatter)
 			);
 			scatter_group.add(task);
 			scatter(node.data, TASK, this, scatter_group);
@@ -177,13 +177,13 @@ public class StreamDecompActor<T, R> extends Actor {
 						for (int i=0; i<node.nTasks; i++) {
 							final int i_ = i;
 							UUID task = addChild(() -> 
-								new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, group, null, dest_tag, i_+1)
+								new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, 
+									group, null, dest_tag, i_+1, node.recursiveDecompScatter)
 							);
 							waitForChildren.add(task);
 							scatter_group.add(task);
 						}
-						// temporary
-						SortRecursiveStream.scatter(node.data, triple.a()/*criterionIndex*/, TASK, this, scatter_group);
+						node.recursiveDecompScatter.scatter(node.data, triple.a()/*criterionIndex*/, TASK, this, scatter_group);
 					}
 					
 					public void receive(ActorMessage<?> message) {

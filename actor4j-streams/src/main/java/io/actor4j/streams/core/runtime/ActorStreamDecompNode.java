@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
+import io.actor4j.streams.core.utils.RecursiveDecompScatter;
+
 public class ActorStreamDecompNode<T, R> {
 	public final UUID id;
 	public final String alias;
@@ -32,10 +34,11 @@ public class ActorStreamDecompNode<T, R> {
 	public final Set<ActorStreamDecompNode<?, ?>> pres; // Set<Node<?, T>>
 	public boolean isRoot;
 	public final int recursiveDecomp;
+	public final RecursiveDecompScatter<T> recursiveDecompScatter;
 
 	public CountDownLatch rootCountDownLatch;
 	
-	public ActorStreamDecompNode(String alias, int recursiveDecomp) {
+	public ActorStreamDecompNode(String alias, int recursiveDecomp, RecursiveDecompScatter<T> recursiveDecompScatter) {
 		super();
 		
 		this.id = UUID.randomUUID();
@@ -47,13 +50,14 @@ public class ActorStreamDecompNode<T, R> {
 		this.pres = new HashSet<>();
 		
 		this.recursiveDecomp = recursiveDecomp;
+		this.recursiveDecompScatter = recursiveDecompScatter;
 	}
 	
 	public ActorStreamDecompNode(String alias) {
-		this(alias, -1);
+		this(alias, -1, null);
 	}
 	
 	public ActorStreamDecompNode() {
-		this(null, -1);
+		this(null, -1, null);
 	}
 }

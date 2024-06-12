@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 
 import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.runtime.ActorStreamDecompNode;
+import io.actor4j.streams.core.utils.RecursiveDecompScatter;
 import io.reactivex.rxjava3.core.Observable;
 
 public class ActorStream<T, R> {
@@ -41,17 +42,17 @@ public class ActorStream<T, R> {
 	protected final ActorStreamOperations<T, R> processOperations;
 	
 	public ActorStream() {
-		this(null, -1);
+		this(null, -1, null);
 	}
 	
 	public ActorStream(String alias) {
-		this(alias, -1);
+		this(alias, -1, null);
 	}
 	
-	public ActorStream(String alias, int recursiveDecomp) {
+	public ActorStream(String alias, int recursiveDecomp, RecursiveDecompScatter<T> recursiveDecompScatter) {
 		super();
 		
-		node = new ActorStreamDecompNode<>(alias, recursiveDecomp);
+		node = new ActorStreamDecompNode<>(alias, recursiveDecomp, recursiveDecompScatter);
 		
 		processOperations = new ActorStreamOperations<>(this);
 	}

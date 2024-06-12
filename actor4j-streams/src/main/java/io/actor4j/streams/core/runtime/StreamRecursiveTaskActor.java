@@ -33,7 +33,7 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.core.utils.Triple;
-import io.actor4j.streams.core.utils.SortRecursiveStream;
+import io.actor4j.streams.core.utils.RecursiveDecompScatter;
 
 public class StreamRecursiveTaskActor<T, R> extends StreamDecompTaskActor<T, R> {
 	protected final int recursiveDecomp;
@@ -45,12 +45,16 @@ public class StreamRecursiveTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 	
 	protected Object criterion;
 	
-	public StreamRecursiveTaskActor(String name, ActorStreamDecompOperations<T, R> operations, int recursiveDecomp, int threshold, ActorGroup group, ActorGroup hubGroup, int dest_tag, long rank) {
+	protected final RecursiveDecompScatter<T> recursiveDecompScatter;
+	
+	public StreamRecursiveTaskActor(String name, ActorStreamDecompOperations<T, R> operations, int recursiveDecomp, int threshold, 
+			ActorGroup group, ActorGroup hubGroup, int dest_tag, long rank, RecursiveDecompScatter<T> recursiveDecompScatter) {
 		super(name, operations, group, hubGroup, dest_tag);
 		
 		this.recursiveDecomp = recursiveDecomp;
 		this.threshold = threshold;
 		this.rank = rank;
+		this.recursiveDecompScatter = recursiveDecompScatter;
 		
 		waitForChildren = new HashSet<>();
 		resultMap = new TreeMap<>();
@@ -79,13 +83,13 @@ public class StreamRecursiveTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 				for (int i=0; i<recursiveDecomp; i++) {
 					final int i_ = i;
 					UUID task = addChild(() -> 
-						new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), operations, recursiveDecomp, threshold, group, hubGroup, dest_tag, (rank<<recursiveDecomp/2)+i_+1)
+						new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), operations, recursiveDecomp, threshold, 
+								group, hubGroup, dest_tag, (rank<<recursiveDecomp/2)+i_+1, recursiveDecompScatter)
 					);
 					waitForChildren.add(task);
 					scatter_group.add(task);
 				}
-				// temporary
-				SortRecursiveStream.scatter(triple.c(), triple.a()/*criterionIndex*/, TASK, this, scatter_group);
+				recursiveDecompScatter.scatter(triple.c(), triple.a()/*criterionIndex*/, TASK, this, scatter_group);
 			}
 		}
 		else if (message.tag()==RESULT) {

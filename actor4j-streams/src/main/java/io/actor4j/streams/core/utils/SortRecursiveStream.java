@@ -42,9 +42,9 @@ public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorS
 	
 	@SuppressWarnings("unchecked")
 	public SortRecursiveStream(final String name, final SortStreamType type, final int threshold) {
-		super(name, 2/*binary tree, recursive decomposition*/);
+		super(name, 2/*binary tree, recursive decomposition*/, SortRecursiveStream::scatter);
 		node.threshold = threshold;
-		
+
 		// Lomuto partition
 		partition((list) -> {
 			T pivot = list.getLast();
