@@ -15,6 +15,8 @@
  */
 package io.actor4j.jcache.mongo;
 
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -25,6 +27,7 @@ import org.bson.Document;
 import com.mongodb.client.MongoClient;
 
 import io.actor4j.core.utils.GenericType;
+import io.actor4j.jcache.mongo.runtime.AsyncMongoCacheLoaderAndWriter;
 
 public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 	private static final long serialVersionUID = 6602264788991737589L;
@@ -42,7 +45,8 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 	
 	protected AsyncMongoCacheLoaderAndWriter<K, V> cacheLoaderAndWriter;
 	
-	protected Consumer<Object> handler;
+	protected BiConsumer<K, V> asyncLoadHandler;
+	protected Consumer<Map<K,V>> asyncLoadAllHandler;
 
 	public MongoClient getMongoClient() {
 		return mongoClient;
@@ -126,14 +130,39 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 	}
 	
 	// ---
+
+	public BiConsumer<K, V> getAsyncLoadHandler() {
+		return asyncLoadHandler;
+	}
+
+	public void setAsyncLoadHandler(BiConsumer<K, V> asyncLoadHandler) {
+		this.asyncLoadHandler = asyncLoadHandler;
+	}
+
+	public Consumer<Map<K, V>> getAsyncLoadAllHandler() {
+		return asyncLoadAllHandler;
+	}
+
+	public void setAsyncLoadAllHandler(Consumer<Map<K, V>> asyncLoadAllHandler) {
+		this.asyncLoadAllHandler = asyncLoadAllHandler;
+	}
+
+	public AsyncMongoCacheLoaderAndWriter<K, V> getCacheLoaderAndWriter() {
+		return cacheLoaderAndWriter;
+	}
 	
+	// ---
+
 	public MongoCacheConfiguration<K, V> build() {
 		if (valueType!=null)
 			cacheLoaderAndWriter = new AsyncMongoCacheLoaderAndWriter<K, V>(mongoClient, databaseName, collectionName, 
-				valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize, handler);
+				valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize);
 		else if (valueTypeReference!=null)
 			cacheLoaderAndWriter = new AsyncMongoCacheLoaderAndWriter<K, V>(mongoClient, databaseName, collectionName, 
-				valueTypeReference, bulkOrdered, bulkSize, handler);
+				valueTypeReference, bulkOrdered, bulkSize);
+		
+		cacheLoaderAndWriter.setAsyncLoadHandler(asyncLoadHandler);
+		cacheLoaderAndWriter.setAsyncLoadAllHandler(asyncLoadAllHandler);
 		
 		setReadThrough(true);
 		setWriteThrough(true);
@@ -141,9 +170,5 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 		setCacheWriterFactory(() -> cacheLoaderAndWriter);
 			
 		return this;
-	}
-	
-	public AsyncMongoCacheLoaderAndWriter<K, V> getCacheLoaderAndWriter() {
-		return cacheLoaderAndWriter;
 	}
 }

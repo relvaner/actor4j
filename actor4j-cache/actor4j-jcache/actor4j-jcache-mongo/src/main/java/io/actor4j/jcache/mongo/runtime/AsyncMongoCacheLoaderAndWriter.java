@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.jcache.mongo;
+package io.actor4j.jcache.mongo.runtime;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -27,21 +28,21 @@ import com.mongodb.client.MongoClient;
 
 import io.actor4j.core.utils.GenericType;
 import io.actor4j.jcache.AsyncCacheLoader;
+import io.actor4j.jcache.mongo.MongoCacheLoaderAndWriter;
 
 public class AsyncMongoCacheLoaderAndWriter<K, V> extends MongoCacheLoaderAndWriter<K, V> implements AsyncCacheLoader<K, V> {
-	protected final Consumer<Object> handler;
+	protected BiConsumer<K, V> asyncLoadHandler;
+	protected Consumer<Map<K,V>> asyncLoadAllHandler;
 
 	public AsyncMongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
 			Class<V> valueType, Function<Document, V> valueReadMapper, Function<V, ?> valueWriteMapper,
-			boolean bulkOrdered, int bulkSize, Consumer<Object> handler) {
+			boolean bulkOrdered, int bulkSize) {
 		super(mongoClient, databaseName, collectionName, valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize);
-		this.handler = handler;
 	}
 
 	public AsyncMongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
-			GenericType<V> valueTypeReference, boolean bulkOrdered, int bulkSize, Consumer<Object> handler) {
+			GenericType<V> valueTypeReference, boolean bulkOrdered, int bulkSize) {
 		super(mongoClient, databaseName, collectionName, valueTypeReference, bulkOrdered, bulkSize);
-		this.handler = handler;
 	}
 
 	@Override
@@ -49,8 +50,8 @@ public class AsyncMongoCacheLoaderAndWriter<K, V> extends MongoCacheLoaderAndWri
 		CompletableFuture<V> result = new CompletableFuture<>();
 		executor.execute(() -> {
 			V value = load(key);
-			if (handler!=null)
-				handler.accept(value);
+			if (asyncLoadHandler!=null)
+				asyncLoadHandler.accept(key, value);
 			result.complete(value);
 		});
 		
@@ -62,11 +63,19 @@ public class AsyncMongoCacheLoaderAndWriter<K, V> extends MongoCacheLoaderAndWri
 		CompletableFuture<Map<K,V>> result = new CompletableFuture<>();
 		executor.execute(() -> {
 			Map<K,V> map = loadAll(keys);
-			if (handler!=null)
-				handler.accept(map);
+			if (asyncLoadAllHandler!=null)
+				asyncLoadAllHandler.accept(map);
 			result.complete(map);
 		});
 		
 		return result;
+	}
+
+	public void setAsyncLoadHandler(BiConsumer<K, V> loadHandler) {
+		this.asyncLoadHandler = loadHandler;
+	}
+
+	public void setAsyncLoadAllHandler(Consumer<Map<K, V>> loadAllHandler) {
+		this.asyncLoadAllHandler = loadAllHandler;
 	}
 }
