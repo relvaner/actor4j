@@ -52,8 +52,10 @@
 	
 	<modules>
 		<module>actor4j-json</module>
-		
+
 		<module>actor4j-database-mongo-sync</module>
+		
+		<module>actor4j-cache</module>
 		
 		<module>actor4j-data</module>
 		<module>actor4j-data-mongo</module>
