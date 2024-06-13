@@ -4,15 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>io.actor4j</groupId>
-		<artifactId>actor4j-cache</artifactId>
+		<artifactId>actor4j-jcache</artifactId>
 		<version>2.1.0</version>
 	</parent>
-	<artifactId>actor4j-jcache</artifactId>
-	<packaging>pom</packaging>
-
-	<modules>
-		<module>actor4j-jcache-local</module>
-		<module>actor4j-jcache-caffeine</module>
-		<module>actor4j-jcache-mongo</module>
-	</modules>
+	<artifactId>actor4j-jcache-local</artifactId>
+	
+	<dependencies>
+		<dependency>
+			<groupId>javax.cache</groupId>
+			<artifactId>cache-api</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+	</dependencies>
 </project>
