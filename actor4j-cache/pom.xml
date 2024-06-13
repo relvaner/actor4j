@@ -12,6 +12,6 @@
 	
 	<modules>
 		<module>actor4j-cache-local</module>
-		<module>actor4j-cache-jsr107</module>
+		<module>actor4j-jcache</module>
 	</modules>
 </project>
