@@ -71,11 +71,11 @@ public class AsyncMongoCacheLoaderAndWriter<K, V> extends MongoCacheLoaderAndWri
 		return result;
 	}
 
-	public void setAsyncLoadHandler(BiConsumer<K, V> loadHandler) {
-		this.asyncLoadHandler = loadHandler;
+	public void setAsyncLoadHandler(BiConsumer<K, V> asyncLoadHandler) {
+		this.asyncLoadHandler = asyncLoadHandler;
 	}
 
-	public void setAsyncLoadAllHandler(Consumer<Map<K, V>> loadAllHandler) {
-		this.asyncLoadAllHandler = loadAllHandler;
+	public void setAsyncLoadAllHandler(Consumer<Map<K, V>> asyncLoadAllHandler) {
+		this.asyncLoadAllHandler = asyncLoadAllHandler;
 	}
 }
