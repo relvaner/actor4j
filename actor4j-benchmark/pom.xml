@@ -38,6 +38,11 @@
 			<artifactId>actor4j-data</artifactId>
 			<version>${actor4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-streams</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.typesafe.akka</groupId>
