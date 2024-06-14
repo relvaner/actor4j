@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import javax.cache.Cache.Entry;
@@ -34,6 +35,7 @@ import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.utils.GenericType;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
@@ -56,7 +58,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 
 	public MongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
 			Class<V> valueType, Function<Document, V> valueReadMapper, Function<V, ?> valueWriteMapper, boolean bulkOrdered,
-			int bulkSize) {
+			int bulkSize, BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
 		super();
 		this.mongoClient = mongoClient;
 		this.databaseName = databaseName;
@@ -69,13 +71,14 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 		this.bulkSize = bulkSize;
 		if (bulkSize > 0)
 			this.bulkWriter = MongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
-					bulkSize);
+					bulkSize, onBulkWriterError);
 		else
 			this.bulkWriter = null;
 	}
 
 	public MongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
-			GenericType<V> valueTypeReference, boolean bulkOrdered, int bulkSize) {
+			GenericType<V> valueTypeReference, boolean bulkOrdered, int bulkSize, 
+			BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
 		super();
 		this.mongoClient = mongoClient;
 		this.databaseName = databaseName;
@@ -88,7 +91,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 		this.bulkSize = bulkSize;
 		if (bulkSize > 0)
 			this.bulkWriter = MongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
-					bulkSize);
+					bulkSize, onBulkWriterError);
 		else
 			this.bulkWriter = null;
 	}
@@ -98,16 +101,20 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 	public V load(K key) throws CacheLoaderException {
 		V result = null;
 
-		Document document = findOne(Filters.eq(KEY_NAME, key), mongoClient, databaseName, collectionName);
-		if (document != null && document.containsKey(VALUE_NAME)) {
-			Object obj = document.get(VALUE_NAME);
-			if (obj instanceof Document d) {
-				if (valueType != null)
-					result = valueReadMapper!=null ? valueReadMapper.apply(d) : convertToValue(d, valueType);
-				else
-					result = convertToValue(d, valueTypeReference);
-			} else
-				result = (V) obj;
+		try {
+			Document document = findOne(Filters.eq(KEY_NAME, key), mongoClient, databaseName, collectionName);
+			if (document != null && document.containsKey(VALUE_NAME)) {
+				Object obj = document.get(VALUE_NAME);
+				if (obj instanceof Document d) {
+					if (valueType != null)
+						result = valueReadMapper!=null ? valueReadMapper.apply(d) : convertToValue(d, valueType);
+					else
+						result = convertToValue(d, valueTypeReference);
+				} else
+					result = (V) obj;
+			}
+		} catch(Exception e) {
+			throw new CacheLoaderException("database error", e);
 		}
 
 		return result;
@@ -118,40 +125,50 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 	public Map<K, V> loadAll(Iterable<? extends K> keys) throws CacheLoaderException {
 		Map<K, V> result = new HashMap<>();
 
-		List<Document> documents = findAll(Filters.in(KEY_NAME, keys), null, null, mongoClient, databaseName, collectionName);
-		documents.stream().forEach((document) -> {
-			K key = null;
-			V value = null;
-
-			if (document.containsKey(KEY_NAME))
-				key = (K) document.get(KEY_NAME);
-			if (document.containsKey(VALUE_NAME)) {
-				Object obj = document.get(VALUE_NAME);
-				if (obj instanceof Document d) {
-					if (valueType != null)
-						value = valueReadMapper!=null ? valueReadMapper.apply(d) : convertToValue(d, valueType);
-					else
-						value = convertToValue(d, valueTypeReference);
-				} else
-					value = (V) obj;
-			}
-
-			if (key != null && value != null)
-				result.put(key, value);
-		});
+		try {
+			List<Document> documents = findAll(Filters.in(KEY_NAME, keys), null, null, mongoClient, databaseName, collectionName);
+			documents.stream().forEach((document) -> {
+				K key = null;
+				V value = null;
+	
+				if (document.containsKey(KEY_NAME))
+					key = (K) document.get(KEY_NAME);
+				if (document.containsKey(VALUE_NAME)) {
+					Object obj = document.get(VALUE_NAME);
+					if (obj instanceof Document d) {
+						if (valueType != null)
+							value = valueReadMapper!=null ? valueReadMapper.apply(d) : convertToValue(d, valueType);
+						else
+							value = convertToValue(d, valueTypeReference);
+					} else
+						value = (V) obj;
+				}
+	
+				if (key != null && value != null)
+					result.put(key, value);
+			});
+		}
+		catch(Exception e) {
+			throw new CacheLoaderException("database error", e);
+		}
 
 		return result;
 	}
 
 	@Override
 	public void write(Entry<? extends K, ? extends V> entry) throws CacheWriterException {
-		Document document = new Document().append(KEY_NAME, entry.getKey());
-		if (ClassUtils.isPrimitiveOrWrapper(entry.getValue().getClass()) || entry.getValue() instanceof String)
-			document.append(VALUE_NAME, valueWriteMapper!=null ? valueWriteMapper.apply(entry.getValue()) : entry.getValue());
-		else
-			document.append(VALUE_NAME, valueWriteMapper!=null ? valueWriteMapper.apply(entry.getValue()) : convertToDocument(entry.getValue()));
-
-		insertOne(document, mongoClient, databaseName, collectionName, bulkWriter);
+		try {
+			Document document = new Document().append(KEY_NAME, entry.getKey());
+			if (ClassUtils.isPrimitiveOrWrapper(entry.getValue().getClass()) || entry.getValue() instanceof String)
+				document.append(VALUE_NAME, valueWriteMapper!=null ? valueWriteMapper.apply(entry.getValue()) : entry.getValue());
+			else
+				document.append(VALUE_NAME, valueWriteMapper!=null ? valueWriteMapper.apply(entry.getValue()) : convertToDocument(entry.getValue()));
+	
+			insertOne(document, mongoClient, databaseName, collectionName, bulkWriter);
+		}
+		catch(Exception e) {
+			throw new CacheWriterException("database error", e);
+		}
 	}
 
 	@Override
@@ -161,7 +178,12 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 
 	@Override
 	public void delete(Object key) throws CacheWriterException {
-		deleteOne(Filters.eq(KEY_NAME, key), mongoClient, databaseName, collectionName, bulkWriter);
+		try {
+			deleteOne(Filters.eq(KEY_NAME, key), mongoClient, databaseName, collectionName, bulkWriter);
+		}
+		catch(Exception e) {
+			throw new CacheWriterException("database error", e);
+		}
 	}
 
 	@Override
@@ -169,8 +191,10 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 		keys.stream().forEach((key) -> delete(key));
 	}
 
-	public void flush() {
+	public void flush() throws CacheWriterException {
 		if (bulkWriter != null)
 			bulkWriter.flush();
+		else
+			throw new CacheWriterException("bulkWriter is null");
 	}
 }
