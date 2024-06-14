@@ -21,6 +21,7 @@ import com.mongodb.client.model.WriteModel;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
 import io.actor4j.core.data.access.DataAccessActor;
+import io.actor4j.core.data.access.FailureDTO;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
@@ -119,7 +120,7 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 			catch(Exception e) {
 				e.printStackTrace();
 				
-				tell(message.value(), FAILURE, message.source(), message.interaction());
+				tell(FailureDTO.of(dto, e), FAILURE, message.source(), message.interaction());
 			}
 		}
 		else

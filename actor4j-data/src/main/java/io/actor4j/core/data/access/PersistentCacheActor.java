@@ -85,8 +85,8 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 				else
 					tell(dto, message.tag(), dto.source(), message.interaction());
 			}
-			else if (message.tag()==FAILURE)
-				handleFailure(message);
+			else if (message.source()==dataAccess && message.tag()==FAILURE && message.value() instanceof FailureDTO failure)
+				handleFailure(message, failure);
 			else
 				unhandled(message);
 		}
@@ -96,7 +96,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			unhandled(message);
 	}
 	
-	public void handleFailure(ActorMessage<?> message) {
-		// empty
+	public void handleFailure(ActorMessage<?> message, FailureDTO<K,V> failure) {
+		tell(failure, FAILURE, failure.dto().source(), message.interaction());
 	}
 }
