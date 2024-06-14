@@ -16,6 +16,7 @@
 package io.actor4j.core.data.access.mongo;
 
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
@@ -26,6 +27,7 @@ import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.database.mongo.MongoOperations.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.Document;
@@ -62,6 +64,10 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType) {
 		this(null, client, databaseName, valueType);
 	}
+	
+	public void onBulkWriterError(List<WriteModel<Document>> requests, Throwable t) {
+		// empty
+	}
 
 	@Override
 	public void receive(ActorMessage<?> message) {
@@ -74,7 +80,7 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 				if (bulkWrite) {
 					bulkWriter = bulkWriters.get(dto.collectionName());
 					if (bulkWriter==null) {
-						bulkWriter = MongoBufferedBulkWriter.create(client, databaseName, dto.collectionName(), bulkOrdered, bulkSize);
+						bulkWriter = MongoBufferedBulkWriter.create(client, databaseName, dto.collectionName(), bulkOrdered, bulkSize, this::onBulkWriterError);
 						bulkWriters.put(dto.collectionName(), bulkWriter);
 					}
 				}

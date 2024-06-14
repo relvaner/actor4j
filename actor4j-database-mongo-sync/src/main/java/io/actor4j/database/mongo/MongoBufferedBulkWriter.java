@@ -15,6 +15,9 @@
  */
 package io.actor4j.database.mongo;
 
+import java.util.List;
+import java.util.function.BiConsumer;
+
 import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
@@ -25,12 +28,13 @@ public interface MongoBufferedBulkWriter {
 	public void write(WriteModel<Document> request);
 	public void flush();
 	
-	public static MongoBufferedBulkWriter create(MongoClient client, String databaseName, String collectionName, boolean ordered, int size) {
+	public static MongoBufferedBulkWriter create(MongoClient client, String databaseName, String collectionName, boolean ordered, int size, 
+			BiConsumer<List<WriteModel<Document>>, Throwable> onError) {
 		MongoBufferedBulkWriter result = null;
 
 		try {
 			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-			result =  new MongoBufferedBulkWriterImpl(collection, ordered, size);
+			result =  new MongoBufferedBulkWriterImpl(collection, ordered, size, onError);
 		}
 		catch(Exception e) {
 			e.printStackTrace();

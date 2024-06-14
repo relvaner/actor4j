@@ -39,16 +39,11 @@ public final class MongoOperations {
 	public static boolean hasOne(Bson filter, MongoClient client, String databaseName, String collectionName) {
 		boolean result = false;
 		
-		try {
-			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-			Document document = collection.find(filter).first();
-			
-			if (document!=null)
-				result = true;
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+		Document document = collection.find(filter).first();
+		
+		if (document!=null)
+			result = true;
 		
 		return result;
 	}
@@ -78,13 +73,8 @@ public final class MongoOperations {
 		if (bulkWriter!=null)
 			bulkWriter.write(new InsertOneModel<>(document));
 		else {
-			try {
-				MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-				collection.insertOne(document);
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
+			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+			collection.insertOne(document);
 		}
 	}
 	
@@ -97,13 +87,8 @@ public final class MongoOperations {
 		if (bulkWriter!=null)
 			bulkWriter.write(new ReplaceOneModel<>(filter, document));
 		else {
-			try {
-				MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-				collection.replaceOne(filter, document);
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
+			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+			collection.replaceOne(filter, document);
 		}
 	}
 	
@@ -116,13 +101,8 @@ public final class MongoOperations {
 		if (bulkWriter!=null)
 			bulkWriter.write(new UpdateOneModel<>(filter, update));
 		else {
-			try {
-				MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-				collection.updateOne(filter, update);
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
+			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+			collection.updateOne(filter, update);
 		}
 	}
 	
@@ -135,26 +115,16 @@ public final class MongoOperations {
 		if (bulkWriter!=null)
 			bulkWriter.write(new DeleteOneModel<>(filter));
 		else {
-			try {
-				MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-				collection.deleteOne(filter);
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
+			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+			collection.deleteOne(filter);
 		}
 	}
 	
 	public static Document findOne(Bson filter, MongoClient client, String databaseName, String collectionName) {
 		Document result = null;
 		
-		try {
-			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-			result = collection.find(filter).first();
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+		result = collection.find(filter).first();
 
 		return result;
 	}
@@ -162,30 +132,25 @@ public final class MongoOperations {
 	public static List<Document> find(Bson filter, Bson sort, Bson projection, int skip, int limit, MongoClient client, String databaseName, String collectionName) {
 		List<Document> result = new LinkedList<>();
 		
-		try {
-			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-			
-			FindIterable<Document> iterable = null;
-			if (filter!=null)
-				iterable = collection.find(filter);
-			else
-				iterable = collection.find();
-			
-			if (sort!=null)
-				iterable = iterable.sort(sort);
-			if (projection!=null)
-				iterable = iterable.projection(projection);
-			if (skip>0)
-				iterable = iterable.skip(skip);
-			if (limit>0)
-				iterable = iterable.limit(limit);
-			
-			iterable.forEach((Consumer<? super Document>) document -> {result.add(document);});
-			//iterable.forEach((Block<Document>) document -> {result.add(document);});
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+		
+		FindIterable<Document> iterable = null;
+		if (filter!=null)
+			iterable = collection.find(filter);
+		else
+			iterable = collection.find();
+		
+		if (sort!=null)
+			iterable = iterable.sort(sort);
+		if (projection!=null)
+			iterable = iterable.projection(projection);
+		if (skip>0)
+			iterable = iterable.skip(skip);
+		if (limit>0)
+			iterable = iterable.limit(limit);
+		
+		iterable.forEach((Consumer<? super Document>) document -> {result.add(document);});
+		//iterable.forEach((Block<Document>) document -> {result.add(document);});
 		
 		return result;
 	}
@@ -195,27 +160,15 @@ public final class MongoOperations {
 	}
 	
 	public static <V> Document convertToDocument(V value) {
-		Document result = null;
-		try {
-			result = Document.parse(objectMapper.mapFrom(value));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		return Document.parse(objectMapper.mapFrom(value));
 	}
 	
 	public static <V> V convertToValue(String json, Class<V> valueType) {
 		V result = null;
 		
 		if (json!=null)
-			try {
-				result = objectMapper.mapTo(json, valueType);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		
-		
+			result = objectMapper.mapTo(json, valueType);
+
 		return result;
 	}
 	
@@ -232,11 +185,7 @@ public final class MongoOperations {
 		List<V> result = new LinkedList<>();
 		
 		for (Document document : documents)
-			try {
-				result.add(objectMapper.mapTo(document.toJson(), valueType));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			result.add(objectMapper.mapTo(document.toJson(), valueType));
 		
 		return result;
 	}
@@ -245,12 +194,7 @@ public final class MongoOperations {
 		V result = null;
 		
 		if (json!=null)
-			try {
-				result = objectMapper.mapTo(json, valueTypeRef);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		
+			result = objectMapper.mapTo(json, valueTypeRef);
 		
 		return result;
 	}
@@ -268,11 +212,7 @@ public final class MongoOperations {
 		List<V> result = new LinkedList<>();
 		
 		for (Document document : documents)
-			try {
-				result.add(objectMapper.mapTo(document.toJson(), valueTypeRef));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			result.add(objectMapper.mapTo(document.toJson(), valueTypeRef));
 		
 		return result;
 	}

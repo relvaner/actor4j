@@ -16,11 +16,13 @@
 package io.actor4j.database.mongo;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 
 import org.bson.Document;
 
@@ -38,11 +40,15 @@ public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 	protected final AtomicInteger counter;
 	protected final Lock lock;
 	
-	public MongoBufferedBulkWriterImpl(MongoCollection<Document> collection, boolean ordered, int size) {
+	protected final BiConsumer<List<WriteModel<Document>>, Throwable> onError;
+	
+	public MongoBufferedBulkWriterImpl(MongoCollection<Document> collection, boolean ordered, int size, 
+			BiConsumer<List<WriteModel<Document>>, Throwable> onError) {
 		super();
 		this.collection = collection;
 		this.ordered = ordered;
 		this.size = size;
+		this.onError = onError;
 		
 		counter = new AtomicInteger(0);
 		requestsQueue = new ConcurrentLinkedQueue<>();
@@ -66,14 +72,19 @@ public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 	public void flush() {
 		lock.lock();
 		try {
+			List<WriteModel<Document>> requests = null;
 			try {
+				requests = new LinkedList<>(requestsQueue);
 				if (ordered)
-					collection.bulkWrite(new LinkedList<>(requestsQueue));
+					collection.bulkWrite(requests);
 				else
-					collection.bulkWrite(new LinkedList<>(requestsQueue), new BulkWriteOptions().ordered(false));
+					collection.bulkWrite(requests, new BulkWriteOptions().ordered(false));
 				}
 			catch(Exception e) {
 				e.printStackTrace();
+				
+				if (onError!=null)
+					onError.accept(requests, e);
 			}
 			
 			requestsQueue.clear();
