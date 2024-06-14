@@ -106,6 +106,8 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					else
 						tell(dto, message.tag(), dto.source(), message.interaction());
 				}
+				else if (message.tag()==FAILURE)
+					handleFailure(message);
 				else
 					unhandled(message);
 			}
@@ -120,5 +122,9 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 		}
 		else
 			unhandled(message);
+	}
+	
+	public void handleFailure(ActorMessage<?> message) {
+		// empty
 	}
 }

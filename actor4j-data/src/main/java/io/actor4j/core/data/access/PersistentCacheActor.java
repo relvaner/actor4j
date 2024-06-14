@@ -85,6 +85,8 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 				else
 					tell(dto, message.tag(), dto.source(), message.interaction());
 			}
+			else if (message.tag()==FAILURE)
+				handleFailure(message);
 			else
 				unhandled(message);
 		}
@@ -92,5 +94,9 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			cache.evict(message.valueAsLong());
 		else
 			unhandled(message);
+	}
+	
+	public void handleFailure(ActorMessage<?> message) {
+		// empty
 	}
 }

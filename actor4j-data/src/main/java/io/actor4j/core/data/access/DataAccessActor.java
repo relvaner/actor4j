@@ -26,6 +26,8 @@ public abstract class DataAccessActor<K, V> extends ResourceActor {
 	public static final int FIND_ONE    = 320;
 	public static final int FLUSH       = 321;
 	
+	public static final int FAILURE     = 322;
+	
 	public DataAccessActor(String name) {
 		super(name);
 	}

@@ -118,6 +118,8 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 			}
 			catch(Exception e) {
 				e.printStackTrace();
+				
+				tell(message.value(), FAILURE, message.source(), message.interaction());
 			}
 		}
 		else
