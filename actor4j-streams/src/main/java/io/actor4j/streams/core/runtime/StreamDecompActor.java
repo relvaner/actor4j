@@ -136,8 +136,9 @@ public class StreamDecompActor<T, R> extends Actor {
 		checkData(node.data);
 		node.nTasks = adjustSizeForMapReduce(node.nTasks, node.data.size(), node.threshold);
 		for (int i=0; i<node.nTasks; i++) {
+			final int i_ = i;
 			UUID task = addChild(() -> 
-				new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, group, hubGroup, dest_tag)
+				new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString()+"-rank-"+i_, node.operations, group, hubGroup, dest_tag)
 			);
 			group.add(task);
 		}

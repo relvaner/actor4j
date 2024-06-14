@@ -27,6 +27,7 @@ import io.actor4j.core.utils.ActorGroupList;
 
 import static io.actor4j.core.utils.CommPattern.*;
 import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
+//import static io.actor4j.core.logging.ActorLogger.*;
 
 public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> {
 	protected final BinaryOperator<List<R>> defaultReduceOp;
@@ -59,13 +60,13 @@ public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 		int grank = groupList.indexOf(self());
 		if (grank%(1<<(level+1))>0) { 
 			int dest = grank-(1<<level);
-			//System.out.printf("[level: %d] rank %d has sended a message (%s) to rank %d%n", level, group.indexOf(self()), result.getValue().toString(), dest);
+//			systemLogger().log(DEBUG, String.format("[level: %d] rank %d has sent a message (%s) to rank %d", level, groupList.indexOf(self()), result.getValue().toString(), dest));
 			send(ActorMessage.create(new ImmutableList<R>(result.getValue()), REDUCE, self(), groupList.get(dest), null, String.valueOf(level+1), null));
 			stop();
 		}
 		else if (message.tag()==REDUCE && message.value()!=null && message.value() instanceof ImmutableList){
 			List<R> buf = ((ImmutableList<R>)message.value()).get();
-			//System.out.printf("[level: %d] rank %d has received a message (%s) from rank %d%n", level, group.indexOf(self()), buf.toString(), group.indexOf(message.source));
+//			systemLogger().log(DEBUG, String.format("[level: %d] rank %d has received a message (%s) from rank %d", level, groupList.indexOf(self()), buf.toString(), groupList.indexOf(message.source())));
 			if (operations.reduceOp!=null)
 				result.setValue(operations.reduceOp.apply(result.getValue(), buf));
 			else
@@ -97,7 +98,7 @@ public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 				executeOperations((ImmutableList<T>)message.value());
 				
 				level = 0;
-				//System.out.printf("[level: %d] rank %d has got a message (%s) from manager %n", level, group.indexOf(self()), result.getValue().toString());
+//				systemLogger().log(DEBUG, String.format("[level: %d] rank %d has received a message (%s) from node", level, groupList.indexOf(self()), result.getValue().toString()));
 				
 				treeReduction(message);
 				dissolveStash();

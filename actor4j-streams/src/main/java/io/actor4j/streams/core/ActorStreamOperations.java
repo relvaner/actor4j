@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.exceptions.ActorStreamDataException;
 import io.actor4j.streams.core.utils.SortMapReduceStream;
+import io.actor4j.streams.core.utils.SortRecursiveStream;
 import io.actor4j.streams.core.utils.SortStreamType;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -47,7 +48,7 @@ public class ActorStreamOperations<T, R> {
 	}
 	
 	public ActorStreamOperations<T, R> data(List<T> data) {
-		return data(data, -1);
+		return data(data, process.node.threshold>0 ? process.node.threshold : -1);
 	}
 	
 	public ActorStreamOperations<T, R> filter(Predicate<T> filterOp) {
@@ -102,6 +103,16 @@ public class ActorStreamOperations<T, R> {
 	
 	public ActorStreamOperations<?, ?> sortedDESC() {
 		process.sequence(new SortMapReduceStream<>(SortStreamType.SORT_DESCENDING));
+		return this;
+	}
+	
+	public ActorStreamOperations<?, ?> sortedRASC(int threshold) {
+		process.sequence(new SortRecursiveStream<>(SortStreamType.SORT_ASCENDING, threshold));
+		return this;
+	}
+	
+	public ActorStreamOperations<?, ?> sortedRDESC(int threshold) {
+		process.sequence(new SortRecursiveStream<>(SortStreamType.SORT_DESCENDING, threshold));
 		return this;
 	}
 	

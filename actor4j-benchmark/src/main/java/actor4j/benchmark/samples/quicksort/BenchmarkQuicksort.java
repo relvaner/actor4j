@@ -27,8 +27,12 @@ import org.apache.commons.io.FileUtils;
 
 import actor4j.benchmark.BenchmarkSampleActor4j;
 import io.actor4j.core.ActorSystem;
+//import io.actor4j.core.logging.ActorLogger;
 import io.actor4j.streams.core.ActorStream;
 import io.actor4j.streams.core.ActorStreamManager;
+//import io.actor4j.streams.core.utils.SortMapReduceStream;
+import io.actor4j.streams.core.utils.SortRecursiveStream;
+import io.actor4j.streams.core.utils.SortStreamType;
 import shared.benchmark.Benchmark;
 import shared.benchmark.BenchmarkConfig;
 
@@ -42,9 +46,10 @@ public class BenchmarkQuicksort extends BenchmarkSampleActor4j {
 		System.out.printf("Benchmark started (%s)...%n", system.getConfig().name());
 		
 		system.start();
+		//ActorLogger.systemLogger().setLevel(ActorLogger.DEBUG);
 		
 		Benchmark benchmark = new Benchmark(config);
-		
+		int threshold = Integer.valueOf(config.param2);
 		benchmark.start((timeMeasurement, iteration) -> {
 			int data_size = Integer.valueOf(config.param1);
 			List<Integer> data = new ArrayList<>(data_size);
@@ -52,13 +57,9 @@ public class BenchmarkQuicksort extends BenchmarkSampleActor4j {
 				data.add(ThreadLocalRandom.current().nextInt());
 			
 			timeMeasurement.start();
-			ActorStream<Integer, Double> process = new ActorStream<>();
+			ActorStream<Integer, Integer> process = new SortRecursiveStream<>(SortStreamType.SORT_DESCENDING, threshold);
 			process
-				.data(data)
-//				.filter(v -> v>0)
-//				.map(v -> v+100d)
-//				.forEach(System.out::println)
-				.sortedASC();
+				.data(data);
 			
 			ActorStreamManager manager = new ActorStreamManager(system);
 			manager
@@ -76,6 +77,6 @@ public class BenchmarkQuicksort extends BenchmarkSampleActor4j {
 	}
 	
 	public static void main(String[] args) {
-		new BenchmarkQuicksort(new BenchmarkConfig(0, 10, 60, 8, 1, String.valueOf(20_000_000))); // 10 + 60 iterations!
+		new BenchmarkQuicksort(new BenchmarkConfig(0, 10, 60, 8, 1, String.valueOf(10_000_000), String.valueOf(200_000))); // 10 + 60 iterations!
 	}
 }

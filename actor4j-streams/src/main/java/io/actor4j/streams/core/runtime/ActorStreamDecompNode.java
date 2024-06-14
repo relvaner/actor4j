@@ -43,6 +43,7 @@ public class ActorStreamDecompNode<T, R> {
 		
 		this.id = UUID.randomUUID();
 		this.alias = alias;
+		this.threshold = -1;
 		
 		this.operations = new ActorStreamDecompOperations<>();
 		
