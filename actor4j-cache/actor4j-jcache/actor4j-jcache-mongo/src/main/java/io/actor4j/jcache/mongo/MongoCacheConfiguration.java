@@ -15,9 +15,9 @@
  */
 package io.actor4j.jcache.mongo;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.cache.configuration.MutableConfiguration;
@@ -25,8 +25,10 @@ import javax.cache.configuration.MutableConfiguration;
 import org.bson.Document;
 
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.utils.GenericType;
+import io.actor4j.core.utils.Pair;
 import io.actor4j.jcache.mongo.runtime.AsyncMongoCacheLoaderAndWriter;
 
 public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
@@ -42,11 +44,12 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 
 	protected boolean bulkOrdered;
 	protected int bulkSize = -1;
+	protected BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError;
 	
 	protected AsyncMongoCacheLoaderAndWriter<K, V> cacheLoaderAndWriter;
 	
-	protected BiConsumer<K, V> asyncLoadHandler;
-	protected Consumer<Map<K,V>> asyncLoadAllHandler;
+	protected BiConsumer<Pair<K, V>, Throwable> asyncLoadHandler;
+	protected BiConsumer<Map<K,V>, Throwable> asyncLoadAllHandler;
 
 	public MongoClient getMongoClient() {
 		return mongoClient;
@@ -129,26 +132,34 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 		return this;
 	}
 	
+	public BiConsumer<List<WriteModel<Document>>, Throwable> getOnBulkWriterError() {
+		return onBulkWriterError;
+	}
+
+	public void setOnBulkWriterError(BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
+		this.onBulkWriterError = onBulkWriterError;
+	}
+	
+	public AsyncMongoCacheLoaderAndWriter<K, V> getCacheLoaderAndWriter() {
+		return cacheLoaderAndWriter;
+	}
+	
 	// ---
 
-	public BiConsumer<K, V> getAsyncLoadHandler() {
+	public BiConsumer<Pair<K, V>, Throwable> getAsyncLoadHandler() {
 		return asyncLoadHandler;
 	}
 
-	public void setAsyncLoadHandler(BiConsumer<K, V> asyncLoadHandler) {
+	public void setAsyncLoadHandler(BiConsumer<Pair<K, V>, Throwable> asyncLoadHandler) {
 		this.asyncLoadHandler = asyncLoadHandler;
 	}
 
-	public Consumer<Map<K, V>> getAsyncLoadAllHandler() {
+	public BiConsumer<Map<K, V>, Throwable> getAsyncLoadAllHandler() {
 		return asyncLoadAllHandler;
 	}
 
-	public void setAsyncLoadAllHandler(Consumer<Map<K, V>> asyncLoadAllHandler) {
+	public void setAsyncLoadAllHandler(BiConsumer<Map<K, V>, Throwable> asyncLoadAllHandler) {
 		this.asyncLoadAllHandler = asyncLoadAllHandler;
-	}
-
-	public AsyncMongoCacheLoaderAndWriter<K, V> getCacheLoaderAndWriter() {
-		return cacheLoaderAndWriter;
 	}
 	
 	// ---
@@ -156,10 +167,10 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 	public MongoCacheConfiguration<K, V> build() {
 		if (valueType!=null)
 			cacheLoaderAndWriter = new AsyncMongoCacheLoaderAndWriter<K, V>(mongoClient, databaseName, collectionName, 
-				valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize);
+				valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize, onBulkWriterError);
 		else if (valueTypeReference!=null)
 			cacheLoaderAndWriter = new AsyncMongoCacheLoaderAndWriter<K, V>(mongoClient, databaseName, collectionName, 
-				valueTypeReference, bulkOrdered, bulkSize);
+				valueTypeReference, bulkOrdered, bulkSize, onBulkWriterError);
 		
 		cacheLoaderAndWriter.setAsyncLoadHandler(asyncLoadHandler);
 		cacheLoaderAndWriter.setAsyncLoadAllHandler(asyncLoadAllHandler);
