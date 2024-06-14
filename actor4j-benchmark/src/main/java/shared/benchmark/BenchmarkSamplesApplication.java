@@ -28,7 +28,7 @@ import org.apache.commons.cli.ParseException;
 import io.actor4j.core.runtime.ActorThreadMode;
 
 public class BenchmarkSamplesApplication {
-	protected static final String VERSION = "1.0.0";
+	protected static final String VERSION = "2.1.0";
 	
 	public static String prefixToName(String prefix) {
 		StringBuffer buffer = new StringBuffer("");
