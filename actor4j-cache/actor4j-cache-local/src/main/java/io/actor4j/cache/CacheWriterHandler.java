@@ -15,10 +15,8 @@
  */
 package io.actor4j.cache;
 
-import io.actor4j.core.utils.Cache;
+import io.actor4j.core.function.Procedure;
 
-public interface ConcurrentCache<K, V> extends Cache<K, V> {
-	public String name();
-	
-	public void synchronizeWithStorage();
+public interface CacheWriterHandler extends Procedure {
+
 }

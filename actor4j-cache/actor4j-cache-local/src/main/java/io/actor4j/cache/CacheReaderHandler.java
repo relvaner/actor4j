@@ -15,10 +15,8 @@
  */
 package io.actor4j.cache;
 
-import io.actor4j.core.utils.Cache;
+import java.util.function.Consumer;
 
-public interface ConcurrentCache<K, V> extends Cache<K, V> {
-	public String name();
-	
-	public void synchronizeWithStorage();
+public interface CacheReaderHandler<T> extends Consumer<T> {
+
 }

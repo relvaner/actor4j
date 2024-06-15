@@ -15,8 +15,7 @@
  */
 package io.actor4j.cache;
 
-import java.util.function.BiConsumer;
-
 public interface StorageReader<K, V> {
-	 void get(K key, BiConsumer<K, V> handler);
+	 void get(K key, CacheReaderHandler<V> handler);
+//	 void get(Set<K> keys, CacheReaderHandler<Map<K, V>> handler);
 }

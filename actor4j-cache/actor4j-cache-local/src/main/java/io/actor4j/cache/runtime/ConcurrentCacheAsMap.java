@@ -30,6 +30,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 	
 	private final Map<K, V> map;
 	private final Set<K> cacheMiss;
+	private final Set<K> cacheDirty;
 	private final Set<K> cacheDel;
 	
 	private final LockManager<K> lockManager;
@@ -43,6 +44,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 	public ConcurrentCacheAsMap(String cacheName, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter) {
 		map = new ConcurrentHashMap<>();
 		cacheMiss = ConcurrentHashMap.newKeySet();
+		cacheDirty = ConcurrentHashMap.newKeySet();
 		cacheDel = ConcurrentHashMap.newKeySet();
 		lockManager = new LockManager<>();
 		disabled = new AtomicBoolean(false);
@@ -81,7 +83,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 				if (storageReader!=null) {
 					if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 						cacheMiss.add(key);
-						storageReader.get(key, (k, v) -> putIfAbsentLocal(k, v));
+						storageReader.get(key, (v) -> putIfAbsentLocal(key, v));
 					}
 				}
 			}
@@ -125,7 +127,8 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 			if (storageWriter!=null) {
 				if (cacheDel.contains(key))
 					cacheDel.remove(key);
-				storageWriter.put(key, value);
+				cacheDirty.add(key);
+				storageWriter.put(key, value, () -> removeDirty(key, value));
 			}
 		}
 		finally {
@@ -134,6 +137,24 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 		clients.decrementAndGet();
 		
 		return result;
+	}
+	
+	private void removeDirty(K key, V value) {
+		while (disabled.get());
+
+		clients.incrementAndGet();
+		lockManager.lock(key);
+		try {
+			if (cacheDirty.contains(key)) {
+				V current = map.get(key);
+				if (current!=null && current.equals(value))
+					cacheDirty.remove(key);
+			}
+		}
+		finally {
+			lockManager.unLock(key);
+		}
+		clients.decrementAndGet();
 	}
 	
 	@Override
@@ -147,8 +168,10 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 			
 			if (storageWriter!=null)
 				if (!cacheDel.contains(key)) {
+					if (cacheDirty.contains(key))
+						cacheDirty.remove(key);
 					cacheDel.add(key);
-					storageWriter.remove(key, (k) -> removeIfDelLocal(key));
+					storageWriter.remove(key, () -> removeIfDelLocal(key));
 				}
 		}
 		finally {
@@ -179,6 +202,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 		while (clients.get()>0);
 		map.clear();
 		cacheMiss.clear();
+		cacheDirty.clear();
 		cacheDel.clear();
 
 		disabled.set(false);
@@ -187,6 +211,33 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 	@Override
 	public void evict(long duration) {
 		// empty
+	}
+	
+	@Override
+	public void synchronizeWithStorage() {
+		while (disabled.get());
+
+		clients.incrementAndGet();
+		for (K key : cacheDirty) {
+			lockManager.lock(key);
+			try {
+				V value = map.get(key);
+				storageWriter.put(key, value, () -> removeDirty(key, value));
+			}
+			finally {
+				lockManager.unLock(key);
+			}
+		}
+		for (K key : cacheDel) {
+			lockManager.lock(key);
+			try {
+				storageWriter.remove(key, () -> removeIfDelLocal(key));
+			}
+			finally {
+				lockManager.unLock(key);
+			}
+		}
+		clients.decrementAndGet();
 	}
 
 	@Override

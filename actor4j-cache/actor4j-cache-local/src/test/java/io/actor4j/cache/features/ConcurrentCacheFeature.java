@@ -17,6 +17,7 @@ package io.actor4j.cache.features;
 
 import org.junit.Test;
 
+import io.actor4j.cache.CacheWriterHandler;
 import io.actor4j.cache.StorageReader;
 import io.actor4j.cache.StorageWriter;
 import io.actor4j.cache.runtime.ConcurrentCacheAsMap;
@@ -31,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class ConcurrentCacheFeature {
 	@Test
@@ -129,7 +129,7 @@ public class ConcurrentCacheFeature {
 		StorageReader<String, String> reader = (key, handler) -> {
 			readerExecuter.execute(() -> {
 				String value = storage.get(key);
-				handler.accept(key, value);
+				handler.accept(value);
 				// async -> additionally inform client
 			});
 		};
@@ -137,16 +137,20 @@ public class ConcurrentCacheFeature {
 		final Executor writerExecuter = Executors.newSingleThreadExecutor();
 		StorageWriter<String, String> writer = new StorageWriter<>() {
 			@Override
-			public void put(String key, String value) {
-				writerExecuter.execute(() -> storage.put(key, value));
+			public void put(String key, String value, CacheWriterHandler handler) {
+				writerExecuter.execute(() -> {
+					storage.put(key, value);
+					// if no failure, remove dirty bit
+					handler.apply(); 
+				});
 				// async -> additionally inform client
 			}
 
 			@Override
-			public void remove(String key, Consumer<String> handler) {
+			public void remove(String key, CacheWriterHandler handler) {
 				writerExecuter.execute(() -> { 
 					storage.remove(key);
-					handler.accept(key);
+					handler.apply();
 				});
 				// async -> additionally inform client
 			}

@@ -41,6 +41,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 	private final Map<K, Pair<V>> map;
 	private final SortedMap<Long, K> lru;
 	private final Set<K> cacheMiss;
+	private final Set<K> cacheDirty;
 	private final Set<K> cacheDel;
 	
 	private final LockManager<K> lockManager;
@@ -56,6 +57,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		map = new ConcurrentHashMap<>(size);
 		lru = new ConcurrentSkipListMap<>();
 		cacheMiss = ConcurrentHashMap.newKeySet();
+		cacheDirty = ConcurrentHashMap.newKeySet();
 		cacheDel = ConcurrentHashMap.newKeySet();
 		lockManager = new LockManager<>();
 		disabled = new AtomicBoolean(false);
@@ -103,7 +105,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 				if (storageReader!=null) {
 					if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 						cacheMiss.add(key);
-						storageReader.get(key, (k, v) -> putIfAbsentLocal(k, v));
+						storageReader.get(key, (v) -> putIfAbsentLocal(key, v));
 					}
 				}
 			}
@@ -169,7 +171,8 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 			if (storageWriter!=null) {
 				if (cacheDel.contains(key))
 					cacheDel.remove(key);
-				storageWriter.put(key, value);
+				cacheDirty.add(key);
+				storageWriter.put(key, value, () -> removeDirty(key, pair));
 			}
 		}
 		finally {
@@ -178,6 +181,24 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		clients.decrementAndGet();
 		
 		return result;
+	}
+	
+	private void removeDirty(K key, Pair<V> pair) {
+		while (disabled.get());
+
+		clients.incrementAndGet();
+		lockManager.lock(key);
+		try {
+			if (cacheDirty.contains(key)) {
+				Pair<V> current = map.get(key);
+				if (current!=null && current.equals(pair))
+					cacheDirty.remove(key);
+			}
+		}
+		finally {
+			lockManager.unLock(key);
+		}
+		clients.decrementAndGet();
 	}
 	
 	@Override
@@ -193,8 +214,10 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 			
 			if (storageWriter!=null)
 				if (!cacheDel.contains(key)) {
+					if (cacheDirty.contains(key))
+						cacheDirty.remove(key);
 					cacheDel.add(key);
-					storageWriter.remove(key, (k) -> removeIfDelLocal(key));
+					storageWriter.remove(key, () -> removeIfDelLocal(key));
 				}
 		}
 		finally {
@@ -226,6 +249,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		map.clear();
 		lru.clear();
 		cacheMiss.clear();
+		cacheDirty.clear();
 		cacheDel.clear();
 
 		disabled.set(false);
@@ -251,6 +275,33 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 				iterator.remove();
 			}
 		}
+	}
+	
+	@Override
+	public void synchronizeWithStorage() {
+		while (disabled.get());
+
+		clients.incrementAndGet();
+		for (K key : cacheDirty) {
+			lockManager.lock(key);
+			try {
+				Pair<V> pair = map.get(key);
+				storageWriter.put(key, pair.value(), () -> removeDirty(key, pair));
+			}
+			finally {
+				lockManager.unLock(key);
+			}
+		}
+		for (K key : cacheDel) {
+			lockManager.lock(key);
+			try {
+				storageWriter.remove(key, () -> removeIfDelLocal(key));
+			}
+			finally {
+				lockManager.unLock(key);
+			}
+		}
+		clients.decrementAndGet();
 	}
 
 	@Override
