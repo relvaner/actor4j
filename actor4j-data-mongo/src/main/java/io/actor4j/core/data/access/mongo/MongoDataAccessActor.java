@@ -135,7 +135,10 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 					
 					circuitBreaker.success();
 				}
-				catch(Exception e) { // inclusively invocation timeout regarding MongoClient 
+				catch(Exception e) { 
+					// Inclusively invocation timeout regarding MongoClient, Retryable Reads/Writes
+					// @See https://www.mongodb.com/docs/drivers/java/sync/v4.11/fundamentals/connection/mongoclientsettings/
+					
 					e.printStackTrace();
 					
 					circuitBreaker.failure();
