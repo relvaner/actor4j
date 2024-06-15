@@ -17,8 +17,5 @@ package io.actor4j.cache;
 
 public interface StorageWriter<K, V> {
 	void put(K key, V value, CacheWriterHandler handler);
-//	void put(Map<K, V> entries, CacheWriterHandler handler);
-	
 	void remove(K key, CacheWriterHandler handler);
-//	void remove(Set<K> keys, CacheWriterHandler handler);
 }
