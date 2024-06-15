@@ -19,6 +19,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.utils.CircuitBreaker;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.FailureDTO;
@@ -26,6 +27,7 @@ import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.database.mongo.MongoOperations.*;
+//import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,16 +36,19 @@ import java.util.Map;
 import org.bson.Document;
 
 public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
-	protected MongoClient client;
-	protected String databaseName;
-	protected boolean bulkWrite;
-	protected boolean bulkOrdered;
-	protected int bulkSize;
-	protected Class<V> valueType;
-	protected Map<String, MongoBufferedBulkWriter> bulkWriters;
+	protected final MongoClient client;
+	protected final String databaseName;
+	protected final boolean bulkWrite;
+	protected final boolean bulkOrdered;
+	protected final int bulkSize;
+	protected final Class<V> valueType;
+	protected final Map<String, MongoBufferedBulkWriter> bulkWriters;
+	protected final CircuitBreaker circuitBreaker;
 	
-	public MongoDataAccessActor(String name, MongoClient client, String databaseName, boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType) {
-		super(name);
+	public MongoDataAccessActor(String name, MongoClient client, String databaseName, 
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int failureThreshold, int resetTimeout) {
+		super(name, true); // @Stateful
+		
 		this.client = client;
 		this.databaseName = databaseName;
 		this.bulkWrite = bulkWrite;
@@ -52,18 +57,28 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 		this.valueType = valueType;
 		
 		bulkWriters = new HashMap<>();
+		circuitBreaker = new CircuitBreaker(failureThreshold, resetTimeout);
 	}
 	
-	public MongoDataAccessActor(MongoClient client, String databaseName, boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType) {
-		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType);
+	public MongoDataAccessActor(MongoClient client, String databaseName, 
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int failureThreshold, int resetTimeout) {
+		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, failureThreshold, failureThreshold);
+	}
+	
+	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, int failureThreshold, int resetTimeout) {
+		this(name, client, databaseName, false, true, 0, valueType, failureThreshold, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType) {
-		this(name, client, databaseName, false, true, 0, valueType);
+		this(name, client, databaseName, false, true, 0, valueType, 3, 30_000);
+	}
+	
+	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType, int failureThreshold, int resetTimeout) {
+		this(null, client, databaseName, valueType, failureThreshold, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType) {
-		this(null, client, databaseName, valueType);
+		this(null, client, databaseName, valueType, 3, 30_000);
 	}
 	
 	public void onBulkWriterError(List<WriteModel<Document>> requests, Throwable t) {
@@ -76,52 +91,59 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 			@SuppressWarnings("unchecked")
 			PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
 			
-			try {
-				MongoBufferedBulkWriter bulkWriter = null;
-				if (bulkWrite) {
-					bulkWriter = bulkWriters.get(dto.collectionName());
-					if (bulkWriter==null) {
-						bulkWriter = MongoBufferedBulkWriter.create(client, databaseName, dto.collectionName(), bulkOrdered, bulkSize, this::onBulkWriterError);
-						bulkWriters.put(dto.collectionName(), bulkWriter);
+			if (circuitBreaker.isCallable()) {
+				try {
+					MongoBufferedBulkWriter bulkWriter = null;
+					if (bulkWrite) {
+						bulkWriter = bulkWriters.get(dto.collectionName());
+						if (bulkWriter==null) {
+							bulkWriter = MongoBufferedBulkWriter.create(client, databaseName, dto.collectionName(), bulkOrdered, bulkSize, this::onBulkWriterError);
+							bulkWriters.put(dto.collectionName(), bulkWriter);
+						}
 					}
-				}
-				
-				if (message.tag()==FIND_ONE || message.tag()==GET) {
-					V value = convertToValue(findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), valueType);
-					tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
-				}
-				else if (message.tag()==SET) {
-					if (!((boolean)dto.reserved()) && !hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()))
-						insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
-					else
-						replaceOne(Document.parse(dto.filter().encode()), convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
-				}
-				else if (message.tag()==UPDATE_ONE || message.tag()==UPDATE)
-					updateOne(Document.parse(dto.filter().encode()), Document.parse(dto.update().encode()), client, databaseName, dto.collectionName(), bulkWriter);
-				else if (message.tag()==INSERT_ONE) {
-					if (dto.filter()!=null) {
-						if (!hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()))
+					
+					if (message.tag()==FIND_ONE || message.tag()==GET) {
+						V value = convertToValue(findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), valueType);
+						tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
+					}
+					else if (message.tag()==SET) {
+						if (!((boolean)dto.reserved()) && !hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()))
+							insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
+						else
+							replaceOne(Document.parse(dto.filter().encode()), convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
+					}
+					else if (message.tag()==UPDATE_ONE || message.tag()==UPDATE)
+						updateOne(Document.parse(dto.filter().encode()), Document.parse(dto.update().encode()), client, databaseName, dto.collectionName(), bulkWriter);
+					else if (message.tag()==INSERT_ONE) {
+						if (dto.filter()!=null) {
+							if (!hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()))
+								insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
+						}
+						else
 							insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
 					}
+					else if (message.tag()==DELETE_ONE)
+						deleteOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName(), bulkWriter);
+					else if (message.tag()==HAS_ONE) {
+						Object reserved = hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName());
+						tell(dto.shallowCopyWithReserved(reserved), FIND_ONE, message.source(), message.interaction());
+					}
+					else if (message.tag()==FLUSH && bulkWrite)
+						bulkWriter.flush();
 					else
-						insertOne(convertToDocument(dto.value()), client, databaseName, dto.collectionName(), bulkWriter);
+						unhandled(message);
+					
+					circuitBreaker.success();
 				}
-				else if (message.tag()==DELETE_ONE)
-					deleteOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName(), bulkWriter);
-				else if (message.tag()==HAS_ONE) {
-					Object reserved = hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName());
-					tell(dto.shallowCopyWithReserved(reserved), FIND_ONE, message.source(), message.interaction());
+				catch(Exception e) { // inclusively invocation timeout regarding MongoClient 
+					e.printStackTrace();
+					
+					circuitBreaker.failure();
+					tell(FailureDTO.of(dto, e), FAILURE, message.source(), message.interaction());
 				}
-				else if (message.tag()==FLUSH && bulkWrite)
-					bulkWriter.flush();
-				else
-					unhandled(message);
 			}
-			catch(Exception e) {
-				e.printStackTrace();
-				
-				tell(FailureDTO.of(dto, e), FAILURE, message.source(), message.interaction());
-			}
+
+//			systemLogger().log(DEBUG, "circuit breaker: "+circuitBreaker.getState());
 		}
 		else
 			unhandled(message);

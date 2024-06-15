@@ -31,4 +31,16 @@ public abstract class DataAccessActor<K, V> extends ResourceActor {
 	public DataAccessActor(String name) {
 		super(name);
 	}
+
+	public DataAccessActor(boolean stateful) {
+		super(stateful);
+	}
+
+	public DataAccessActor(String name, boolean stateful, boolean bulk) {
+		super(name, stateful, bulk);
+	}
+
+	public DataAccessActor(String name, boolean stateful) {
+		super(name, stateful);
+	}
 }
