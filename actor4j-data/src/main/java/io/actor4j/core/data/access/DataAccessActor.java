@@ -18,6 +18,9 @@ package io.actor4j.core.data.access;
 import io.actor4j.core.actors.ResourceActor;
 
 public abstract class DataAccessActor<K, V> extends ResourceActor {
+	public static final int  DEFAULT_MAX_FAILURES  = 5;
+	public static final long DEFAULT_RESET_TIMEOUT = 30_000;
+	
 	public static final int HAS_ONE     = 315;
 	public static final int INSERT_ONE  = 316;
 	public static final int REPLACE_ONE = 317;

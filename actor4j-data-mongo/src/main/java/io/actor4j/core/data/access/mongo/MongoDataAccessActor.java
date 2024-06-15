@@ -46,7 +46,7 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 	protected final CircuitBreaker circuitBreaker;
 	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int failureThreshold, int resetTimeout) {
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout) {
 		super(name, true); // @Stateful
 		
 		this.client = client;
@@ -57,28 +57,28 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 		this.valueType = valueType;
 		
 		bulkWriters = new HashMap<>();
-		circuitBreaker = new CircuitBreaker(failureThreshold, resetTimeout);
+		circuitBreaker = new CircuitBreaker(maxFailures, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int failureThreshold, int resetTimeout) {
-		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, failureThreshold, failureThreshold);
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout) {
+		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, maxFailures, resetTimeout);
 	}
 	
-	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, int failureThreshold, int resetTimeout) {
-		this(name, client, databaseName, false, true, 0, valueType, failureThreshold, resetTimeout);
+	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout) {
+		this(name, client, databaseName, false, true, 0, valueType, maxFailures, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType) {
-		this(name, client, databaseName, false, true, 0, valueType, 3, 30_000);
+		this(name, client, databaseName, false, true, 0, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
-	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType, int failureThreshold, int resetTimeout) {
-		this(null, client, databaseName, valueType, failureThreshold, resetTimeout);
+	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout) {
+		this(null, client, databaseName, valueType, maxFailures, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType) {
-		this(null, client, databaseName, valueType, 3, 30_000);
+		this(null, client, databaseName, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
 	public void onBulkWriterError(List<WriteModel<Document>> requests, Throwable t) {
