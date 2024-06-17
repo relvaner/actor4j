@@ -1,1 +1,1 @@
-io.actor4j.json.spi.JsonFactoryProvider
+io.actor4j.dataformat.json.org.spi.JsonFactoryProvider

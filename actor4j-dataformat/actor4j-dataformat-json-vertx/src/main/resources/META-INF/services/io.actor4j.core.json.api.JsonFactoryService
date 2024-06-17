@@ -1,1 +1,1 @@
-io.actor4j.json.vertx.spi.JsonFactoryProvider
+io.actor4j.dataformat.json.vertx.spi.JsonFactoryProvider

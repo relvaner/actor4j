@@ -1,1 +1,1 @@
-io.actor4j.msgpack.jackson.spi.ObjectMapperProvider
+io.actor4j.dataformat.msgpack.jackson.spi.ObjectMapperProvider

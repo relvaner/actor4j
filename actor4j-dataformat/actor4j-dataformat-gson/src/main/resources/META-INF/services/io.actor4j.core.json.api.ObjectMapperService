@@ -1,1 +1,1 @@
-io.actor4j.json.gson.spi.ObjectMapperProvider
+io.actor4j.dataformat.gson.spi.ObjectMapperProvider
