@@ -46,7 +46,7 @@ public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorS
 		node.threshold = threshold;
 
 		// Lomuto partition
-		partition((list) -> {
+		partitionRec((list) -> {
 			T pivot = list.getLast();
 			int i=-1;
 			for (int j=0; j<list.size()-1; j++) {
@@ -82,7 +82,7 @@ public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorS
 			}
 		});
 		
-		merge((map, pivot) -> {
+		mergeRec((map, pivot) -> {
 			List<T> result = new ArrayList<>();
 			
 			MutableObject<Integer> index = new MutableObject<>();

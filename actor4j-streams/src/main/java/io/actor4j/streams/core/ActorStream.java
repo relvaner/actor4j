@@ -110,7 +110,7 @@ public class ActorStream<T, R> {
 		return processOperations.streamRx(streamRxOp);
 	}
 	
-	public ActorStreamOperations<T, R> partition(Function<List<T>, Triple<Object, Object, List<T>>> partitionOp) {
+	public ActorStreamOperations<T, R> partitionRec(Function<List<T>, Triple<Object, Object, List<T>>> partitionOp) {
 		return processOperations.partition(partitionOp);
 	}	
 	
@@ -118,7 +118,7 @@ public class ActorStream<T, R> {
 		return processOperations.reduce(reduceOp);
 	}	
 	
-	public ActorStreamOperations<T, R> merge(BiFunction<Map<Long, List<R>>, Object, List<R>> mergeOp) {
+	public ActorStreamOperations<T, R> mergeRec(BiFunction<Map<Long, List<R>>, Object, List<R>> mergeOp) {
 		return processOperations.merge(mergeOp);
 	}	
 	
