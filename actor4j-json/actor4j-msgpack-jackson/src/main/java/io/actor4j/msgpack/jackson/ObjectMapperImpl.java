@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.json.jackson;
+package io.actor4j.msgpack.jackson;
+
+import org.msgpack.jackson.dataformat.MessagePackFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -25,22 +27,19 @@ public class ObjectMapperImpl implements ObjectMapper {
 	private static final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 	
 	static {
-		objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+		objectMapper = new com.fasterxml.jackson.databind.ObjectMapper(new MessagePackFactory());
 		
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 	}
+	
+	public static com.fasterxml.jackson.databind.ObjectMapper underlyingImpl() {
+		return objectMapper;
+	}
 
+	@Deprecated
 	@Override
 	public String mapFrom(Object obj) {
-		String result = null;
-		
-		try {
-			result = objectMapper.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-		return result;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

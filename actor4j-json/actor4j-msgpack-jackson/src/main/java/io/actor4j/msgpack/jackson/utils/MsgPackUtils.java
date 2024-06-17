@@ -13,56 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.json.jackson;
+package io.actor4j.msgpack.jackson.utils;
+
+import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 
-import io.actor4j.core.json.ObjectMapper;
 import io.actor4j.core.utils.GenericType;
+import io.actor4j.msgpack.jackson.ObjectMapperImpl;
+import io.actor4j.msgpack.jackson.TypeReferenceGenerator;
 
-public class ObjectMapperImpl implements ObjectMapper {
-	private static final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+public final class MsgPackUtils {
+	public static byte[] encode(Object obj) {
+		byte[] result = null;
+		
+		try {
+			result = ObjectMapperImpl.underlyingImpl().writeValueAsBytes(obj);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
 	
-	static {
-		objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-		
-		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-	}
-
-	@Override
-	public String mapFrom(Object obj) {
-		String result = null;
-		
-		try {
-			result = objectMapper.writeValueAsString(obj);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-		return result;
-	}
-
-	@Override
-	public <T> T mapTo(String json, Class<T> type) {
+	public static <T> T decode(byte[] src, Class<T> type) {
 		T result = null;
 		
 		try {
-			result = objectMapper.readValue(json, type);
-		} catch (JsonProcessingException e) {
+			result = ObjectMapperImpl.underlyingImpl().readValue(src, type);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		return result;
 	}
-
-	@Override
-	public <T> T mapTo(String json, GenericType<T> type) {
+	
+	public static <T> T decode(byte[] src, GenericType<T> type) {
 		T result = null;
 		
 		try {
-			result = objectMapper.readValue(json, TypeReferenceGenerator.generate(type));
-		} catch (JsonProcessingException e) {
+			result = ObjectMapperImpl.underlyingImpl().readValue(src, TypeReferenceGenerator.generate(type));
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
