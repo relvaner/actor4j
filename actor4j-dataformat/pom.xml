@@ -7,7 +7,7 @@
 		<artifactId>actor4j</artifactId>
 		<version>2.1.0</version>
 	</parent>
-	<artifactId>actor4j-json</artifactId>
+	<artifactId>actor4j-dataformat</artifactId>
 	<packaging>pom</packaging>
 
 	<dependencies>
@@ -26,13 +26,13 @@
 	</dependencies>
 
 	<modules>
-		<module>actor4j-json-org</module>
-		<module>actor4j-json-vertx</module>
-		<module>actor4j-json-bson</module>
+		<module>actor4j-dataformat-json-org</module>
+		<module>actor4j-dataformat-json-vertx</module>
+		<module>actor4j-dataformat-bson</module>
 		
-		<module>actor4j-json-jackson</module>
-		<module>actor4j-json-gson</module>
+		<module>actor4j-dataformat-json-jackson</module>
+		<module>actor4j-dataformat-gson</module>
 		
-		<module>actor4j-msgpack-jackson</module>
+		<module>actor4j-dataformat-msgpack-jackson</module>
 	</modules>
 </project>
