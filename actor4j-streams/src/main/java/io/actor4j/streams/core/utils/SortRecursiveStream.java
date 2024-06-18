@@ -18,7 +18,6 @@ package io.actor4j.streams.core.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.immutable.ImmutableList;
@@ -68,9 +67,7 @@ public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorS
 			return Triple.of(i+1, list.get(i+1), list);
 		});
 
-		flatMap(new Function<List<T>, List<T>>() {
-			@Override
-			public List<T> apply(List<T> list) {
+		flatMap((list) -> {
 				List<T> result = new ArrayList<>(list);
 				
 				if (type == SortStreamType.SORT_ASCENDING)
@@ -79,8 +76,7 @@ public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorS
 					Collections.sort(result, Collections.reverseOrder());
 				
 				return result;
-			}
-		});
+			});
 		
 		mergeRec((map, pivot) -> {
 			List<T> result = new ArrayList<>();
