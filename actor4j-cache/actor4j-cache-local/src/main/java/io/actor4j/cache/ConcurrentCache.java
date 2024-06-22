@@ -20,9 +20,5 @@ import io.actor4j.core.utils.Cache;
 public interface ConcurrentCache<K, V> extends Cache<K, V> {
 	public String name();
 	
-//	public Map<K, V> get(Set<K> keys);
-//	public Map<K, V> put(Map<K, V> entries);
-//	public void remove(Set<K> keys);
-	
 	public void synchronizeWithStorage();
 }

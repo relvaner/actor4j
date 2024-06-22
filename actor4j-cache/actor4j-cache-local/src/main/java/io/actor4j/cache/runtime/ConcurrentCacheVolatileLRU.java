@@ -308,4 +308,22 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 	public String toString() {
 		return "ConcurrentCacheVolatileLRU [map=" + map + ", lru=" + lru + ", size=" + size + "]";
 	}
+
+	@Override
+	public Map<K, V> get(Set<K> keys) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void put(Map<K, V> entries) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void remove(Set<K> keys) {
+		// TODO Auto-generated method stub
+		
+	}
 }
