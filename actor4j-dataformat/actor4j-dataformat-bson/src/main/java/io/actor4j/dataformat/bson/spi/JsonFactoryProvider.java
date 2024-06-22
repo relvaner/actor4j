@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.dataformat.spi;
+package io.actor4j.dataformat.bson.spi;
 
 import java.util.List;
 
