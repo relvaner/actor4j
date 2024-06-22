@@ -57,6 +57,10 @@ public class JsonObjectImpl implements JsonObject {
 		return new JsonObjectImpl().put(key, value);
 	}
 
+	public Document getDocument() {
+		return document;
+	}
+
 	@Override
 	public Object getValue(String key) {
 		return document.get(key);
