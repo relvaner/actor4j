@@ -304,4 +304,9 @@ public class ConcurrentCacheLRU<K, V> implements ConcurrentCache<K, V> {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void close() {
+		// empty
+	}
 }
