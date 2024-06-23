@@ -15,6 +15,7 @@
  */
 package io.actor4j.cache.runtime;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -246,7 +247,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 	}
 
 	@Override
-	public Map<K, V> get(Set<K> keys) {
+	public Map<K, V> get(List<K> keys) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -258,7 +259,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 	}
 
 	@Override
-	public void remove(Set<K> keys) {
+	public void remove(List<K> keys) {
 		// TODO Auto-generated method stub
 		
 	}
