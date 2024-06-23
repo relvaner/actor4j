@@ -13,36 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.cache.rocks.spi;
+package io.actor4j.cache.rocks;
 
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
-import io.actor4j.cache.rocks.RocksDBCache;
-import io.actor4j.cache.rocks.RocksDBCacheSerializer;
-import io.actor4j.core.pods.api.Caching;
-
-public class CacheProvider implements Caching<CacheProvider> {
-	// Initialization-on-demand holder idiom
-	private static class LazyHolder {
-		private final static CacheProvider INSTANCE = new CacheProvider();
-	}
-	
-	private CacheProvider() {
+public final class RocksDBCacheManager {
+	public static void loadLibrary() {
 		RocksDB.loadLibrary();
 	}
 	
-	public static CacheProvider getInstance() {
-		return LazyHolder.INSTANCE;
-	}
-	
-	@Override
-	public CacheProvider getProvider() {
-		return this;
-	}
-	
-	public RocksDB createDB(String path) {
+	public static RocksDB createDB(String path) {
 		RocksDB result = null;
 		
 		final Options options = new Options();
@@ -57,7 +39,7 @@ public class CacheProvider implements Caching<CacheProvider> {
 		return result;
 	}
 	
-	public <K, V> RocksDBCache<K, V> createCache(String path, RocksDBCacheSerializer<K> keySerializer, RocksDBCacheSerializer<V> valueSerializer) {
+	public static <K, V> RocksDBCache<K, V> createCache(String path, RocksDBCacheSerializer<K> keySerializer, RocksDBCacheSerializer<V> valueSerializer) {
 		RocksDBCache<K, V> result = null;
 		
 		RocksDB db = createDB(path);
