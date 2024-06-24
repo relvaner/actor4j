@@ -17,35 +17,28 @@ package io.actor4j.cache.rocks.spi;
 
 import org.rocksdb.RocksDB;
 
-import io.actor4j.cache.rocks.RocksDBCache;
-import io.actor4j.cache.rocks.RocksDBCacheManager;
-import io.actor4j.cache.rocks.RocksDBCacheSerializer;
 import io.actor4j.core.pods.api.Caching;
 
-public class CachingProvider implements Caching<CachingProvider> {
+public class CachingProvider implements Caching<RocksDBCacheManager> {
+	private final RocksDBCacheManager cacheManager;
+	
 	// Initialization-on-demand holder idiom
 	private static class LazyHolder {
 		private final static CachingProvider INSTANCE = new CachingProvider();
 	}
 	
 	private CachingProvider() {
-		RocksDBCacheManager.loadLibrary();
+		RocksDB.loadLibrary();
+		
+		cacheManager = new RocksDBCacheManager();
 	}
 	
-	public static CachingProvider getInstance() {
+	public static CachingProvider getCachingProvider() {
 		return LazyHolder.INSTANCE;
 	}
 	
 	@Override
-	public CachingProvider getCachingProvider() {
-		return this;
-	}
-	
-	public RocksDB createDB(String path) {
-		return RocksDBCacheManager.createDB(path);
-	}
-	
-	public <K, V> RocksDBCache<K, V> createCache(String path, RocksDBCacheSerializer<K> keySerializer, RocksDBCacheSerializer<V> valueSerializer) {
-		return RocksDBCacheManager.createCache(path, keySerializer, valueSerializer);
+	public RocksDBCacheManager getCacheManager() {
+		return cacheManager;
 	}
 }

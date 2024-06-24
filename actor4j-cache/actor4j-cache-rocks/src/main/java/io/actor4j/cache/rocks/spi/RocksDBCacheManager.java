@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.cache.rocks;
+package io.actor4j.cache.rocks.spi;
 
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
+import io.actor4j.cache.rocks.RocksDBCache;
+import io.actor4j.cache.rocks.RocksDBCacheSerializer;
+
 public final class RocksDBCacheManager {
-	public static void loadLibrary() {
-		RocksDB.loadLibrary();
+	protected RocksDBCacheManager() {
+		super();
 	}
 	
-	public static RocksDB createDB(String path) {
+	public RocksDB createDB(String path) {
 		RocksDB result = null;
 		
 		final Options options = new Options();
@@ -39,7 +42,7 @@ public final class RocksDBCacheManager {
 		return result;
 	}
 	
-	public static <K, V> RocksDBCache<K, V> createCache(String path, RocksDBCacheSerializer<K> keySerializer, RocksDBCacheSerializer<V> valueSerializer) {
+	public <K, V> RocksDBCache<K, V> createCache(String path, RocksDBCacheSerializer<K> keySerializer, RocksDBCacheSerializer<V> valueSerializer) {
 		RocksDBCache<K, V> result = null;
 		
 		RocksDB db = createDB(path);
