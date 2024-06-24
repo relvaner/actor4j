@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.jcache;
+package io.actor4j.jcache.spi;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.Configuration;
 
-public class ActorCacheManager {
-	public static CacheManager cacheManager() {
+public class LocalActorCacheManager {
+	public CacheManager underlyingCacheManager() {
 		return Caching.getCachingProvider().getCacheManager();
 	}
 	
-	public static <K, V, C extends Configuration<K, V>> Cache<K, V> createCache(String cacheName, C configuration) {
-		return cacheManager().createCache(cacheName, configuration);
+	public <K, V, C extends Configuration<K, V>> Cache<K, V> createCache(String cacheName, C configuration) {
+		return underlyingCacheManager().createCache(cacheName, configuration);
 	}
 }

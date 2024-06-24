@@ -13,26 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.cache;
+package io.actor4j.cache.spi;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import io.actor4j.cache.ConcurrentCache;
+import io.actor4j.cache.StorageReader;
+import io.actor4j.cache.StorageWriter;
 import io.actor4j.cache.runtime.ConcurrentCacheAsMap;
 import io.actor4j.cache.runtime.ConcurrentCacheLRU;
 import io.actor4j.cache.runtime.ConcurrentCacheVolatileLRU;
 
 public final class LocalActorCacheManager {
-	private static final Object lock = new Object();
-	private static final Map<String, ConcurrentCache<?, ?>> localCachesMap;
-	
-	static {
+	private final Object lock = new Object();
+	private final Map<String, ConcurrentCache<?, ?>> localCachesMap;
+
+	protected LocalActorCacheManager() {
 		localCachesMap = new ConcurrentHashMap<>();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <K, V> ConcurrentCache<K, V> createCache(String cacheName, Function<String, ConcurrentCache<K, V>> factory) {
+	public <K, V> ConcurrentCache<K, V> createCache(String cacheName, Function<String, ConcurrentCache<K, V>> factory) {
 		ConcurrentCache<?, ?> result = localCachesMap.get(cacheName);
 		boolean created = false;
 		
@@ -50,40 +53,40 @@ public final class LocalActorCacheManager {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <K, V> ConcurrentCache<K, V> getCache(String cacheName) {
+	public <K, V> ConcurrentCache<K, V> getCache(String cacheName) {
 		ConcurrentCache<?, ?> result = localCachesMap.get(cacheName);
 		
 		return (ConcurrentCacheAsMap<K, V>)result;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <K, V> ConcurrentCache<K, V> removeCache(String cacheName) {
+	public <K, V> ConcurrentCache<K, V> removeCache(String cacheName) {
 		ConcurrentCache<?, ?> result = localCachesMap.remove(cacheName);
 		
 		return (ConcurrentCacheAsMap<K, V>)result;
 	}
 	
-	public static <K, V> ConcurrentCache<K, V> createCacheAsMap(String cacheName) {
+	public <K, V> ConcurrentCache<K, V> createCacheAsMap(String cacheName) {
 		return createCache(cacheName, (name) -> new ConcurrentCacheAsMap<>(name));
 	}
 	
-	public static <K, V> ConcurrentCache<K, V> createCacheAsMap(String cacheName, StorageReader<K, V> reader, StorageWriter<K, V> writer) {
+	public <K, V> ConcurrentCache<K, V> createCacheAsMap(String cacheName, StorageReader<K, V> reader, StorageWriter<K, V> writer) {
 		return createCache(cacheName, (name) -> new ConcurrentCacheAsMap<>(name, reader, writer));
 	}
 	
-	public static <K, V> ConcurrentCache<K, V> createLRUCache(String cacheName, int size) {
+	public <K, V> ConcurrentCache<K, V> createLRUCache(String cacheName, int size) {
 		return createCache(cacheName, (name) -> new ConcurrentCacheLRU<>(name, size));
 	}
 	
-	public static <K, V> ConcurrentCache<K, V> createLRUCache(String cacheName, int size, StorageReader<K, V> reader, StorageWriter<K, V> writer) {
+	public <K, V> ConcurrentCache<K, V> createLRUCache(String cacheName, int size, StorageReader<K, V> reader, StorageWriter<K, V> writer) {
 		return createCache(cacheName, (name) -> new ConcurrentCacheLRU<>(name, size, reader, writer));
 	}
 	
-	public static <K, V> ConcurrentCache<K, V> createVolatileLRUCache(String cacheName, int size) {
+	public <K, V> ConcurrentCache<K, V> createVolatileLRUCache(String cacheName, int size) {
 		return createCache(cacheName, (name) -> new ConcurrentCacheVolatileLRU<>(name, size));
 	}
 	
-	public static <K, V> ConcurrentCache<K, V> createVolatileLRUCache(String cacheName, int size, StorageReader<K, V> reader, StorageWriter<K, V> writer) {
+	public <K, V> ConcurrentCache<K, V> createVolatileLRUCache(String cacheName, int size, StorageReader<K, V> reader, StorageWriter<K, V> writer) {
 		return createCache(cacheName, (name) -> new ConcurrentCacheVolatileLRU<>(name, size, reader, writer));
 	}
 }

@@ -30,13 +30,15 @@ import com.mongodb.client.MongoClients;
 
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
-import io.actor4j.jcache.ActorCacheManager;
 import io.actor4j.jcache.mongo.MongoCacheConfiguration;
+import io.actor4j.jcache.spi.CachingProvider;
+import io.actor4j.jcache.spi.LocalActorCacheManager;
 import io.actor4j.jcache.utils.DummyCacheEntry;
 
 public class MongoCacheLoaderAndWriterFeature {
 	protected MongoServer mongoServer;
 	protected MongoClient client;
+	protected LocalActorCacheManager cacheManager;
 	
 	@Before
 	public void before() {
@@ -48,6 +50,8 @@ public class MongoCacheLoaderAndWriterFeature {
 		mongoServer.bind("localhost", 27027);
 		
 		client = MongoClients.create("mongodb://localhost:27027");
+		
+		cacheManager = CachingProvider.getCachingProvider().getCacheManager();
 	}
 	
 	@After
@@ -65,7 +69,7 @@ public class MongoCacheLoaderAndWriterFeature {
 			.setCollectionName("collection01")
 			.setValueType(String.class)
 			.build();
-		Cache<String, String> cache = ActorCacheManager.createCache("test", configuration);
+		Cache<String, String> cache = cacheManager.createCache("test", configuration);
 		
 		cache.put("key01", "value01");
 		cache.put("key02", "value02");
@@ -95,7 +99,7 @@ public class MongoCacheLoaderAndWriterFeature {
 			.setValueType(String.class)
 			.setBulkSize(1)
 			.build();
-		Cache<String, String> cache = ActorCacheManager.createCache("test_bulk_1", configuration);
+		Cache<String, String> cache = cacheManager.createCache("test_bulk_1", configuration);
 		
 		cache.put("key01", "value01");
 		cache.put("key02", "value02");
@@ -125,7 +129,7 @@ public class MongoCacheLoaderAndWriterFeature {
 			.setValueType(String.class)
 			.setBulkSize(2)
 			.build();
-		Cache<String, String> cache = ActorCacheManager.createCache("test_bulk_2", configuration);
+		Cache<String, String> cache = cacheManager.createCache("test_bulk_2", configuration);
 		
 		cache.put("key01", "value01");
 		cache.put("key02", "value02");
@@ -164,7 +168,7 @@ public class MongoCacheLoaderAndWriterFeature {
 			.setValueType(String.class)
 			.setBulkSize(10)
 			.build();
-		Cache<String, String> cache = ActorCacheManager.createCache("test_bulk_10", configuration);
+		Cache<String, String> cache = cacheManager.createCache("test_bulk_10", configuration);
 		
 		cache.put("key01", "value01");
 		cache.put("key02", "value02");
@@ -200,7 +204,7 @@ public class MongoCacheLoaderAndWriterFeature {
 			.setCollectionName("collection05")
 			.setValueType(Point.class)
 			.build();
-		Cache<Integer, Point> cache = ActorCacheManager.createCache("test_point", configuration);
+		Cache<Integer, Point> cache = cacheManager.createCache("test_point", configuration);
 		
 		cache.put(100, new Point(12, 55));
 		cache.put(101, new Point(13, 56));
