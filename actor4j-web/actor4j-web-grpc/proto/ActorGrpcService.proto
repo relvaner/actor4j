@@ -1,5 +1,5 @@
 syntax = "proto3";
-package actor4j.web.grpc;
+package io.actor4j.web.grpc;
 
 message ActorGrpcRequest {
 	int32 tag = 1;
