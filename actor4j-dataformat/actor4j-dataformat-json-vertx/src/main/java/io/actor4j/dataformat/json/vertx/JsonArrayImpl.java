@@ -116,14 +116,24 @@ public class JsonArrayImpl implements JsonArray {
 
 	@Override
 	public JsonArray add(Object value) {
-		jsonArray.add(value);
+		if (value instanceof JsonObjectImpl impl)
+			jsonArray.add(impl.jsonObject);
+		if (value instanceof JsonArrayImpl impl)
+			jsonArray.add(impl.jsonArray);
+		else
+			jsonArray.add(value);
 		
 		return this;
 	}
 
 	@Override
 	public JsonArray add(int pos, Object value) {
-		jsonArray.add(pos, value);
+		if (value instanceof JsonObjectImpl impl)
+			jsonArray.add(pos, impl.jsonObject);
+		if (value instanceof JsonArrayImpl impl)
+			jsonArray.add(pos, impl.jsonArray);
+		else
+			jsonArray.add(pos, value);
 		
 		return this;
 	}
@@ -131,21 +141,36 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonArray addAll(JsonArray array) {
 		if (array!=null && array instanceof JsonArrayImpl array_)
-			jsonArray.addAll(array_.jsonArray);
+			for (Object value : array_.jsonArray)
+				add(value);
 			
 		return this;
 	}
 
 	@Override
 	public JsonArray set(int pos, Object value) {
-		jsonArray.set(pos, value);
+		if (value instanceof JsonObjectImpl impl)
+			jsonArray.set(pos, impl.jsonObject);
+		if (value instanceof JsonArrayImpl impl)
+			jsonArray.set(pos, impl.jsonArray);
+		else
+			jsonArray.set(pos, value);
 		
 		return this;
 	}
 
 	@Override
 	public boolean contains(Object value) {
-		return jsonArray.contains(value);
+		boolean result = false;
+		
+		if (value instanceof JsonObjectImpl impl)
+			 result = jsonArray.contains(impl.jsonObject);
+		if (value instanceof JsonArrayImpl impl)
+			 result = jsonArray.contains(impl.jsonArray);
+		else
+			 result = jsonArray.contains(value);
+		
+		return result;
 	}
 
 	@Override

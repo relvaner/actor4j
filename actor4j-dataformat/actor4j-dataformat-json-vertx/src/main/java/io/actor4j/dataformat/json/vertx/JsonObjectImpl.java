@@ -126,7 +126,12 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public JsonObject put(String key, Object value) {
-		jsonObject.put(key, value);
+		if (value instanceof JsonObjectImpl impl)
+			jsonObject.put(key, impl.jsonObject);
+		if (value instanceof JsonArrayImpl impl)
+			jsonObject.put(key, impl.jsonArray);
+		else
+			jsonObject.put(key, value);
 		
 		return this;
 	}

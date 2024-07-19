@@ -207,7 +207,7 @@ public class JsonArrayImpl implements JsonArray {
 		if (array!=null && array instanceof JsonArrayImpl array_)
 			for (Object value : array_.jsonArray.toList()) {
 				try {
-					jsonArray.put(value);
+					add(value);
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -235,9 +235,13 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public boolean contains(Object value) {
 		boolean result = false;
-		
-		if (value!=null)
-			result = jsonArray.toList().stream().anyMatch((v) -> v!=null ? v.equals(value) : false);
+
+		if (value instanceof JsonObjectImpl impl)
+			result = jsonArray.toList().contains(impl.jsonObject);
+		else if (value instanceof JsonArrayImpl impl)
+			result = jsonArray.toList().contains(impl.jsonArray);
+		else
+			result = jsonArray.toList().contains(value);
 
 		return result;
 	}
