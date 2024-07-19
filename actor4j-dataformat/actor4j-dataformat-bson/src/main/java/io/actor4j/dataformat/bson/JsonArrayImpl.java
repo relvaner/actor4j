@@ -88,14 +88,24 @@ public class JsonArrayImpl implements JsonArray {
 
 	@Override
 	public JsonArray add(Object value) {
-		list.add(value);
+		if (value instanceof JsonObjectImpl impl)
+			list.add(impl.document);
+		if (value instanceof JsonArrayImpl impl)
+			list.add(impl.list);
+		else
+			list.add(value);
 		
 		return this;
 	}
 
 	@Override
 	public JsonArray add(int pos, Object value) {
-		list.add(pos, value);
+		if (value instanceof JsonObjectImpl impl)
+			list.add(pos, impl.document);
+		if (value instanceof JsonArrayImpl impl)
+			list.add(pos, impl.list);
+		else
+			list.add(pos, value);
 		
 		return this;
 	}
@@ -103,21 +113,36 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonArray addAll(JsonArray array) {
 		if (array!=null && array instanceof JsonArrayImpl array_)
-			list.addAll(array_.list);
+			for (Object value : array_.list)
+				add(value);
 			
 		return this;
 	}
 
 	@Override
 	public JsonArray set(int pos, Object value) {
-		list.set(pos, value);
+		if (value instanceof JsonObjectImpl impl)
+			list.set(pos, impl.document);
+		if (value instanceof JsonArrayImpl impl)
+			list.set(pos, impl.list);
+		else
+			list.set(pos, value);
 		
 		return this;
 	}
 
 	@Override
 	public boolean contains(Object value) {
-		return list.contains(value);
+		boolean result = false;
+
+		if (value instanceof JsonObjectImpl impl)
+			result = list.contains(impl.document);
+		else if (value instanceof JsonArrayImpl impl)
+			result = list.contains(impl.list);
+		else
+			result = list.contains(value);
+
+		return result;
 	}
 
 	@Override

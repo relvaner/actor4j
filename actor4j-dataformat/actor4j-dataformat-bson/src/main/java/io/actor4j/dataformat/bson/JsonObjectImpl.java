@@ -129,7 +129,12 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public JsonObject put(String key, Object value) {
-		document.put(key, value);
+		if (value instanceof JsonObjectImpl impl)
+			document.put(key, impl.document);
+		if (value instanceof JsonArrayImpl impl)
+			document.put(key, impl.list);
+		else
+			document.put(key, value);
 		
 		return this;
 	}
@@ -143,7 +148,7 @@ public class JsonObjectImpl implements JsonObject {
 	public JsonObject mergeIn(JsonObject other) {
 		if (other!=null && other instanceof JsonObjectImpl other_)
 			for (String key : other_.document.keySet())
-				document.put(key, other.getValue(key));
+				put(key, other.getValue(key));
 			
 		return this;
 	}

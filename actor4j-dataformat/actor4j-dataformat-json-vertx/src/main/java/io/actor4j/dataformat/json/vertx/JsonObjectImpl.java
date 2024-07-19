@@ -143,7 +143,9 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public JsonObject mergeIn(JsonObject other) {
-		jsonObject.mergeIn(jsonObject);
+		if (other!=null && other instanceof JsonObjectImpl other_)
+			for (String key : other_.jsonObject.fieldNames())
+				put(key, other.getValue(key));
 			
 		return this;
 	}

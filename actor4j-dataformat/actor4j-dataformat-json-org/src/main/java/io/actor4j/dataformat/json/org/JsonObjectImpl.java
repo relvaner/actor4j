@@ -198,13 +198,8 @@ public class JsonObjectImpl implements JsonObject {
 	@Override
 	public JsonObject mergeIn(JsonObject other) {
 		if (other!=null && other instanceof JsonObjectImpl other_)
-			for (String key : other_.jsonObject.keySet()) {
-				try {
-					jsonObject.put(key, other.getValue(key));
-				} catch (JSONException | NullPointerException e) {
-					e.printStackTrace();
-				}
-			}
+			for (String key : other_.jsonObject.keySet())
+				put(key, other.getValue(key));
 			
 		return this;
 	}
