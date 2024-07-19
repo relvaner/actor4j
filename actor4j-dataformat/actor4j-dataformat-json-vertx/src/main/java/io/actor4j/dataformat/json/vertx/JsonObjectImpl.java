@@ -174,4 +174,9 @@ public class JsonObjectImpl implements JsonObject {
 	public boolean isEmpty() {
 		return jsonObject.isEmpty();
 	}
+
+	@Override
+	public Object underlyingImpl() {
+		return jsonObject;
+	}
 }

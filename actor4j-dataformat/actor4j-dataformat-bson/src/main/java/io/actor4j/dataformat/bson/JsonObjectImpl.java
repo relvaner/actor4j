@@ -184,4 +184,9 @@ public class JsonObjectImpl implements JsonObject {
 	public boolean isEmpty() {
 		return document.isEmpty();
 	}
+
+	@Override
+	public Object underlyingImpl() {
+		return document;
+	}
 }

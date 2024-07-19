@@ -295,4 +295,9 @@ public class JsonArrayImpl implements JsonArray {
 	public Iterator<Object> iterator() {
 		return jsonArray.iterator();
 	}
+
+	@Override
+	public Object underlyingImpl() {
+		return jsonArray;
+	}
 }

@@ -252,4 +252,9 @@ public class JsonObjectImpl implements JsonObject {
 	public String toString() {
 		return jsonObject.toString();
 	}
+
+	@Override
+	public Object underlyingImpl() {
+		return jsonObject;
+	}
 }
