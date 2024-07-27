@@ -17,6 +17,7 @@ package io.actor4j.database.mongo;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.bson.Document;
@@ -49,71 +50,67 @@ public final class MongoOperations {
 	}
 	
 	public static void insertOne(Document document, MongoClient client, String databaseName, String collectionName) {
-		insertOne(document, client, databaseName, collectionName, null);
+		insertOne(document, null, client, databaseName, collectionName, null);
 	}
 	
 	public static void replaceOne(Bson filter, Document document, MongoClient client, String databaseName, String collectionName) {
-		replaceOne(filter, document, client, databaseName, collectionName, null);
+		replaceOne(filter, document, null, client, databaseName, collectionName, null);
 	}
 	
 	public static void updateOne(Bson filter, Bson update, MongoClient client, String databaseName, String collectionName) {
-		updateOne(filter, update, client, databaseName, collectionName, null);
+		updateOne(filter, update, null, client, databaseName, collectionName, null);
 	}
 	
 	public static void deleteOne(Bson filter, MongoClient client, String databaseName, String collectionName) {
-		deleteOne(filter, client, databaseName, collectionName, null);
+		deleteOne(filter, null, client, databaseName, collectionName, null);
 	}
 	
-	public static void insertOne(Document document, MongoBufferedBulkWriter bulkWriter) {
-		if (bulkWriter!=null)
-			bulkWriter.write(new InsertOneModel<>(document));
+	public static void insertOne(Document document, UUID id, MongoBufferedBulkWriter bulkWriter) {
+		insertOne(document, id, null, null, null, bulkWriter);
 	}
 	
-	public static void insertOne(Document document, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
+	public static void replaceOne(Bson filter, Document document, UUID id, MongoBufferedBulkWriter bulkWriter) {
+		replaceOne(filter, document, id, null, null, null, bulkWriter);
+	}
+	
+	public static void updateOne(Bson filter, Bson update, UUID id, MongoBufferedBulkWriter bulkWriter) {
+		updateOne(filter, update, id, null, null, null, bulkWriter);
+	}
+	
+	public static void deleteOne(Bson filter, UUID id, MongoBufferedBulkWriter bulkWriter) {
+		deleteOne(filter, id, null, null, null, bulkWriter);
+	}
+	
+	public static void insertOne(Document document, UUID id, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
 		if (bulkWriter!=null)
-			bulkWriter.write(new InsertOneModel<>(document));
+			bulkWriter.write(new InsertOneModel<>(document), id);
 		else {
 			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
 			collection.insertOne(document);
 		}
 	}
-	
-	public static void replaceOne(Bson filter, Document document, MongoBufferedBulkWriter bulkWriter) {
+
+	public static void replaceOne(Bson filter, Document document, UUID id, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
 		if (bulkWriter!=null)
-			bulkWriter.write(new ReplaceOneModel<>(filter, document));
-	}
-	
-	public static void replaceOne(Bson filter, Document document, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
-		if (bulkWriter!=null)
-			bulkWriter.write(new ReplaceOneModel<>(filter, document));
+			bulkWriter.write(new ReplaceOneModel<>(filter, document), id);
 		else {
 			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
 			collection.replaceOne(filter, document);
 		}
 	}
 	
-	public static void updateOne(Bson filter, Bson update, MongoBufferedBulkWriter bulkWriter) {
+	public static void updateOne(Bson filter, Bson update, UUID id, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
 		if (bulkWriter!=null)
-			bulkWriter.write(new UpdateOneModel<>(filter, update));
-	}
-	
-	public static void updateOne(Bson filter, Bson update, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
-		if (bulkWriter!=null)
-			bulkWriter.write(new UpdateOneModel<>(filter, update));
+			bulkWriter.write(new UpdateOneModel<>(filter, update), id);
 		else {
 			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
 			collection.updateOne(filter, update);
 		}
 	}
-	
-	public static void deleteOne(Bson filter, MongoBufferedBulkWriter bulkWriter) {
+
+	public static void deleteOne(Bson filter, UUID id, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
 		if (bulkWriter!=null)
-			bulkWriter.write(new DeleteOneModel<>(filter));
-	}
-	
-	public static void deleteOne(Bson filter, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
-		if (bulkWriter!=null)
-			bulkWriter.write(new DeleteOneModel<>(filter));
+			bulkWriter.write(new DeleteOneModel<>(filter), id);
 		else {
 			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
 			collection.deleteOne(filter);

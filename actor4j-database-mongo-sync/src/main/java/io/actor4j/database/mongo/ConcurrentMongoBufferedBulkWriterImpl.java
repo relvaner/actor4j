@@ -16,30 +16,36 @@
 package io.actor4j.database.mongo;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.bson.Document;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.WriteModel;
 
+import io.actor4j.core.utils.Pair;
+
 public class ConcurrentMongoBufferedBulkWriterImpl extends MongoBufferedBulkWriterImpl implements ConcurrentMongoBufferedBulkWriter {
 	protected final Lock lock;
-	
+
 	public ConcurrentMongoBufferedBulkWriterImpl(MongoCollection<Document> collection, boolean ordered, int size,
-			BiConsumer<List<WriteModel<Document>>, Throwable> onError) {
-		super(collection, ordered, size, onError);
-		
+			Consumer<List<Pair<UUID, WriteModel<Document>>>> onSuccess,
+			BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError) {
+		super(collection, ordered, size, onSuccess, onError);
+
+
 		lock = new ReentrantLock();
 	}
-
+	
 	@Override
-	public void write(WriteModel<Document> request) {
+	public void write(WriteModel<Document> request, UUID id) {
 		lock.lock();
 		try {
-			super.write(request);
+			super.write(request, id);
 		}
 		finally {
 			lock.unlock();

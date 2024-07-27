@@ -18,7 +18,10 @@ package io.actor4j.database.mongo;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.bson.Document;
 
@@ -26,23 +29,27 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.WriteModel;
 
+import io.actor4j.core.utils.Pair;
+
 public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 	protected final MongoCollection<Document> collection;
 	
-	protected final Queue<WriteModel<Document>> requestsQueue;
+	protected final Queue<Pair<UUID, WriteModel<Document>>> requestsQueue;
 	protected final boolean ordered;
 	
 	protected final int size;
 	protected int count;
 	
-	protected final BiConsumer<List<WriteModel<Document>>, Throwable> onError;
+	protected final BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError;
+	protected final Consumer<List<Pair<UUID, WriteModel<Document>>>> onSuccess;
 	
 	public MongoBufferedBulkWriterImpl(MongoCollection<Document> collection, boolean ordered, int size, 
-			BiConsumer<List<WriteModel<Document>>, Throwable> onError) {
+			Consumer<List<Pair<UUID, WriteModel<Document>>>> onSuccess, BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError) {
 		super();
 		this.collection = collection;
 		this.ordered = ordered;
 		this.size = size;
+		this.onSuccess = onSuccess;
 		this.onError = onError;
 		
 		count = 0;
@@ -50,21 +57,21 @@ public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 	}
 	
 	@Override
-	public void write(WriteModel<Document> request) {
-		requestsQueue.offer(request);
+	public void write(WriteModel<Document> request, UUID id) {
+		requestsQueue.offer(Pair.of(id, request));
 		if (++count==size)
 			flush();
 	}
 	
 	@Override
 	public void flush() {
-		List<WriteModel<Document>> requests = null;
+		List<Pair<UUID, WriteModel<Document>>> requests = new LinkedList<>(requestsQueue);
 		try {
-			requests = new LinkedList<>(requestsQueue);
+			List<WriteModel<Document>> writeModels = requestsQueue.stream().map((r) -> r.b()).collect(Collectors.toList());
 			if (ordered)
-				collection.bulkWrite(requests);
+				collection.bulkWrite(writeModels);
 			else
-				collection.bulkWrite(requests, new BulkWriteOptions().ordered(false));
+				collection.bulkWrite(writeModels, new BulkWriteOptions().ordered(false));
 			}
 		catch(Exception e) {
 			e.printStackTrace();
