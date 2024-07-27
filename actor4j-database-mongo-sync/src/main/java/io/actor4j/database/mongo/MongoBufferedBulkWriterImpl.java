@@ -18,10 +18,6 @@ package io.actor4j.database.mongo;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 
 import org.bson.Document;
@@ -37,8 +33,7 @@ public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 	protected final boolean ordered;
 	
 	protected final int size;
-	protected final AtomicInteger counter;
-	protected final Lock lock;
+	protected int count;
 	
 	protected final BiConsumer<List<WriteModel<Document>>, Throwable> onError;
 	
@@ -50,48 +45,35 @@ public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 		this.size = size;
 		this.onError = onError;
 		
-		counter = new AtomicInteger(0);
-		requestsQueue = new ConcurrentLinkedQueue<>();
-		lock = new ReentrantLock();
+		count = 0;
+		requestsQueue = new LinkedList<>();
 	}
 	
 	@Override
 	public void write(WriteModel<Document> request) {
-		lock.lock();
-		try {
-			requestsQueue.offer(request);
-			if (counter.incrementAndGet()==size)
-				flush();
-		}
-		finally {
-			lock.unlock();
-		}
+		requestsQueue.offer(request);
+		if (++count==size)
+			flush();
 	}
 	
 	@Override
 	public void flush() {
-		lock.lock();
+		List<WriteModel<Document>> requests = null;
 		try {
-			List<WriteModel<Document>> requests = null;
-			try {
-				requests = new LinkedList<>(requestsQueue);
-				if (ordered)
-					collection.bulkWrite(requests);
-				else
-					collection.bulkWrite(requests, new BulkWriteOptions().ordered(false));
-				}
-			catch(Exception e) {
-				e.printStackTrace();
-				
-				if (onError!=null)
-					onError.accept(requests, e);
+			requests = new LinkedList<>(requestsQueue);
+			if (ordered)
+				collection.bulkWrite(requests);
+			else
+				collection.bulkWrite(requests, new BulkWriteOptions().ordered(false));
 			}
+		catch(Exception e) {
+			e.printStackTrace();
 			
-			requestsQueue.clear();
-			counter.set(0);
+			if (onError!=null)
+				onError.accept(requests, e);
 		}
-		finally {
-			lock.unlock();
-		}
+		
+		requestsQueue.clear();
+		count = 0;
 	}
 }

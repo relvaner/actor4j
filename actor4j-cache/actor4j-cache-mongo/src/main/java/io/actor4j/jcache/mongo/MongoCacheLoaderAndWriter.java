@@ -38,6 +38,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.utils.GenericType;
+import io.actor4j.database.mongo.ConcurrentMongoBufferedBulkWriter;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
 
 public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, CacheWriter<K, V> {
@@ -70,7 +71,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 		this.bulkOrdered = bulkOrdered;
 		this.bulkSize = bulkSize;
 		if (bulkSize > 0)
-			this.bulkWriter = MongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
+			this.bulkWriter = ConcurrentMongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
 					bulkSize, onBulkWriterError);
 		else
 			this.bulkWriter = null;
@@ -90,7 +91,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 		this.bulkOrdered = bulkOrdered;
 		this.bulkSize = bulkSize;
 		if (bulkSize > 0)
-			this.bulkWriter = MongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
+			this.bulkWriter = ConcurrentMongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
 					bulkSize, onBulkWriterError);
 		else
 			this.bulkWriter = null;
