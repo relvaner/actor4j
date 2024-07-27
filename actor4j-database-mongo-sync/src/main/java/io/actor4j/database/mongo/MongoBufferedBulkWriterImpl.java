@@ -40,9 +40,9 @@ public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 	protected final int size;
 	protected int count;
 	
-	protected final BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError;
 	protected final Consumer<List<Pair<UUID, WriteModel<Document>>>> onSuccess;
-	
+	protected final BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError;
+
 	public MongoBufferedBulkWriterImpl(MongoCollection<Document> collection, boolean ordered, int size, 
 			Consumer<List<Pair<UUID, WriteModel<Document>>>> onSuccess, BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError) {
 		super();
