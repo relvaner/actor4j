@@ -34,22 +34,39 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 		if (message.value()!=null && message.value() instanceof VolatileDataAccessDTO) {
 			VolatileDataAccessDTO<K,V> dto = ( VolatileDataAccessDTO<K,V>)message.value();
 			
-			if (message.tag()==GET) {
-				V value = cache.get(dto.key());
-				if (value instanceof DeepCopyable)
-					value = ((DeepCopyable<V>)value).deepCopy();
-				tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+			try {
+				boolean unhandled = false;
+				if (message.tag()==GET) {
+					V value = cache.get(dto.key());
+					if (value instanceof DeepCopyable)
+						value = ((DeepCopyable<V>)value).deepCopy();
+					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+				}
+				else if (message.tag()==SET)
+					cache.put(dto.key(), dto.value());
+				else if (message.tag()==UPDATE)
+					; // empty
+				else if (message.tag()==DEL)
+					cache.remove(dto.key());
+				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
+					cache.clear();
+				else {
+					unhandled = true;
+					unhandled(message);
+				}
+				
+				if (!unhandled) {
+					if (message.tag()!=GET)
+						tell(dto, SUCCESS, dto.source(), message.interaction());
+				}
+				else
+					tell(dto, ActorMessage.UNHANDLED, dto.source(), message.interaction());
 			}
-			else if (message.tag()==SET)
-				cache.put(dto.key(), dto.value());
-			else if (message.tag()==UPDATE)
-				; // empty
-			else if (message.tag()==DEL)
-				cache.remove(dto.key());
-			else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
-				cache.clear();
-			else
-				unhandled(message);
+			catch(Exception e) {
+				e.printStackTrace();
+				
+				tell(VolatileFailureDTO.of(dto, e), FAILURE, dto.source(), message.interaction());
+			}
 		}
 		else if (message.tag()==EVICT)
 			cache.evict(message.valueAsLong());
