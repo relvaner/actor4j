@@ -97,7 +97,7 @@ public class PodVolatileActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value()!=null && message.value() instanceof VolatileDTO && message.tag()==GET) {
+		if (message.tag()==GET && message.value()!=null && message.value() instanceof VolatileDTO) {
 			VolatileDTO<K, V> dto = (VolatileDTO<K, V>)message.value();
 			return Pair.of(dto.key(), dto.value());
 		}
