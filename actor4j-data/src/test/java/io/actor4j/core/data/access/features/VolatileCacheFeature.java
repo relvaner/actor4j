@@ -66,7 +66,8 @@ public class VolatileCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag()==ActorWithCache.SUCCESS || message.tag()==ActorWithCache.FAILURE)
+				// Ignore
+				if (message.tag()==ActorWithCache.SUCCESS)
 					return;
 				
 				if (i<4) {
@@ -193,7 +194,8 @@ public class VolatileCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag()==ActorWithCache.SUCCESS || message.tag()==ActorWithCache.FAILURE)
+				// Ignore
+				if (message.tag()==ActorWithCache.SUCCESS)
 					return;
 				
 				if (i<4) {
