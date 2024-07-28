@@ -73,7 +73,7 @@ public class VolatileCacheFeature {
 				if (i<4) {
 					tell(VolatileDTO.create(keys[i], self()), ActorWithCache.GET, "vcache1");
 					
-					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null && msg.tag()==ActorWithCache.GET, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
@@ -92,7 +92,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<5) {
 							tell(VolatileDTO.create(keys[2], self()), ActorWithCache.GET, "vcache1");
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null && msg2.tag()==ActorWithCache.GET, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (payload.value()==null) {
@@ -113,7 +113,7 @@ public class VolatileCacheFeature {
 					if (i==7)
 						i++;
 					tell(VolatileDTO.create(keys[i-5], self()), ActorWithCache.GET, "vcache1");
-					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null && msg.tag()==ActorWithCache.GET, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
@@ -130,7 +130,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<13) {
 							tell(VolatileDTO.create(keys[i-9], self()), ActorWithCache.GET, "vcache1");
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null && msg2.tag()==ActorWithCache.GET, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (keys[i-9].equals(payload.key())) {
@@ -201,7 +201,7 @@ public class VolatileCacheFeature {
 				if (i<4) {
 					manager.get(keys[i]);
 					
-					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null && msg.tag()==ActorWithCache.GET, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
@@ -220,7 +220,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<5) {
 							manager.get(keys[2]);
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null && msg2.tag()==ActorWithCache.GET, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (payload.value()==null) {
@@ -241,7 +241,7 @@ public class VolatileCacheFeature {
 					if (i==7)
 						i++;
 					manager.get(keys[i-5]);
-					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+					await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null && msg.tag()==ActorWithCache.GET, (msg) -> {
 						@SuppressWarnings("unchecked")
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
@@ -258,7 +258,7 @@ public class VolatileCacheFeature {
 					become((msg) -> {
 						if (i<13) {
 							manager.get(keys[i-9]);
-							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null, (msg2) -> {
+							await((msg2) -> msg2.source()!=system.SYSTEM_ID() && msg2.value()!=null && msg2.tag()==ActorWithCache.GET, (msg2) -> {
 								@SuppressWarnings("unchecked")
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (keys[i-9].equals(payload.key())) {

@@ -80,37 +80,37 @@ public class PersistentActorCacheManager<K, V> {
 	
 	public void set(K key, V value) {
 		if (keyname!=null)
-			actorRef.tell(PersistentDTO.create(key, value, keyname, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, collectionName, actorRef.self()), SET, cacheAlias);
 		else
-			actorRef.tell(PersistentDTO.create(key, value, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, collectionName, actorRef.self()), SET, cacheAlias);
 	}
 	
 	public void update(K key, V value, JsonObject update) {
 		if (keyname!=null)
-			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update : null, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update : null, collectionName, actorRef.self()), SET, cacheAlias);
 		else
-			actorRef.tell(PersistentDTO.create(key, value, null, update!=null ? update : null, collectionName), SET, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, value, keyname, update!=null ? update : null, collectionName, actorRef.self()), SET, cacheAlias);
 	}
 	
 	public void del(K key) {
 		if (keyname!=null)
-			actorRef.tell(PersistentDTO.create(key, null, keyname, collectionName), DEL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, null, keyname, collectionName, actorRef.self()), DEL, cacheAlias);
 		else
-			actorRef.tell(PersistentDTO.create(key, null, collectionName), DEL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(key, null, collectionName, actorRef.self()), DEL, cacheAlias);
 	}
 	
 	public void delAll() {
 		if (keyname!=null)
-			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName), DEL_ALL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName, actorRef.self()), DEL_ALL, cacheAlias);
 		else
-			actorRef.tell(PersistentDTO.create(null, null, collectionName), DEL_ALL, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, collectionName, actorRef.self()), DEL_ALL, cacheAlias);
 	}
 	
 	public void clear() {
 		if (keyname!=null)
-			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName), CLEAR, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName, actorRef.self()), CLEAR, cacheAlias);
 		else
-			actorRef.tell(PersistentDTO.create(null, null, collectionName), CLEAR, cacheAlias);
+			actorRef.tell(PersistentDTO.create(null, null, collectionName, actorRef.self()), CLEAR, cacheAlias);
 	}
 	
 	public void evict(long duration) {

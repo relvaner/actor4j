@@ -43,7 +43,7 @@ public class PersistentCacheFeature {
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor() {
 		ActorSystem system = ActorSystem.create(AllFeaturesTest.factory());
-		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
+		final int COUNT = 4/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
 		
@@ -61,17 +61,21 @@ public class PersistentCacheFeature {
 				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestObject>(
 						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestObject>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess));
 
-				tell(PersistentDTO.create("key1", new TestObject("key1", "value1"), "key", "test"), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key2", new TestObject("key2", "value2"), "key", "test"), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key3", new TestObject("key3", "value3"), "key", "test"), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key4", new TestObject("key4", "value4"), "key", "test"), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key1", new TestObject("key1", "value1"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key2", new TestObject("key2", "value2"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key3", new TestObject("key3", "value3"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key4", new TestObject("key4", "value4"), "key", "test", self()), ActorWithCache.SET, "cache1");
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
+				// Ignore
+				if (message.tag()==ActorWithCache.SUCCESS)
+					return;
+				
 				tell(PersistentDTO.create(keys[i], "key", "test", self()), ActorWithCache.GET, "cache1");
 				
-				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+				await((msg) -> msg.tag()==ActorWithCache.GET && msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					@SuppressWarnings("unchecked")
 					PersistentDTO<String, TestObject> payload = ((PersistentDTO<String, TestObject>)msg.value());
 					if (payload.value()!=null) {
@@ -111,7 +115,7 @@ public class PersistentCacheFeature {
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor_with_manager_imdb() {
 		ActorSystem system = ActorSystem.create(AllFeaturesTest.factory());
-		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
+		final int COUNT = 4/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
 		
@@ -137,9 +141,13 @@ public class PersistentCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
+				// Ignore
+				if (message.tag()==ActorWithCache.SUCCESS)
+					return;
+				
 				manager.get(keys[i]);
 				
-				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+				await((msg) -> msg.tag()==ActorWithCache.GET && msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					Pair<String, TestObject> pair = manager.get(msg);
 					
 					if (pair!=null && pair.b()!=null) {
