@@ -114,19 +114,19 @@ public class PodVolatileActorCacheManager<K, V> {
 	}
 	
 	public void set(K key, V value) {
-		actorRef.tell(VolatileDTO.create(key, value), SET, replica);
+		actorRef.tell(VolatileDTO.create(key, value, actorRef.self()), SET, replica);
 	}
 	
 	public void del(K key) {
-		actorRef.tell(VolatileDTO.create(key), DEL, replica);
+		actorRef.tell(VolatileDTO.create(key, actorRef.self()), DEL, replica);
 	}
 	
 	public void delAll() {
-		actorRef.tell(VolatileDTO.create(), DEL_ALL, replica);
+		actorRef.tell(VolatileDTO.create(actorRef.self()), DEL_ALL, replica);
 	}
 	
 	public void clear() {
-		actorRef.tell(VolatileDTO.create(), CLEAR, replica);
+		actorRef.tell(VolatileDTO.create(actorRef.self()), CLEAR, replica);
 	}
 	
 	public void evict(long duration) {
