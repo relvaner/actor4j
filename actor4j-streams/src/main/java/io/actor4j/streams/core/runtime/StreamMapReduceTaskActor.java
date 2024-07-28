@@ -26,7 +26,7 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
 
 import static io.actor4j.core.utils.CommPattern.*;
-import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
+import static io.actor4j.streams.core.runtime.ActorStreamsTag.*;
 //import static io.actor4j.core.logging.ActorLogger.*;
 
 public class StreamMapReduceTaskActor<T, R> extends StreamDecompTaskActor<T, R> {

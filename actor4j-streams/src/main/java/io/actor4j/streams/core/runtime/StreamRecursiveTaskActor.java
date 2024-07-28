@@ -16,8 +16,8 @@
 package io.actor4j.streams.core.runtime;
 
 import static io.actor4j.core.utils.CommPattern.broadcast;
-import static io.actor4j.streams.core.runtime.ActorMessageTag.TASK;
-import static io.actor4j.streams.core.runtime.ActorMessageTag.RESULT;
+import static io.actor4j.streams.core.runtime.ActorStreamsTag.TASK;
+import static io.actor4j.streams.core.runtime.ActorStreamsTag.RESULT;
 
 import java.util.ArrayList;
 import java.util.HashSet;

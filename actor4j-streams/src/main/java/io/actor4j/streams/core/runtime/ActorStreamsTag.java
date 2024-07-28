@@ -15,10 +15,12 @@
  */
 package io.actor4j.streams.core.runtime;
 
-public final class ActorMessageTag {
-	public static final int DATA     = 1;
-	public static final int TASK     = 2;
-	public static final int REDUCE   = 3;
-	public static final int RESULT   = 4;
-	public static final int SHUTDOWN = 5;
+import static io.actor4j.core.messages.ActorReservedTag.*;
+
+public final class ActorStreamsTag {
+	public static final int DATA     = RESERVED_STREAMS_DATA;
+	public static final int TASK     = RESERVED_STREAMS_TASK;
+	public static final int REDUCE   = RESERVED_STREAMS_REDUCE;
+	public static final int RESULT   = RESERVED_STREAMS_RESULT;
+	public static final int SHUTDOWN = RESERVED_STREAMS_SHUTDOWN;
 }

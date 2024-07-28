@@ -17,7 +17,7 @@ package io.actor4j.core.reactive.streams;
 
 import static io.actor4j.core.messages.ActorReservedTag.*;
 
-public final class ReactiveStreamsTag {
+public final class ActorReactiveStreamsTag {
 	public static final int SUBSCRIPTION_REQUEST       = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_REQUEST;
 	public static final int SUBSCRIPTION_REQUEST_RESET = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_REQUEST_RESET;
 	public static final int SUBSCRIPTION_CANCEL        = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_CANCEL;

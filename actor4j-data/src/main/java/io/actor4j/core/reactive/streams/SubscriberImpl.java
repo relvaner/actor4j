@@ -19,7 +19,7 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.function.Procedure;
 import io.actor4j.core.messages.ActorMessage;
 
-import static io.actor4j.core.reactive.streams.ReactiveStreamsTag.*;
+import static io.actor4j.core.reactive.streams.ActorReactiveStreamsTag.*;
 
 import java.util.HashMap;
 import java.util.Map;

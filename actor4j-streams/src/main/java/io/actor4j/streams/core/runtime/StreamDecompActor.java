@@ -35,7 +35,7 @@ import io.actor4j.core.utils.Triple;
 import io.actor4j.streams.core.exceptions.ActorStreamDataException;
 
 import static io.actor4j.core.utils.CommPattern.*;
-import static io.actor4j.streams.core.runtime.ActorMessageTag.*;
+import static io.actor4j.streams.core.runtime.ActorStreamsTag.*;
 
 public class StreamDecompActor<T, R> extends Actor {
 	protected final ActorStreamDecompNode<T, R> node;

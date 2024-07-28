@@ -15,7 +15,7 @@
  */
 package io.actor4j.streams.core;
 
-import static io.actor4j.streams.core.runtime.ActorMessageTag.DATA;
+import static io.actor4j.streams.core.runtime.ActorStreamsTag.DATA;
 
 import java.util.Arrays;
 import java.util.List;

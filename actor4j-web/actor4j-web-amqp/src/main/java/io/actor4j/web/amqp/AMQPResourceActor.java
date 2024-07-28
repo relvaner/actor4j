@@ -31,15 +31,16 @@ import com.rabbitmq.client.Consumer;
 
 import io.actor4j.core.actors.ResourceActor;
 import io.actor4j.core.messages.ActorMessage;
+import static io.actor4j.core.messages.ActorReservedTag.*;
 
 /*
  *  MQTT compatible implementation (MQTT topics use a topic exchange (amq.topic by default))
  * 	@See https://www.rabbitmq.com/mqtt.html 
  */
 public abstract class AMQPResourceActor extends ResourceActor {
-	public static final int PUBLISH     = 1;
-	public static final int SUBSCRIBE   = 2;
-	public static final int UNSUBSCRIBE = 3;
+	public static final int PUBLISH     = RESERVED_PUBSUB_PUBLISH;
+	public static final int SUBSCRIBE   = RESERVED_PUBSUB_SUBSCRIBE;
+	public static final int UNSUBSCRIBE = RESERVED_PUBSUB_UNSUBSCRIBE;
 	
 	protected volatile Connection connection;
 	protected final String host;

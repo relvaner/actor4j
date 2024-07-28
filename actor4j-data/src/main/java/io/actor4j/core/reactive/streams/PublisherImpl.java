@@ -15,7 +15,7 @@
  */
 package io.actor4j.core.reactive.streams;
 
-import static io.actor4j.core.reactive.streams.ReactiveStreamsTag.*;
+import static io.actor4j.core.reactive.streams.ActorReactiveStreamsTag.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
