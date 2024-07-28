@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
+import static io.actor4j.core.messages.ActorReservedTag.*;
 
 /**
  * publish over broker or directly to the topic actor (Tag=GET_TOPIC_ACTOR), watch(TOPIC_ACTOR) on starvation (no subscribers)
@@ -32,9 +33,9 @@ public class BrokerActor extends Actor {
 	protected Map<String, UUID> topics;
 	protected Map<String, Integer> counter;
 	
-	public static final int GET_TOPIC_ACTOR = 100;
-	public static final int CLEAN_UP = 101;
-	protected static final int INTERNAL_FORWARDED_BY_BROKER = 102;
+	public static final int GET_TOPIC_ACTOR = RESERVED_PUBSUB_GET_TOPIC_ACTOR;
+	public static final int CLEAN_UP 		= RESERVED_PUBSUB_CLEAN_UP;
+	protected static final int INTERNAL_FORWARDED_BY_BROKER = RESERVED_PUBSUB_FORWARDED_BY_BROKER;
 	
 	public BrokerActor() {
 		this("broker-actor");

@@ -15,13 +15,15 @@
  */
 package io.actor4j.core.reactive.streams;
 
+import static io.actor4j.core.messages.ActorReservedTag.*;
+
 public final class ReactiveStreamsTag {
-	public static final int SUBSCRIPTION_REQUEST       = 200;
-	public static final int SUBSCRIPTION_REQUEST_RESET = 201;
-	public static final int SUBSCRIPTION_CANCEL        = 202;
-	public static final int SUBSCRIPTION_BULK          = 203;
-	public static final int SUBSCRIPTION_CANCEL_BULK   = 204;
-	public static final int ON_NEXT                    = 205;
-	public static final int ON_ERROR                   = 206;
-	public static final int ON_COMPLETE                = 207;
+	public static final int SUBSCRIPTION_REQUEST       = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_REQUEST;
+	public static final int SUBSCRIPTION_REQUEST_RESET = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_REQUEST_RESET;
+	public static final int SUBSCRIPTION_CANCEL        = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_CANCEL;
+	public static final int SUBSCRIPTION_BULK          = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_BULK;
+	public static final int SUBSCRIPTION_CANCEL_BULK   = RESERVED_REACTIVE_STREAMS_SUBSCRIPTION_CANCEL_BULK;
+	public static final int ON_NEXT                    = RESERVED_REACTIVE_STREAMS_ON_NEXT;
+	public static final int ON_ERROR                   = RESERVED_REACTIVE_STREAMS_ON_ERROR;
+	public static final int ON_COMPLETE                = RESERVED_REACTIVE_STREAMS_ON_COMPLETE;
 }
