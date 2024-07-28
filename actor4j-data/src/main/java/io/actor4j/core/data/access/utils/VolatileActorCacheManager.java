@@ -70,19 +70,19 @@ public class VolatileActorCacheManager<K, V> {
 	}
 	
 	public void set(K key, V value) {
-		actorRef.tell(VolatileDTO.create(key, value), SET, cacheAlias);
+		actorRef.tell(VolatileDTO.create(key, value, actorRef.self()), SET, cacheAlias);
 	}
 	
 	public void del(K key) {
-		actorRef.tell(VolatileDTO.create(key), DEL, cacheAlias);
+		actorRef.tell(VolatileDTO.create(key, actorRef.self()), DEL, cacheAlias);
 	}
 	
 	public void delAll() {
-		actorRef.tell(VolatileDTO.create(), DEL_ALL, cacheAlias);
+		actorRef.tell(VolatileDTO.create(actorRef.self()), DEL_ALL, cacheAlias);
 	}
 	
 	public void clear() {
-		actorRef.tell(VolatileDTO.create(), CLEAR, cacheAlias);
+		actorRef.tell(VolatileDTO.create(actorRef.self()), CLEAR, cacheAlias);
 	}
 	
 	public void evict(long duration) {

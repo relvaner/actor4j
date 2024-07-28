@@ -58,14 +58,17 @@ public class VolatileCacheFeature {
 				system.addActor(() -> new PrimaryVolatileCacheActor<String, String>(
 						"primary", group, "vcache1", (id) -> () -> new SecondaryVolatileCacheActor<String, String>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500));
 
-				tell(VolatileDTO.create("key1", "value1"), ActorWithCache.SET, "vcache1");
-				tell(VolatileDTO.create("key2", "value2"), ActorWithCache.SET, "vcache1");
-				tell(VolatileDTO.create("key3", "value3"), ActorWithCache.SET, "vcache1");
-				tell(VolatileDTO.create("key4", "value4"), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key1", "value1", self()), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key2", "value2", self()), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key3", "value3", self()), ActorWithCache.SET, "vcache1");
+				tell(VolatileDTO.create("key4", "value4", self()), ActorWithCache.SET, "vcache1");
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
+				if (message.tag()==ActorWithCache.SUCCESS || message.tag()==ActorWithCache.FAILURE)
+					return;
+				
 				if (i<4) {
 					tell(VolatileDTO.create(keys[i], self()), ActorWithCache.GET, "vcache1");
 					
@@ -84,7 +87,7 @@ public class VolatileCacheFeature {
 					});
 				}
 				else if (i==4) {
-					tell(VolatileDTO.create(keys[2]), ActorWithCache.DEL, "vcache1");
+					tell(VolatileDTO.create(keys[2], self()), ActorWithCache.DEL, "vcache1");
 					become((msg) -> {
 						if (i<5) {
 							tell(VolatileDTO.create(keys[2], self()), ActorWithCache.GET, "vcache1");
@@ -122,7 +125,7 @@ public class VolatileCacheFeature {
 					});
 				}
 				else if (i>8) {
-					tell(VolatileDTO.create(), ActorWithCache.DEL_ALL, "vcache1");
+					tell(VolatileDTO.create(self()), ActorWithCache.DEL_ALL, "vcache1");
 					become((msg) -> {
 						if (i<13) {
 							tell(VolatileDTO.create(keys[i-9], self()), ActorWithCache.GET, "vcache1");
@@ -190,6 +193,9 @@ public class VolatileCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
+				if (message.tag()==ActorWithCache.SUCCESS || message.tag()==ActorWithCache.FAILURE)
+					return;
+				
 				if (i<4) {
 					manager.get(keys[i]);
 					

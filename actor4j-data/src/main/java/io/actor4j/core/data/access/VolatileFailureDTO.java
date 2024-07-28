@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2018, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,8 @@
  */
 package io.actor4j.core.data.access;
 
-import java.util.UUID;
-
-public record VolatileDataAccessDTO<K, V>(K key, V value, UUID source) implements VolatileDTO<K, V>  {
-	public VolatileDataAccessDTO(UUID source) {
-		this(null, null, source);
-	}
-	
-	public VolatileDataAccessDTO(K key, UUID source) {
-		this(key, null, source);
-	}
-	
-	public VolatileDataAccessDTO<K, V> shallowCopy(V value) {
-		return new VolatileDataAccessDTO<K, V>(key, value, source);
+public record VolatileFailureDTO<K, V>(VolatileDataAccessDTO<K, V> dto, Throwable throwable) {
+	public static <K, V> VolatileFailureDTO<K, V> of(VolatileDataAccessDTO<K, V> dto, Throwable throwable) {
+		return new VolatileFailureDTO<K, V>(dto, throwable);
 	}
 }

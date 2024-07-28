@@ -47,35 +47,48 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 		if (message.value()!=null && message.value() instanceof VolatileDataAccessDTO) {
 			VolatileDataAccessDTO<K,V> dto = (VolatileDataAccessDTO<K,V>)message.value();
 			
-			if (message.tag()==GET) {
-				V value = cache.get(dto.key());
-				if (value instanceof DeepCopyable)
-					value = ((DeepCopyable<V>)value).deepCopy();
-				tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+			try {
+				boolean unhandled = false;
+				if (message.tag()==GET) {
+					V value = cache.get(dto.key());
+					if (value instanceof DeepCopyable)
+						value = ((DeepCopyable<V>)value).deepCopy();
+					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+				}
+				else if (message.source() == primary) {
+					if (message.tag()==SET)
+						cache.put(dto.key(), dto.value());
+					else if (message.tag()==DEL)
+						cache.remove(dto.key());
+					else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
+						cache.clear();
+					else if (message.tag()==EVICT)
+						cache.evict(message.valueAsLong());
+					else
+						unhandled(message);
+				}
+				else {
+					if (message.tag()==SET)
+						publish(dto, SET);
+					else if (message.tag()==UPDATE)
+						; // empty
+					else if (message.tag()==DEL)
+						publish(dto, DEL);
+					else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
+						publish(dto, DEL_ALL);
+					else {
+						unhandled = true;
+						unhandled(message);
+					}
+					
+					if (unhandled)
+						tell(dto, ActorMessage.UNHANDLED, dto.source(), message.interaction());
+				}
 			}
-			else if (message.source() == primary) {
-				if (message.tag()==SET)
-					cache.put(dto.key(), dto.value());
-				else if (message.tag()==DEL)
-					cache.remove(dto.key());
-				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
-					cache.clear();
-				else if (message.tag()==EVICT)
-					cache.evict(message.valueAsLong());
-				else
-					unhandled(message);
-			}
-			else {
-				if (message.tag()==SET)
-					publish(VolatileDTO.create(dto.key(), dto.value()), SET);
-				else if (message.tag()==UPDATE)
-					; // empty
-				else if (message.tag()==DEL)
-					publish(VolatileDTO.create(dto.key()), DEL);
-				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
-					publish(VolatileDTO.create(), DEL_ALL);
-				else
-					unhandled(message);
+			catch(Exception e) {
+				e.printStackTrace();
+				
+				tell(VolatileFailureDTO.of(dto, e), FAILURE, dto.source(), message.interaction());
 			}
 		}
 		else if (message.tag()==EVICT)
