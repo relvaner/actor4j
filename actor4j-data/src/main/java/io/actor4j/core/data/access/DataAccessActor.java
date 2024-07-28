@@ -16,20 +16,22 @@
 package io.actor4j.core.data.access;
 
 import io.actor4j.core.actors.ResourceActor;
+import static io.actor4j.core.messages.ActorReservedTag.*;
 
 public abstract class DataAccessActor<K, V> extends ResourceActor {
 	public static final int  DEFAULT_MAX_FAILURES  = 5;
 	public static final long DEFAULT_RESET_TIMEOUT = 30_000;
 	
-	public static final int HAS_ONE     = 315;
-	public static final int INSERT_ONE  = 316;
-	public static final int REPLACE_ONE = 317;
-	public static final int UPDATE_ONE  = 318;
-	public static final int DELETE_ONE  = 319;
-	public static final int FIND_ONE    = 320;
-	public static final int FLUSH       = 321;
+	public static final int HAS_ONE     = RESERVED_DATA_ACCESS_HAS_ONE;
+	public static final int INSERT_ONE  = RESERVED_DATA_ACCESS_INSERT_ONE;
+	public static final int REPLACE_ONE = RESERVED_DATA_ACCESS_REPLACE_ONE;
+	public static final int UPDATE_ONE  = RESERVED_DATA_ACCESS_UPDATE_ONE;
+	public static final int DELETE_ONE  = RESERVED_DATA_ACCESS_DELETE_ONE;
+	public static final int FIND_ONE    = RESERVED_DATA_ACCESS_FIND_ONE;
+	public static final int FLUSH       = RESERVED_DATA_ACCESS_FLUSH;
 	
-	public static final int FAILURE     = 322;
+	public static final int SUCCESS     = RESERVED_DATA_ACCESS_SUCCESS;
+	public static final int FAILURE     = RESERVED_DATA_ACCESS_FAILURE;
 	
 	public DataAccessActor(String name) {
 		super(name);
