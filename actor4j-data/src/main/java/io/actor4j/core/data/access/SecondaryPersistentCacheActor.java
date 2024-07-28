@@ -44,10 +44,11 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void receive(ActorMessage<?> message) {
-		if (message.value()!=null) {
-			if (message.value() instanceof PersistentDataAccessDTO) {
-				PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
-				
+		if (message.value()!=null && message.value() instanceof PersistentDataAccessDTO) {
+			PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
+			
+			try {
+				boolean unhandled = false;
 				if (message.tag()==GET) {
 					V value = cache.get(dto.key());
 					if (value!=null) {
@@ -67,21 +68,31 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 					     message.tag()==CAU || 
 					     message.tag()==EVICT)
 					publish(message);
-				else
+				else {
+					unhandled = true;
 					unhandled(message);
-			}
-			else if (message.value() instanceof VolatileDataAccessDTO && message.source() == primary) {
-				VolatileDataAccessDTO<K,V> dto = (VolatileDataAccessDTO<K,V>)message.value();
+				}
 				
-				if (message.tag()==SET)
-					cache.put(dto.key(), dto.value());
-				else if (message.tag()==DEL)
-					cache.remove(dto.key());
-				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
-					cache.clear();
-				else
-					unhandled(message);
+				if (unhandled)
+					tell(dto, ActorMessage.UNHANDLED, dto.source(), message.interaction());
 			}
+			catch(Exception e) {
+				e.printStackTrace();
+				
+				tell(PersistentFailureDTO.of(dto, e), FAILURE, dto.source(), message.interaction());
+			}
+		}
+		else if (message.value() instanceof VolatileDataAccessDTO && message.source() == primary) {
+			VolatileDataAccessDTO<K,V> dto = (VolatileDataAccessDTO<K,V>)message.value();
+			
+			if (message.tag()==SET)
+				cache.put(dto.key(), dto.value());
+			else if (message.tag()==DEL)
+				cache.remove(dto.key());
+			else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
+				cache.clear();
+			else
+				unhandled(message);
 		}
 		else if (message.tag()==EVICT)
 			cache.evict(message.valueAsLong());

@@ -41,54 +41,69 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 		if (message.value()!=null && message.value() instanceof PersistentDataAccessDTO) {
 			PersistentDataAccessDTO<K,V> dto = (PersistentDataAccessDTO<K,V>)message.value();
 			
-			if (message.tag()==GET) {
-				V value = cache.get(dto.key());
-				if (value!=null) {
-					if (value instanceof DeepCopyable)
-						value = ((DeepCopyable<V>)value).deepCopy();
-					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+			try {
+				boolean unhandled = false;
+				if (message.tag()==GET) {
+					V value = cache.get(dto.key());
+					if (value!=null) {
+						if (value instanceof DeepCopyable)
+							value = ((DeepCopyable<V>)value).deepCopy();
+						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+					}
+					else
+						tell(message.value(), GET, dataAccess, message.interaction());
 				}
-				else
-					tell(message.value(), GET, dataAccess, message.interaction());
-			}
-			else if (message.tag()==SET) {
-				Object reserved = cache.get(dto.key()) != null;
-				cache.put(dto.key(), dto.value());
-				tell(dto.shallowCopyWithReserved(reserved), SET, dataAccess);
-			}
-			else if (message.tag()==UPDATE) {
-				cache.remove(dto.key());
-				tell(message.value(), UPDATE, dataAccess);
-			}
-			else if (message.tag()==DEL) {
-				cache.remove(dto.key());
-				tell(message.value(), DELETE_ONE, dataAccess);
-			}
-			else if (message.tag()==DEL_ALL) {
-				cache.clear();
-				// drop collection
-			}
-			else if (message.tag()==CLEAR)
-				cache.clear();
-			else if (message.source()==dataAccess && message.tag()==FIND_ONE) {
-				cache.put(dto.key(), dto.value());
-				tell(dto, GET, dto.source(), message.interaction());
-			}
-			else if (message.tag()==CAS || message.tag()==CAU) {
-				V value = cache.get(dto.key());
-				if (value.hashCode()==dto.hashCodeExpected()) {
-					int tag = SET;
-					if (message.tag()==CAU)
-						tag = UPDATE;
-					receive(message.shallowCopy(tag));
+				else if (message.tag()==SET) {
+					Object reserved = cache.get(dto.key()) != null;
+					cache.put(dto.key(), dto.value());
+					tell(dto.shallowCopyWithReserved(reserved), SET, dataAccess);
 				}
-				else
-					tell(dto, message.tag(), dto.source(), message.interaction());
+				else if (message.tag()==UPDATE) {
+					cache.remove(dto.key());
+					tell(message.value(), UPDATE, dataAccess);
+				}
+				else if (message.tag()==DEL) {
+					cache.remove(dto.key());
+					tell(message.value(), DELETE_ONE, dataAccess);
+				}
+				else if (message.tag()==DEL_ALL) {
+					cache.clear();
+					// drop collection
+				}
+				else if (message.tag()==CLEAR)
+					cache.clear();
+				else if (message.source()==dataAccess && message.tag()==FIND_ONE) {
+					cache.put(dto.key(), dto.value());
+					tell(dto, GET, dto.source(), message.interaction());
+				}
+				else if (message.tag()==CAS || message.tag()==CAU) {
+					V value = cache.get(dto.key());
+					if (value.hashCode()==dto.hashCodeExpected()) {
+						int tag = SET;
+						if (message.tag()==CAU)
+							tag = UPDATE;
+						receive(message.shallowCopy(tag));
+					}
+					else
+						tell(dto, message.tag(), dto.source(), message.interaction());
+				}
+				else if (message.source()==dataAccess && message.tag()==DataAccessActor.SUCCESS && message.value() instanceof PersistentDataAccessDTO origin_dto)
+					handleSuccess(message, origin_dto);
+				else if (message.source()==dataAccess && message.tag()==DataAccessActor.FAILURE && message.value() instanceof PersistentFailureDTO failure)
+					handleFailure(message, failure);
+				else {
+					unhandled = true;
+					unhandled(message);
+				}
+				
+				if (unhandled)
+					tell(dto, ActorMessage.UNHANDLED, dto.source(), message.interaction());
 			}
-			else if (message.source()==dataAccess && message.tag()==FAILURE && message.value() instanceof FailureDTO failure)
-				handleFailure(message, failure);
-			else
-				unhandled(message);
+			catch(Exception e) {
+				e.printStackTrace();
+				
+				tell(PersistentFailureDTO.of(dto, e), ActorWithCache.FAILURE, dto.source(), message.interaction());
+			}
 		}
 		else if (message.tag()==EVICT)
 			cache.evict(message.valueAsLong());
@@ -96,7 +111,11 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			unhandled(message);
 	}
 	
-	public void handleFailure(ActorMessage<?> message, FailureDTO<K,V> failure) {
-		tell(failure, FAILURE, failure.dto().source(), message.interaction());
+	public void handleSuccess(ActorMessage<?> message, PersistentDataAccessDTO<K,V> dto) {
+		tell(dto, DataAccessActor.SUCCESS, dto.source(), message.interaction());
+	}
+	
+	public void handleFailure(ActorMessage<?> message, PersistentFailureDTO<K,V> failure) {
+		tell(failure, DataAccessActor.FAILURE, failure.dto().source(), message.interaction());
 	}
 }
