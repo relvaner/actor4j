@@ -24,7 +24,7 @@ import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.HubPattern;
 
 public class Fibonacci extends Actor {
-	public static final int CREATE = 10_000;
+	public static final int CREATE = 1_000;
 	
 	public static AtomicInteger count = new AtomicInteger(0);
 	

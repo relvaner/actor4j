@@ -31,7 +31,7 @@ import akka.routing.Routee;
 import akka.routing.Router;
 
 public class Fibonacci extends UntypedAbstractActor {
-	public static final int CREATE = 10_000;
+	public static final int CREATE = 1_000;
 	
 	public static AtomicInteger count = new AtomicInteger(0);
 	

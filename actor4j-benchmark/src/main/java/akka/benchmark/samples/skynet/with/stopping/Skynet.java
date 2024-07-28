@@ -33,7 +33,7 @@ import akka.routing.Router;
 // @see https://github.com/atemerev/skynet
 // @see https://github.com/atemerev/skynet/blob/master/java-quasar/src/main/java/Skynet.java
 public class Skynet extends UntypedAbstractActor {
-	public static final int CREATE = 10000;
+	public static final int CREATE = 1_000;
 	
 	public static AtomicInteger count = new AtomicInteger(0);
 	
