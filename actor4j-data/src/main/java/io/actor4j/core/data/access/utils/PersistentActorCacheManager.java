@@ -63,7 +63,7 @@ public class PersistentActorCacheManager<K, V> {
 	
 	@SuppressWarnings("unchecked")
 	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.value()!=null && message.value() instanceof PersistentDTO) {
+		if (message.value()!=null && message.value() instanceof PersistentDTO && message.tag()==GET) {
 			PersistentDTO<K, V> dto = (PersistentDTO<K, V>)message.value();
 			return Pair.of(dto.key(), dto.value());
 		}
