@@ -17,7 +17,9 @@ package io.actor4j.jcache.mongo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.cache.configuration.MutableConfiguration;
@@ -44,7 +46,8 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 
 	protected boolean bulkOrdered;
 	protected int bulkSize = -1;
-	protected BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError;
+	protected Consumer<List<Pair<UUID, WriteModel<Document>>>> onBulkWriterSuccess;
+	protected BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onBulkWriterError;
 	
 	protected AsyncMongoCacheLoaderAndWriter<K, V> cacheLoaderAndWriter;
 	
@@ -132,14 +135,22 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 		return this;
 	}
 	
-	public BiConsumer<List<WriteModel<Document>>, Throwable> getOnBulkWriterError() {
+	public Consumer<List<Pair<UUID, WriteModel<Document>>>> getOnBulkWriterSuccess() {
+		return onBulkWriterSuccess;
+	}
+
+	public void setOnBulkWriterSuccess(Consumer<List<Pair<UUID, WriteModel<Document>>>> onBulkWriterSuccess) {
+		this.onBulkWriterSuccess = onBulkWriterSuccess;
+	}
+	
+	public BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> getOnBulkWriterError() {
 		return onBulkWriterError;
 	}
 
-	public void setOnBulkWriterError(BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
+	public void setOnBulkWriterError(BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onBulkWriterError) {
 		this.onBulkWriterError = onBulkWriterError;
 	}
-	
+
 	public AsyncMongoCacheLoaderAndWriter<K, V> getCacheLoaderAndWriter() {
 		return cacheLoaderAndWriter;
 	}
@@ -167,10 +178,10 @@ public class MongoCacheConfiguration<K, V> extends MutableConfiguration<K, V> {
 	public MongoCacheConfiguration<K, V> build() {
 		if (valueType!=null)
 			cacheLoaderAndWriter = new AsyncMongoCacheLoaderAndWriter<K, V>(mongoClient, databaseName, collectionName, 
-				valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize, onBulkWriterError);
+				valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize, onBulkWriterSuccess, onBulkWriterError);
 		else if (valueTypeReference!=null)
 			cacheLoaderAndWriter = new AsyncMongoCacheLoaderAndWriter<K, V>(mongoClient, databaseName, collectionName, 
-				valueTypeReference, bulkOrdered, bulkSize, onBulkWriterError);
+				valueTypeReference, bulkOrdered, bulkSize, onBulkWriterSuccess, onBulkWriterError);
 		
 		cacheLoaderAndWriter.setAsyncLoadHandler(asyncLoadHandler);
 		cacheLoaderAndWriter.setAsyncLoadAllHandler(asyncLoadAllHandler);

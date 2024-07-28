@@ -17,9 +17,11 @@ package io.actor4j.jcache.mongo.runtime;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.cache.integration.CacheLoaderException;
@@ -40,13 +42,15 @@ public class AsyncMongoCacheLoaderAndWriter<K, V> extends MongoCacheLoaderAndWri
 
 	public AsyncMongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
 			Class<V> valueType, Function<Document, V> valueReadMapper, Function<V, ?> valueWriteMapper,
-			boolean bulkOrdered, int bulkSize, BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
-		super(mongoClient, databaseName, collectionName, valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize, onBulkWriterError);
+			boolean bulkOrdered, int bulkSize, Consumer<List<Pair<UUID, WriteModel<Document>>>> onBulkWriterSuccess, 
+			BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onBulkWriterError) {
+		super(mongoClient, databaseName, collectionName, valueType, valueReadMapper, valueWriteMapper, bulkOrdered, bulkSize, onBulkWriterSuccess, onBulkWriterError);
 	}
 
 	public AsyncMongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
-			GenericType<V> valueTypeReference, boolean bulkOrdered, int bulkSize, BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
-		super(mongoClient, databaseName, collectionName, valueTypeReference, bulkOrdered, bulkSize, onBulkWriterError);
+			GenericType<V> valueTypeReference, boolean bulkOrdered, int bulkSize, Consumer<List<Pair<UUID, WriteModel<Document>>>> onBulkWriterSuccess, 
+			BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onBulkWriterError) {
+		super(mongoClient, databaseName, collectionName, valueTypeReference, bulkOrdered, bulkSize, onBulkWriterSuccess, onBulkWriterError);
 	}
 
 	@Override

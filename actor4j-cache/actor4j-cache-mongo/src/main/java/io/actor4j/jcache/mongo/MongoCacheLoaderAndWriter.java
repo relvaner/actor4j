@@ -21,7 +21,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.cache.Cache.Entry;
@@ -38,6 +40,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.utils.GenericType;
+import io.actor4j.core.utils.Pair;
 import io.actor4j.database.mongo.ConcurrentMongoBufferedBulkWriter;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
 
@@ -59,7 +62,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 
 	public MongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
 			Class<V> valueType, Function<Document, V> valueReadMapper, Function<V, ?> valueWriteMapper, boolean bulkOrdered,
-			int bulkSize, BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
+			int bulkSize, Consumer<List<Pair<UUID, WriteModel<Document>>>> onBulkWriterSuccess, BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onBulkWriterError) {
 		super();
 		this.mongoClient = mongoClient;
 		this.databaseName = databaseName;
@@ -72,14 +75,14 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 		this.bulkSize = bulkSize;
 		if (bulkSize > 0)
 			this.bulkWriter = ConcurrentMongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
-					bulkSize, onBulkWriterError);
+					bulkSize, onBulkWriterSuccess, onBulkWriterError);
 		else
 			this.bulkWriter = null;
 	}
 
 	public MongoCacheLoaderAndWriter(MongoClient mongoClient, String databaseName, String collectionName,
 			GenericType<V> valueTypeReference, boolean bulkOrdered, int bulkSize, 
-			BiConsumer<List<WriteModel<Document>>, Throwable> onBulkWriterError) {
+			Consumer<List<Pair<UUID, WriteModel<Document>>>> onBulkWriterSuccess, BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onBulkWriterError) {
 		super();
 		this.mongoClient = mongoClient;
 		this.databaseName = databaseName;
@@ -92,7 +95,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 		this.bulkSize = bulkSize;
 		if (bulkSize > 0)
 			this.bulkWriter = ConcurrentMongoBufferedBulkWriter.create(mongoClient, databaseName, collectionName, bulkOrdered,
-					bulkSize, onBulkWriterError);
+					bulkSize, onBulkWriterSuccess, onBulkWriterError);
 		else
 			this.bulkWriter = null;
 	}
@@ -165,7 +168,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 			else
 				document.append(VALUE_NAME, valueWriteMapper!=null ? valueWriteMapper.apply(entry.getValue()) : convertToDocument(entry.getValue()));
 	
-			insertOne(document, mongoClient, databaseName, collectionName, bulkWriter);
+			insertOne(document, UUID.randomUUID(), mongoClient, databaseName, collectionName, bulkWriter);
 		}
 		catch(Exception e) {
 			throw new CacheWriterException("database error", e);
@@ -180,7 +183,7 @@ public class MongoCacheLoaderAndWriter<K, V> implements CacheLoader<K, V>, Cache
 	@Override
 	public void delete(Object key) throws CacheWriterException {
 		try {
-			deleteOne(Filters.eq(KEY_NAME, key), mongoClient, databaseName, collectionName, bulkWriter);
+			deleteOne(Filters.eq(KEY_NAME, key), UUID.randomUUID(), mongoClient, databaseName, collectionName, bulkWriter);
 		}
 		catch(Exception e) {
 			throw new CacheWriterException("database error", e);
