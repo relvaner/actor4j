@@ -15,16 +15,5 @@
  */
 package io.actor4j.core.data.access.features;
 
-public class TestObject {
-	public String key;
-	public String value;
-	
-	public TestObject() {
-		super();
-	}
-
-	public TestObject(String key, String value) {
-		this.key = key;
-		this.value = value;
-	}
+public record TestObject(String key, String value) {
 }

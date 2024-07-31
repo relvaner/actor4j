@@ -47,6 +47,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class PersistentCacheFeature {
 	protected MongoServer mongoServer;
@@ -84,12 +85,12 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class, NONE));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
 				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestObject>(
-						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestObject>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess));
+						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestObject>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
 
 				tell(PersistentDTO.create("key1", new TestObject("key1", "value1"), "key", "test", self()), ActorWithCache.SET, "cache1");
 				tell(PersistentDTO.create("key2", new TestObject("key2", "value2"), "key", "test", self()), ActorWithCache.SET, "cache1");
@@ -154,10 +155,10 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class, NONE));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
-				system.addActor(manager.create(COUNT, 500, dataAccess));
+				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));
 				
 				manager.set("key1", new TestObject("key1", "value1"));
 				manager.set("key2", new TestObject("key2", "value2"));

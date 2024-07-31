@@ -60,7 +60,7 @@ public class PersistentCacheFeature {
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
 				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestObject>(
-						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestObject>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess));
+						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestObject>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
 
 				tell(PersistentDTO.create("key1", new TestObject("key1", "value1"), "key", "test", self()), ActorWithCache.SET, "cache1");
 				tell(PersistentDTO.create("key2", new TestObject("key2", "value2"), "key", "test", self()), ActorWithCache.SET, "cache1");
@@ -80,8 +80,8 @@ public class PersistentCacheFeature {
 					@SuppressWarnings("unchecked")
 					PersistentDTO<String, TestObject> payload = ((PersistentDTO<String, TestObject>)msg.value());
 					if (payload.value()!=null) {
-						assertEquals(values[i], payload.value().value);
-						logger().log(DEBUG, payload.value().value);
+						assertEquals(values[i], payload.value().value());
+						logger().log(DEBUG, payload.value().value());
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();
@@ -132,7 +132,7 @@ public class PersistentCacheFeature {
 				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc", NONE));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
-				system.addActor(manager.create(COUNT, 500, dataAccess));
+				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));
 				
 				manager.set("key1", new TestObject("key1", "value1"));
 				manager.set("key2", new TestObject("key2", "value2"));
@@ -153,9 +153,9 @@ public class PersistentCacheFeature {
 					
 					if (pair!=null && pair.b()!=null) {
 						assertEquals(keys[i], pair.a());
-						assertEquals(keys[i], pair.b().key);
-						assertEquals(values[i], pair.b().value);
-						logger().log(DEBUG, pair.b().value);
+						assertEquals(keys[i], pair.b().key());
+						assertEquals(values[i], pair.b().value());
+						logger().log(DEBUG, pair.b().value());
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();
