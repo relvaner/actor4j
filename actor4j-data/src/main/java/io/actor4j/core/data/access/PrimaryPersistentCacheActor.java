@@ -28,6 +28,8 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
+import static io.actor4j.core.data.access.AckMode.ALL;
+import static io.actor4j.core.data.access.AckMode.PRIMARY;
 import static io.actor4j.core.data.access.DataAccessActor.*;
 
 public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
@@ -35,18 +37,20 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	protected Cache<K, V> cache;
 	
 	protected UUID dataAccess;
+	protected AckMode ackMode;
 	
-	public PrimaryPersistentCacheActor(ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, UUID dataAccess) {
-		this(null, group, alias, secondary, instances, cacheSize, dataAccess);
+	public PrimaryPersistentCacheActor(ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
+		this(null, group, alias, secondary, instances, cacheSize, dataAccess, ackMode);
 	}
 
-	public PrimaryPersistentCacheActor(String name, ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, UUID dataAccess) {
+	public PrimaryPersistentCacheActor(String name, ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
 		super(name, group, alias, secondary, instances);
 		
 		this.cacheSize = cacheSize;
 		cache = new CacheVolatileLRU<>(cacheSize);
 		
 		this.dataAccess = dataAccess;
+		this.ackMode = ackMode;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -71,31 +75,31 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					Object reserved = cache.get(dto.key()) != null;
 					cache.put(dto.key(), dto.value());
 					tell(dto.shallowCopyWithReserved(reserved), SET, dataAccess);
-					publish(dto, SET);
+					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
 				}
 				else if (message.tag()==UPDATE) {
 					cache.remove(dto.key());
 					tell(message.value(), UPDATE, dataAccess);
-					publish(dto, DEL);
+					publish(VolatileDTO.create(dto.key(), dto.source()), DEL);
 				}
 				else if (message.tag()==DEL) {
 					cache.remove(dto.key());
 					tell(message.value(), DELETE_ONE, dataAccess);
-					publish(dto, DEL);
+					publish(VolatileDTO.create(dto.key(), dto.source()), DEL);
 				}
 				else if (message.tag()==DEL_ALL ) {
 					cache.clear();
 					// drop collection
-					publish(dto, DEL_ALL);
+					publish(VolatileDTO.create(dto.source()), DEL_ALL);
 				}
 				else if (message.tag()==CLEAR) {
 					cache.clear();
-					publish(dto, CLEAR);
+					publish(VolatileDTO.create(dto.source()), CLEAR);
 				}
 				else if (message.source()==dataAccess && message.tag()==FIND_ONE) {
 					cache.put(dto.key(), dto.value());
 					tell(dto, GET, dto.source(), message.interaction());
-					publish(dto, SET);
+					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
 				}
 				else if (message.tag()==CAS || message.tag()==CAU) {
 					V value = cache.get(dto.key());
@@ -138,7 +142,8 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	}
 	
 	public void handleSuccess(ActorMessage<?> message, PersistentDataAccessDTO<K,V> dto) {
-		tell(dto, DataAccessActor.SUCCESS, dto.source(), message.interaction());
+		if (ackMode==PRIMARY || ackMode==ALL)
+			tell(dto, DataAccessActor.SUCCESS, dto.source(), message.interaction());
 	}
 	
 	public void handleFailure(ActorMessage<?> message, PersistentFailureDTO<K,V> failure) {
