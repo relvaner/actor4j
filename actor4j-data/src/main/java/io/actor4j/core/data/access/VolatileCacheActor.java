@@ -18,14 +18,26 @@ package io.actor4j.core.data.access;
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.DeepCopyable;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
-	public VolatileCacheActor(String name, int cacheSize) {
+	protected AckMode ackMode;
+	
+	public VolatileCacheActor(String name, int cacheSize, AckMode ackMode) {
 		super(name, cacheSize);
+		this.ackMode = ackMode;
+	}
+	
+	public VolatileCacheActor(String name, int cacheSize) {
+		this(name, cacheSize, PRIMARY);
+	}
+	
+	public VolatileCacheActor(int cacheSize, AckMode ackMode) {
+		this(null, cacheSize, ackMode);
 	}
 	
 	public VolatileCacheActor(int cacheSize) {
-		this(null, cacheSize);
+		this(null, cacheSize, PRIMARY);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -56,7 +68,7 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 				}
 				
 				if (!unhandled) {
-					if (message.tag()!=GET)
+					if (message.tag()!=GET && (ackMode==PRIMARY || ackMode==ALL))
 						tell(dto, SUCCESS, dto.source(), message.interaction());
 				}
 				else

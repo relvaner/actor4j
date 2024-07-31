@@ -18,6 +18,7 @@ package io.actor4j.core.data.access.ims;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.DeepCopyable;
+import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.PersistentFailureDTO;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
@@ -25,18 +26,25 @@ import io.actor4j.core.data.access.PersistentDataAccessDTO;
 import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.core.data.access.DataAccessActor.*;
 import static io.actor4j.core.data.access.ims.IMSUtils.*;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class IMSDataAccessActor<K, V> extends Actor {
 	protected IMS<K, V> ims;
+	protected AckMode ackMode;
 	
-	public IMSDataAccessActor(String name) {
+	public IMSDataAccessActor(String name, AckMode ackMode) {
 		super(name);
+		this.ackMode = ackMode;
 		
 		ims = new IMS<>();
 	}
 	
+	public IMSDataAccessActor(String name) {
+		this(name, PRIMARY);
+	}
+	
 	public IMSDataAccessActor() {
-		this(null);
+		this(null, PRIMARY);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,7 +93,7 @@ public class IMSDataAccessActor<K, V> extends Actor {
 				}
 				
 				if (!unhandled) {
-					if (message.tag()!=FIND_ONE && message.tag()!=GET && message.tag()!=HAS_ONE)
+					if (message.tag()!=FIND_ONE && message.tag()!=GET && message.tag()!=HAS_ONE && (ackMode==PRIMARY || ackMode==ALL))
 						tell(dto, DataAccessActor.SUCCESS, message.source(), message.interaction());
 				}
 				else

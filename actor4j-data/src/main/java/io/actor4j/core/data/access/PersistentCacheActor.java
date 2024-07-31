@@ -20,19 +20,30 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.DeepCopyable;
 
 import static io.actor4j.core.data.access.DataAccessActor.*;
+import static io.actor4j.core.data.access.AckMode.*;
 
 import java.util.UUID;
 
 public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
-	protected UUID dataAccess;
+	protected final UUID dataAccess;
+	protected final AckMode ackMode;
 	
-	public PersistentCacheActor(String name, int cacheSize, UUID dataAccess) {
+	public PersistentCacheActor(String name, int cacheSize, UUID dataAccess, AckMode ackMode) {
 		super(name, cacheSize);
 		this.dataAccess = dataAccess;
+		this.ackMode = ackMode;
+	}
+	
+	public PersistentCacheActor(String name, int cacheSize, UUID dataAcess) {
+		this(null, cacheSize, dataAcess, PRIMARY);
+	}
+	
+	public PersistentCacheActor(int cacheSize, UUID dataAcess, AckMode ackMode) {
+		this(null, cacheSize, dataAcess, ackMode);
 	}
 	
 	public PersistentCacheActor(int cacheSize, UUID dataAcess) {
-		this(null, cacheSize, dataAcess);
+		this(null, cacheSize, dataAcess, PRIMARY);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -112,7 +123,8 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 	}
 	
 	public void handleSuccess(ActorMessage<?> message, PersistentDataAccessDTO<K,V> dto) {
-		tell(dto, DataAccessActor.SUCCESS, dto.source(), message.interaction());
+		if (ackMode==PRIMARY || ackMode==ALL)
+			tell(dto, DataAccessActor.SUCCESS, dto.source(), message.interaction());
 	}
 	
 	public void handleFailure(ActorMessage<?> message, PersistentFailureDTO<K,V> failure) {
