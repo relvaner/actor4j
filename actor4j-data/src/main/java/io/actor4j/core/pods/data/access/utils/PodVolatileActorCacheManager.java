@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.VolatileDTO;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
@@ -34,6 +35,7 @@ import io.actor4j.core.utils.Pair;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.data.access.PodPrimaryVolatileCacheActor;
 import io.actor4j.core.pods.data.access.PodSecondaryVolatileCacheActor;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class PodVolatileActorCacheManager<K, V> {
 	public static final UUID PRIMARY_FROM_CACHE_COORDINATOR = UUID.randomUUID();
@@ -52,11 +54,15 @@ public class PodVolatileActorCacheManager<K, V> {
 	}
 	
 	public ActorFactory createReplica(int cacheSize, PodContext context) {
+		return createReplica(cacheSize, PRIMARY, context);
+	}
+	
+	public ActorFactory createReplica(int cacheSize, AckMode ackMode, PodContext context) {
 		if (context.isShard())
 			cacheAlias = cacheAlias + context.shardId();
 		
 		if (context.primaryReplica())
-			return () -> new PodPrimaryVolatileCacheActor<K, V>("primary-"+cacheAlias, new ActorGroupSet(), cacheAlias, null, 0, cacheSize, context) {
+			return () -> new PodPrimaryVolatileCacheActor<K, V>("primary-"+cacheAlias, new ActorGroupSet(), cacheAlias, null, 0, cacheSize, ackMode, context) {
 				@Override
 				public void preStart() {
 					super.preStart();

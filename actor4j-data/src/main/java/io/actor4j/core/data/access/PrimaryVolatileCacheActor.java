@@ -31,15 +31,17 @@ import io.actor4j.core.utils.DeepCopyable;
 public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 	protected int cacheSize;
 	protected Cache<K, V> cache;
+	protected AckMode ackMode;
 	
-	public PrimaryVolatileCacheActor(ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize) {
-		this(null, group, alias, secondary, instances, cacheSize);
+	public PrimaryVolatileCacheActor(ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, AckMode ackMode) {
+		this(null, group, alias, secondary, instances, cacheSize, ackMode);
 	}
 
-	public PrimaryVolatileCacheActor(String name, ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize) {
+	public PrimaryVolatileCacheActor(String name, ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, AckMode ackMode) {
 		super(name, group, alias, secondary, instances);
 		
 		this.cacheSize = cacheSize;
+		this.ackMode = ackMode;
 		cache = new CacheVolatileLRU<>(cacheSize);
 	}
 

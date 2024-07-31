@@ -26,13 +26,16 @@ import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.PrimaryVolatileCacheActor;
 import io.actor4j.core.data.access.SecondaryVolatileCacheActor;
 import io.actor4j.core.data.access.VolatileDTO;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class VolatileActorCacheManager<K, V> {
 	protected ActorRef actorRef;
 	protected String cacheAlias;
+	protected AckMode ackMode;
 	
 	public VolatileActorCacheManager(ActorRef actorRef, String cacheAlias) {
 		super();
@@ -42,17 +45,25 @@ public class VolatileActorCacheManager<K, V> {
 	}
 	
 	public ActorFactory create(int instances, int cacheSize) {
+		return create(instances, cacheSize, PRIMARY);
+	}
+	
+	public ActorFactory create(int instances, int cacheSize, AckMode ackMode) {
 		ActorGroup group = new ActorGroupSet();
 		AtomicInteger k = new AtomicInteger(0);
 		return () -> new PrimaryVolatileCacheActor<K, V>(
-				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryVolatileCacheActor<K, V>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize);		
+				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryVolatileCacheActor<K, V>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize, ackMode);		
 	}
 	
 	public static ActorFactory create(int instances, int cacheSize, String cacheAlias) {
+		return create(instances, cacheSize, cacheAlias, PRIMARY);
+	}
+	
+	public static ActorFactory create(int instances, int cacheSize, String cacheAlias, AckMode ackMode) {
 		ActorGroup group = new ActorGroupSet();
 		AtomicInteger k = new AtomicInteger(0);
 		return () -> new PrimaryVolatileCacheActor<Object, Object>(
-				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryVolatileCacheActor<Object, Object>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize);		
+				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryVolatileCacheActor<Object, Object>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize, ackMode);		
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -20,6 +20,7 @@ import java.util.function.Function;
 
 import io.actor4j.core.actors.ActorGroupMember;
 import io.actor4j.core.actors.ActorIgnoreDistributedGroupMember;
+import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.PrimaryVolatileCacheActor;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
@@ -29,14 +30,14 @@ public abstract class PodPrimaryVolatileCacheActor<K, V> extends PrimaryVolatile
 	protected final PodContext context;
 	
 	public PodPrimaryVolatileCacheActor(ActorGroup group, String alias, Function<UUID, ActorFactory> secondary,
-			int instances, int cacheSize, PodContext podContext) {
-		super(group, alias, secondary, instances, cacheSize);
+			int instances, int cacheSize, AckMode ackMode, PodContext podContext) {
+		super(group, alias, secondary, instances, cacheSize, ackMode);
 		this.context = podContext;
 	}
 
 	public PodPrimaryVolatileCacheActor(String name, ActorGroup group, String alias,
-			Function<UUID, ActorFactory> secondary, int instances, int cacheSize, PodContext podContext) {
-		super(name, group, alias, secondary, instances, cacheSize);
+			Function<UUID, ActorFactory> secondary, int instances, int cacheSize, AckMode ackMode, PodContext podContext) {
+		super(name, group, alias, secondary, instances, cacheSize, ackMode);
 		this.context = podContext;
 	}
 }
