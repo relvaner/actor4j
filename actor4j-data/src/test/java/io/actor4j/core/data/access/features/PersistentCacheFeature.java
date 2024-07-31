@@ -38,6 +38,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class PersistentCacheFeature {
 	@Test(timeout=5000)
@@ -54,7 +55,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
+				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc", NONE));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
@@ -128,7 +129,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
+				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc", NONE));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess));

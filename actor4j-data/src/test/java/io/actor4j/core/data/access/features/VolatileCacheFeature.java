@@ -36,6 +36,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class VolatileCacheFeature {
 
@@ -56,7 +57,7 @@ public class VolatileCacheFeature {
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
 				system.addActor(() -> new PrimaryVolatileCacheActor<String, String>(
-						"primary", group, "vcache1", (id) -> () -> new SecondaryVolatileCacheActor<String, String>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500));
+						"primary", group, "vcache1", (id) -> () -> new SecondaryVolatileCacheActor<String, String>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, NONE));
 
 				tell(VolatileDTO.create("key1", "value1", self()), ActorWithCache.SET, "vcache1");
 				tell(VolatileDTO.create("key2", "value2", self()), ActorWithCache.SET, "vcache1");
@@ -184,7 +185,7 @@ public class VolatileCacheFeature {
 			@Override 
 			public void preStart() {
 				manager = new VolatileActorCacheManager<String, String>(this, "vcache1");
-				system.addActor(manager.create(COUNT, 500));
+				system.addActor(manager.create(COUNT, 500, NONE));
 
 				manager.set("key1", "value1");
 				manager.set("key2", "value2");
