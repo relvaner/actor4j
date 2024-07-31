@@ -34,11 +34,11 @@ public abstract class DataAccessActor<K, V> extends ResourceActor {
 	public static final int FAILURE     = RESERVED_DATA_ACCESS_FAILURE;
 	
 	public DataAccessActor(String name) {
-		this(name, false, false);
+		super(name);
 	}
 
 	public DataAccessActor(boolean stateful) {
-		this(null, stateful, false);
+		super(stateful);
 	}
 
 	public DataAccessActor(String name, boolean stateful, boolean bulk) {
@@ -46,6 +46,6 @@ public abstract class DataAccessActor<K, V> extends ResourceActor {
 	}
 
 	public DataAccessActor(String name, boolean stateful) {
-		this(name, stateful, false);
+		super(name, stateful);
 	}
 }

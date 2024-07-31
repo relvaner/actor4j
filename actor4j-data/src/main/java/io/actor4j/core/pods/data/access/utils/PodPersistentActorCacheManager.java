@@ -28,8 +28,10 @@ import io.actor4j.core.utils.Pair;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.data.access.PodPrimaryPersistentCacheActor;
 import io.actor4j.core.pods.data.access.PodSecondaryPersistentCacheActor;
+import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.json.JsonObject;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class PodPersistentActorCacheManager<K, V> {
 	public static final UUID PRIMARY_FROM_CACHE_COORDINATOR = UUID.randomUUID();
@@ -53,11 +55,15 @@ public class PodPersistentActorCacheManager<K, V> {
 	}
 	
 	public ActorFactory createReplica(int cacheSize, UUID dataAccess, PodContext context) {
+		return createReplica(cacheSize, dataAccess, PRIMARY, context);
+	}
+	
+	public ActorFactory createReplica(int cacheSize, UUID dataAccess, AckMode ackMode, PodContext context) {
 		if (context.isShard())
 			cacheAlias = cacheAlias + context.shardId();
 		
 		if (context.primaryReplica())
-			return () -> new PodPrimaryPersistentCacheActor<K, V>("primary-"+cacheAlias, new ActorGroupSet(), cacheAlias, null, 0, cacheSize, dataAccess, context) {
+			return () -> new PodPrimaryPersistentCacheActor<K, V>("primary-"+cacheAlias, new ActorGroupSet(), cacheAlias, null, 0, cacheSize, dataAccess, ackMode, context) {
 				@Override
 				public void preStart() {
 					super.preStart();

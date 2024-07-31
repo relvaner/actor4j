@@ -25,8 +25,8 @@ import static io.actor4j.core.data.access.AckMode.*;
 import java.util.UUID;
 
 public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
-	protected final UUID dataAccess;
-	protected final AckMode ackMode;
+	protected UUID dataAccess;
+	protected AckMode ackMode;
 	
 	public PersistentCacheActor(String name, int cacheSize, UUID dataAccess, AckMode ackMode) {
 		super(name, cacheSize);

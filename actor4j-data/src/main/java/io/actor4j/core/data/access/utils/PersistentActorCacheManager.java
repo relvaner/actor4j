@@ -27,10 +27,12 @@ import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
 import io.actor4j.core.json.JsonObject;
+import static io.actor4j.core.data.access.AckMode.*;
 
 public class PersistentActorCacheManager<K, V> {
 	protected ActorRef actorRef;
@@ -48,17 +50,21 @@ public class PersistentActorCacheManager<K, V> {
 	}
 	
 	public ActorFactory create(int instances, int cacheSize, UUID dataAccess) {
+		return create(instances, cacheSize, dataAccess, PRIMARY);
+	}
+	
+	public ActorFactory create(int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
 		ActorGroup group = new ActorGroupSet();
 		AtomicInteger k = new AtomicInteger(0);
 		return () -> new PrimaryPersistentCacheActor<K, V>(
-				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryPersistentCacheActor<K, V>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize, dataAccess);		
+				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryPersistentCacheActor<K, V>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize, dataAccess, ackMode);		
 	}
 	
-	public static ActorFactory create(int instances, int cacheSize, UUID dataAccess, String cacheAlias, String keyname, String collectionName) {
+	public static ActorFactory create(int instances, int cacheSize, UUID dataAccess, String cacheAlias, String keyname, String collectionName, AckMode ackMode) {
 		ActorGroup group = new ActorGroupSet();
 		AtomicInteger k = new AtomicInteger(0);
 		return () -> new PrimaryPersistentCacheActor<Object, Object>(
-				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryPersistentCacheActor<Object, Object>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize, dataAccess);		
+				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryPersistentCacheActor<Object, Object>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize, dataAccess, ackMode);		
 	}
 	
 	@SuppressWarnings("unchecked")

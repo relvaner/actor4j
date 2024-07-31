@@ -15,6 +15,7 @@
  */
 package io.actor4j.core.data.access;
 
+// Only for write operations
 public enum AckMode {
 	NONE, PRIMARY, ALL /*not implemented*/
 }
