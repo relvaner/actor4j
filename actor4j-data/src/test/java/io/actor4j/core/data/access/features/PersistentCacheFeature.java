@@ -70,10 +70,6 @@ public class PersistentCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				// Ignore
-				if (message.tag()==ActorWithCache.SUCCESS)
-					return;
-				
 				tell(PersistentDTO.create(keys[i], "key", "test", self()), ActorWithCache.GET, "cache1");
 				
 				await((msg) -> msg.tag()==ActorWithCache.GET && msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
@@ -142,10 +138,6 @@ public class PersistentCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				// Ignore
-				if (message.tag()==ActorWithCache.SUCCESS)
-					return;
-				
 				manager.get(keys[i]);
 				
 				await((msg) -> msg.tag()==ActorWithCache.GET && msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {

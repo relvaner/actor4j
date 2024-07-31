@@ -67,10 +67,6 @@ public class VolatileCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				// Ignore
-				if (message.tag()==ActorWithCache.SUCCESS)
-					return;
-				
 				if (i<4) {
 					tell(VolatileDTO.create(keys[i], self()), ActorWithCache.GET, "vcache1");
 					
@@ -195,10 +191,6 @@ public class VolatileCacheFeature {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				// Ignore
-				if (message.tag()==ActorWithCache.SUCCESS)
-					return;
-				
 				if (i<4) {
 					manager.get(keys[i]);
 					
