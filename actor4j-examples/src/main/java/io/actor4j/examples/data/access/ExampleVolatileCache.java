@@ -19,14 +19,20 @@ import java.util.concurrent.CountDownLatch;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.actors.ActorWithCache;
+import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.examples.shared.ExamplesSettings;
+import io.actor4j.core.data.access.VolatileDataAccessDTO;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 
 public class ExampleVolatileCache {
 	public ExampleVolatileCache() {
-		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
+		ActorSystemConfig config = ActorSystemConfig.builder()
+			.parallelism(4)
+			.build();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
 		final int INSTANCES = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
 		
 		system.addActor(() -> new Actor("manager") {
@@ -43,12 +49,13 @@ public class ExampleVolatileCache {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				// empty
+				if (message.tag()==ActorWithCache.SUCCESS && message.value() instanceof VolatileDataAccessDTO dto)
+					System.out.printf("Write success for key: %s%n", dto.key().toString());
 			}
 		});
 		
 		system.start();
-		
+
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
