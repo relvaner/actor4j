@@ -96,7 +96,7 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					cache.clear();
 					publish(VolatileDTO.create(dto.source()), CLEAR);
 				}
-				else if (message.source()==dataAccess && message.tag()==FIND_ONE) {
+				else if (message.tag()==FIND_ONE && message.source()==dataAccess) {
 					cache.put(dto.key(), dto.value());
 					tell(dto, GET, dto.source(), message.interaction());
 					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
@@ -112,10 +112,8 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					else
 						tell(dto, message.tag(), dto.source(), message.interaction());
 				}
-				else if (message.source()==dataAccess && message.tag()==DataAccessActor.SUCCESS && message.value() instanceof PersistentDataAccessDTO origin_dto)
-					handleSuccess(message, origin_dto);
-				else if (message.source()==dataAccess && message.tag()==DataAccessActor.FAILURE && message.value() instanceof PersistentFailureDTO failure)
-					handleFailure(message, failure);
+				else if (message.tag()==DataAccessActor.SUCCESS && message.source()==dataAccess)
+					handleSuccess(message, dto);
 				else {
 					unhandled = true;
 					unhandled(message);
@@ -131,6 +129,8 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 			}
 			
 		}
+		else if (message.tag()==DataAccessActor.FAILURE && message.source()==dataAccess && message.value() instanceof PersistentFailureDTO failure)
+			handleFailure(message, failure);
 		else if (message.tag()==SUBSCRIBE_SECONDARY)
 			hub.add(message.source());
 		else if (message.tag()==EVICT) {
