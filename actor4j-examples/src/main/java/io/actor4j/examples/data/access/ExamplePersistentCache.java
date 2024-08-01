@@ -17,7 +17,10 @@ package io.actor4j.examples.data.access;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
@@ -29,12 +32,22 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
+import io.actor4j.core.data.access.PersistentFailureDTO;
 import io.actor4j.core.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
 public class ExamplePersistentCache {
 	public ExamplePersistentCache() {
-		MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+		MongoClientSettings mongoClientSettings = MongoClientSettings.builder()
+			.applyConnectionString(new ConnectionString("mongodb://localhost:27017"))
+			.applyToClusterSettings(builder -> builder.serverSelectionTimeout(5000, TimeUnit.MILLISECONDS))
+			.applyToSocketSettings(builder -> {
+				builder
+					.readTimeout(2000, TimeUnit.MILLISECONDS)
+					.connectTimeout(2000, TimeUnit.MILLISECONDS);
+	        })
+			.build();
+		MongoClient mongoClient = MongoClients.create(mongoClientSettings);
 		mongoClient.getDatabase("actor4j-test").drop();
 		
 		ActorSystemConfig config = ActorSystemConfig.builder()
@@ -42,7 +55,7 @@ public class ExamplePersistentCache {
 			.build();
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
 		final int INSTANCES = system.getConfig().parallelism()*system.getConfig().parallelismFactor();
-		
+
 		system.addActor(() -> new Actor("manager") {
 			protected PersistentActorCacheManager<String, ExampleEntity> manager;
 			@Override 
@@ -61,6 +74,8 @@ public class ExamplePersistentCache {
 			public void receive(ActorMessage<?> message) {
 				if (message.tag()==ActorWithCache.SUCCESS && message.value() instanceof PersistentDataAccessDTO dto)
 					System.out.printf("Write success for key: %s%n", dto.key().toString());
+				else if (message.tag()==ActorWithCache.FAILURE && message.value() instanceof PersistentFailureDTO failure) 
+					System.out.printf("Write failure for key: %s%n", failure.dto().key().toString());
 			}
 		});
 		
