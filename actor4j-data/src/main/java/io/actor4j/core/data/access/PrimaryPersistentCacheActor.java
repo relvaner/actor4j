@@ -118,7 +118,11 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					unhandled(message);
 				}
 				
-				if (unhandled)
+				if (!unhandled) {
+					if (message.tag()==CLEAR && (ackMode==PRIMARY || ackMode==ALL))
+						tell(PersistentSuccessDTO.of(dto, message.tag()), ActorWithCache.SUCCESS, dto.source(), message.interaction());
+				}
+				else
 					tell(dto, ActorMessage.UNHANDLED, dto.source(), message.interaction());
 			}
 			catch(Exception e) {

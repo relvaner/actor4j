@@ -175,20 +175,17 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 
 	@Override
 	public Map<K, V> get(List<K> keys) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void put(Map<K, V> entries) {
-		// TODO Auto-generated method stub
-		
+		// empty
 	}
 
 	@Override
 	public void remove(List<K> keys) {
-		// TODO Auto-generated method stub
-		
+		// empty
 	}
 	
 	@Override
