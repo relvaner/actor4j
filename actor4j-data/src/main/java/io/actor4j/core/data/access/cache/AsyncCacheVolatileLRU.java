@@ -71,14 +71,24 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		return size;
 	}
 
+	@Deprecated
 	@Override
 	public V get(K key) {
+		return null;
+	}
+	
+	@Override
+	public V get(K key, Runnable handler) {
 		V result = null;
 		
 		Pair<V> pair = map.get(key);
 		if (pair==null) {
-			if (!cacheMiss.contains(key) && !cacheDel.contains(key))
-				cacheMiss.add(key);
+			if (handler!=null) {
+				if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
+					cacheMiss.add(key);
+					handler.run();
+				}
+			}
 		}
 		else {
 			lru.remove(pair.timestamp());
@@ -134,17 +144,25 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		}
 	}
 	
+	@Deprecated
 	@Override
 	public void remove(K key) {
+		// empty
+	}
+	
+	@Override
+	public void remove(K key, Runnable handler) {
 		Pair<V> pair = map.get(key);
 		lru.remove(pair.timestamp);
 		map.remove(key);
 		
-		if (!cacheDel.contains(key)) {
-			if (cacheDirty.contains(key))
-				cacheDirty.remove(key);
-			cacheDel.add(key);
-		}
+		if (handler!=null)
+			if (!cacheDel.contains(key)) {
+				if (cacheDirty.contains(key))
+					cacheDirty.remove(key);
+				cacheDel.add(key);
+				handler.run();
+			}
 	}
 	
 	protected void removeIfDelLocal(K key) {
@@ -189,7 +207,7 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	}
 	
 	@Override
-	public void update(int tag, K key, V value) {
+	public void complete(int tag, K key, V value) {
 		if (tag==ActorWithCache.GET || tag==DataAccessActor.FIND_ONE)
 			putIfAbsentLocal(key, value);
 //		else if (tag==ActorWithCache.SET || tag==INSERT_ONE)

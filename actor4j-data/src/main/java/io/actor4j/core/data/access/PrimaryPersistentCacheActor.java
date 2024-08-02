@@ -63,14 +63,12 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 			try {
 				boolean unhandled = false;
 				if (message.tag()==GET) {
-					V value = cache.get(dto.key());
+					V value = ((AsyncCache<K,V>)cache).get(dto.key(), () -> tell(message.value(), GET, dataAccess, message.interaction()));
 					if (value!=null) {
 						if (value instanceof DeepCopyable)
 							value = ((DeepCopyable<V>)value).deepCopy();
 						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
 					}
-					else
-						tell(message.value(), GET, dataAccess, message.interaction());
 				}
 				else if (message.tag()==SET) {
 					Object reserved = cache.get(dto.key()) != null;
@@ -79,14 +77,14 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
 				}
 				else if (message.tag()==UPDATE) {
-					cache.remove(dto.key());
+					((AsyncCache<K,V>)cache).remove(dto.key(), () -> publish(VolatileDTO.create(dto.key(), dto.source()), DEL));
 					tell(message.value(), UPDATE, dataAccess);
-					publish(VolatileDTO.create(dto.key(), dto.source()), DEL);
 				}
 				else if (message.tag()==DEL) {
-					cache.remove(dto.key());
-					tell(message.value(), DELETE_ONE, dataAccess);
-					publish(VolatileDTO.create(dto.key(), dto.source()), DEL);
+					((AsyncCache<K,V>)cache).remove(dto.key(), () -> {
+						tell(message.value(), DELETE_ONE, dataAccess);
+						publish(VolatileDTO.create(dto.key(), dto.source()), DEL);
+					});
 				}
 				else if (message.tag()==DEL_ALL ) {
 					cache.clear();
@@ -147,7 +145,7 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	}
 	
 	public void handleSuccess(ActorMessage<?> message, PersistentSuccessDTO<K,V> success) {
-		((AsyncCache<K,V>)cache).update(success.tag(), success.dto().key(), success.dto().value());
+		((AsyncCache<K,V>)cache).complete(success.tag(), success.dto().key(), success.dto().value());
 		if (ackMode==PRIMARY || ackMode==ALL)
 			tell(success, DataAccessActor.SUCCESS, success.dto().source(), message.interaction());
 	}

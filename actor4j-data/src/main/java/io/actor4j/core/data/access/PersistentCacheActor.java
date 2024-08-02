@@ -63,14 +63,12 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			try {
 				boolean unhandled = false;
 				if (message.tag()==GET) {
-					V value = cache.get(dto.key());
+					V value = ((AsyncCache<K,V>)cache).get(dto.key(), () -> tell(message.value(), GET, dataAccess, message.interaction()));
 					if (value!=null) {
 						if (value instanceof DeepCopyable)
 							value = ((DeepCopyable<V>)value).deepCopy();
 						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
 					}
-					else
-						tell(message.value(), GET, dataAccess, message.interaction());
 				}
 				else if (message.tag()==SET) {
 					Object reserved = cache.get(dto.key()) != null;
@@ -81,10 +79,8 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 					cache.remove(dto.key());
 					tell(message.value(), UPDATE, dataAccess);
 				}
-				else if (message.tag()==DEL) {
-					cache.remove(dto.key());
-					tell(message.value(), DELETE_ONE, dataAccess);
-				}
+				else if (message.tag()==DEL)
+					((AsyncCache<K,V>)cache).remove(dto.key(), () -> tell(message.value(), DELETE_ONE, dataAccess));
 				else if (message.tag()==DEL_ALL) {
 					cache.clear();
 					// drop collection, not implemented
@@ -135,7 +131,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 	}
 	
 	public void handleSuccess(ActorMessage<?> message, PersistentSuccessDTO<K,V> success) {
-		((AsyncCache<K,V>)cache).update(success.tag(), success.dto().key(), success.dto().value());
+		((AsyncCache<K,V>)cache).complete(success.tag(), success.dto().key(), success.dto().value());
 		if (ackMode==PRIMARY || ackMode==ALL)
 			tell(success, DataAccessActor.SUCCESS, success.dto().source(), message.interaction());
 	}
