@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.cache;
+package io.actor4j.core.data.access.cache;
 
 import io.actor4j.core.utils.Cache;
 
 public interface AsyncCache<K, V> extends Cache<K, V> {
-	public void synchronizeWithStorage();
 }

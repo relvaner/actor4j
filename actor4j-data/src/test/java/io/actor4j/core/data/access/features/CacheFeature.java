@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.cache.features;
+package io.actor4j.core.data.access.features;
 
 import org.junit.Test;
 
-import io.actor4j.cache.runtime.AsyncCacheVolatileLRU;
+import io.actor4j.core.data.access.cache.AsyncCacheLRU;
+import io.actor4j.core.data.access.cache.AsyncCacheVolatileLRU;
 
 import static org.junit.Assert.*;
 
@@ -82,52 +83,52 @@ public class CacheFeature {
 		*/
 	}
 	
-//	@Test
-//	public void test_cache_lru__get_put_resize() {
-//		CacheLRU<String, String> cache = new CacheLRU<>(5);
-//		
-//		String[][] data = { 
-//				{"A", "AA"}, 
-//				{"B", "BB"},
-//				{"C", "CC"},
-//				{"D", "DD"},
-//				{"E", "EE"},
-//				{"F", "FF"},
-//				{"G", "GG"}
-//		};
-//		
-//		cache.put(data[0][0], data[0][1]);
-//		cache.put(data[1][0], data[1][1]);
-//		cache.put(data[2][0], data[2][1]);
-//		cache.put(data[3][0], data[3][1]);
-//		cache.put(data[4][0], data[4][1]);
-//		
-//		for (int i=0; i<data.length-2; i++)
-//			assertEquals(data[i][1], cache.get(data[i][0]));
-//		
-//		assertTrue(cache.getMap().size()==5);
-//		assertTrue(cache.getLru().size()==5);
-//		cache.put(data[5][0], data[5][1]);
-//		cache.put(data[6][0], data[6][1]);
-//		assertTrue(cache.getMap().size()==5);
-//		assertTrue(cache.getLru().size()==5);
-//		
-//		int i=2;
-//		for (String key : cache.getMap().keySet()) {
-//			assertEquals(data[i++][0], key);
-//		}
-//		
-//		cache.get(data[5][0]);
-//		cache.get(data[4][0]);
-//
-//		Iterator<String> iterator = cache.getLru().iterator();
-//		assertEquals(data[2][0], iterator.next());
-//		assertEquals(data[3][0], iterator.next());
-//		assertEquals(data[6][0], iterator.next());
-//		assertEquals(data[5][0], iterator.next());
-//		assertEquals(data[4][0], iterator.next());
-//	}
-//	
+	@Test
+	public void test_cache_lru__get_put_resize() {
+		AsyncCacheLRU<String, String> cache = new AsyncCacheLRU<>(5);
+		
+		String[][] data = { 
+				{"A", "AA"}, 
+				{"B", "BB"},
+				{"C", "CC"},
+				{"D", "DD"},
+				{"E", "EE"},
+				{"F", "FF"},
+				{"G", "GG"}
+		};
+		
+		cache.put(data[0][0], data[0][1]);
+		cache.put(data[1][0], data[1][1]);
+		cache.put(data[2][0], data[2][1]);
+		cache.put(data[3][0], data[3][1]);
+		cache.put(data[4][0], data[4][1]);
+		
+		for (int i=0; i<data.length-2; i++)
+			assertEquals(data[i][1], cache.get(data[i][0]));
+		
+		assertTrue(cache.getMap().size()==5);
+		assertTrue(cache.getLru().size()==5);
+		cache.put(data[5][0], data[5][1]);
+		cache.put(data[6][0], data[6][1]);
+		assertTrue(cache.getMap().size()==5);
+		assertTrue(cache.getLru().size()==5);
+		
+		int i=2;
+		for (String key : cache.getMap().keySet()) {
+			assertEquals(data[i++][0], key);
+		}
+		
+		cache.get(data[5][0]);
+		cache.get(data[4][0]);
+
+		Iterator<String> iterator = cache.getLru().iterator();
+		assertEquals(data[2][0], iterator.next());
+		assertEquals(data[3][0], iterator.next());
+		assertEquals(data[6][0], iterator.next());
+		assertEquals(data[5][0], iterator.next());
+		assertEquals(data[4][0], iterator.next());
+	}
+	
 //	@Test
 //	public void test_cache_default__get_put() {
 //		CacheAsMap<String, String> cache = new CacheAsMap<>();

@@ -16,9 +16,9 @@
 package io.actor4j.core.data.access;
 
 import io.actor4j.core.actors.ActorWithCache;
+import io.actor4j.core.data.access.cache.AsyncCacheLRU;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Cache;
-import io.actor4j.core.utils.CacheLRU;
 import io.actor4j.core.utils.DeepCopyable;
 
 import static io.actor4j.core.data.access.DataAccessActor.*;
@@ -50,7 +50,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 	
 	@Override
 	public Cache<K, V> createCache(int cacheSize) {
-		return new CacheLRU<>(cacheSize);
+		return new AsyncCacheLRU<>(cacheSize);
 	}
 	
 	@SuppressWarnings("unchecked")

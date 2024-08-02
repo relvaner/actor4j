@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.cache.runtime;
+package io.actor4j.core.data.access.cache;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,10 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-
-import io.actor4j.cache.AsyncCache;
-import io.actor4j.cache.StorageReader;
-import io.actor4j.cache.StorageWriter;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -44,15 +40,10 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	private final Set<K> cacheDel;
 	
 	private final int size;
-	
-	private final StorageReader<K, V> storageReader;
-	private final StorageWriter<K, V> storageWriter;
 
 	public AsyncCacheVolatileLRU(int size) {
-		this(size, null, null);
-	}
-	
-	public AsyncCacheVolatileLRU(int size, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter) {
+		super();
+		
 		map = new HashMap<>(size);
 		lru = new TreeMap<>();
 		cacheMiss = new HashSet<>();
@@ -60,8 +51,6 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		cacheDel = new HashSet<>();
 		
 		this.size = size;
-		this.storageReader = storageReader;
-		this.storageWriter = storageWriter;
 	}
 		
 	public Map<K, Pair<V>> getMap() {
@@ -71,6 +60,10 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	public SortedMap<Long, K> getLru() {
 		return lru;
 	}
+	
+	public int size() {
+		return size;
+	}
 
 	@Override
 	public V get(K key) {
@@ -78,12 +71,8 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		
 		Pair<V> pair = map.get(key);
 		if (pair==null) {
-			if (storageReader!=null) {
-				if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
-					cacheMiss.add(key);
-					storageReader.get(key, (v) -> putIfAbsentLocal(key, v));
-				}
-			}
+			if (!cacheMiss.contains(key) && !cacheDel.contains(key))
+				cacheMiss.add(key);
 		}
 		else {
 			lru.remove(pair.timestamp());
@@ -96,7 +85,7 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		return result;
 	}
 	
-	private void putIfAbsentLocal(K key, V value) {
+	public void putIfAbsentLocal(K key, V value) {
 		long timestamp = System.nanoTime();
 		Pair<V> oldPair = map.putIfAbsent(key, Pair.of(value, timestamp));
 		
@@ -124,17 +113,14 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 			result = pair.value;
 		}
 		
-		if (storageWriter!=null) {
-			if (cacheDel.contains(key))
-				cacheDel.remove(key);
-			cacheDirty.add(key);
-			storageWriter.put(key, value, () -> removeDirty(key, pair));
-		}
+		if (cacheDel.contains(key))
+			cacheDel.remove(key);
+		cacheDirty.add(key);
 		
 		return result;
 	}
 	
-	private void removeDirty(K key, Pair<V> pair) {
+	public void removeDirty(K key, Pair<V> pair) {
 		if (cacheDirty.contains(key)) {
 			Pair<V> current = map.get(key);
 			if (current!=null && current.equals(pair))
@@ -148,16 +134,14 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		lru.remove(pair.timestamp);
 		map.remove(key);
 		
-		if (storageWriter!=null)
-			if (!cacheDel.contains(key)) {
-				if (cacheDirty.contains(key))
-					cacheDirty.remove(key);
-				cacheDel.add(key);
-				storageWriter.remove(key, () -> removeIfDelLocal(key));
-			}
+		if (!cacheDel.contains(key)) {
+			if (cacheDirty.contains(key))
+				cacheDirty.remove(key);
+			cacheDel.add(key);
+		}
 	}
 	
-	private void removeIfDelLocal(K key) {
+	public void removeIfDelLocal(K key) {
 		if (cacheDel.contains(key))
 			cacheDel.remove(key);
 	}
@@ -191,16 +175,6 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 				iterator.remove();
 			}
 		}
-	}
-	
-	@Override
-	public void synchronizeWithStorage() {
-		for (K key : cacheDirty) {
-			Pair<V> pair = map.get(key);
-			storageWriter.put(key, pair.value(), () -> removeDirty(key, pair));
-		}
-		for (K key : cacheDel)
-			storageWriter.remove(key, () -> removeIfDelLocal(key));
 	}
 	
 	@Override

@@ -1,0 +1,182 @@
+/*
+ * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.actor4j.core.data.access.cache;
+
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+
+public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
+	private final Map<K, V> map;
+	private final Deque<K> lru;
+	private final Set<K> cacheMiss;
+	private final Set<K> cacheDirty;
+	private final Set<K> cacheDel;
+
+	private final int size;
+
+	public AsyncCacheLRU(int size) {
+		super();
+		
+		map = new ConcurrentHashMap<>(size);
+		lru = new ConcurrentLinkedDeque<>();
+		cacheMiss = ConcurrentHashMap.newKeySet();
+		cacheDirty = ConcurrentHashMap.newKeySet();
+		cacheDel = ConcurrentHashMap.newKeySet();
+		
+		this.size = size;
+	}
+	
+	public Map<K, V> getMap() {
+		return map;
+	}
+
+	public Deque<K> getLru() {
+		return lru;
+	}
+	
+	public int size() {
+		return size;
+	}
+	
+	@Override
+	public V get(K key) {
+		V result = null;
+		
+		result = map.get(key);
+		
+		if (result==null) {
+			if (!cacheMiss.contains(key) && !cacheDel.contains(key))
+					cacheMiss.add(key);
+		}
+		else {
+			lru.remove(key);
+			lru.addLast(key);
+		}
+
+		return result;
+	}
+	
+	public void putIfAbsentLocal(K key, V value) {
+		V oldValue = map.putIfAbsent(key, value);
+		
+		if (oldValue==null) {
+			resize();
+			lru.addLast(key);
+			cacheMiss.remove(key);
+		}
+	}
+	
+	@Override
+	public V put(K key, V value) {
+		V result = null;
+		
+		result = map.put(key, value);
+		
+		if (result==null) {
+			resize();
+			lru.addLast(key);
+		}
+		else {
+			lru.remove(key);
+			lru.addLast(key);
+		}
+		
+		
+		if (cacheDel.contains(key))
+			cacheDel.remove(key);
+		cacheDirty.add(key);
+		
+		return result;
+	}
+	
+	public void removeDirty(K key, V value) {
+		if (cacheDirty.contains(key)) {
+			V current = map.get(key);
+			if (current!=null && current.equals(value))
+				cacheDirty.remove(key);
+		}
+	}
+	
+	@Override
+	public void remove(K key) {
+		map.remove(key);
+		lru.remove(key);
+
+		if (!cacheDel.contains(key)) {
+			if (cacheDirty.contains(key))
+				cacheDirty.remove(key);
+			cacheDel.add(key);
+		}
+	}
+	
+	public void removeIfDelLocal(K key) {
+		if (cacheDel.contains(key))
+			cacheDel.remove(key);
+	}
+	
+	@Override
+	public void clear() {
+		map.clear();
+		lru.clear();
+		cacheMiss.clear();
+		cacheDirty.clear();
+		cacheDel.clear();
+	}
+	
+	private void resize() {
+		if (map.size()>size) {
+			map.remove(lru.getFirst());
+			lru.removeFirst();
+		}
+	}
+	
+	@Override
+	public void evict(long duration) {
+		// empty
+	}
+
+	@Override
+	public String toString() {
+		return "ConcurrentCacheLRU [map=" + map + ", lru=" + lru + ", size=" + size + "]";
+	}
+
+	@Override
+	public Map<K, V> get(List<K> keys) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void put(Map<K, V> entries) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void remove(List<K> keys) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void close() {
+		// empty
+	}
+}
