@@ -18,33 +18,22 @@ package io.actor4j.core.data.access.ims;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.DeepCopyable;
-import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.PersistentFailureDTO;
+import io.actor4j.core.data.access.PersistentSuccessDTO;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.core.data.access.DataAccessActor.*;
 import static io.actor4j.core.data.access.ims.IMSUtils.*;
-import static io.actor4j.core.data.access.AckMode.*;
 
 public class IMSDataAccessActor<K, V> extends Actor {
 	protected IMS<K, V> ims;
-	protected AckMode ackMode;
-	
-	public IMSDataAccessActor(String name, AckMode ackMode) {
-		super(name);
-		this.ackMode = ackMode;
-		
-		ims = new IMS<>();
-	}
 	
 	public IMSDataAccessActor(String name) {
-		this(name, PRIMARY);
-	}
-	
-	public IMSDataAccessActor() {
-		this(null, PRIMARY);
+		super(name);
+		
+		ims = new IMS<>();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -55,7 +44,7 @@ public class IMSDataAccessActor<K, V> extends Actor {
 			
 			try {
 				boolean unhandled = false;
-				if (message.tag()==GET) {
+				if (message.tag()==FIND_ONE || message.tag()==GET) {
 					V value = findOne(dto.key(), dto.filter(), ims, dto.collectionName());
 					if (value instanceof DeepCopyable)
 						value = ((DeepCopyable<V>)value).deepCopy();
@@ -93,8 +82,8 @@ public class IMSDataAccessActor<K, V> extends Actor {
 				}
 				
 				if (!unhandled) {
-					if (message.tag()!=FIND_ONE && message.tag()!=GET && message.tag()!=HAS_ONE && (ackMode==PRIMARY || ackMode==ALL))
-						tell(dto, DataAccessActor.SUCCESS, message.source(), message.interaction());
+					if (message.tag()!=FIND_ONE && message.tag()!=GET && message.tag()!=HAS_ONE)
+						tell(PersistentSuccessDTO.of(dto, message.tag()), DataAccessActor.SUCCESS, message.source(), message.interaction());
 				}
 				else
 					tell(dto, ActorMessage.UNHANDLED, message.source(), message.interaction());
@@ -102,7 +91,7 @@ public class IMSDataAccessActor<K, V> extends Actor {
 			catch(Exception e) {
 				e.printStackTrace();
 				
-				tell(PersistentFailureDTO.of(dto, e), DataAccessActor.FAILURE, message.source(), message.interaction());
+				tell(PersistentFailureDTO.of(dto, message.tag(), e), DataAccessActor.FAILURE, message.source(), message.interaction());
 			}
 		}
 		else

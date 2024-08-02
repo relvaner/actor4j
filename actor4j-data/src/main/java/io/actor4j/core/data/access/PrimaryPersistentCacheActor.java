@@ -17,6 +17,7 @@ package io.actor4j.core.data.access;
 
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.actors.PrimaryActor;
+import io.actor4j.core.data.access.cache.AsyncCache;
 import io.actor4j.core.data.access.cache.AsyncCacheVolatileLRU;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
@@ -89,7 +90,7 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 				}
 				else if (message.tag()==DEL_ALL ) {
 					cache.clear();
-					// drop collection
+					// drop collection, not implemented
 					publish(VolatileDTO.create(dto.source()), DEL_ALL);
 				}
 				else if (message.tag()==CLEAR) {
@@ -112,8 +113,6 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					else
 						tell(dto, message.tag(), dto.source(), message.interaction());
 				}
-				else if (message.tag()==DataAccessActor.SUCCESS && message.source()==dataAccess)
-					handleSuccess(message, dto);
 				else {
 					unhandled = true;
 					unhandled(message);
@@ -125,10 +124,12 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 			catch(Exception e) {
 				e.printStackTrace();
 				
-				tell(PersistentFailureDTO.of(dto, e), ActorWithCache.FAILURE, dto.source(), message.interaction());
+				tell(PersistentFailureDTO.of(dto, message.tag(), e), ActorWithCache.FAILURE, dto.source(), message.interaction());
 			}
 			
 		}
+		else if (message.tag()==DataAccessActor.SUCCESS && message.source()==dataAccess && message.value() instanceof PersistentSuccessDTO success)
+			handleSuccess(message, success);
 		else if (message.tag()==DataAccessActor.FAILURE && message.source()==dataAccess && message.value() instanceof PersistentFailureDTO failure)
 			handleFailure(message, failure);
 		else if (message.tag()==SUBSCRIBE_SECONDARY)
@@ -141,9 +142,10 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 			unhandled(message);
 	}
 	
-	public void handleSuccess(ActorMessage<?> message, PersistentDataAccessDTO<K,V> dto) {
+	public void handleSuccess(ActorMessage<?> message, PersistentSuccessDTO<K,V> success) {
+		((AsyncCache<K,V>)cache).update(success.tag(), success.dto().key(), success.dto().value());
 		if (ackMode==PRIMARY || ackMode==ALL)
-			tell(dto, DataAccessActor.SUCCESS, dto.source(), message.interaction());
+			tell(success, DataAccessActor.SUCCESS, success.dto().source(), message.interaction());
 	}
 	
 	public void handleFailure(ActorMessage<?> message, PersistentFailureDTO<K,V> failure) {

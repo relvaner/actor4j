@@ -22,15 +22,14 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.CircuitBreaker;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
-import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.PersistentFailureDTO;
+import io.actor4j.core.data.access.PersistentSuccessDTO;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.database.mongo.MongoOperations.*;
 //import static io.actor4j.core.logging.ActorLogger.*;
-import static io.actor4j.core.data.access.AckMode.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,10 +48,9 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 	protected final Map<String, MongoBufferedBulkWriter> bulkWriters;
 	protected final Map<UUID, Pair<UUID, PersistentDataAccessDTO<K, V>>> bulkWriterRequests; // interaction -> source
 	protected final CircuitBreaker circuitBreaker;
-	protected final AckMode ackMode;
 	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout, AckMode ackMode) {
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout) {
 		super(name, true); // @Stateful
 		
 		this.client = client;
@@ -61,7 +59,6 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 		this.bulkOrdered = bulkOrdered;
 		this.bulkSize = bulkSize;
 		this.valueType = valueType;
-		this.ackMode = ackMode;
 		
 		bulkWriters = new HashMap<>();
 		bulkWriterRequests = new HashMap<>();
@@ -69,49 +66,37 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout, AckMode ackMode) {
-		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, maxFailures, resetTimeout, ackMode);
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout) {
+		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, maxFailures, resetTimeout);
 	}
 	
-	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout, AckMode ackMode) {
-		this(name, client, databaseName, false, true, 0, valueType, maxFailures, resetTimeout, ackMode);
+	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout) {
+		this(name, client, databaseName, false, true, 0, valueType, maxFailures, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType) {
-		this(name, client, databaseName, false, true, 0, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT, PRIMARY);
-	}
-	
-	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, AckMode ackMode) {
-		this(name, client, databaseName, false, true, 0, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT, ackMode);
+		this(name, client, databaseName, false, true, 0, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout) {
-		this(null, client, databaseName, valueType, maxFailures, resetTimeout, PRIMARY);
-	}
-	
-	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout, AckMode ackMode) {
-		this(null, client, databaseName, valueType, maxFailures, resetTimeout, ackMode);
+		this(null, client, databaseName, valueType, maxFailures, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType) {
-		this(null, client, databaseName, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT, PRIMARY);
-	}
-	
-	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType, AckMode ackMode) {
-		this(null, client, databaseName, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT, ackMode);
+		this(null, client, databaseName, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
 	public void onBulkWriterSuccess(List<Pair<UUID, WriteModel<Document>>> requests) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
 			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a());
-			tell(originRequest.b(), SUCCESS, originRequest.a(/*source*/), pair.a()/*interaction*/);
+			tell(PersistentSuccessDTO.of(originRequest.b(), 0), SUCCESS, originRequest.a(/*source*/), pair.a()/*interaction*/);
 		}
 	}
 	
 	public void onBulkWriterError(List<Pair<UUID, WriteModel<Document>>> requests, Throwable t) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
 			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a());
-			tell(PersistentFailureDTO.of(originRequest.b(), t), FAILURE, originRequest.a(/*source*/), pair.a()/*interaction*/);
+			tell(PersistentFailureDTO.of(originRequest.b(), 0, t), FAILURE, originRequest.a(/*source*/), pair.a()/*interaction*/);
 		}
 	}
 
@@ -169,8 +154,8 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 					
 					if (!unhandled) {
 						circuitBreaker.success();
-						if (!bulkWrite && message.tag()!=FIND_ONE && message.tag()!=GET && message.tag()!=HAS_ONE && (ackMode==PRIMARY || ackMode==ALL))
-							tell(dto, SUCCESS, message.source(), message.interaction());
+						if (!bulkWrite && message.tag()!=FIND_ONE && message.tag()!=GET && message.tag()!=HAS_ONE)
+							tell(PersistentSuccessDTO.of(dto, message.tag()), SUCCESS, message.source(), message.interaction());
 					}
 					else
 						tell(dto, ActorMessage.UNHANDLED, message.source(), message.interaction());
@@ -183,7 +168,7 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 					
 					circuitBreaker.failure();
 					if (!bulkWrite)
-						tell(PersistentFailureDTO.of(dto, e), FAILURE, message.source(), message.interaction());
+						tell(PersistentFailureDTO.of(dto, message.tag(), e), FAILURE, message.source(), message.interaction());
 				}
 			}
 

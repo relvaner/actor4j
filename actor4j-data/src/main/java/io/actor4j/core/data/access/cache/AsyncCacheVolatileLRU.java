@@ -15,6 +15,9 @@
  */
 package io.actor4j.core.data.access.cache;
 
+import static io.actor4j.core.actors.ActorWithCache.UPDATE;
+import static io.actor4j.core.data.access.DataAccessActor.INSERT_ONE;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,23 +26,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import io.actor4j.core.actors.ActorWithCache;
+import io.actor4j.core.data.access.DataAccessActor;
+
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
-	private static record Pair<V>(V value, long timestamp) {
+	protected static record Pair<V>(V value, long timestamp) {
 		public static <V> Pair<V> of(V value, long timestamp) {
 			return new Pair<V>(value, timestamp);
 		}
 	}
 	
-	private final Map<K, Pair<V>> map;
-	private final SortedMap<Long, K> lru;
-	private final Set<K> cacheMiss;
-	private final Set<K> cacheDirty;
-	private final Set<K> cacheDel;
+	protected final Map<K, Pair<V>> map;
+	protected final SortedMap<Long, K> lru;
+	protected final Set<K> cacheMiss;
+	protected final Set<K> cacheDirty;
+	protected final Set<K> cacheDel;
 	
-	private final int size;
+	protected final int size;
 
 	public AsyncCacheVolatileLRU(int size) {
 		super();
@@ -85,7 +91,7 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		return result;
 	}
 	
-	public void putIfAbsentLocal(K key, V value) {
+	protected void putIfAbsentLocal(K key, V value) {
 		long timestamp = System.nanoTime();
 		Pair<V> oldPair = map.putIfAbsent(key, Pair.of(value, timestamp));
 		
@@ -120,7 +126,7 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		return result;
 	}
 	
-	public void removeDirty(K key, Pair<V> pair) {
+	protected void removeDirty(K key, Pair<V> pair) {
 		if (cacheDirty.contains(key)) {
 			Pair<V> current = map.get(key);
 			if (current!=null && current.equals(pair))
@@ -141,7 +147,7 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		}
 	}
 	
-	public void removeIfDelLocal(K key) {
+	protected void removeIfDelLocal(K key) {
 		if (cacheDel.contains(key))
 			cacheDel.remove(key);
 	}
@@ -180,6 +186,16 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	@Override
 	public String toString() {
 		return "CacheLRUWithGC [map=" + map + ", lru=" + lru + ", size=" + size + "]";
+	}
+	
+	@Override
+	public void update(int tag, K key, V value) {
+		if (tag==ActorWithCache.GET || tag==DataAccessActor.FIND_ONE)
+			putIfAbsentLocal(key, value);
+//		else if (tag==ActorWithCache.SET || tag==INSERT_ONE)
+//			removeDirty(key, value);
+		else if (tag==DataAccessActor.DELETE_ONE || tag==DataAccessActor.UPDATE_ONE || tag==UPDATE)
+			removeIfDelLocal(key);
 	}
 	
 	@Override

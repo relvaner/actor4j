@@ -79,7 +79,7 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 			catch(Exception e) {
 				e.printStackTrace();
 				
-				tell(PersistentFailureDTO.of(dto, e), FAILURE, dto.source(), message.interaction());
+				tell(PersistentFailureDTO.of(dto, message.tag(), e), FAILURE, dto.source(), message.interaction());
 			}
 		}
 		else if (message.value() instanceof VolatileDataAccessDTO && message.source() == primary) {

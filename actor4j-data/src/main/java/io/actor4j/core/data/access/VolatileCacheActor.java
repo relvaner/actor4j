@@ -76,7 +76,7 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 				
 				if (!unhandled) {
 					if (message.tag()!=GET && (ackMode==PRIMARY || ackMode==ALL))
-						tell(dto, SUCCESS, dto.source(), message.interaction());
+						tell(VolatileSuccessDTO.of(dto, message.tag()), SUCCESS, dto.source(), message.interaction());
 				}
 				else
 					tell(dto, ActorMessage.UNHANDLED, dto.source(), message.interaction());
@@ -84,7 +84,7 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 			catch(Exception e) {
 				e.printStackTrace();
 				
-				tell(VolatileFailureDTO.of(dto, e), FAILURE, dto.source(), message.interaction());
+				tell(VolatileFailureDTO.of(dto, message.tag(), e), FAILURE, dto.source(), message.interaction());
 			}
 		}
 		else if (message.tag()==EVICT)

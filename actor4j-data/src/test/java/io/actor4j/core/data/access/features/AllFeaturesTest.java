@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+	CacheFeature.class,
 	VolatileCacheFeature.class,
 	PersistentCacheFeature.class,
 	IMSFeature.class,

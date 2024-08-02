@@ -31,8 +31,8 @@ import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.examples.shared.ExamplesSettings;
-import io.actor4j.core.data.access.PersistentDataAccessDTO;
 import io.actor4j.core.data.access.PersistentFailureDTO;
+import io.actor4j.core.data.access.PersistentSuccessDTO;
 import io.actor4j.core.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 
@@ -72,8 +72,8 @@ public class ExamplePersistentCache {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag()==ActorWithCache.SUCCESS && message.value() instanceof PersistentDataAccessDTO dto)
-					System.out.printf("Write success for key: %s%n", dto.key().toString());
+				if (message.tag()==ActorWithCache.SUCCESS && message.value() instanceof PersistentSuccessDTO success)
+					System.out.printf("Write success for key: %s%n", success.dto().key().toString());
 				else if (message.tag()==ActorWithCache.FAILURE && message.value() instanceof PersistentFailureDTO failure) 
 					System.out.printf("Write failure for key: %s%n", failure.dto().key().toString());
 			}

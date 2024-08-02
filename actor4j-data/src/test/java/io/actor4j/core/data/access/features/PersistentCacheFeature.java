@@ -55,7 +55,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc", NONE));
+				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
@@ -125,7 +125,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc", NONE));
+				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));

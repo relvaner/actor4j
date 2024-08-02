@@ -24,8 +24,8 @@ import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.examples.shared.ExamplesSettings;
-import io.actor4j.core.data.access.VolatileDataAccessDTO;
 import io.actor4j.core.data.access.VolatileFailureDTO;
+import io.actor4j.core.data.access.VolatileSuccessDTO;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 
 public class ExampleVolatileCache {
@@ -50,8 +50,8 @@ public class ExampleVolatileCache {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.tag()==ActorWithCache.SUCCESS && message.value() instanceof VolatileDataAccessDTO dto)
-					System.out.printf("Write success for key: %s%n", dto.key().toString());
+				if (message.tag()==ActorWithCache.SUCCESS && message.value() instanceof VolatileSuccessDTO success)
+					System.out.printf("Write success for key: %s%n", success.dto().key().toString());
 				else if (message.tag()==ActorWithCache.FAILURE && message.value() instanceof VolatileFailureDTO failure) 
 					System.out.printf("Write failure for key: %s%n", failure.dto().key().toString());
 			}

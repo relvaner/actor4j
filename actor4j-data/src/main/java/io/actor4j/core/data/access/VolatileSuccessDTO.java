@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2018, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.data.access.cache;
+package io.actor4j.core.data.access;
 
-import io.actor4j.core.utils.Cache;
-
-public interface AsyncCache<K, V> extends Cache<K, V> {
-	public void update(int tag, K key, V value);
+public record VolatileSuccessDTO<K, V>(VolatileDataAccessDTO<K, V> dto, int tag) {
+	public static <K, V> VolatileSuccessDTO<K, V> of(VolatileDataAccessDTO<K, V> dto, int tag) {
+		return new VolatileSuccessDTO<K, V>(dto, tag);
+	}
 }

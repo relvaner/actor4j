@@ -15,8 +15,8 @@
  */
 package io.actor4j.core.data.access;
 
-public record PersistentFailureDTO<K, V>(PersistentDataAccessDTO<K, V> dto, Throwable throwable) {
-	public static <K, V> PersistentFailureDTO<K, V> of(PersistentDataAccessDTO<K, V> dto, Throwable throwable) {
-		return new PersistentFailureDTO<K, V>(dto, throwable);
+public record PersistentFailureDTO<K, V>(PersistentDataAccessDTO<K, V> dto, int tag, Throwable throwable) {
+	public static <K, V> PersistentFailureDTO<K, V> of(PersistentDataAccessDTO<K, V> dto, int tag, Throwable throwable) {
+		return new PersistentFailureDTO<K, V>(dto, tag, throwable);
 	}
 }

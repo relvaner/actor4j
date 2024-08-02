@@ -88,7 +88,7 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 			catch(Exception e) {
 				e.printStackTrace();
 				
-				tell(VolatileFailureDTO.of(dto, e), FAILURE, dto.source(), message.interaction());
+				tell(VolatileFailureDTO.of(dto, message.tag(), e), FAILURE, dto.source(), message.interaction());
 			}
 		}
 		else if (message.tag()==EVICT)

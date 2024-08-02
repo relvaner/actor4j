@@ -85,7 +85,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class, NONE));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
@@ -155,7 +155,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class, NONE));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));

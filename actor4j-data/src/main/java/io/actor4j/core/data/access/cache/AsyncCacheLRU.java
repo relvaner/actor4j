@@ -15,6 +15,9 @@
  */
 package io.actor4j.core.data.access.cache;
 
+import static io.actor4j.core.actors.ActorWithCache.UPDATE;
+import static io.actor4j.core.data.access.DataAccessActor.INSERT_ONE;
+
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -22,14 +25,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
-	private final Map<K, V> map;
-	private final Deque<K> lru;
-	private final Set<K> cacheMiss;
-	private final Set<K> cacheDirty;
-	private final Set<K> cacheDel;
+import io.actor4j.core.actors.ActorWithCache;
+import io.actor4j.core.data.access.DataAccessActor;
 
-	private final int size;
+public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
+	protected final Map<K, V> map;
+	protected final Deque<K> lru;
+	protected final Set<K> cacheMiss;
+	protected final Set<K> cacheDirty;
+	protected final Set<K> cacheDel;
+
+	protected final int size;
 
 	public AsyncCacheLRU(int size) {
 		super();
@@ -73,7 +79,7 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 		return result;
 	}
 	
-	public void putIfAbsentLocal(K key, V value) {
+	protected void putIfAbsentLocal(K key, V value) {
 		V oldValue = map.putIfAbsent(key, value);
 		
 		if (oldValue==null) {
@@ -106,7 +112,7 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 		return result;
 	}
 	
-	public void removeDirty(K key, V value) {
+	protected void removeDirty(K key, V value) {
 		if (cacheDirty.contains(key)) {
 			V current = map.get(key);
 			if (current!=null && current.equals(value))
@@ -126,7 +132,7 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 		}
 	}
 	
-	public void removeIfDelLocal(K key) {
+	protected void removeIfDelLocal(K key) {
 		if (cacheDel.contains(key))
 			cacheDel.remove(key);
 	}
@@ -140,7 +146,7 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 		cacheDel.clear();
 	}
 	
-	private void resize() {
+	protected void resize() {
 		if (map.size()>size) {
 			map.remove(lru.getFirst());
 			lru.removeFirst();
@@ -155,6 +161,16 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 	@Override
 	public String toString() {
 		return "ConcurrentCacheLRU [map=" + map + ", lru=" + lru + ", size=" + size + "]";
+	}
+	
+	@Override
+	public void update(int tag, K key, V value) {
+		if (tag==ActorWithCache.GET || tag==DataAccessActor.FIND_ONE)
+			putIfAbsentLocal(key, value);
+		else if (tag==ActorWithCache.SET || tag==INSERT_ONE)
+			removeDirty(key, value);
+		else if (tag==DataAccessActor.DELETE_ONE || tag==DataAccessActor.UPDATE_ONE || tag==UPDATE)
+			removeIfDelLocal(key);
 	}
 
 	@Override

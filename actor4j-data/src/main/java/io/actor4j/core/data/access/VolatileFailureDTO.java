@@ -15,8 +15,8 @@
  */
 package io.actor4j.core.data.access;
 
-public record VolatileFailureDTO<K, V>(VolatileDataAccessDTO<K, V> dto, Throwable throwable) {
-	public static <K, V> VolatileFailureDTO<K, V> of(VolatileDataAccessDTO<K, V> dto, Throwable throwable) {
-		return new VolatileFailureDTO<K, V>(dto, throwable);
+public record VolatileFailureDTO<K, V>(VolatileDataAccessDTO<K, V> dto, int tag, Throwable throwable) {
+	public static <K, V> VolatileFailureDTO<K, V> of(VolatileDataAccessDTO<K, V> dto, int tag, Throwable throwable) {
+		return new VolatileFailureDTO<K, V>(dto, tag, throwable);
 	}
 }
