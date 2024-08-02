@@ -47,7 +47,7 @@ public class CacheFeature {
 		cache.put(data[4][0], data[4][1]);
 		
 		for (int i=0; i<data.length-2; i++)
-			assertEquals(data[i][1], cache.get(data[i][0]));
+			assertEquals(data[i][1], cache.get(data[i][0], null));
 		
 		assertTrue(cache.getMap().size()==5);
 		assertTrue(cache.getLru().size()==5);
@@ -61,8 +61,8 @@ public class CacheFeature {
 			assertEquals(data[i++][0], key);
 		}
 		
-		cache.get(data[5][0]);
-		cache.get(data[4][0]);
+		cache.get(data[5][0], null);
+		cache.get(data[4][0], null);
 		
 		Iterator<Entry<Long, String>> iterator = cache.getLru().entrySet().iterator();
 		assertEquals(data[2][0], iterator.next().getValue());
@@ -104,7 +104,7 @@ public class CacheFeature {
 		cache.put(data[4][0], data[4][1]);
 		
 		for (int i=0; i<data.length-2; i++)
-			assertEquals(data[i][1], cache.get(data[i][0]));
+			assertEquals(data[i][1], cache.get(data[i][0], null));
 		
 		assertTrue(cache.getMap().size()==5);
 		assertTrue(cache.getLru().size()==5);
@@ -118,8 +118,8 @@ public class CacheFeature {
 			assertEquals(data[i++][0], key);
 		}
 		
-		cache.get(data[5][0]);
-		cache.get(data[4][0]);
+		cache.get(data[5][0], null);
+		cache.get(data[4][0], null);
 
 		Iterator<String> iterator = cache.getLru().iterator();
 		assertEquals(data[2][0], iterator.next());
