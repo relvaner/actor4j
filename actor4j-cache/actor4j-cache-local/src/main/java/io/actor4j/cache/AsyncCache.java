@@ -15,6 +15,8 @@
  */
 package io.actor4j.cache;
 
-public interface ConcurrentCache<K, V> extends AsyncCache<K, V> {
-	public String name();
+import io.actor4j.core.utils.Cache;
+
+public interface AsyncCache<K, V> extends Cache<K, V> {
+	public void synchronizeWithStorage();
 }

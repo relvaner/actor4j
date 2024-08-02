@@ -20,12 +20,12 @@ import static io.actor4j.core.actors.ActorWithCache.*;
 import java.util.UUID;
 import java.util.function.Function;
 
-import io.actor4j.cache.runtime.CacheVolatileLRU;
 import io.actor4j.core.actors.PrimaryActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
+import io.actor4j.core.utils.CacheVolatileLRU;
 import io.actor4j.core.utils.DeepCopyable;
 
 public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {

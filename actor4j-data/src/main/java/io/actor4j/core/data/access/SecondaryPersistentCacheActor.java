@@ -15,7 +15,7 @@
  */
 package io.actor4j.core.data.access;
 
-import io.actor4j.cache.runtime.CacheVolatileLRU;
+import io.actor4j.cache.runtime.AsyncCacheVolatileLRU;
 import io.actor4j.core.actors.SecondaryActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
@@ -38,7 +38,7 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 		super(name, group, primary);
 		
 		this.cacheSize = cacheSize;
-		cache = new CacheVolatileLRU<>(cacheSize);
+		cache = new AsyncCacheVolatileLRU<>(cacheSize);
 	}
 	
 	@SuppressWarnings("unchecked")

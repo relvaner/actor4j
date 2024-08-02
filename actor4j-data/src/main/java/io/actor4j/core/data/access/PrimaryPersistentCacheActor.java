@@ -15,7 +15,7 @@
  */
 package io.actor4j.core.data.access;
 
-import io.actor4j.cache.runtime.CacheVolatileLRU;
+import io.actor4j.cache.runtime.AsyncCacheVolatileLRU;
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.actors.PrimaryActor;
 import io.actor4j.core.messages.ActorMessage;
@@ -47,7 +47,7 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 		super(name, group, alias, secondary, instances);
 		
 		this.cacheSize = cacheSize;
-		cache = new CacheVolatileLRU<>(cacheSize);
+		cache = new AsyncCacheVolatileLRU<>(cacheSize);
 		
 		this.dataAccess = dataAccess;
 		this.ackMode = ackMode;

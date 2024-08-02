@@ -18,10 +18,9 @@ package io.actor4j.core.data.access;
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Cache;
+import io.actor4j.core.utils.CacheLRU;
 import io.actor4j.core.utils.DeepCopyable;
 import static io.actor4j.core.data.access.AckMode.*;
-
-import io.actor4j.cache.runtime.CacheLRU;
 
 public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 	protected AckMode ackMode;
