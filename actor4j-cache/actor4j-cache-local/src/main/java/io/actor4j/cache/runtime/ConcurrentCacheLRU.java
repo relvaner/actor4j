@@ -86,7 +86,7 @@ public class ConcurrentCacheLRU<K, V> implements ConcurrentCache<K, V> {
 	}
 	
 	@Override
-	public boolean contains(K key) {
+	public boolean containsKey(K key) {
 		while (disabled.get());
 		
 		boolean result = false;

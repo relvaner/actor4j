@@ -50,7 +50,7 @@ public class RocksDBCache<K, V> implements Cache<K, V> {
 	}
 	
 	@Override
-	public boolean contains(K key) {
+	public boolean containsKey(K key) {
 		boolean result = false;
 		
 		try {

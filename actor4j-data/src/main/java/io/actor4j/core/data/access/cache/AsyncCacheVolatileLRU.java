@@ -73,7 +73,7 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	}
 
 	@Override
-	public boolean contains(K key) {
+	public boolean containsKey(K key) {
 		return map.containsKey(key);
 	}
 	
