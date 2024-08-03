@@ -22,22 +22,22 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import io.actor4j.core.actors.Actor;
+import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 
 public class PublisherImpl {
-	protected Actor actor;
+	protected ActorRef actorRef;
 	
 	protected ActorGroup subscribers;
 	protected Iterator<UUID> iteratorSubscribers;
 	protected Map<UUID, Long> requests;
 	protected Map<UUID, Boolean> bulks;
 	
-	public PublisherImpl(Actor actor) {
+	public PublisherImpl(ActorRef actorRef) {
 		super();
-		this.actor = actor;
+		this.actorRef = actorRef;
 		subscribers = new ActorGroupSet();
 		requests = new HashMap<>();
 		bulks = new HashMap<>();
@@ -92,10 +92,10 @@ public class PublisherImpl {
 			
 			if (request!=null) {
 				if (request==Long.MAX_VALUE)
-					actor.tell(value, ON_NEXT, dest);
+					actorRef.tell(value, ON_NEXT, dest);
 				else if (request>0) {
 					requests.put(dest, request-1);
-					actor.tell(value, ON_NEXT, dest);
+					actorRef.tell(value, ON_NEXT, dest);
 				
 					if (request==1)
 						onComplete(dest);
@@ -109,12 +109,12 @@ public class PublisherImpl {
 	}
 	
 	public void onError(String error, UUID dest) {
-		actor.tell(error, ON_ERROR, dest);
+		actorRef.tell(error, ON_ERROR, dest);
 		cancel(dest);
 	}
 	
 	public void onComplete(UUID dest) {
-		actor.tell(null, ON_COMPLETE, dest);
+		actorRef.tell(null, ON_COMPLETE, dest);
 		cancel(dest);
 	}
 }

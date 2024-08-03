@@ -18,16 +18,16 @@ package io.actor4j.core.reactive.streams;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import io.actor4j.core.actors.Actor;
+import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.function.Procedure;
 import io.actor4j.core.messages.ActorMessage;
 
 public class ProcessorImpl extends PublisherImpl {
 	protected SubscriberImpl subscriberImpl;
 	
-	public ProcessorImpl(Actor actor) {
-		super(actor);
-		subscriberImpl = new SubscriberImpl(actor);
+	public ProcessorImpl(ActorRef actorRef) {
+		super(actorRef);
+		subscriberImpl = new SubscriberImpl(actorRef);
 	}
 	
 	@Override

@@ -15,7 +15,7 @@
  */
 package io.actor4j.core.reactive.streams;
 
-import io.actor4j.core.actors.Actor;
+import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.function.Procedure;
 import io.actor4j.core.messages.ActorMessage;
 
@@ -27,15 +27,15 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SubscriberImpl {
-	protected Actor actor;
+	protected ActorRef actorRef;
 	
 	protected Map<UUID, Consumer<Object>> onNextMap;
 	protected Map<UUID, Consumer<String>> onErrorMap; 
 	protected Map<UUID, Procedure> onCompleteMap;
 	
-	public SubscriberImpl(Actor actor) {
+	public SubscriberImpl(ActorRef actorRef) {
 		super();
-		this.actor = actor;
+		this.actorRef = actorRef;
 		
 		onNextMap = new HashMap<>();
 		onErrorMap = new HashMap<>();
@@ -80,22 +80,22 @@ public class SubscriberImpl {
 	}
 	
 	public void request(long n, UUID dest) {
-		actor.tell(n, SUBSCRIPTION_REQUEST, dest);
+		actorRef.tell(n, SUBSCRIPTION_REQUEST, dest);
 	}
 	
 	public void requestReset(long n, UUID dest) {
-		actor.tell(n, SUBSCRIPTION_REQUEST_RESET, dest);
+		actorRef.tell(n, SUBSCRIPTION_REQUEST_RESET, dest);
 	}
 	
 	protected void cancel(UUID dest) {
-		actor.tell(null, SUBSCRIPTION_CANCEL, dest);
+		actorRef.tell(null, SUBSCRIPTION_CANCEL, dest);
 	}
 	
 	public void bulk(UUID dest) {
-		actor.tell(null, SUBSCRIPTION_BULK, dest);
+		actorRef.tell(null, SUBSCRIPTION_BULK, dest);
 	}
 	
 	public void cancelBulk(UUID dest) {
-		actor.tell(null, SUBSCRIPTION_CANCEL_BULK, dest);
+		actorRef.tell(null, SUBSCRIPTION_CANCEL_BULK, dest);
 	}
 }
