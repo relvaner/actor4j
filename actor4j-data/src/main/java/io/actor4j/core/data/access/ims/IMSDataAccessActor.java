@@ -17,6 +17,7 @@ package io.actor4j.core.data.access.ims;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.utils.DeepCopyable;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.PersistentFailureDTO;
@@ -45,10 +46,19 @@ public class IMSDataAccessActor<K, V> extends Actor {
 			try {
 				boolean unhandled = false;
 				if (message.tag()==FIND_ONE || message.tag()==GET) {
-					V value = findOne(dto.key(), dto.filter(), ims, dto.collectionName());
-					if (value instanceof DeepCopyable)
-						value = ((DeepCopyable<V>)value).deepCopy();
-					tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
+					ActorOptional<V> optional = findOne(dto.key(), dto.filter(), ims, dto.collectionName());
+					if (optional.exists()) {
+						if (optional.isPresent()) {
+							V value = optional.get();
+							if (value instanceof DeepCopyable)
+								value = ((DeepCopyable<V>)value).deepCopy();
+							tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
+						}
+						else
+							tell(dto, FIND_ONE, message.source(), message.interaction());
+					}
+					else
+						tell(dto, FIND_NONE, message.source(), message.interaction());
 				}
 				else if (message.tag()==SET) {
 					if (dto.key()!=null) 

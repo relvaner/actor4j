@@ -121,7 +121,10 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 					boolean unhandled = false;
 					if (message.tag()==FIND_ONE || message.tag()==GET) {
 						V value = convertToValue(findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), valueType);
-						tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
+						if (dto.value()!=null)
+							tell(dto.shallowCopy(value), FIND_ONE, message.source(), message.interaction());
+						else
+							tell(dto, FIND_NONE, message.source(), message.interaction());
 					}
 					else if (message.tag()==SET) {
 						if (!((boolean)dto.reserved()) && !hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()))

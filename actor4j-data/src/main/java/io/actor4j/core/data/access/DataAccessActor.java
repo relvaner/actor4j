@@ -28,6 +28,7 @@ public abstract class DataAccessActor<K, V> extends ResourceActor {
 	public static final int UPDATE_ONE  = RESERVED_DATA_ACCESS_UPDATE_ONE;
 	public static final int DELETE_ONE  = RESERVED_DATA_ACCESS_DELETE_ONE;
 	public static final int FIND_ONE    = RESERVED_DATA_ACCESS_FIND_ONE;
+	public static final int FIND_NONE   = RESERVED_DATA_ACCESS_FIND_NONE;
 	public static final int FLUSH       = RESERVED_DATA_ACCESS_FLUSH;
 	
 	public static final int SUCCESS     = RESERVED_DATA_ACCESS_SUCCESS;

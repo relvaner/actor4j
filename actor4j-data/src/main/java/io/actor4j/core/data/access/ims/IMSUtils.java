@@ -16,6 +16,7 @@
 package io.actor4j.core.data.access.ims;
 
 import io.actor4j.core.json.JsonObject;
+import io.actor4j.core.utils.ActorOptional;
 
 // collectionName not used; filter, update not implemented 
 public final class IMSUtils {
@@ -27,7 +28,7 @@ public final class IMSUtils {
 		boolean result = false;
 		
 		if (key!=null)
-			result = imdb.getData().get(key) != null;
+			result = imdb.getData().containsKey(key);
 		
 		return result;
 	}
@@ -49,12 +50,14 @@ public final class IMSUtils {
 			imdb.remove(key);
 	}
 	
-	public static <K, V> V findOne(K key, JsonObject filter, IMS<K, V> imdb, String collectionName) {
-		V result = null;
-		
-		if (key!=null)
-			result = imdb.getData().get(key);
-		
-		return result;
+	public static <K, V> ActorOptional<V> findOne(K key, JsonObject filter, IMS<K, V> imdb, String collectionName) {
+		if (key!=null) {
+			if (imdb.getData().containsKey(key))
+				return ActorOptional.of(imdb.getData().get(key));
+			else
+				return ActorOptional.none();
+		}
+		else
+			return ActorOptional.none();
 	}
 }
