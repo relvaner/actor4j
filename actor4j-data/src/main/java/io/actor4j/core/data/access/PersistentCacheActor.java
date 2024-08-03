@@ -31,10 +31,16 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 	protected UUID dataAccess;
 	protected AckMode ackMode;
 	
+	protected AckWatcher<K> getWatcher;
+	protected AckWatcher<K> delWatcher;
+	
 	public PersistentCacheActor(String name, int cacheSize, UUID dataAccess, AckMode ackMode) {
 		super(name, cacheSize);
 		this.dataAccess = dataAccess;
 		this.ackMode = ackMode;
+		
+		getWatcher = new AckWatcher<>();
+		delWatcher = new AckWatcher<>();
 	}
 	
 	public PersistentCacheActor(String name, int cacheSize, UUID dataAcess) {
@@ -63,7 +69,11 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			try {
 				boolean unhandled = false;
 				if (message.tag()==GET) {
-					V value = ((AsyncCache<K,V>)cache).get(dto.key(), () -> tell(message.value(), GET, dataAccess, message.interaction()));
+					V value = ((AsyncCache<K,V>)cache).get(dto.key(), 
+						() -> tell(message.value(), GET, dataAccess, message.interaction()),
+						() -> getWatcher.watch(dto.key(), dto.source(), message.interaction()),
+						() -> tell(dto/*value==null*/, GET, dto.source(), message.interaction())
+					);
 					if (value!=null) {
 						if (value instanceof DeepCopyable)
 							value = ((DeepCopyable<V>)value).deepCopy();
@@ -80,7 +90,10 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 					tell(message.value(), UPDATE, dataAccess);
 				}
 				else if (message.tag()==DEL)
-					((AsyncCache<K,V>)cache).remove(dto.key(), () -> tell(message.value(), DELETE_ONE, dataAccess));
+					((AsyncCache<K,V>)cache).remove(dto.key(), 
+						() -> tell(message.value(), DELETE_ONE, dataAccess),
+						() -> delWatcher.watch(dto.key(), dto.source(), message.interaction())
+					);
 				else if (message.tag()==DEL_ALL) {
 					cache.clear();
 					// drop collection, not implemented
@@ -90,6 +103,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 				else if (message.tag()==FIND_ONE && message.source()==dataAccess) {
 					cache.put(dto.key(), dto.value());
 					tell(dto, GET, dto.source(), message.interaction());
+					getWatcher.trigger(dto.key(), (source, interaction) -> tell(dto.shallowCopy(source), GET, source, interaction));
 				}
 				else if (message.tag()==CAS || message.tag()==CAU) {
 					V value = cache.get(dto.key());
@@ -132,8 +146,11 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 	
 	public void handleSuccess(ActorMessage<?> message, PersistentSuccessDTO<K,V> success) {
 		((AsyncCache<K,V>)cache).complete(success.tag(), success.dto().key(), success.dto().value());
-		if (ackMode==PRIMARY || ackMode==ALL)
+		if (ackMode==PRIMARY || ackMode==ALL) {
 			tell(success, DataAccessActor.SUCCESS, success.dto().source(), message.interaction());
+			if (success.tag()==DELETE_ONE)
+				delWatcher.trigger(success.dto().key(), (source, interaction) -> tell(success/*dto.shallowCopy(source)*/, DataAccessActor.SUCCESS, source, interaction));
+		}
 	}
 	
 	public void handleFailure(ActorMessage<?> message, PersistentFailureDTO<K,V> failure) {

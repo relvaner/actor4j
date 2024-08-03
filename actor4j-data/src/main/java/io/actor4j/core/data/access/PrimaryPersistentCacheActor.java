@@ -40,6 +40,9 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	protected UUID dataAccess;
 	protected AckMode ackMode;
 	
+	protected AckWatcher<K> getWatcher;
+	protected AckWatcher<K> delWatcher;
+	
 	public PrimaryPersistentCacheActor(ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
 		this(null, group, alias, secondary, instances, cacheSize, dataAccess, ackMode);
 	}
@@ -52,6 +55,9 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 		
 		this.dataAccess = dataAccess;
 		this.ackMode = ackMode;
+		
+		getWatcher = new AckWatcher<>();
+		delWatcher = new AckWatcher<>();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -63,7 +69,11 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 			try {
 				boolean unhandled = false;
 				if (message.tag()==GET) {
-					V value = ((AsyncCache<K,V>)cache).get(dto.key(), () -> tell(message.value(), GET, dataAccess, message.interaction()));
+					V value = ((AsyncCache<K,V>)cache).get(dto.key(), 
+						() -> tell(message.value(), GET, dataAccess, message.interaction()),
+						() -> getWatcher.watch(dto.key(), dto.source(), message.interaction()),
+						() -> tell(dto/*value==null*/, GET, dto.source(), message.interaction())
+					);
 					if (value!=null) {
 						if (value instanceof DeepCopyable)
 							value = ((DeepCopyable<V>)value).deepCopy();
@@ -77,14 +87,17 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
 				}
 				else if (message.tag()==UPDATE) {
-					((AsyncCache<K,V>)cache).remove(dto.key(), () -> publish(VolatileDTO.create(dto.key(), dto.source()), DEL));
+					((AsyncCache<K,V>)cache).remove(dto.key(), () -> publish(VolatileDTO.create(dto.key(), dto.source()), DEL), null);
 					tell(message.value(), UPDATE, dataAccess);
 				}
 				else if (message.tag()==DEL) {
-					((AsyncCache<K,V>)cache).remove(dto.key(), () -> {
-						tell(message.value(), DELETE_ONE, dataAccess);
-						publish(VolatileDTO.create(dto.key(), dto.source()), DEL);
-					});
+					((AsyncCache<K,V>)cache).remove(dto.key(), 
+						() -> {
+							tell(message.value(), DELETE_ONE, dataAccess);
+							publish(VolatileDTO.create(dto.key(), dto.source()), DEL);
+						},
+						() -> delWatcher.watch(dto.key(), dto.source(), message.interaction())
+						);
 				}
 				else if (message.tag()==DEL_ALL ) {
 					cache.clear();
@@ -98,6 +111,7 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 				else if (message.tag()==FIND_ONE && message.source()==dataAccess) {
 					cache.put(dto.key(), dto.value());
 					tell(dto, GET, dto.source(), message.interaction());
+					getWatcher.trigger(dto.key(), (source, interaction) -> tell(dto.shallowCopy(source), GET, source, interaction));
 					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
 				}
 				else if (message.tag()==CAS || message.tag()==CAU) {

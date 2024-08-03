@@ -78,17 +78,19 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	}
 	
 	@Override
-	public V get(K key, Runnable handler) {
+	public V get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler) {
 		V result = null;
 		
 		Pair<V> pair = map.get(key);
 		if (pair==null) {
-			if (handler!=null) {
-				if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
-					cacheMiss.add(key);
-					handler.run();
-				}
+			if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
+				cacheMiss.add(key);
+				storageReader.run();
 			}
+			else if (cacheDel.contains(key))
+				cacheDelFlaggedHandler.run();
+			else if (cacheMiss.contains(key))
+				cacheMissFlaggedHandler.run();
 		}
 		else {
 			lru.remove(pair.timestamp());
@@ -151,18 +153,20 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	}
 	
 	@Override
-	public void remove(K key, Runnable handler) {
+	public void remove(K key, Runnable storageWriter, Runnable cacheDelFlaggedHandler) {
 		Pair<V> pair = map.get(key);
 		lru.remove(pair.timestamp);
 		map.remove(key);
 		
-		if (handler!=null)
-			if (!cacheDel.contains(key)) {
-				if (cacheDirty.contains(key))
-					cacheDirty.remove(key);
-				cacheDel.add(key);
-				handler.run();
-			}
+		
+		if (!cacheDel.contains(key)) {
+			if (cacheDirty.contains(key))
+				cacheDirty.remove(key);
+			cacheDel.add(key);
+			storageWriter.run();
+		}
+		else
+			cacheDelFlaggedHandler.run();
 	}
 	
 	protected void removeIfDelLocal(K key) {

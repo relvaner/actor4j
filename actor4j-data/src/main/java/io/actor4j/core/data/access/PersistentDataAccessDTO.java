@@ -51,4 +51,8 @@ public record PersistentDataAccessDTO<K, V>(K key, V value, int hashCodeExpected
 	public PersistentDataAccessDTO<K, V> shallowCopyWithReserved(Object reserved) {
 		return new PersistentDataAccessDTO<K, V>(key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
 	}
+	
+	public PersistentDataAccessDTO<K, V> shallowCopy(UUID source) {
+		return new PersistentDataAccessDTO<K, V>(key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
+	}
 }
