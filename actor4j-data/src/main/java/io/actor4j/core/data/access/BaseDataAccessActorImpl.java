@@ -55,7 +55,7 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 	public abstract boolean handleMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	
 	public abstract void onSuccess(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
-	public abstract void onFailure(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
+	public abstract void onFailure(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto, Throwable t);
 
 	public void receive(ActorMessage<?> message) {
 		if (message.value()!=null && message.value() instanceof PersistentDataAccessDTO) {
@@ -112,7 +112,7 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 					e.printStackTrace();
 					
 					circuitBreaker.failure();
-					onFailure(message, dto);
+					onFailure(message, dto, e);
 				}
 			}
 
