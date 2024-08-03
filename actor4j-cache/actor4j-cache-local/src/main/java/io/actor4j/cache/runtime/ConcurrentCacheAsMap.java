@@ -80,7 +80,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 		try {
 			result = map.get(key);
 			
-			if (result==null) {
+			if (result==null && !map.containsKey(key)) {
 				if (storageReader!=null) {
 					if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 						cacheMiss.add(key);
