@@ -44,14 +44,14 @@ public class ExampleReactiveStreams {
 		system.addActor(() -> new SubscriberActor("subscriberA") {
 			@Override
 			public void preStart() {
-				subscribe(publisher, (obj) -> logger().log(DEBUG, String.format("At actor %s following value was received: %s", name, obj)), null, null);
+				subscribe(publisher, (obj) -> logger().log(DEBUG, String.format("Actor (%s) has received: %s", name, obj)), null, null);
 				request(10, publisher);
 			}
 		});
 		system.addActor(() -> new SubscriberActor("subscriberB") {
 			@Override
 			public void preStart() {
-				subscribe(publisher, (obj) -> logger().log(DEBUG, String.format("At actor %s following value was received: %s", name, obj)), null, null);
+				subscribe(publisher, (obj) -> logger().log(DEBUG, String.format("Actor (%s) has received: %s", name, obj)), null, null);
 				request(15, publisher);
 			}
 		});
