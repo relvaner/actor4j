@@ -19,6 +19,7 @@ import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.data.access.cache.AsyncCache;
 import io.actor4j.core.data.access.cache.AsyncCacheLRU;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.DeepCopyable;
 
@@ -69,15 +70,20 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			try {
 				boolean unhandled = false;
 				if (message.tag()==GET) {
-					V value = ((AsyncCache<K,V>)cache).get(dto.key(), 
+					ActorOptional<V> optional = ((AsyncCache<K,V>)cache).get(dto.key(), 
 						() -> tell(message.value(), GET, dataAccess, message.interaction()),
 						() -> getWatcher.watch(dto.key(), dto.source(), message.interaction()),
 						() -> tell(dto/*value==null*/, GET, dto.source(), message.interaction())
 					);
-					if (value!=null) {
-						if (value instanceof DeepCopyable)
-							value = ((DeepCopyable<V>)value).deepCopy();
-						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+					if (optional.isPresent()) {
+						V value = optional.get();
+						if (value!=null) {
+							if (value instanceof DeepCopyable)
+								value = ((DeepCopyable<V>)value).deepCopy();
+							tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+						}
+						else
+							tell(dto, GET, dto.source(), message.interaction());
 					}
 				}
 				else if (message.tag()==SET) {
@@ -100,8 +106,9 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 				}
 				else if (message.tag()==CLEAR)
 					cache.clear();
-				else if (message.tag()==FIND_ONE && message.source()==dataAccess) {
-					cache.put(dto.key(), dto.value());
+				else if ((message.tag()==FIND_ONE || message.tag()==FIND_NONE) && message.source()==dataAccess) {
+					if (message.tag()==FIND_ONE)
+						cache.put(dto.key(), dto.value());
 					tell(dto, GET, dto.source(), message.interaction());
 					getWatcher.trigger(dto.key(), (source, interaction) -> tell(dto.shallowCopy(source), GET, source, interaction));
 				}

@@ -22,6 +22,7 @@ import io.actor4j.core.data.access.cache.AsyncCacheVolatileLRU;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
+import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.DeepCopyable;
 
@@ -69,15 +70,20 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 			try {
 				boolean unhandled = false;
 				if (message.tag()==GET) {
-					V value = ((AsyncCache<K,V>)cache).get(dto.key(), 
+					ActorOptional<V> optional = ((AsyncCache<K,V>)cache).get(dto.key(), 
 						() -> tell(message.value(), GET, dataAccess, message.interaction()),
 						() -> getWatcher.watch(dto.key(), dto.source(), message.interaction()),
 						() -> tell(dto/*value==null*/, GET, dto.source(), message.interaction())
 					);
-					if (value!=null) {
-						if (value instanceof DeepCopyable)
-							value = ((DeepCopyable<V>)value).deepCopy();
-						tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+					if (optional.isPresent()) {
+						V value = optional.get();
+						if (value!=null) {
+							if (value instanceof DeepCopyable)
+								value = ((DeepCopyable<V>)value).deepCopy();
+							tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
+						}
+						else
+							tell(dto, GET, dto.source(), message.interaction());
 					}
 				}
 				else if (message.tag()==SET) {
@@ -108,11 +114,13 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					cache.clear();
 					publish(VolatileDTO.create(dto.source()), CLEAR);
 				}
-				else if (message.tag()==FIND_ONE && message.source()==dataAccess) {
-					cache.put(dto.key(), dto.value());
+				else if ((message.tag()==FIND_ONE || message.tag()==FIND_NONE) && message.source()==dataAccess) {
+					if (message.tag()==FIND_ONE)
+						cache.put(dto.key(), dto.value());
 					tell(dto, GET, dto.source(), message.interaction());
 					getWatcher.trigger(dto.key(), (source, interaction) -> tell(dto.shallowCopy(source), GET, source, interaction));
-					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
+					if (message.tag()==FIND_ONE)
+						publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
 				}
 				else if (message.tag()==CAS || message.tag()==CAU) {
 					V value = cache.get(dto.key());
