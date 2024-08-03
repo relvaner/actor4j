@@ -18,15 +18,17 @@ package io.actor4j.core.data.access.cache;
 import static io.actor4j.core.actors.ActorWithCache.UPDATE;
 import static io.actor4j.core.data.access.DataAccessActor.INSERT_ONE;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.data.access.DataAccessActor;
+import io.actor4j.core.utils.ActorOptional;
 
 public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 	protected final Map<K, V> map;
@@ -40,11 +42,11 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 	public AsyncCacheLRU(int size) {
 		super();
 		
-		map = new ConcurrentHashMap<>(size);
-		lru = new ConcurrentLinkedDeque<>();
-		cacheMiss = ConcurrentHashMap.newKeySet();
-		cacheDirty = ConcurrentHashMap.newKeySet();
-		cacheDel = ConcurrentHashMap.newKeySet();
+		map = new HashMap<>(size);
+		lru = new ArrayDeque<>(size);
+		cacheMiss = new HashSet<>();
+		cacheDirty = new HashSet<>();
+		cacheDel = new HashSet<>();
 		
 		this.size = size;
 	}
@@ -68,12 +70,8 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 	}
 	
 	@Override
-	public V get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler) {
-		V result = null;
-		
-		result = map.get(key);
-		
-		if (result==null) {
+	public ActorOptional<V> get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler) {
+		if (!map.containsKey(key)) {
 			if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 				cacheMiss.add(key);
 				storageReader.run();
@@ -82,13 +80,15 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 				cacheDelFlaggedHandler.run();
 			else if (cacheMiss.contains(key))
 				cacheMissFlaggedHandler.run();
+			
+			return ActorOptional.none();
 		}
 		else {
 			lru.remove(key);
 			lru.addLast(key);
+			
+			return ActorOptional.of(map.get(key));
 		}
-
-		return result;
 	}
 	
 	protected void putIfAbsentLocal(K key, V value) {

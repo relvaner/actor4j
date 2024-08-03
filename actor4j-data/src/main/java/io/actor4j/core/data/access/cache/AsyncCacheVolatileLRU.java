@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.data.access.DataAccessActor;
+import io.actor4j.core.utils.ActorOptional;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -78,11 +79,8 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	}
 	
 	@Override
-	public V get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler) {
-		V result = null;
-		
-		Pair<V> pair = map.get(key);
-		if (pair==null) {
+	public ActorOptional<V> get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler) {
+		if (!map.containsKey(key)) {
 			if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 				cacheMiss.add(key);
 				storageReader.run();
@@ -91,16 +89,19 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 				cacheDelFlaggedHandler.run();
 			else if (cacheMiss.contains(key))
 				cacheMissFlaggedHandler.run();
+			
+			return ActorOptional.none();
 		}
 		else {
+			Pair<V> pair = map.get(key);
+			
 			lru.remove(pair.timestamp());
 			long timestamp = System.nanoTime();
 			map.put(key, new Pair<V>(pair.value(), timestamp));
 			lru.put(timestamp, key);
-			result = pair.value();
+			
+			return ActorOptional.of(pair.value());
 		}
-		
-		return result;
 	}
 	
 	protected void putIfAbsentLocal(K key, V value) {

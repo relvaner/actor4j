@@ -15,10 +15,11 @@
  */
 package io.actor4j.core.data.access.cache;
 
+import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.utils.Cache;
 
 public interface AsyncCache<K, V> extends Cache<K, V> {
-	public V get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler);
+	public ActorOptional<V> get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler);
 	public void remove(K key, Runnable storageWriter, Runnable cacheDelFlaggedHandler);
 	
 	public void complete(int tag, K key, V value);
