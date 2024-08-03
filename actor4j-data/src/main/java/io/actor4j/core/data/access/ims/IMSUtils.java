@@ -52,10 +52,11 @@ public final class IMSUtils {
 	
 	public static <K, V> ActorOptional<V> findOne(K key, JsonObject filter, IMS<K, V> imdb, String collectionName) {
 		if (key!=null) {
-			if (imdb.getData().containsKey(key))
-				return ActorOptional.of(imdb.getData().get(key));
-			else
+			V value = imdb.getData().get(key);
+			if (value==null && !imdb.getData().containsKey(key))
 				return ActorOptional.none();
+			
+			return ActorOptional.of(value);
 		}
 		else
 			return ActorOptional.none();
