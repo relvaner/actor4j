@@ -63,6 +63,11 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 		return size;
 	}
 	
+	@Override
+	public boolean contains(K key) {
+		return map.containsKey(key);
+	}
+	
 	@Deprecated
 	@Override
 	public V get(K key) {
