@@ -80,7 +80,9 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	
 	@Override
 	public ActorOptional<V> get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler) {
-		if (!map.containsKey(key)) {
+		Pair<V> pair = map.get(key);
+		
+		if (pair==null) {
 			if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 				cacheMiss.add(key);
 				storageReader.run();
@@ -93,8 +95,6 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 			return ActorOptional.none();
 		}
 		else {
-			Pair<V> pair = map.get(key);
-			
 			lru.remove(pair.timestamp());
 			long timestamp = System.nanoTime();
 			map.put(key, new Pair<V>(pair.value(), timestamp));

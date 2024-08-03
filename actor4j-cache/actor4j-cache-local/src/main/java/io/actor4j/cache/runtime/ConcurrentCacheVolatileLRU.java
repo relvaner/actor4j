@@ -102,7 +102,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		try {
 			Pair<V> pair = map.get(key);
 			
-			if (pair==null && !map.containsKey(key)) {
+			if (pair==null) {
 				if (storageReader!=null) {
 					if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 						cacheMiss.add(key);

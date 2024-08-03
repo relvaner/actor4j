@@ -71,7 +71,9 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 	
 	@Override
 	public ActorOptional<V> get(K key, Runnable storageReader, Runnable cacheMissFlaggedHandler, Runnable cacheDelFlaggedHandler) {
-		if (!map.containsKey(key)) {
+		V value = map.get(key);
+		
+		if (value==null && !map.containsKey(key)) {
 			if (!cacheMiss.contains(key) && !cacheDel.contains(key)) {
 				cacheMiss.add(key);
 				storageReader.run();
@@ -87,7 +89,7 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 			lru.remove(key);
 			lru.addLast(key);
 			
-			return ActorOptional.of(map.get(key));
+			return ActorOptional.of(value);
 		}
 	}
 	
