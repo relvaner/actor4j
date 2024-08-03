@@ -48,6 +48,19 @@ public class RocksDBCache<K, V> implements Cache<K, V> {
 	public RocksDB getDB() {
 		return db;
 	}
+	
+	@Override
+	public boolean contains(K key) {
+		boolean result = false;
+		
+		try {
+			result = db.keyExists(keySerializer.encode().apply(key));
+		} catch(Exception e) {
+			throw new CacheLoaderException(e);
+		}
+		
+		return result;
+	}
 
 	@Override
 	public V get(K key) {

@@ -86,6 +86,25 @@ public class ConcurrentCacheLRU<K, V> implements ConcurrentCache<K, V> {
 	}
 	
 	@Override
+	public boolean contains(K key) {
+		while (disabled.get());
+		
+		boolean result = false;
+		
+		clients.incrementAndGet();
+		lockManager.lock(key);
+		try {
+			result = map.containsKey(key);
+		}
+		finally {
+			lockManager.unLock(key);
+		}
+		clients.decrementAndGet();
+		
+		return result;
+	}
+	
+	@Override
 	public V get(K key) {
 		while (disabled.get());
 		
