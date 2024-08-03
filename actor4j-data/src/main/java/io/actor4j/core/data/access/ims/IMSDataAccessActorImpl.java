@@ -15,10 +15,10 @@
  */
 package io.actor4j.core.data.access.ims;
 
-import static io.actor4j.core.actors.ActorWithCache.*;
 import static io.actor4j.core.data.access.DataAccessActor.*;
 
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.data.access.BaseDataAccessActorImpl;
 import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
@@ -100,7 +100,7 @@ public class IMSDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V>{
 
 	@Override
 	public void onSuccess(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
-		if (msg.tag()!=FIND_ONE && msg.tag()!=GET && msg.tag()!=HAS_ONE)
+		if (msg.tag()!=FIND_ONE && msg.tag()!=ActorWithCache.GET && msg.tag()!=HAS_ONE)
 			dataAccess.tell(PersistentSuccessDTO.of(dto, msg.tag()), DataAccessActor.SUCCESS, msg.source(), msg.interaction());
 	}
 
