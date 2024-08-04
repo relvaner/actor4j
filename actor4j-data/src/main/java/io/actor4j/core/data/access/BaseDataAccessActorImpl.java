@@ -106,9 +106,6 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 						dataAccess.tell(dto, ActorMessage.UNHANDLED, message.source(), message.interaction());
 				}
 				catch(Exception e) { 
-					// Inclusively invocation timeout regarding MongoClient, Retryable Reads/Writes
-					// @See https://www.mongodb.com/docs/drivers/java/sync/v4.11/fundamentals/connection/mongoclientsettings/
-					
 					e.printStackTrace();
 					
 					circuitBreaker.failure();

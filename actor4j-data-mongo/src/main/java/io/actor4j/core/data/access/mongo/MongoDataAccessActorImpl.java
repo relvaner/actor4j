@@ -149,6 +149,8 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 
 	@Override
 	public void onFailure(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto, Throwable t) {
+		// Inclusively invocation timeout regarding MongoClient, Retryable Reads/Writes
+		// @See https://www.mongodb.com/docs/drivers/java/sync/v4.11/fundamentals/connection/mongoclientsettings/
 		if (!bulkWrite)
 			dataAccess.tell(PersistentFailureDTO.of(dto, msg.tag(), t), FAILURE, msg.source(), msg.interaction());
 	}
