@@ -40,7 +40,10 @@ import io.actor4j.database.mongo.MongoOperations;
 
 import static io.actor4j.database.mongo.MongoOperations.*;
 
-public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V>{
+public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V> {
+	protected record BulkWriterRequest<K, V>(int tag, UUID interaction, UUID source, PersistentDataAccessDTO<K, V> dto) {
+	}
+	
 	protected final MongoClient client;
 	protected final String databaseName;
 	protected final boolean bulkWrite;
@@ -48,7 +51,7 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	protected final int bulkSize;
 	protected final Class<V> valueType;
 	protected final Map<String, MongoBufferedBulkWriter> bulkWriters;
-	protected final Map<UUID, Pair<UUID, PersistentDataAccessDTO<K, V>>> bulkWriterRequests; // id -> source
+	protected final Map<UUID, BulkWriterRequest<K, V>> bulkWriterRequests; // id -> request
 	
 	protected MongoBufferedBulkWriter selectedBulkWriter;
 	
@@ -69,8 +72,8 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	
 	public void onBulkWriterSuccess(List<Pair<UUID, WriteModel<Document>>> requests) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
-			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
-			dataAccess.tell(PersistentSuccessDTO.of(originRequest.b(), 0), SUCCESS, originRequest.b().source(), originRequest.a()/*interaction*/);
+			BulkWriterRequest<K, V> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
+			dataAccess.tell(PersistentSuccessDTO.of(originRequest.dto(), originRequest.tag()), SUCCESS, originRequest.source(), originRequest.interaction());
 			
 			bulkWriterRequests.remove(pair.a());
 		}
@@ -78,8 +81,8 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	
 	public void onBulkWriterError(List<Pair<UUID, WriteModel<Document>>> requests, Throwable t) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
-			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
-			dataAccess.tell(PersistentFailureDTO.of(originRequest.b(), 0, t), FAILURE, originRequest.b().source(), originRequest.a()/*interaction*/);
+			BulkWriterRequest<K, V> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
+			dataAccess.tell(PersistentFailureDTO.of(originRequest.dto(), originRequest.tag(), t), FAILURE, originRequest.source(), originRequest.interaction());
 			
 			bulkWriterRequests.remove(pair.a());
 		}
@@ -97,7 +100,8 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 			
 			selectedBulkWriter = bulkWriter;
 			
-			bulkWriterRequests.put(dto.id(), Pair.of(msg.interaction(), dto));
+			if (msg.tag()!=FIND_ONE && msg.tag()!=ActorWithCache.GET && msg.tag()!=HAS_ONE)
+				bulkWriterRequests.put(dto.id(), new BulkWriterRequest<>(msg.tag(), msg.interaction(), msg.source(), dto));
 		}
 	}
 
