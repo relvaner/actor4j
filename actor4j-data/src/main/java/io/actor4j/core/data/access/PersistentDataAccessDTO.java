@@ -19,7 +19,11 @@ import java.util.UUID;
 
 import io.actor4j.core.json.JsonObject;
 
-public record PersistentDataAccessDTO<K, V>(K key, V value, int hashCodeExpected, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
+public record PersistentDataAccessDTO<K, V>(UUID id, K key, V value, int hashCodeExpected, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
+	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) {
+		this(UUID.randomUUID(), key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
+	}
+	
 	public PersistentDataAccessDTO(K key, V value, String keyname, String collectionName, UUID source) {
 		this(key, value, 0, JsonObject.create().put(keyname, key), null, collectionName, source, null);
 	}

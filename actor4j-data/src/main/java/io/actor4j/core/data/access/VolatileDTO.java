@@ -18,6 +18,8 @@ package io.actor4j.core.data.access;
 import java.util.UUID;
 
 public interface VolatileDTO<K, V> {
+	public UUID id();
+	
 	public K key();
 	public V value();
 	public UUID source();

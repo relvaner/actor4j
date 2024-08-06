@@ -17,7 +17,11 @@ package io.actor4j.core.data.access;
 
 import java.util.UUID;
 
-public record VolatileDataAccessDTO<K, V>(K key, V value, UUID source) implements VolatileDTO<K, V>  {
+public record VolatileDataAccessDTO<K, V>(UUID id, K key, V value, UUID source) implements VolatileDTO<K, V>  {
+	public VolatileDataAccessDTO(K key, V value, UUID source) {
+		this(UUID.randomUUID(), key, value, source);
+	}
+	
 	public VolatileDataAccessDTO(UUID source) {
 		this(null, null, source);
 	}
