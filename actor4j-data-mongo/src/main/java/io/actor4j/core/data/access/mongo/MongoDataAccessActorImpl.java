@@ -48,7 +48,7 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	protected final int bulkSize;
 	protected final Class<V> valueType;
 	protected final Map<String, MongoBufferedBulkWriter> bulkWriters;
-	protected final Map<UUID, Pair<UUID, PersistentDataAccessDTO<K, V>>> bulkWriterRequests; // interaction -> source
+	protected final Map<UUID, Pair<UUID, PersistentDataAccessDTO<K, V>>> bulkWriterRequests; // id -> source
 	
 	protected MongoBufferedBulkWriter selectedBulkWriter;
 	
@@ -69,15 +69,19 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	
 	public void onBulkWriterSuccess(List<Pair<UUID, WriteModel<Document>>> requests) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
-			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a());
-			dataAccess.tell(PersistentSuccessDTO.of(originRequest.b(), 0), SUCCESS, originRequest.a(/*source*/), pair.a()/*interaction*/);
+			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
+			dataAccess.tell(PersistentSuccessDTO.of(originRequest.b(), 0), SUCCESS, originRequest.b().source(), originRequest.a()/*interaction*/);
+			
+			bulkWriterRequests.remove(pair.a());
 		}
 	}
 	
 	public void onBulkWriterError(List<Pair<UUID, WriteModel<Document>>> requests, Throwable t) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
-			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a());
-			dataAccess.tell(PersistentFailureDTO.of(originRequest.b(), 0, t), FAILURE, originRequest.a(/*source*/), pair.a()/*interaction*/);
+			Pair<UUID, PersistentDataAccessDTO<K, V>> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
+			dataAccess.tell(PersistentFailureDTO.of(originRequest.b(), 0, t), FAILURE, originRequest.b().source(), originRequest.a()/*interaction*/);
+			
+			bulkWriterRequests.remove(pair.a());
 		}
 	}
 
@@ -92,6 +96,8 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 			}
 			
 			selectedBulkWriter = bulkWriter;
+			
+			bulkWriterRequests.put(dto.id(), Pair.of(msg.interaction(), dto));
 		}
 	}
 
@@ -111,22 +117,22 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 
 	@Override
 	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
-		MongoOperations.insertOne(convertToDocument(dto.value()), msg.interaction(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		MongoOperations.insertOne(convertToDocument(dto.value()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
 	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
-		MongoOperations.replaceOne(Document.parse(dto.filter().encode()), convertToDocument(dto.value()), msg.interaction(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		MongoOperations.replaceOne(Document.parse(dto.filter().encode()), convertToDocument(dto.value()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
-		MongoOperations.updateOne(Document.parse(dto.filter().encode()), Document.parse(dto.update().encode()), msg.interaction(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		MongoOperations.updateOne(Document.parse(dto.filter().encode()), Document.parse(dto.update().encode()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
 	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
-		MongoOperations.deleteOne(Document.parse(dto.filter().encode()), msg.interaction(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		MongoOperations.deleteOne(Document.parse(dto.filter().encode()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
