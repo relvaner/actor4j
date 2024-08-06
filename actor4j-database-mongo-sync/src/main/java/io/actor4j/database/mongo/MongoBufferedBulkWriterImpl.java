@@ -68,11 +68,15 @@ public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 		List<Pair<UUID, WriteModel<Document>>> requests = new LinkedList<>(requestsQueue);
 		try {
 			List<WriteModel<Document>> writeModels = requestsQueue.stream().map((r) -> r.b()).collect(Collectors.toList());
+			
 			if (ordered)
 				collection.bulkWrite(writeModels);
 			else
 				collection.bulkWrite(writeModels, new BulkWriteOptions().ordered(false));
-			}
+			
+			if (onSuccess!=null)
+				onSuccess.accept(requests);
+		}
 		catch(Exception e) {
 			e.printStackTrace();
 			
