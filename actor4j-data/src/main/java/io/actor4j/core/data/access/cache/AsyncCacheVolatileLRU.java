@@ -144,11 +144,14 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 		return result;
 	}
 	
-	protected void removeDirty(K key, Pair<V> pair) {
+	protected void removeDirty(K key, V value/*Pair<V> pair*/) {
 		if (cacheDirty.contains(key)) {
-			Pair<V> current = map.get(key);
-			if (current!=null && current.equals(pair))
-				cacheDirty.remove(key);
+			Pair<V> pair = map.get(key);
+			if (pair!=null) {
+				V currentValue = pair.value();
+				if (currentValue.equals(value))
+					cacheDirty.remove(key);
+			}
 		}
 	}
 	
@@ -220,8 +223,8 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	public void complete(int tag, K key, V value) {
 		if (tag==ActorWithCache.GET || tag==DataAccessActor.FIND_ONE)
 			putIfAbsentLocal(key, value);
-//		else if (tag==ActorWithCache.SET || tag==INSERT_ONE)
-//			removeDirty(key, value);
+		else if (tag==ActorWithCache.SET || tag==INSERT_ONE)
+			removeDirty(key, value);
 		else if (tag==DataAccessActor.DELETE_ONE || tag==DataAccessActor.UPDATE_ONE || tag==UPDATE)
 			removeIfDelLocal(key);
 	}
