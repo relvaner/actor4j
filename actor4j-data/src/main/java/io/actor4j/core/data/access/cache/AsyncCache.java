@@ -15,6 +15,9 @@
  */
 package io.actor4j.core.data.access.cache;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.utils.Cache;
 
@@ -23,4 +26,6 @@ public interface AsyncCache<K, V> extends Cache<K, V> {
 	public void remove(K key, Runnable storageWriter, Runnable cacheDelFlaggedHandler);
 	
 	public void complete(int tag, K key, V value);
+	
+	public void synchronizeWithStorage(BiConsumer<K, V> cacheDirtyFlaggedHandler, Consumer<K> cacheDelFlaggedHandler);
 }

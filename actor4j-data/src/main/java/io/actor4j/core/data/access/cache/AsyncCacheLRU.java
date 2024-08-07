@@ -25,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.data.access.DataAccessActor;
@@ -206,6 +208,17 @@ public class AsyncCacheLRU<K, V> implements AsyncCache<K, V> {
 			removeDirty(key, value);
 		else if (tag==DataAccessActor.DELETE_ONE || tag==DataAccessActor.UPDATE_ONE || tag==UPDATE)
 			removeIfDelLocal(key);
+	}
+	
+	@Override
+	public void synchronizeWithStorage(BiConsumer<K, V> cacheDirtyFlaggedHandler, Consumer<K> cacheDelFlaggedHandler) {
+		for (K key : cacheDirty) {
+			V value = map.get(key);
+			cacheDirtyFlaggedHandler.accept(key, value);
+		}
+		
+		for (K key : cacheDel)
+			cacheDelFlaggedHandler.accept(key);
 	}
 
 	@Override
