@@ -156,7 +156,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 		if (ackMode==PRIMARY || ackMode==ALL) {
 			tell(success, DataAccessActor.SUCCESS, success.dto().source(), message.interaction());
 			if (success.tag()==DELETE_ONE)
-				delWatcher.trigger(success.dto().key(), (source, interaction) -> tell(success/*dto.shallowCopy(source)*/, DataAccessActor.SUCCESS, source, interaction));
+				delWatcher.trigger(success.dto().key(), (source, interaction) -> tell(success.shallowCopy(source), DataAccessActor.SUCCESS, source, interaction));
 		}
 	}
 	

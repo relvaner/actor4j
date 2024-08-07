@@ -168,8 +168,11 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	
 	public void handleSuccess(ActorMessage<?> message, PersistentSuccessDTO<K,V> success) {
 		((AsyncCache<K,V>)cache).complete(success.tag(), success.dto().key(), success.dto().value());
-		if (ackMode==PRIMARY || ackMode==ALL)
+		if (ackMode==PRIMARY || ackMode==ALL) {
 			tell(success, DataAccessActor.SUCCESS, success.dto().source(), message.interaction());
+			if (success.tag()==DELETE_ONE)
+				delWatcher.trigger(success.dto().key(), (source, interaction) -> tell(success.shallowCopy(source), DataAccessActor.SUCCESS, source, interaction));
+		}
 	}
 	
 	public void handleFailure(ActorMessage<?> message, PersistentFailureDTO<K,V> failure) {
