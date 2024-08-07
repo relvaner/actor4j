@@ -19,6 +19,7 @@ import java.util.UUID;
 
 public interface VolatileDTO<K, V> {
 	public UUID id();
+	public boolean keyExists();
 	
 	public K key();
 	public V value();

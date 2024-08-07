@@ -55,7 +55,7 @@ public class IMSDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V>{
 					dataAccess.tell(dto.shallowCopy(value), FIND_ONE, msg.source(), msg.interaction());
 				}
 				else
-					dataAccess.tell(dto, FIND_ONE, msg.source(), msg.interaction());
+					dataAccess.tell(dto.shallowCopy(true), FIND_ONE, msg.source(), msg.interaction());
 			}
 		}
 		else

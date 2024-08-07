@@ -17,9 +17,9 @@ package io.actor4j.core.data.access;
 
 import java.util.UUID;
 
-public record VolatileDataAccessDTO<K, V>(UUID id, K key, V value, UUID source) implements VolatileDTO<K, V>  {
+public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, V value, UUID source) implements VolatileDTO<K, V>  {
 	public VolatileDataAccessDTO(K key, V value, UUID source) {
-		this(UUID.randomUUID(), key, value, source);
+		this(UUID.randomUUID(), false, key, value, source);
 	}
 	
 	public VolatileDataAccessDTO(UUID source) {
@@ -31,6 +31,7 @@ public record VolatileDataAccessDTO<K, V>(UUID id, K key, V value, UUID source) 
 	}
 	
 	public VolatileDataAccessDTO<K, V> shallowCopy(V value) {
-		return new VolatileDataAccessDTO<K, V>(key, value, source);
+		// Presume keyExists=true
+		return new VolatileDataAccessDTO<K, V>(id, true, key, value, source);
 	}
 }

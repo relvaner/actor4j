@@ -19,9 +19,9 @@ import java.util.UUID;
 
 import io.actor4j.core.json.JsonObject;
 
-public record PersistentDataAccessDTO<K, V>(UUID id, K key, V value, int hashCodeExpected, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
+public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, V value, int hashCodeExpected, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
 	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) {
-		this(UUID.randomUUID(), key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
+		this(UUID.randomUUID(), false, key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO(K key, V value, String keyname, String collectionName, UUID source) {
@@ -48,8 +48,13 @@ public record PersistentDataAccessDTO<K, V>(UUID id, K key, V value, int hashCod
 		this(key, null, 0, null, null, collectionName, source, null);
 	}
 	
+	public PersistentDataAccessDTO<K, V> shallowCopy(boolean keyExists) {
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
+	}
+	
 	public PersistentDataAccessDTO<K, V> shallowCopy(V value) {
-		return new PersistentDataAccessDTO<K, V>(key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
+		// Presume keyExists=true
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithReserved(Object reserved) {
