@@ -67,7 +67,13 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 					onReceiveMessage(message, dto);
 					
 					boolean unhandled = false;
-					if (message.tag()==FIND_ONE || message.tag()==GET)
+					if (message.tag()==HAS_ONE) {
+						if (hasOne(message, dto))
+							dataAccess.tell(dto.shallowCopy(true), HAS_ONE, message.source(), message.interaction());
+						else
+							dataAccess.tell(dto.keyExists() ? dto.shallowCopy(false) : dto, HAS_ONE, message.source(), message.interaction());
+					}
+					else if (message.tag()==FIND_ONE || message.tag()==GET)
 						onFindOne(message, dto);
 					else if (message.tag()==SET) {
 						if (!((boolean)dto.reserved()) && !hasOne(message, dto))
@@ -75,22 +81,14 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 						else
 							replaceOne(message, dto);
 					}
+					else if (message.tag()==INSERT_ONE)
+						insertOne(message, dto);
+					else if (message.tag()==REPLACE_ONE)
+						replaceOne(message, dto);
 					else if (message.tag()==UPDATE_ONE || message.tag()==UPDATE)
 						updateOne(message, dto);
-					else if (message.tag()==INSERT_ONE) {
-						if (dto.filter()!=null) {
-							if (!hasOne(message, dto))
-								insertOne(message, dto);
-						}
-						else
-							insertOne(message, dto);
-					}
 					else if (message.tag()==DELETE_ONE)
 						deleteOne(message, dto);
-//					else if (message.tag()==HAS_ONE) {
-//						Object reserved = hasOne(message, dto);
-//						dataAccess.tell(dto.shallowCopyWithReserved(reserved), FIND_ONE, message.source(), message.interaction());
-//					}
 					else if (handleMessage(message, dto))
 						;
 					else {
