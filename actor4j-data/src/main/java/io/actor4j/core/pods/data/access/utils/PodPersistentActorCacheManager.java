@@ -168,4 +168,11 @@ public class PodPersistentActorCacheManager<K, V> {
 	public void evict(long duration, TimeUnit unit) {
 		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, replica);
 	}
+	
+	public void syncWithStorage() {
+		if (keyname!=null)
+			actorRef.tell(PersistentDTO.create(null, null, keyname, collectionName, actorRef.self()), SYNC_WITH_STORAGE, replica);
+		else
+			actorRef.tell(PersistentDTO.create(null, null, collectionName, actorRef.self()), SYNC_WITH_STORAGE, replica);
+	}
 }

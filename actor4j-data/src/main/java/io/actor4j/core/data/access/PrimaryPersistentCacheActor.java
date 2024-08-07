@@ -87,7 +87,7 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					}
 				}
 				else if (message.tag()==SET) {
-					Object reserved = cache.get(dto.key()) != null;
+					Object reserved = cache.containsKey(dto.key());
 					cache.put(dto.key(), dto.value());
 					tell(dto.shallowCopyWithReserved(reserved), SET, dataAccess);
 					publish(VolatileDTO.create(dto.key(), dto.value(), dto.source()), SET);
@@ -132,6 +132,12 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 					}
 					else
 						tell(dto, message.tag(), dto.source(), message.interaction());
+				}
+				else if (message.tag()==SYNC_WITH_STORAGE) {
+					((AsyncCache<K,V>)cache).synchronizeWithStorage(
+						(k, v) -> receive(((ActorMessage<PersistentDataAccessDTO<K,V>>)message).shallowCopy(dto.shallowCopy(k, v), SET)), 
+						(k) -> receive(((ActorMessage<PersistentDataAccessDTO<K,V>>)message).shallowCopy(dto.shallowCopyWithKey(k), DEL))
+					);
 				}
 				else {
 					unhandled = true;

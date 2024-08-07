@@ -52,7 +52,17 @@ public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, V
 		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
 	}
 	
+	public PersistentDataAccessDTO<K, V> shallowCopyWithKey(K key) {
+		// Presume keyExists=true
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
+	}
+	
 	public PersistentDataAccessDTO<K, V> shallowCopy(V value) {
+		// Presume keyExists=true
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
+	}
+	
+	public PersistentDataAccessDTO<K, V> shallowCopy(K key, V value) {
 		// Presume keyExists=true
 		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, filter, update, collectionName, source, reserved);
 	}

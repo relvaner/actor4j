@@ -66,7 +66,8 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 					     message.tag()==CLEAR ||
 					     message.tag()==CAS || 
 					     message.tag()==CAU || 
-					     message.tag()==EVICT)
+					     message.tag()==EVICT ||
+						 message.tag()==SYNC_WITH_STORAGE)
 					publish(message);
 				else {
 					unhandled = true;

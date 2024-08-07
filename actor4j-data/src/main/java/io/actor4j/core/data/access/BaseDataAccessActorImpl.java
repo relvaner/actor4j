@@ -87,10 +87,10 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 					}
 					else if (message.tag()==DELETE_ONE)
 						deleteOne(message, dto);
-					else if (message.tag()==HAS_ONE) {
-						Object reserved = hasOne(message, dto);
-						dataAccess.tell(dto.shallowCopyWithReserved(reserved), FIND_ONE, message.source(), message.interaction());
-					}
+//					else if (message.tag()==HAS_ONE) {
+//						Object reserved = hasOne(message, dto);
+//						dataAccess.tell(dto.shallowCopyWithReserved(reserved), FIND_ONE, message.source(), message.interaction());
+//					}
 					else if (handleMessage(message, dto))
 						;
 					else {
