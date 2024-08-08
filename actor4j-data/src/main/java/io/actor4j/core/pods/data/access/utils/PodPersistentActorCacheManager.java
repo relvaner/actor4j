@@ -54,6 +54,10 @@ public class PodPersistentActorCacheManager<K, V> {
 		this.collectionName = collectionName;
 	}
 	
+	public PodPersistentActorCacheManager(ActorRef actorRef, String cacheAlias, UUID groupId) {
+		this(actorRef, cacheAlias, null, null, groupId);
+	}
+	
 	public ActorFactory createReplica(int cacheSize, UUID dataAccess, PodContext context) {
 		return createReplica(cacheSize, dataAccess, PRIMARY, context);
 	}

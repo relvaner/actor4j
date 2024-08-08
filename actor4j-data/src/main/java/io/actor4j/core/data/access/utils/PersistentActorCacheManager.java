@@ -49,6 +49,10 @@ public class PersistentActorCacheManager<K, V> {
 		this.collectionName = collectionName;
 	}
 	
+	public PersistentActorCacheManager(ActorRef actorRef, String cacheAlias) {
+		this(actorRef, cacheAlias, null, null);
+	}
+	
 	public ActorFactory create(int instances, int cacheSize, UUID dataAccess) {
 		return create(instances, cacheSize, dataAccess, PRIMARY);
 	}
