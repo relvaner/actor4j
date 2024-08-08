@@ -156,60 +156,50 @@ public final class MongoOperations {
 		return find(filter, sort, projection, 0, 0, client, databaseName, collectionName);
 	}
 	
-	public static <V> Document convertToDocument(V value) {
-		return Document.parse(objectMapper.mapFrom(value));
-	}
-	
-	public static <V> V convertToValue(String json, Class<V> valueType) {
-		V result = null;
-		
-		if (json!=null)
-			result = objectMapper.mapTo(json, valueType);
-
-		return result;
+	public static <E> Document convertToDocument(E entity) {
+		return Document.parse(objectMapper.mapFrom(entity));
 	}
 	
 	public static <V> V convertToValue(Document document, Class<V> valueType) {
-		V result = null;
+		return convertToEntity(document, valueType);
+	}
+	
+	public static <E> E convertToEntity(Document document, Class<E> entityType) {
+		E result = null;
 		
 		if (document!=null)
-			result = convertToValue(document.toJson(), valueType);
+			result = objectMapper.mapTo(document.toJson(), entityType);
 
 		return result;
 	}
 	
-	public static <V> List<V> convertToValue(List<Document> documents, Class<V> valueType) {
-		List<V> result = new LinkedList<>();
+	public static <E> List<E> convertToEntity(List<Document> documents, Class<E> entityType) {
+		List<E> result = new LinkedList<>();
 		
 		for (Document document : documents)
-			result.add(objectMapper.mapTo(document.toJson(), valueType));
-		
-		return result;
-	}
-	
-	public static <V> V convertToValue(String json, GenericType<V> valueTypeRef) {
-		V result = null;
-		
-		if (json!=null)
-			result = objectMapper.mapTo(json, valueTypeRef);
+			result.add(objectMapper.mapTo(document.toJson(), entityType));
 		
 		return result;
 	}
 	
 	public static <V> V convertToValue(Document document, GenericType<V> valueTypeRef) {
-		V result = null;
+		return convertToEntity(document, valueTypeRef);
+	}
+	
+	public static <E> E convertToEntity(Document document, GenericType<E> entityTypeRef) {
+		E result = null;
 		
 		if (document!=null)
-			result = convertToValue(document.toJson(), valueTypeRef);
+			result = objectMapper.mapTo(document.toJson(), entityTypeRef);
 
 		return result;
 	}
 	
-	public static <V> List<V> convertToValue(List<Document> documents, GenericType<V> valueTypeRef) {
-		List<V> result = new LinkedList<>();
+	public static <E> List<E> convertToEntity(List<Document> documents, GenericType<E> entityTypeRef) {
+		List<E> result = new LinkedList<>();
 		
 		for (Document document : documents)
-			result.add(objectMapper.mapTo(document.toJson(), valueTypeRef));
+			result.add(objectMapper.mapTo(document.toJson(), entityTypeRef));
 		
 		return result;
 	}

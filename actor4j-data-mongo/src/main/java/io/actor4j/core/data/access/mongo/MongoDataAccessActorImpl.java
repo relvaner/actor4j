@@ -40,8 +40,8 @@ import io.actor4j.database.mongo.MongoOperations;
 
 import static io.actor4j.database.mongo.MongoOperations.*;
 
-public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V> {
-	protected record BulkWriterRequest<K, V>(int tag, UUID interaction, UUID source, PersistentDataAccessDTO<K, V> dto) {
+public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> {
+	protected record BulkWriterRequest<K, E>(int tag, UUID interaction, UUID source, PersistentDataAccessDTO<K, E> dto) {
 	}
 	
 	protected final MongoClient client;
@@ -49,14 +49,14 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	protected final boolean bulkWrite;
 	protected final boolean bulkOrdered;
 	protected final int bulkSize;
-	protected final Class<V> valueType;
+	protected final Class<E> entityType;
 	protected final Map<String, MongoBufferedBulkWriter> bulkWriters;
-	protected final Map<UUID, BulkWriterRequest<K, V>> bulkWriterRequests; // id -> request
+	protected final Map<UUID, BulkWriterRequest<K, E>> bulkWriterRequests; // id -> request
 	
 	protected MongoBufferedBulkWriter selectedBulkWriter;
 	
 	public MongoDataAccessActorImpl(ActorRef dataAccess, MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout) {
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<E> entityType, int maxFailures, long resetTimeout) {
 		super(dataAccess);
 		
 		this.client = client;
@@ -64,7 +64,7 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 		this.bulkWrite = bulkWrite;
 		this.bulkOrdered = bulkOrdered;
 		this.bulkSize = bulkSize;
-		this.valueType = valueType;
+		this.entityType = entityType;
 		
 		bulkWriters = new HashMap<>();
 		bulkWriterRequests = new HashMap<>();
@@ -72,7 +72,7 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	
 	public void onBulkWriterSuccess(List<Pair<UUID, WriteModel<Document>>> requests) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
-			BulkWriterRequest<K, V> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
+			BulkWriterRequest<K, E> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
 			dataAccess.tell(PersistentSuccessDTO.of(originRequest.dto(), originRequest.tag()), SUCCESS, originRequest.source(), originRequest.interaction());
 			
 			bulkWriterRequests.remove(pair.a());
@@ -81,7 +81,7 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	
 	public void onBulkWriterError(List<Pair<UUID, WriteModel<Document>>> requests, Throwable t) {
 		for (Pair<UUID, WriteModel<Document>> pair : requests) {
-			BulkWriterRequest<K, V> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
+			BulkWriterRequest<K, E> originRequest = bulkWriterRequests.get(pair.a()/*id*/);
 			dataAccess.tell(PersistentFailureDTO.of(originRequest.dto(), originRequest.tag(), t), FAILURE, originRequest.source(), originRequest.interaction());
 			
 			bulkWriterRequests.remove(pair.a());
@@ -89,7 +89,7 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	}
 
 	@Override
-	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (bulkWrite) {
 			MongoBufferedBulkWriter bulkWriter = bulkWriters.get(dto.collectionName());
 			if (bulkWriter==null) {
@@ -106,41 +106,41 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	}
 
 	@Override
-	public void onFindOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
-		V value = convertToValue(findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), valueType);
+	public void onFindOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		E entity = convertToEntity(findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), entityType);
 		if (dto.value()!=null)
-			dataAccess.tell(dto.shallowCopy(value), FIND_ONE, msg.source(), msg.interaction());
+			dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
 		else
 			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
 	}
 
 	@Override
-	public boolean hasOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public boolean hasOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		return MongoOperations.hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName());
 	}
 
 	@Override
-	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		MongoOperations.insertOne(convertToDocument(dto.value()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
-	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		MongoOperations.replaceOne(Document.parse(dto.filter().encode()), convertToDocument(dto.value()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
-	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		MongoOperations.updateOne(Document.parse(dto.filter().encode()), Document.parse(dto.update().encode()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
-	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		MongoOperations.deleteOne(Document.parse(dto.filter().encode()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
 	}
 
 	@Override
-	public boolean handleMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public boolean handleMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		boolean result = false;
 		
 		if (msg.tag()==FLUSH && bulkWrite) {
@@ -152,13 +152,13 @@ public class MongoDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V
 	}
 
 	@Override
-	public void onSuccess(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public void onSuccess(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (!bulkWrite && msg.tag()!=FIND_ONE && msg.tag()!=ActorWithCache.GET && msg.tag()!=HAS_ONE)
 			dataAccess.tell(PersistentSuccessDTO.of(dto, msg.tag()), SUCCESS, msg.source(), msg.interaction());
 	}
 
 	@Override
-	public void onFailure(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto, Throwable t) {
+	public void onFailure(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto, Throwable t) {
 		// Inclusively invocation timeout regarding MongoClient, Retryable Reads/Writes
 		// @See https://www.mongodb.com/docs/drivers/java/sync/v4.11/fundamentals/connection/mongoclientsettings/
 		if (!bulkWrite)

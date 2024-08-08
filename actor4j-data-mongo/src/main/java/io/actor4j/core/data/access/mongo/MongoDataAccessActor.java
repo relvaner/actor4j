@@ -20,44 +20,44 @@ import com.mongodb.client.MongoClient;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.data.access.DataAccessActor;
 
-public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
-	protected MongoDataAccessActorImpl<K, V> impl;
+public class MongoDataAccessActor<K, E> extends DataAccessActor<K, E> {
+	protected MongoDataAccessActorImpl<K, E> impl;
 	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout) {
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<E> valueType, int maxFailures, long resetTimeout) {
 		super(name, true); // @Stateful
 		
-		impl = new MongoDataAccessActorImpl<K, V>(this, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, maxFailures, resetTimeout);
+		impl = new MongoDataAccessActorImpl<K, E>(this, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, maxFailures, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType, int maxFailures, long resetTimeout) {
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<E> valueType, int maxFailures, long resetTimeout) {
 		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, maxFailures, resetTimeout);
 	}
 	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType) {
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<E> valueType) {
 		this(name, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
 	public MongoDataAccessActor(MongoClient client, String databaseName, 
-			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType) {
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<E> valueType) {
 		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
-	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout) {
+	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<E> valueType, int maxFailures, long resetTimeout) {
 		this(name, client, databaseName, false, true, 0, valueType, maxFailures, resetTimeout);
 	}
 	
-	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType) {
+	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<E> valueType) {
 		this(name, client, databaseName, false, true, 0, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
-	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout) {
+	public MongoDataAccessActor(MongoClient client, String databaseName, Class<E> valueType, int maxFailures, long resetTimeout) {
 		this(null, client, databaseName, valueType, maxFailures, resetTimeout);
 	}
 	
-	public MongoDataAccessActor(MongoClient client, String databaseName, Class<V> valueType) {
+	public MongoDataAccessActor(MongoClient client, String databaseName, Class<E> valueType) {
 		this(null, client, databaseName, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
 	}
 	
