@@ -85,17 +85,17 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestEntity>("dc", client, "actor4j-test", TestEntity.class));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
-				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestObject>(
-						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestObject>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
+				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestEntity>(
+						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestEntity>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
 
-				tell(PersistentDTO.create("key1", new TestObject("key1", "value1"), "key", "test", self()), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key2", new TestObject("key2", "value2"), "key", "test", self()), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key3", new TestObject("key3", "value3"), "key", "test", self()), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key4", new TestObject("key4", "value4"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key1", new TestEntity("key1", "value1"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key2", new TestEntity("key2", "value2"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key3", new TestEntity("key3", "value3"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key4", new TestEntity("key4", "value4"), "key", "test", self()), ActorWithCache.SET, "cache1");
 			}
 			
 			@Override
@@ -104,7 +104,7 @@ public class PersistentCacheFeature {
 				
 				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					@SuppressWarnings("unchecked")
-					VolatileDTO<String, TestObject> payload = ((VolatileDTO<String, TestObject>)msg.value());
+					VolatileDTO<String, TestEntity> payload = ((VolatileDTO<String, TestEntity>)msg.value());
 					if (payload.value()!=null) {
 						assertEquals(values[i], payload.value().value);
 						logger().log(DEBUG, payload.value().value);
@@ -147,7 +147,7 @@ public class PersistentCacheFeature {
 		CountDownLatch testDone = new CountDownLatch(COUNT);
 		
 		UUID mediator = system.addActor(() -> new Actor("mediator") {
-			protected PersistentActorCacheManager<String, TestObject> manager;
+			protected PersistentActorCacheManager<String, TestEntity> manager;
 			
 			protected final String[] keys = {"key4", "key1", "key3", "key2"};
 			protected final String[] values = {"value4", "value1", "value3", "value2"};
@@ -155,15 +155,15 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestObject>("dc", client, "actor4j-test", TestObject.class));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestEntity>("dc", client, "actor4j-test", TestEntity.class));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));
 				
-				manager.set("key1", new TestObject("key1", "value1"));
-				manager.set("key2", new TestObject("key2", "value2"));
-				manager.set("key3", new TestObject("key3", "value3"));
-				manager.set("key4", new TestObject("key4", "value4"));
+				manager.set("key1", new TestEntity("key1", "value1"));
+				manager.set("key2", new TestEntity("key2", "value2"));
+				manager.set("key3", new TestEntity("key3", "value3"));
+				manager.set("key4", new TestEntity("key4", "value4"));
 			}
 			
 			@Override
@@ -171,7 +171,7 @@ public class PersistentCacheFeature {
 				manager.get(keys[i]);
 				
 				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
-					Pair<String, TestObject> pair = manager.get(msg);
+					Pair<String, TestEntity> pair = manager.get(msg);
 					
 					if (pair!=null && pair.b()!=null) {
 						assertEquals(keys[i], pair.a());

@@ -15,15 +15,15 @@
  */
 package io.actor4j.core.data.access.features;
 
-public class TestObject {
+public class TestEntity {
 	public String key;
 	public String value;
 	
-	public TestObject() {
+	public TestEntity() {
 		super();
 	}
 
-	public TestObject(String key, String value) {
+	public TestEntity(String key, String value) {
 		this.key = key;
 		this.value = value;
 	}
