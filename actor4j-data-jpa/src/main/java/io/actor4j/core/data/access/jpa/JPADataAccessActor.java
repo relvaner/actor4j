@@ -21,14 +21,30 @@ import io.actor4j.core.data.access.DataAccessActor;
 public class JPADataAccessActor<K, E> extends DataAccessActor<K, E> {
 	protected JPADataAccessActorImpl<K, E> impl;
 	
-	public JPADataAccessActor(String name, String persistenceUnitName, Class<E> entityType, int maxFailures, long resetTimeout) {
+	public JPADataAccessActor(String name, String persistenceUnitName, boolean batchWrite, 
+			boolean batchOrdered, int batchSize, Class<E> entityType, int maxFailures, long resetTimeout) {
 		super(name, true); // @Stateful
 		
-		impl = new JPADataAccessActorImpl<K, E>(this, persistenceUnitName, entityType, maxFailures, resetTimeout);
+		impl = new JPADataAccessActorImpl<K, E>(this, persistenceUnitName, batchWrite, batchOrdered, batchSize, entityType, maxFailures, resetTimeout);
 	}
 
-	public JPADataAccessActor(String persistenceUnitName, Class<E> entityType, int maxFailures, long resetTimeout) {
-		this(null, persistenceUnitName, entityType, maxFailures, resetTimeout);
+	public JPADataAccessActor(String persistenceUnitName, boolean batchWrite, 
+			boolean batchOrdered, int batchSize, Class<E> entityType, int maxFailures, long resetTimeout) {
+		this(null, persistenceUnitName, batchWrite, batchOrdered, batchSize, entityType, maxFailures, resetTimeout);
+	}
+	
+	public JPADataAccessActor(String name, String persistenceUnitName, boolean batchWrite, 
+			boolean batchOrdered, int batchSize, Class<E> entityType) {
+		this(name, persistenceUnitName, batchWrite, batchOrdered, batchSize, entityType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
+	}
+	
+	public JPADataAccessActor(String persistenceUnitName, boolean batchWrite, 
+			boolean batchOrdered, int batchSize, Class<E> entityType) {
+		this(null, persistenceUnitName, batchWrite, batchOrdered, batchSize, entityType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
+	}
+	
+	public JPADataAccessActor(String name, String persistenceUnitName, Class<E> entityType, int maxFailures, long resetTimeout) {
+		this(name, persistenceUnitName, false, true, 0, entityType, maxFailures, resetTimeout);
 	}
 	
 	public JPADataAccessActor(String name, String persistenceUnitName, Class<E> entityType) {

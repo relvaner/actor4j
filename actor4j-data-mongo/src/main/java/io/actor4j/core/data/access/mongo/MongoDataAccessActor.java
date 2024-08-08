@@ -35,6 +35,16 @@ public class MongoDataAccessActor<K, V> extends DataAccessActor<K, V> {
 		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, maxFailures, resetTimeout);
 	}
 	
+	public MongoDataAccessActor(String name, MongoClient client, String databaseName, 
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType) {
+		this(name, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
+	}
+	
+	public MongoDataAccessActor(MongoClient client, String databaseName, 
+			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<V> valueType) {
+		this(null, client, databaseName, bulkWrite, bulkOrdered, bulkSize, valueType, DEFAULT_MAX_FAILURES, DEFAULT_RESET_TIMEOUT);
+	}
+	
 	public MongoDataAccessActor(String name, MongoClient client, String databaseName, Class<V> valueType, int maxFailures, long resetTimeout) {
 		this(name, client, databaseName, false, true, 0, valueType, maxFailures, resetTimeout);
 	}
