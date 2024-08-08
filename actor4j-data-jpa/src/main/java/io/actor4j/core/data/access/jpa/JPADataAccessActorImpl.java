@@ -60,7 +60,7 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	}
 	
 	public void queryOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.queryOne(dto.query(), entityManager);
+		JPAOperations.queryOne(dto.query(), entityType, entityManager);
 	}
 
 	@Override
