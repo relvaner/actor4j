@@ -15,8 +15,10 @@
  */
 package io.actor4j.database.jpa;
 
+import java.util.List;
+
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 public class JPAOperations {
 	public static boolean hasOne(Object primaryKey, Class<?> entityType, EntityManager entityManager) {
@@ -40,13 +42,22 @@ public class JPAOperations {
 		entityManager.remove(reference);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <E> E queryOne(String qlString, EntityManager entityManager) {
-		Query query = entityManager.createQuery(qlString);
-		return (E)query.getSingleResult();
+	public static <E> E queryOne(String sql, Class<E> entityType, EntityManager entityManager) {
+		TypedQuery<E> query = entityManager.createQuery(sql, entityType);
+		return query.getSingleResult();
+	}
+	
+	public static <E> List<E> queryAll(String sql, Class<E> entityType, EntityManager entityManager) {
+		TypedQuery<E> query = entityManager.createQuery(sql, entityType);
+		return query.getResultList();
 	}
 	
 	public static <E> E findOne(Object primaryKey, Class<E> entityType, EntityManager entityManager) {
 		return entityManager.find(entityType, primaryKey);
+	}
+	
+	public static <E> List<E> findAll(Class<E> entityType, EntityManager entityManager) {
+		TypedQuery<E> query = entityManager.createQuery("SELECT * FROM "+entityType.getSimpleName(), entityType);
+		return query.getResultList();
 	}
 }
