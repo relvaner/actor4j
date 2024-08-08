@@ -26,30 +26,50 @@ public class JPAOperations {
 	}
 	
 	public static void insertOne(Object entity, EntityManager entityManager) {
+		entityManager.getTransaction().begin();
 		entityManager.persist(entity);
+		entityManager.getTransaction().commit();
 	}
 	
 	public static void replaceOne(Object entity, EntityManager entityManager) {
+		entityManager.getTransaction().begin();
 		entityManager.merge(entity);
+		entityManager.getTransaction().commit();
 	}
 	
 	public static void updateOne(Object entity, EntityManager entityManager) {
+		entityManager.getTransaction().begin();
 		entityManager.merge(entity);
+		entityManager.getTransaction().commit();
 	}
 	
 	public static <E> void deleteOne(Object primaryKey, Class<E> entityType, EntityManager entityManager) {
+		entityManager.getTransaction().begin();
 		E reference = entityManager.getReference(entityType, primaryKey);
 		entityManager.remove(reference);
+		entityManager.getTransaction().commit();
 	}
 	
 	public static <E> E queryOne(String sql, Class<E> entityType, EntityManager entityManager) {
+		E result = null;
+		
+		entityManager.getTransaction().begin();
 		TypedQuery<E> query = entityManager.createQuery(sql, entityType);
-		return query.getSingleResult();
+		result = query.getSingleResult();
+		entityManager.getTransaction().commit();
+		
+		return result;
 	}
 	
 	public static <E> List<E> queryAll(String sql, Class<E> entityType, EntityManager entityManager) {
+		List<E> result = null;
+		
+		entityManager.getTransaction().begin();
 		TypedQuery<E> query = entityManager.createQuery(sql, entityType);
-		return query.getResultList();
+		result = query.getResultList();
+		entityManager.getTransaction().commit();
+		
+		return result;
 	}
 	
 	public static <E> E findOne(Object primaryKey, Class<E> entityType, EntityManager entityManager) {

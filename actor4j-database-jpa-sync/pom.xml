@@ -26,5 +26,11 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>6.5.2.Final</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-core-sdk</artifactId>
+			<version>${actor4j.version}</version>
+		</dependency>
 	</dependencies>
 </project>
