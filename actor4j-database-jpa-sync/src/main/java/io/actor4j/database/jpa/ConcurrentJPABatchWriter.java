@@ -19,18 +19,17 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import io.actor4j.core.utils.Pair;
 import jakarta.persistence.EntityManager;
 
 public interface ConcurrentJPABatchWriter<K, E> extends JPABatchWriter<K, E> {
-	public static <K, E> ConcurrentJPABatchWriter<K, E> create(EntityManager entityManager, Function<E, K> getKey, Class<E> entityType, boolean ordered, int size,
-		Consumer<List<Pair<UUID, Pair<Integer, E>>>> onSuccess, BiConsumer<List<Pair<UUID, Pair<Integer, E>>>, Throwable> onError) {
+	public static <K, E> ConcurrentJPABatchWriter<K, E> create(EntityManager entityManager, Class<E> entityType, boolean ordered, int size,
+		Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
 		ConcurrentJPABatchWriter<K, E> result = null;
 		
 		try {
-			result = new ConcurrentJPABatchWriterImpl<K, E>(entityManager, getKey, entityType, ordered, size, onSuccess, onError);
+			result = new ConcurrentJPABatchWriterImpl<K, E>(entityManager, entityType, ordered, size, onSuccess, onError);
 		}
 		catch(Exception e) {
 			e.printStackTrace();

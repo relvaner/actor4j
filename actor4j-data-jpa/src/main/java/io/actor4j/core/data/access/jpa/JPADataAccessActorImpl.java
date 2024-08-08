@@ -75,22 +75,22 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 
 	@Override
 	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.insertOne(dto.value(), entityManager);
+		JPAOperations.insertOne(dto.value(), dto.id(), entityManager);
 	}
 
 	@Override
 	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.replaceOne(dto.value(), entityManager);
+		JPAOperations.replaceOne(dto.value(), dto.id(), entityManager);
 	}
 
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.updateOne(dto.value(), entityManager);
+		JPAOperations.updateOne(dto.value(), dto.id(), entityManager);
 	}
 
 	@Override
 	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.deleteOne(dto.key(), entityType, entityManager);
+		JPAOperations.deleteOne(dto.key(), entityType, dto.id(), entityManager);
 	}
 
 	@Override

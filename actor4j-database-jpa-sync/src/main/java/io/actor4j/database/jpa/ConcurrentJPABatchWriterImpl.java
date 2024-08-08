@@ -21,7 +21,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import io.actor4j.core.utils.Pair;
 import jakarta.persistence.EntityManager;
@@ -29,16 +28,16 @@ import jakarta.persistence.EntityManager;
 public class ConcurrentJPABatchWriterImpl<K, E> extends JPABatchWriterImpl<K, E> implements ConcurrentJPABatchWriter<K, E> {
 	protected final Lock lock;
 
-	public ConcurrentJPABatchWriterImpl(EntityManager entityManager, Function<E, K> getKey, Class<E> entityType,
-			boolean ordered, int size, Consumer<List<Pair<UUID, Pair<Integer, E>>>> onSuccess,
-			BiConsumer<List<Pair<UUID, Pair<Integer, E>>>, Throwable> onError) {
-		super(entityManager, getKey, entityType, ordered, size, onSuccess, onError);
+	public ConcurrentJPABatchWriterImpl(EntityManager entityManager, Class<E> entityType,
+			boolean ordered, int size, Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess,
+			BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
+		super(entityManager, entityType, ordered, size, onSuccess, onError);
 		
 		lock = new ReentrantLock();
 	}
 	
 	@Override
-	public void write(Pair<Integer, E> request, UUID id) {
+	public void write(JPAWriteModel request, UUID id) {
 		lock.lock();
 		try {
 			super.write(request, id);

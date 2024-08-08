@@ -15,7 +15,13 @@
  */
 package io.actor4j.database.jpa;
 
+import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_DELETE_ONE;
+import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_INSERT_ONE;
+import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_REPLACE_ONE;
+import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_UPDATE_ONE;
+
 import java.util.List;
+import java.util.UUID;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -25,29 +31,61 @@ public class JPAOperations {
 		return entityManager.find(entityType, primaryKey)!=null;
 	}
 	
-	public static void insertOne(Object entity, EntityManager entityManager) {
-		entityManager.getTransaction().begin();
-		entityManager.persist(entity);
-		entityManager.getTransaction().commit();
+	public static <K, E> void insertOne(E entity, UUID id, EntityManager entityManager) {
+		insertOne(entity, id, entityManager, null);
 	}
 	
-	public static void replaceOne(Object entity, EntityManager entityManager) {
-		entityManager.getTransaction().begin();
-		entityManager.merge(entity);
-		entityManager.getTransaction().commit();
+	public static <K, E> void replaceOne(E entity, UUID id, EntityManager entityManager) {
+		replaceOne(entity, id, entityManager, null);
 	}
 	
-	public static void updateOne(Object entity, EntityManager entityManager) {
-		entityManager.getTransaction().begin();
-		entityManager.merge(entity);
-		entityManager.getTransaction().commit();
+	public static <K, E> void updateOne(E entity, UUID id, EntityManager entityManager) {
+		updateOne(entity, id, entityManager, null);
 	}
 	
-	public static <E> void deleteOne(Object primaryKey, Class<E> entityType, EntityManager entityManager) {
-		entityManager.getTransaction().begin();
-		E reference = entityManager.getReference(entityType, primaryKey);
-		entityManager.remove(reference);
-		entityManager.getTransaction().commit();
+	public static <K, E> void deleteOne(K primaryKey, Class<E> entityType, UUID id, EntityManager entityManager) {
+		deleteOne(primaryKey, entityType, id, entityManager, null);
+	}
+	
+	public static <K, E> void insertOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+		if (batchWriter!=null)
+			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_INSERT_ONE, entity), id);
+		else {
+			entityManager.getTransaction().begin();
+			entityManager.persist(entity);
+			entityManager.getTransaction().commit();
+		}
+	}
+	
+	public static <K, E> void replaceOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+		if (batchWriter!=null)
+			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_REPLACE_ONE, entity), id);
+		else {
+			entityManager.getTransaction().begin();
+			entityManager.merge(entity);
+			entityManager.getTransaction().commit();
+		}
+	}
+	
+	public static <K, E> void updateOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+		if (batchWriter!=null)
+			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_UPDATE_ONE, entity), id);
+		else {
+			entityManager.getTransaction().begin();
+			entityManager.merge(entity);
+			entityManager.getTransaction().commit();
+		}
+	}
+	
+	public static <K, E> void deleteOne(K primaryKey, Class<E> entityType, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+		if (batchWriter!=null)
+			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_DELETE_ONE, primaryKey), id);
+		else {
+			entityManager.getTransaction().begin();
+			E reference = entityManager.getReference(entityType, primaryKey);
+			entityManager.remove(reference);
+			entityManager.getTransaction().commit();
+		}
 	}
 	
 	public static <E> E queryOne(String sql, Class<E> entityType, EntityManager entityManager) {
