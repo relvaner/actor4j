@@ -120,12 +120,19 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 		}
 	}
 	
+	@Override
 	public void queryOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.queryOne(dto.query(), entityType, entityManager);
+//		JPAOperations.queryOne(dto.query(), entityType, entityManager);
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void queryAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void onFindOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+	public void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		E entity = JPAOperations.findOne(dto.key(), entityType, entityManager);
 		if (dto.value()!=null)
 			dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
@@ -133,6 +140,11 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
 	}
 
+	@Override
+	public void findAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		throw new UnsupportedOperationException();
+	}
+	
 	@Override
 	public boolean hasOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		return JPAOperations.hasOne(dto.key(), entityType, entityManager);

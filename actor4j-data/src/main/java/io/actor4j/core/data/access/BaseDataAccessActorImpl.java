@@ -15,14 +15,11 @@
  */
 package io.actor4j.core.data.access;
 
-import static io.actor4j.core.actors.ActorWithCache.GET;
-import static io.actor4j.core.actors.ActorWithCache.SET;
-import static io.actor4j.core.actors.ActorWithCache.UPDATE;
-
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.CircuitBreaker;
 
 import static io.actor4j.core.data.access.DataAccessActor.*;
+import static io.actor4j.core.actors.ActorWithCache.*;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorRef;
@@ -45,12 +42,16 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 	
 	public abstract void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	
-	public abstract void onFindOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	public abstract boolean hasOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
+	
+	public abstract void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
+	public abstract void findAll(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	public abstract void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	public abstract void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	public abstract void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	public abstract void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
+	public abstract void queryOne(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
+	public abstract void queryAll(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	
 	public abstract boolean handleMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K,V> dto);
 	
@@ -74,7 +75,9 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 							dataAccess.tell(dto.keyExists() ? dto.shallowCopy(false) : dto, HAS_ONE, message.source(), message.interaction());
 					}
 					else if (message.tag()==FIND_ONE || message.tag()==GET)
-						onFindOne(message, dto);
+						findOne(message, dto);
+					else if (message.tag()==FIND_ALL || message.tag()==GET_ALL)
+						findAll(message, dto);
 					else if (message.tag()==SET) {
 						if (!((boolean)dto.reserved()) && !hasOne(message, dto))
 							insertOne(message, dto);
@@ -89,6 +92,10 @@ public abstract class BaseDataAccessActorImpl<K, V> {
 						updateOne(message, dto);
 					else if (message.tag()==DELETE_ONE)
 						deleteOne(message, dto);
+					else if (message.tag()==QUERY_ONE)
+						queryOne(message, dto);
+					else if (message.tag()==QUERY_ALL)
+						queryAll(message, dto);
 					else if (handleMessage(message, dto))
 						;
 					else {

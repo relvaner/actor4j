@@ -104,14 +104,29 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 				bulkWriterRequests.put(dto.id(), new BulkWriterRequest<>(msg.tag(), msg.interaction(), msg.source(), dto));
 		}
 	}
+	
+	@Override
+	public void queryOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void queryAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
-	public void onFindOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		E entity = convertToEntity(findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), entityType);
+	public void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		E entity = convertToEntity(MongoOperations.findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), entityType);
 		if (dto.value()!=null)
 			dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
 		else
 			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+	}
+	
+	@Override
+	public void findAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

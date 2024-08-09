@@ -40,10 +40,20 @@ public class IMSDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V>{
 	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
 		// empty
 	}
+	
+	@Override
+	public void queryOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public void queryAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+		throw new UnsupportedOperationException();
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onFindOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+	public void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
 		if (dto.key()!=null) {
 			V value = ims.getData().get(dto.key());
 			if (value==null && !ims.getData().containsKey(dto.key()))
@@ -60,6 +70,11 @@ public class IMSDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V>{
 		}
 		else
 			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+	}
+	
+	@Override
+	public void findAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
