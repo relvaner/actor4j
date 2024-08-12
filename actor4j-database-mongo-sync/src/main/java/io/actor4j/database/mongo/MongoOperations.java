@@ -126,6 +126,17 @@ public final class MongoOperations {
 		return result;
 	}
 	
+	public static List<Document> findAll(Bson filter, MongoClient client, String databaseName, String collectionName) {
+		List<Document> result = new LinkedList<>();;
+		
+		MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+		FindIterable<Document> iterable = collection.find(filter);
+		
+		iterable.forEach((Consumer<? super Document>) document -> {result.add(document);});
+
+		return result;
+	}
+	
 	public static List<Document> find(Bson filter, Bson sort, Bson projection, int skip, int limit, MongoClient client, String databaseName, String collectionName) {
 		List<Document> result = new LinkedList<>();
 		
@@ -173,7 +184,7 @@ public final class MongoOperations {
 		return result;
 	}
 	
-	public static <E> List<E> convertToEntity(List<Document> documents, Class<E> entityType) {
+	public static <E> List<E> convertToEntities(List<Document> documents, Class<E> entityType) {
 		List<E> result = new LinkedList<>();
 		
 		for (Document document : documents)
@@ -195,7 +206,7 @@ public final class MongoOperations {
 		return result;
 	}
 	
-	public static <E> List<E> convertToEntity(List<Document> documents, GenericType<E> entityTypeRef) {
+	public static <E> List<E> convertToEntities(List<Document> documents, GenericType<E> entityTypeRef) {
 		List<E> result = new LinkedList<>();
 		
 		for (Document document : documents)

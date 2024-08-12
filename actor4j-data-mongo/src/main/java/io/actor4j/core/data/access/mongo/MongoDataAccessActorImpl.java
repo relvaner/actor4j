@@ -126,7 +126,11 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	
 	@Override
 	public void findAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		throw new UnsupportedOperationException();
+		List<E> entities = convertToEntities(MongoOperations.findAll(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), entityType);
+		if (entities!=null)
+			dataAccess.tell(dto.shallowCopyWithEntities(entities), FIND_ALL, msg.source(), msg.interaction());
+		else
+			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
 	}
 
 	@Override
