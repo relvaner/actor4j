@@ -30,8 +30,8 @@ public abstract class DataAccessActor<K, V> extends ResourceActor {
 	public static final int FIND_ONE    = RESERVED_DATA_ACCESS_FIND_ONE;
 	public static final int FIND_ALL    = RESERVED_DATA_ACCESS_FIND_ALL;
 	public static final int FIND_NONE   = RESERVED_DATA_ACCESS_FIND_NONE;
-	public static final int QUERY_ONE   = RESERVED_DATA_ACCESS_QUERY_ONE;
-	public static final int QUERY_ALL   = RESERVED_DATA_ACCESS_QUERY_ALL;
+	public static final int QUERY_ONE   = RESERVED_DATA_ACCESS_QUERY_ONE; // ONLY DIRECT ACCCESS
+	public static final int QUERY_ALL   = RESERVED_DATA_ACCESS_QUERY_ALL; // ONLY DIRECT ACCCESS
 	public static final int FLUSH       = RESERVED_DATA_ACCESS_FLUSH;
 	
 	public static final int SUCCESS     = RESERVED_DATA_ACCESS_SUCCESS;

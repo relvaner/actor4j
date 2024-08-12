@@ -18,6 +18,7 @@ package io.actor4j.core.data.access.jpa;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
@@ -75,7 +76,18 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 		batchWriterRequests = new HashMap<>();
 	}
 	
-	public Class<E> getEntityType(PersistentContext context) {
+	protected Pair<String, Class<E>> getEntityTypeAsPair(PersistentContext context) {
+		if (context==null && entityTypes.size()==1) {
+			Entry<String, Class<E>> entry = entityTypes.entrySet().iterator().next();
+			return Pair.of(entry.getKey(), entry.getValue());
+		}
+		else if (context instanceof SqlPersistentContext ctx)
+			return Pair.of(ctx.entityName(), entityTypes.get(ctx.entityName()));
+		else
+			throw new IllegalArgumentException("Wrong context");
+	}
+	
+	protected Class<E> getEntityType(PersistentContext context) {
 		if (context==null && entityTypes.size()==1)
 			return entityTypes.entrySet().iterator().next().getValue();
 		else if (context instanceof SqlPersistentContext ctx)
@@ -117,13 +129,13 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	@Override
 	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (batchWrite) {
-			Class<E> entityType = getEntityType(dto.context());
+			Pair<String, Class<E>> pair = getEntityTypeAsPair(dto.context());
 			
-			JPABatchWriter<K, E> batchWriter = batchWriters.get(entityType.getClass().getSimpleName());
+			JPABatchWriter<K, E> batchWriter = batchWriters.get(pair.key());
 			if (batchWriter==null) {
-				batchWriter = JPABatchWriter.create(entityManager, entityType, batchOrdered, batchSize, 
+				batchWriter = JPABatchWriter.create(entityManager, pair.value(), batchOrdered, batchSize, 
 					this::onBatchWriterSuccess, this::onBatchWriterError);
-				batchWriters.put(entityType.getClass().getSimpleName(), batchWriter);
+				batchWriters.put(pair.key(), batchWriter);
 			}
 			
 			selectedBatchWriter = batchWriter;

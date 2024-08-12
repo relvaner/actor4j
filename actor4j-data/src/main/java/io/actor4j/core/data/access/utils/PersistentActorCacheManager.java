@@ -41,6 +41,7 @@ public class PersistentActorCacheManager<K, V> {
 	protected ActorRef actorRef;
 	protected String cacheAlias;
 
+	protected UUID dataAccess;
 	protected DataAccessType dataAccessType;
 	
 	protected String keyname;
@@ -70,6 +71,8 @@ public class PersistentActorCacheManager<K, V> {
 	}
 	
 	public ActorFactory create(int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
+		this.dataAccess = dataAccess;
+		
 		ActorGroup group = new ActorGroupSet();
 		AtomicInteger k = new AtomicInteger(0);
 		return () -> new PrimaryPersistentCacheActor<K, V>(
@@ -111,6 +114,15 @@ public class PersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(key, value, actorRef.self()), SET, cacheAlias);
 	}
 	
+	public void writeAround(K key, V value) {
+		if (dataAccessType==DOC) {
+			if (keyname!=null)
+				actorRef.tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, collectionName), actorRef.self(), false), SET, dataAccess);
+		}
+		else
+			actorRef.tell(PersistentDTO.create(key, value, actorRef.self(), false), SET, dataAccess);
+	}
+	
 	public void update(K key, V value, JsonObject update) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
@@ -118,6 +130,15 @@ public class PersistentActorCacheManager<K, V> {
 		}
 		else
 			actorRef.tell(PersistentDTO.create(key, value, actorRef.self()), SET, cacheAlias);
+	}
+	
+	public void writeAround(K key, V value, JsonObject update) {
+		if (dataAccessType==DOC) {
+			if (keyname!=null)
+				actorRef.tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, update, collectionName), actorRef.self(), false), SET, dataAccess);
+		}
+		else
+			actorRef.tell(PersistentDTO.create(key, value, actorRef.self(), false), SET, dataAccess);
 	}
 	
 	public void del(K key) {

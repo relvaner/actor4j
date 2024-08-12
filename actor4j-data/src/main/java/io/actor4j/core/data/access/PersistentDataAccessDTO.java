@@ -23,6 +23,10 @@ public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, O
 		this(UUID.randomUUID(), false, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
+	public PersistentDataAccessDTO(K key, V value, PersistentContext context, UUID source, boolean cacheHit) {
+		this(key, value, 0, context, source, cacheHit);
+	}
+	
 	public PersistentDataAccessDTO(K key, V value, PersistentContext context, UUID source) {
 		this(key, value, 0, context, source, null);
 	}
@@ -33,6 +37,10 @@ public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, O
 	
 	public PersistentDataAccessDTO(PersistentContext context, UUID source) {
 		this(null, null, 0, context, source, null);
+	}
+	
+	public PersistentDataAccessDTO(K key, V value, UUID source, boolean cacheHit) {
+		this(key, value, 0, null, source, cacheHit);
 	}
 	
 	public PersistentDataAccessDTO(K key, V value, UUID source) {

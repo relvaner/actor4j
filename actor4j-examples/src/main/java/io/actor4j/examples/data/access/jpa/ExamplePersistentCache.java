@@ -43,7 +43,7 @@ public class ExamplePersistentCache {
 			protected PersistentActorCacheManager<String, ExampleEntity> manager;
 			@Override 
 			public void preStart() {
-				UUID dataAccess = addChild(() -> new JPADataAccessActor<String, ExampleEntity>("dc", "actor4j-test", ExampleEntity.class));
+				UUID dataAccess = addChild(() -> new JPADataAccessActor<String, ExampleEntity>("dataAccess", "actor4j-test", ExampleEntity.class));
 				
 				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", DataAccessType.SQL);
 				addChild(manager.create(INSTANCES, 500, dataAccess));
@@ -51,6 +51,7 @@ public class ExamplePersistentCache {
 				manager.set("key1", new ExampleEntity("key1", "value1"));
 				manager.set("key2", new ExampleEntity("key2", "value2"));
 				manager.set("key3", new ExampleEntity("key3", "value3"));
+				manager.writeAround("key4", new ExampleEntity("key4", "value4"));
 			}
 			
 			@Override
@@ -76,7 +77,7 @@ public class ExamplePersistentCache {
 			@Override 
 			public void preStart() {
 				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", DataAccessType.SQL);
-				manager.get("key2");
+				manager.get("key4");
 			}
 			
 			@Override

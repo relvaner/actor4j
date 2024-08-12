@@ -60,7 +60,7 @@ public class ExamplePersistentCache {
 			protected PersistentActorCacheManager<String, ExampleEntity> manager;
 			@Override 
 			public void preStart() {
-				UUID dataAccess = addChild(() -> new MongoDataAccessActor<String, ExampleEntity>("dc", mongoClient, "actor4j-test", ExampleEntity.class));
+				UUID dataAccess = addChild(() -> new MongoDataAccessActor<String, ExampleEntity>("dataAccess", mongoClient, "actor4j-test", ExampleEntity.class));
 				
 				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", "key", "cache");
 				addChild(manager.create(INSTANCES, 500, dataAccess));

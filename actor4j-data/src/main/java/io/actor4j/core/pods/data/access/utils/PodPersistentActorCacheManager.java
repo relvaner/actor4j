@@ -43,6 +43,7 @@ public class PodPersistentActorCacheManager<K, V> {
 	protected ActorRef actorRef;
 	protected String cacheAlias;
 	
+	protected UUID dataAccess;
 	protected DataAccessType dataAccessType;
 	
 	protected String keyname;
@@ -76,6 +77,8 @@ public class PodPersistentActorCacheManager<K, V> {
 	}
 	
 	public ActorFactory createReplica(int cacheSize, UUID dataAccess, AckMode ackMode, PodContext context) {
+		this.dataAccess = dataAccess;
+		
 		if (context.isShard())
 			cacheAlias = cacheAlias + context.shardId();
 		
@@ -156,6 +159,15 @@ public class PodPersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(key, value, actorRef.self()), SET, replica);
 	}
 	
+	public void writeAround(K key, V value) {
+		if (dataAccessType==DOC) {
+			if (keyname!=null)
+				actorRef.tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, collectionName), actorRef.self(), false), SET, dataAccess);
+		}
+		else
+			actorRef.tell(PersistentDTO.create(key, value, actorRef.self(), false), SET, dataAccess);
+	}
+	
 	public void update(K key, V value, JsonObject update) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
@@ -163,6 +175,15 @@ public class PodPersistentActorCacheManager<K, V> {
 		}
 		else
 			actorRef.tell(PersistentDTO.create(key, value, actorRef.self()), SET, replica);
+	}
+	
+	public void writeAround(K key, V value, JsonObject update) {
+		if (dataAccessType==DOC) {
+			if (keyname!=null)
+				actorRef.tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, update, collectionName), actorRef.self(), false), SET, dataAccess);
+		}
+		else
+			actorRef.tell(PersistentDTO.create(key, value, actorRef.self(), false), SET, dataAccess);
 	}
 	
 	public void del(K key) {

@@ -21,8 +21,16 @@ public interface PersistentDTO<K, V> extends VolatileDTO<K, V> {
 	public int hashCodeExpected();
 	public PersistentContext context();
 	
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, UUID source, boolean cacheHit) {
+		return new PersistentDataAccessDTO<K, V>(key, value, source, cacheHit);
+	}
+	
 	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, UUID source) {
 		return new PersistentDataAccessDTO<K, V>(key, value, source);
+	}
+	
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, PersistentContext context, UUID source, boolean cacheHit) {
+		return new PersistentDataAccessDTO<K, V>(key, value, context, source, cacheHit);
 	}
 	
 	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, PersistentContext context, UUID source) {
