@@ -62,7 +62,7 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
 				}
 				else if (message.tag()==SET)
-					cache.put(dto.key(), dto.value());
+					cache.put(dto.key(), (V)dto.value());
 				else if (message.tag()==UPDATE)
 					; // empty
 				else if (message.tag()==DEL)

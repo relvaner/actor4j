@@ -106,8 +106,8 @@ public class PersistentCacheFeature {
 					@SuppressWarnings("unchecked")
 					VolatileDTO<String, TestEntity> payload = ((VolatileDTO<String, TestEntity>)msg.value());
 					if (payload.value()!=null) {
-						assertEquals(values[i], payload.value().value);
-						logger().log(DEBUG, payload.value().value);
+						assertEquals(values[i], payload.entity().value);
+						logger().log(DEBUG, payload.entity().value);
 						if (i<keys.length-1)
 							i++;
 						testDone.countDown();

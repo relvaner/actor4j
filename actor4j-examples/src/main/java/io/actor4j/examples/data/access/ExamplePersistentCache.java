@@ -100,7 +100,7 @@ public class ExamplePersistentCache {
 			public void receive(ActorMessage<?> message) {
 				Pair<String, ExampleEntity> pair = manager.get(message);
 				if (pair!=null) {
-					System.out.printf("value for '%s': %s%n", pair.a(), pair.b().value());
+					System.out.printf("value for '%s': %s%n", pair.key(), pair.entity().value());
 					done.countDown();
 				}
 			}

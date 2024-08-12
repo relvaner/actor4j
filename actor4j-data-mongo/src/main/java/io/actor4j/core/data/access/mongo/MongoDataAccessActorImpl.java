@@ -118,7 +118,7 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	@Override
 	public void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		E entity = convertToEntity(MongoOperations.findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), entityType);
-		if (dto.value()!=null)
+		if (entity!=null)
 			dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
 		else
 			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());

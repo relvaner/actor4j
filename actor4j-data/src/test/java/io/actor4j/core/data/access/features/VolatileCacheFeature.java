@@ -75,7 +75,7 @@ public class VolatileCacheFeature {
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
 							assertEquals(values[i], payload.value());
-							logger().log(DEBUG, payload.value());
+							logger().log(DEBUG, payload.value().toString());
 							i++;
 							testDone.countDown();
 						}/*
@@ -94,7 +94,7 @@ public class VolatileCacheFeature {
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (payload.value()==null) {
 									assertNull(payload.value());
-									logger().log(DEBUG, payload.value());
+									logger().log(DEBUG, "null");
 									i++;
 									testDone.countDown();
 								}
@@ -115,7 +115,7 @@ public class VolatileCacheFeature {
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
 							assertEquals(values[i-5], payload.value());
-							logger().log(DEBUG, payload.value());
+							logger().log(DEBUG, payload.value().toString());
 							i++;
 							testDone.countDown();
 						}
@@ -132,7 +132,7 @@ public class VolatileCacheFeature {
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (keys[i-9].equals(payload.key())) {
 									assertNull(payload.value());
-									logger().log(DEBUG, payload.value());
+									logger().log(DEBUG, "null");
 									i++;
 									testDone.countDown();
 								}
@@ -199,7 +199,7 @@ public class VolatileCacheFeature {
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
 							assertEquals(values[i], payload.value());
-							logger().log(DEBUG, payload.value());
+							logger().log(DEBUG, payload.value().toString());
 							i++;
 							testDone.countDown();
 						}/*
@@ -218,7 +218,7 @@ public class VolatileCacheFeature {
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (payload.value()==null) {
 									assertNull(payload.value());
-									logger().log(DEBUG, payload.value());
+									logger().log(DEBUG, "null");
 									i++;
 									testDone.countDown();
 								}
@@ -239,7 +239,7 @@ public class VolatileCacheFeature {
 						VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg.value());
 						if (payload.value()!=null) {
 							assertEquals(values[i-5], payload.value());
-							logger().log(DEBUG, payload.value());
+							logger().log(DEBUG, payload.value().toString());
 							i++;
 							testDone.countDown();
 						}
@@ -256,7 +256,7 @@ public class VolatileCacheFeature {
 								VolatileDTO<String, String> payload = ((VolatileDTO<String, String>)msg2.value());
 								if (keys[i-9].equals(payload.key())) {
 									assertNull(payload.value());
-									logger().log(DEBUG, payload.value());
+									logger().log(DEBUG, "null");
 									i++;
 									testDone.countDown();
 								}

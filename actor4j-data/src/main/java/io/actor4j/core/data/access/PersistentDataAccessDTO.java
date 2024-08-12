@@ -15,11 +15,12 @@
  */
 package io.actor4j.core.data.access;
 
+import java.util.List;
 import java.util.UUID;
 
 import io.actor4j.core.json.JsonObject;
 
-public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, V value, int hashCodeExpected, String query, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
+public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, String query, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
 	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, String query, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) {
 		this(UUID.randomUUID(), false, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
 	}
@@ -74,16 +75,39 @@ public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, V
 		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
 	}
 	
+	public PersistentDataAccessDTO<K, V> shallowCopyWithEntities(List<V> entities) {
+		// Presume keyExists=true
+		return new PersistentDataAccessDTO<K, V>(id, true, key, entities, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+	}
+	
 	public PersistentDataAccessDTO<K, V> shallowCopy(K key, V value) {
 		// Presume keyExists=true
 		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithReserved(Object reserved) {
-		return new PersistentDataAccessDTO<K, V>(key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(UUID source) {
-		return new PersistentDataAccessDTO<K, V>(key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<V> valueAsList() {
+		return (List<V>)value;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public V entity() {
+		return (V)value;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<V> entities() {
+		return (List<V>)value;
 	}
 }

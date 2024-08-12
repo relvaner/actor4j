@@ -97,9 +97,10 @@ public class IMSDataAccessActorImpl<K, V> extends BaseDataAccessActorImpl<K, V>{
 		updateOne(msg, dto);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, V> dto) {
-		 ims.put(dto.key(), dto.value());
+		 ims.put(dto.key(), (V)dto.value());
 	}
 
 	@Override

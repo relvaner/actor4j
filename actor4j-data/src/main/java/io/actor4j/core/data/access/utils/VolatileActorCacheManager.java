@@ -70,7 +70,7 @@ public class VolatileActorCacheManager<K, V> {
 	public Pair<K, V> get(ActorMessage<?> message) {	
 		if (message.tag()==GET && message.value()!=null && message.value() instanceof VolatileDTO) {
 			VolatileDTO<K, V> dto = (VolatileDTO<K, V>)message.value();
-			return Pair.of(dto.key(), dto.value());
+			return Pair.of(dto.key(), (V)dto.value());
 		}
 		else
 			return null;

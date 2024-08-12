@@ -87,7 +87,7 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 			VolatileDataAccessDTO<K,V> dto = (VolatileDataAccessDTO<K,V>)message.value();
 			
 			if (message.tag()==SET)
-				cache.put(dto.key(), dto.value());
+				cache.put(dto.key(), (V)dto.value());
 			else if (message.tag()==DEL)
 				cache.remove(dto.key());
 			else if (message.tag()==DEL_ALL || message.tag()==CLEAR)

@@ -15,13 +15,6 @@
  */
 package io.actor4j.core.data.access.jpa;
 
-import static io.actor4j.core.data.access.DataAccessActor.FAILURE;
-import static io.actor4j.core.data.access.DataAccessActor.FIND_NONE;
-import static io.actor4j.core.data.access.DataAccessActor.FIND_ONE;
-import static io.actor4j.core.data.access.DataAccessActor.FLUSH;
-import static io.actor4j.core.data.access.DataAccessActor.HAS_ONE;
-import static io.actor4j.core.data.access.DataAccessActor.SUCCESS;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +34,8 @@ import io.actor4j.database.jpa.JPAWriteModel;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+
+import static io.actor4j.core.data.access.DataAccessActor.*;
 
 public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> {
 	protected record BatchWriterRequest<K, E>(int tag, UUID interaction, UUID source, PersistentDataAccessDTO<K, E> dto) {
@@ -122,19 +117,26 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	
 	@Override
 	public void queryOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-//		JPAOperations.queryOne(dto.query(), entityType, entityManager);
-		throw new UnsupportedOperationException();
+		E entity = JPAOperations.queryOne(dto.query(), entityType, entityManager);
+		if (entity!=null)
+			dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
+		else
+			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
 	}
 	
 	@Override
 	public void queryAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		throw new UnsupportedOperationException();
+		List<E> entities = JPAOperations.queryAll(dto.query(), entityType, entityManager);
+		if (entities!=null)
+			dataAccess.tell(dto.shallowCopyWithEntities(entities), FIND_ALL, msg.source(), msg.interaction());
+		else
+			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
 	}
 
 	@Override
 	public void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		E entity = JPAOperations.findOne(dto.key(), entityType, entityManager);
-		if (dto.value()!=null)
+		if (entity!=null)
 			dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
 		else
 			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
@@ -142,7 +144,11 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 
 	@Override
 	public void findAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		throw new UnsupportedOperationException();
+		List<E> entities = JPAOperations.findAll(entityType, entityManager);
+		if (entities!=null)
+			dataAccess.tell(dto.shallowCopyWithEntities(entities), FIND_ALL, msg.source(), msg.interaction());
+		else
+			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
 	}
 	
 	@Override
@@ -152,17 +158,17 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 
 	@Override
 	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.insertOne(dto.value(), dto.id(), entityManager, selectedBatchWriter);
+		JPAOperations.insertOne(dto.entity(), dto.id(), entityManager, selectedBatchWriter);
 	}
 
 	@Override
 	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.replaceOne(dto.value(), dto.id(), entityManager, selectedBatchWriter);
+		JPAOperations.replaceOne(dto.entity(), dto.id(), entityManager, selectedBatchWriter);
 	}
 
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.updateOne(dto.value(), dto.id(), entityManager, selectedBatchWriter);
+		JPAOperations.updateOne(dto.entity(), dto.id(), entityManager, selectedBatchWriter);
 	}
 
 	@Override

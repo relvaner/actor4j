@@ -60,7 +60,7 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 					tell(dto.shallowCopy(value), GET, dto.source(), message.interaction());
 				}
 				else if (message.tag()==SET) {
-					cache.put(dto.key(), dto.value());
+					cache.put(dto.key(), (V)dto.value());
 					publish(dto, SET);
 				}
 				else if (message.tag()==UPDATE)

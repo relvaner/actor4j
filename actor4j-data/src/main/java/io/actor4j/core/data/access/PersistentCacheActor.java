@@ -88,7 +88,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 				}
 				else if (message.tag()==SET) {
 					Object reserved = cache.containsKey(dto.key());
-					cache.put(dto.key(), dto.value());
+					cache.put(dto.key(), (V)dto.value());
 					tell(dto.shallowCopyWithReserved(reserved), SET, dataAccess);
 				}
 				else if (message.tag()==UPDATE) {
@@ -108,7 +108,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 					cache.clear();
 				else if ((message.tag()==FIND_ONE || message.tag()==FIND_NONE) && message.source()==dataAccess) {
 					if (message.tag()==FIND_ONE)
-						cache.put(dto.key(), dto.value());
+						cache.put(dto.key(), (V)dto.value());
 					tell(dto, GET, dto.source(), message.interaction());
 					getWatcher.trigger(dto.key(), (source, interaction) -> tell(dto.shallowCopy(source), GET, source, interaction));
 				}
@@ -157,8 +157,9 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 			unhandled(message);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void handleSuccess(ActorMessage<?> message, PersistentSuccessDTO<K,V> success) {
-		((AsyncCache<K,V>)cache).complete(success.tag(), success.dto().key(), success.dto().value());
+		((AsyncCache<K,V>)cache).complete(success.tag(), success.dto().key(), (V)success.dto().value());
 		if (ackMode==PRIMARY || ackMode==ALL) {
 			tell(success, DataAccessActor.SUCCESS, success.dto().source(), message.interaction());
 			if (success.tag()==DELETE_ONE)

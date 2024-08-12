@@ -15,9 +15,10 @@
  */
 package io.actor4j.core.data.access;
 
+import java.util.List;
 import java.util.UUID;
 
-public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, V value, UUID source) implements VolatileDTO<K, V>  {
+public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, UUID source) implements VolatileDTO<K, V>  {
 	public VolatileDataAccessDTO(K key, V value, UUID source) {
 		this(UUID.randomUUID(), false, key, value, source);
 	}
@@ -33,5 +34,23 @@ public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, V v
 	public VolatileDataAccessDTO<K, V> shallowCopy(V value) {
 		// Presume keyExists=true
 		return new VolatileDataAccessDTO<K, V>(id, true, key, value, source);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<V> valueAsList() {
+		return (List<V>)value;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public V entity() {
+		return (V)value;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<V> entities() {
+		return (List<V>)value;
 	}
 }

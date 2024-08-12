@@ -110,7 +110,7 @@ public class PodPersistentActorCacheManager<K, V> {
 	public Pair<K, V> get(ActorMessage<?> message) {	
 		if (message.tag()==GET && message.value()!=null && message.value() instanceof PersistentDTO) {
 			PersistentDTO<K, V> dto = (PersistentDTO<K, V>)message.value();
-			return Pair.of(dto.key(), dto.value());
+			return Pair.of(dto.key(), (V)dto.value());
 		}
 		else
 			return null;

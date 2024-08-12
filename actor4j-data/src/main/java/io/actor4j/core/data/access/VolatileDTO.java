@@ -15,6 +15,7 @@
  */
 package io.actor4j.core.data.access;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface VolatileDTO<K, V> {
@@ -22,7 +23,10 @@ public interface VolatileDTO<K, V> {
 	public boolean keyExists();
 	
 	public K key();
-	public V value();
+	public Object value();
+	public List<V> valueAsList();
+	public V entity();
+	public List<V> entities();
 	public UUID source();
 
 	public static <K, V> VolatileDataAccessDTO<K, V> create(UUID source) {
