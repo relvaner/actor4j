@@ -25,6 +25,7 @@ import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.core.data.access.DataAccessType;
 import io.actor4j.core.data.access.PersistentFailureDTO;
 import io.actor4j.core.data.access.PersistentSuccessDTO;
 import io.actor4j.core.data.access.jpa.JPADataAccessActor;
@@ -44,7 +45,7 @@ public class ExamplePersistentCache {
 			public void preStart() {
 				UUID dataAccess = addChild(() -> new JPADataAccessActor<String, ExampleEntity>("dc", "actor4j-test", ExampleEntity.class));
 				
-				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache");
+				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", DataAccessType.SQL);
 				addChild(manager.create(INSTANCES, 500, dataAccess));
 				
 				manager.set("key1", new ExampleEntity("key1", "value1"));
@@ -74,7 +75,7 @@ public class ExamplePersistentCache {
 			protected PersistentActorCacheManager<String, ExampleEntity> manager;
 			@Override 
 			public void preStart() {
-				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache");
+				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", DataAccessType.SQL);
 				manager.get("key2");
 			}
 			

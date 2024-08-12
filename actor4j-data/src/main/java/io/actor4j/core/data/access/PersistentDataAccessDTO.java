@@ -18,79 +18,65 @@ package io.actor4j.core.data.access;
 import java.util.List;
 import java.util.UUID;
 
-import io.actor4j.core.json.JsonObject;
-
-public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, String query, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) implements PersistentDTO<K, V> {
-	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, String query, JsonObject filter, JsonObject update, String collectionName, UUID source, Object reserved) {
-		this(UUID.randomUUID(), false, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, PersistentContext context, UUID source, Object reserved) implements PersistentDTO<K, V> {
+	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, PersistentContext context, UUID source, Object reserved) {
+		this(UUID.randomUUID(), false, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
-	public PersistentDataAccessDTO(K key, V value, String keyname, String collectionName, UUID source) {
-		this(key, value, 0, null, JsonObject.create().put(keyname, key), null, collectionName, source, null);
+	public PersistentDataAccessDTO(K key, V value, PersistentContext context, UUID source) {
+		this(key, value, 0, context, source, null);
 	}
 	
-	public PersistentDataAccessDTO(K key, String keyname, String collectionName, UUID source) {
-		this(key, null, 0, null, JsonObject.create().put(keyname, key), null, collectionName, source, null);
+	public PersistentDataAccessDTO(K key, PersistentContext context, UUID source) {
+		this(key, null, 0, context, source, null);
 	}
 	
-	public PersistentDataAccessDTO(K key, V value, String keyname, JsonObject update, String collectionName, UUID source) {
-		this(key, value, 0, null, keyname!=null ? JsonObject.create().put(keyname, key) : null, update, collectionName, source, null);
-	}
-	
-	public PersistentDataAccessDTO(K key, V value, JsonObject filter, JsonObject update, String collectionName, UUID source) {
-		this(key, value, 0, null, filter, update, collectionName, source, null);
-	}
-	
-	public PersistentDataAccessDTO(K key, V value, String collectionName, UUID source) {
-		this(key, value, 0, null, null, null, collectionName, source, null);
-	}
-	
-	public PersistentDataAccessDTO(K key, String collectionName, UUID source) {
-		this(key, null, 0, null, null, null, collectionName, source, null);
-	}
-	
-	public PersistentDataAccessDTO(String query, UUID source) {
-		this(null, null, 0, query, null, null, null, source, null);
+	public PersistentDataAccessDTO(PersistentContext context, UUID source) {
+		this(null, null, 0, context, source, null);
 	}
 	
 	public PersistentDataAccessDTO(K key, V value, UUID source) {
-		this(key, value, 0, null, null, null, null, source, null);
+		this(key, value, 0, null, source, null);
 	}
 	
 	public PersistentDataAccessDTO(K key, UUID source) {
-		this(key, null, 0, null, null, null, null, source, null);
+		this(key, null, 0, null, source, null);
+	}
+	
+	public PersistentDataAccessDTO(UUID source) {
+		this(null, null, 0, null, source, null);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(boolean keyExists) {
-		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithKey(K key) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(V value) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithEntities(List<V> entities) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, entities, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, entities, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(K key, V value) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithReserved(Object reserved) {
-		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(UUID source) {
-		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, query, filter, update, collectionName, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -32,7 +32,9 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.data.access.PersistentDTO;
+import io.actor4j.core.data.access.PersistentDataAccessDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
 import io.actor4j.core.data.access.VolatileDTO;
@@ -72,6 +74,76 @@ public class PersistentCacheFeature {
 	}
 	
 	@Test(timeout=5000)
+	public void test_primary_secondary_persistent_cache_actor_read_through() {
+		ActorSystem system = ActorSystem.create(ActorRuntime.factory());
+		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
+		
+		CountDownLatch testDone = new CountDownLatch(COUNT);
+		
+		UUID mediator = system.addActor(() -> new Actor("mediator") {
+			protected final String[] keys = {"key4", "key1", "key3", "key2"};
+			protected final String[] values = {"value4", "value1", "value3", "value2"};
+			protected int i = 0;
+			
+			@Override 
+			public void preStart() {
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestEntity>("dataAccess", client, "actor4j-test", TestEntity.class));
+				system.setAlias(dataAccess, "dataAccess");
+				
+				ActorGroup group = new ActorGroupSet();
+				AtomicInteger k = new AtomicInteger(0);
+				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestEntity>(
+						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestEntity>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
+
+				DocPersistentContext<String> ctx = DocPersistentContext.of("key", "test");
+				tell(new PersistentDataAccessDTO<String, TestEntity>("key1", new TestEntity("key1", "value1"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
+				tell(new PersistentDataAccessDTO<String, TestEntity>("key2", new TestEntity("key2", "value2"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
+				tell(new PersistentDataAccessDTO<String, TestEntity>("key3", new TestEntity("key3", "value3"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
+				tell(new PersistentDataAccessDTO<String, TestEntity>("key4", new TestEntity("key4", "value4"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
+			}
+			
+			@Override
+			public void receive(ActorMessage<?> message) {
+				tell(PersistentDTO.create(keys[i], DocPersistentContext.of("key", "test"), self()), ActorWithCache.GET, "cache1");
+				
+				await((msg) -> msg.tag()==ActorWithCache.GET && msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+					@SuppressWarnings("unchecked")
+					VolatileDTO<String, TestEntity> payload = ((VolatileDTO<String, TestEntity>)msg.value());
+					if (payload.value()!=null) {
+						assertEquals(values[i], payload.entity().value);
+						logger().log(DEBUG, payload.entity().value);
+						if (i<keys.length-1)
+							i++;
+						testDone.countDown();
+					}/*
+					else
+						logger().debug(false);*/
+					unbecome();
+				});
+			}
+		});
+		
+		system.start();
+		
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				system.send(ActorMessage.create(null, 0, system.SYSTEM_ID(), mediator));
+			}
+		}, 0, 100);
+		
+		try {
+			testDone.await();
+			timer.cancel();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		system.shutdownWithActors(true);
+	}
+	
+	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor() {
 		ActorSystem system = ActorSystem.create(ActorRuntime.factory());
 		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
@@ -85,24 +157,25 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestEntity>("dc", client, "actor4j-test", TestEntity.class));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestEntity>("dataAccess", client, "actor4j-test", TestEntity.class));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
 				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestEntity>(
 						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestEntity>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
 
-				tell(PersistentDTO.create("key1", new TestEntity("key1", "value1"), "key", "test", self()), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key2", new TestEntity("key2", "value2"), "key", "test", self()), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key3", new TestEntity("key3", "value3"), "key", "test", self()), ActorWithCache.SET, "cache1");
-				tell(PersistentDTO.create("key4", new TestEntity("key4", "value4"), "key", "test", self()), ActorWithCache.SET, "cache1");
+				DocPersistentContext<String> ctx = DocPersistentContext.of("key", "test");
+				tell(PersistentDTO.create("key1", new TestEntity("key1", "value1"), ctx, self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key2", new TestEntity("key2", "value2"), ctx, self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key3", new TestEntity("key3", "value3"), ctx, self()), ActorWithCache.SET, "cache1");
+				tell(PersistentDTO.create("key4", new TestEntity("key4", "value4"), ctx, self()), ActorWithCache.SET, "cache1");
 			}
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				tell(PersistentDTO.create(keys[i], "key", "test", self()), ActorWithCache.GET, "cache1");
+				tell(PersistentDTO.create(keys[i], DocPersistentContext.of("key", "test"), self()), ActorWithCache.GET, "cache1");
 				
-				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+				await((msg) -> msg.tag()==ActorWithCache.GET && msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					@SuppressWarnings("unchecked")
 					VolatileDTO<String, TestEntity> payload = ((VolatileDTO<String, TestEntity>)msg.value());
 					if (payload.value()!=null) {
@@ -155,7 +228,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestEntity>("dc", client, "actor4j-test", TestEntity.class));
+				UUID dataAccess = system.addActor(() -> new MongoDataAccessActor<String, TestEntity>("dataAccess", client, "actor4j-test", TestEntity.class));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));
@@ -170,7 +243,7 @@ public class PersistentCacheFeature {
 			public void receive(ActorMessage<?> message) {
 				manager.get(keys[i]);
 				
-				await((msg) -> msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
+				await((msg) -> msg.tag()==ActorWithCache.GET && msg.source()!=system.SYSTEM_ID() && msg.value()!=null, (msg) -> {
 					Pair<String, TestEntity> pair = manager.get(msg);
 					
 					if (pair!=null && pair.b()!=null) {

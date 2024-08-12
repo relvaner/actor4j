@@ -30,9 +30,11 @@ import com.mongodb.client.model.WriteModel;
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.data.access.BaseDataAccessActorImpl;
+import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
 import io.actor4j.core.data.access.PersistentFailureDTO;
 import io.actor4j.core.data.access.PersistentSuccessDTO;
+import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
@@ -90,19 +92,22 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 
 	@Override
 	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		if (bulkWrite) {
-			MongoBufferedBulkWriter bulkWriter = bulkWriters.get(dto.collectionName());
-			if (bulkWriter==null) {
-				bulkWriter = MongoBufferedBulkWriter.create(client, databaseName, dto.collectionName(), bulkOrdered, bulkSize, 
-					this::onBulkWriterSuccess, this::onBulkWriterError);
-				bulkWriters.put(dto.collectionName(), bulkWriter);
+		if (bulkWrite)
+			if (dto.context() instanceof DocPersistentContext ctx) {
+				MongoBufferedBulkWriter bulkWriter = bulkWriters.get(ctx.collectionName());
+				if (bulkWriter==null) {
+					bulkWriter = MongoBufferedBulkWriter.create(client, databaseName, ctx.collectionName(), bulkOrdered, bulkSize, 
+						this::onBulkWriterSuccess, this::onBulkWriterError);
+					bulkWriters.put(ctx.collectionName(), bulkWriter);
+				}
+				
+				selectedBulkWriter = bulkWriter;
+				
+				if (msg.tag()!=FIND_ONE && msg.tag()!=ActorWithCache.GET && msg.tag()!=HAS_ONE)
+					bulkWriterRequests.put(dto.id(), new BulkWriterRequest<>(msg.tag(), msg.interaction(), msg.source(), dto));
 			}
-			
-			selectedBulkWriter = bulkWriter;
-			
-			if (msg.tag()!=FIND_ONE && msg.tag()!=ActorWithCache.GET && msg.tag()!=HAS_ONE)
-				bulkWriterRequests.put(dto.id(), new BulkWriterRequest<>(msg.tag(), msg.interaction(), msg.source(), dto));
-		}
+			else
+				throw new IllegalArgumentException("Wrong context");
 	}
 	
 	@Override
@@ -117,45 +122,77 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 
 	@Override
 	public void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		E entity = convertToEntity(MongoOperations.findOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), entityType);
-		if (entity!=null)
-			dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
+		if (dto.context() instanceof DocPersistentContext ctx) {
+			@SuppressWarnings("unchecked")
+			E entity = convertToEntity(MongoOperations.findOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), client, databaseName, ctx.collectionName()), entityType);
+			if (entity!=null)
+				dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
+			else
+				dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+		}
 		else
-			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+			throw new IllegalArgumentException("Wrong context");
 	}
 	
 	@Override
 	public void findAll(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		List<E> entities = convertToEntities(MongoOperations.findAll(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName()), entityType);
-		if (entities!=null)
-			dataAccess.tell(dto.shallowCopyWithEntities(entities), FIND_ALL, msg.source(), msg.interaction());
+		if (dto.context() instanceof DocPersistentContext ctx) {
+			List<E> entities = convertToEntities(MongoOperations.findAll(ctx.filter()!=null ? Document.parse(ctx.filter().encode()) : null, client, databaseName, ctx.collectionName()), entityType);
+			if (entities!=null)
+				dataAccess.tell(dto.shallowCopyWithEntities(entities), FIND_ALL, msg.source(), msg.interaction());
+			else
+				dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+		}
 		else
-			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+			throw new IllegalArgumentException("Wrong context");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean hasOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		return MongoOperations.hasOne(Document.parse(dto.filter().encode()), client, databaseName, dto.collectionName());
+		boolean result = false;
+		
+		if (dto.context() instanceof DocPersistentContext ctx)
+			result = MongoOperations.hasOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), client, databaseName, ctx.collectionName());
+		else
+			throw new IllegalArgumentException("Wrong context");
+		
+		return result;
 	}
 
 	@Override
 	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		MongoOperations.insertOne(convertToDocument(dto.value()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		if (dto.context() instanceof DocPersistentContext c)
+			MongoOperations.insertOne(convertToDocument(dto.value()), dto.id(), client, databaseName, c.collectionName(), selectedBulkWriter);
+		else
+			throw new IllegalArgumentException("Wrong context");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		MongoOperations.replaceOne(Document.parse(dto.filter().encode()), convertToDocument(dto.value()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		if (dto.context() instanceof DocPersistentContext ctx)
+			MongoOperations.replaceOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), convertToDocument(dto.value()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+		else
+			throw new IllegalArgumentException("Wrong context");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		MongoOperations.updateOne(Document.parse(dto.filter().encode()), Document.parse(dto.update().encode()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		if (dto.context() instanceof DocPersistentContext ctx)
+			MongoOperations.updateOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), Document.parse(ctx.update().encode()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+		else
+			throw new IllegalArgumentException("Wrong context");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		MongoOperations.deleteOne(Document.parse(dto.filter().encode()), dto.id(), client, databaseName, dto.collectionName(), selectedBulkWriter);
+		if (dto.context() instanceof DocPersistentContext ctx)
+			MongoOperations.deleteOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+		else
+			throw new IllegalArgumentException("Wrong context");
 	}
 
 	@Override
@@ -182,5 +219,15 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 		// @See https://www.mongodb.com/docs/drivers/java/sync/v4.11/fundamentals/connection/mongoclientsettings/
 		if (!bulkWrite)
 			dataAccess.tell(PersistentFailureDTO.of(dto, msg.tag(), t), FAILURE, msg.source(), msg.interaction());
+	}
+	
+	protected JsonObject filterWithPrimary(K key, DocPersistentContext<K> ctx) {
+		JsonObject result = ctx.filter();
+		
+		if(result==null)
+			result = JsonObject.create();
+		result.put(ctx.keyName(), key);
+			
+		return result;
 	}
 }
