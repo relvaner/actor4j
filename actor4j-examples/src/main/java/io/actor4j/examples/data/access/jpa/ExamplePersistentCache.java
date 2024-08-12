@@ -52,6 +52,7 @@ public class ExamplePersistentCache {
 				manager.set("key2", new ExampleEntity("key2", "value2"));
 				manager.set("key3", new ExampleEntity("key3", "value3"));
 				manager.writeAround("key4", new ExampleEntity("key4", "value4"));
+				manager.writeAround("key5", new ExampleEntity("key5", "value5"));
 			}
 			
 			@Override
