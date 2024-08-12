@@ -34,7 +34,6 @@ import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.data.access.PersistentDTO;
-import io.actor4j.core.data.access.PersistentDataAccessDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
 import io.actor4j.core.data.access.VolatileDTO;
@@ -96,10 +95,10 @@ public class PersistentCacheFeature {
 						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestEntity>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
 
 				DocPersistentContext<String> ctx = DocPersistentContext.of("key", "test");
-				tell(new PersistentDataAccessDTO<String, TestEntity>("key1", new TestEntity("key1", "value1"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
-				tell(new PersistentDataAccessDTO<String, TestEntity>("key2", new TestEntity("key2", "value2"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
-				tell(new PersistentDataAccessDTO<String, TestEntity>("key3", new TestEntity("key3", "value3"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
-				tell(new PersistentDataAccessDTO<String, TestEntity>("key4", new TestEntity("key4", "value4"), ctx, self()).shallowCopyWithReserved(false), ActorWithCache.SET, "dataAccess");
+				tell(PersistentDTO.create("key1", new TestEntity("key1", "value1"), ctx, self(), false), ActorWithCache.SET, "dataAccess");
+				tell(PersistentDTO.create("key2", new TestEntity("key2", "value2"), ctx, self(), false), ActorWithCache.SET, "dataAccess");
+				tell(PersistentDTO.create("key3", new TestEntity("key3", "value3"), ctx, self(), false), ActorWithCache.SET, "dataAccess");
+				tell(PersistentDTO.create("key4", new TestEntity("key4", "value4"), ctx, self(), false), ActorWithCache.SET, "dataAccess");
 			}
 			
 			@Override
@@ -215,7 +214,7 @@ public class PersistentCacheFeature {
 	@Test(timeout=5000)
 	public void test_primary_secondary_persistent_cache_actor_with_manager() {
 		ActorSystem system = ActorSystem.create(ActorRuntime.factory());
-		final int COUNT = 3/*system.getParallelismMin()*system.getParallelismFactor()*/;
+		final int COUNT = 4/*system.getParallelismMin()*system.getParallelismFactor()*/;
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
 		
@@ -234,8 +233,8 @@ public class PersistentCacheFeature {
 				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));
 				
 				manager.set("key1", new TestEntity("key1", "value1"));
-				manager.set("key2", new TestEntity("key2", "value2"));
-				manager.set("key3", new TestEntity("key3", "value3"));
+				manager.writeAround("key2", new TestEntity("key2", "value2"));
+				manager.writeAround("key3", new TestEntity("key3", "value3"));
 				manager.set("key4", new TestEntity("key4", "value4"));
 			}
 			

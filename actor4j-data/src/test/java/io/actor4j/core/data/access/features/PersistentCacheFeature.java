@@ -132,8 +132,8 @@ public class PersistentCacheFeature {
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));
 				
-				manager.set("key1", new TestObject("key1", "value1"));
-				manager.set("key2", new TestObject("key2", "value2"));
+				manager.writeAround("key1", new TestObject("key1", "value1"));
+				manager.writeAround("key2", new TestObject("key2", "value2"));
 				manager.set("key3", new TestObject("key3", "value3"));
 				manager.set("key4", new TestObject("key4", "value4"));
 			}
