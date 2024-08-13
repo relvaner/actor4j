@@ -15,49 +15,40 @@
  */
 package io.actor4j.core.pods.data.access.utils;
 
-import static io.actor4j.core.actors.ActorWithCache.CLEAR;
-import static io.actor4j.core.actors.ActorWithCache.DEL;
-import static io.actor4j.core.actors.ActorWithCache.DEL_ALL;
-import static io.actor4j.core.actors.ActorWithCache.EVICT;
-import static io.actor4j.core.actors.ActorWithCache.GET;
-import static io.actor4j.core.actors.ActorWithCache.SET;
-
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
+import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.data.access.AckMode;
-import io.actor4j.core.data.access.VolatileDTO;
-import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroupSet;
-import io.actor4j.core.utils.Pair;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.data.access.PodPrimaryVolatileCacheActor;
 import io.actor4j.core.pods.data.access.PodSecondaryVolatileCacheActor;
 import static io.actor4j.core.data.access.AckMode.*;
 
-public class PodVolatileActorCacheManager<K, V> {
+public class PodVolatileActorCacheManager<K, V> extends VolatileActorCacheManager<K, V> {
 	public static final UUID PRIMARY_FROM_CACHE_COORDINATOR = UUID.randomUUID();
 	
 	protected UUID groupId;
-	protected ActorRef actorRef;
-	protected String cacheAlias;
-	
-	protected UUID replica;
 	
 	public PodVolatileActorCacheManager(ActorRef actorRef, String cacheAlias, UUID groupId) {
-		super();
+		super(actorRef, cacheAlias);
 		this.groupId = groupId;
-		this.actorRef = actorRef;
-		this.cacheAlias = cacheAlias;
 	}
 	
-	public ActorFactory createReplica(int cacheSize, PodContext context) {
-		return createReplica(cacheSize, PRIMARY, context);
+	@Deprecated
+	public ActorFactory create(int instances, int cacheSize) {
+		throw new UnsupportedOperationException();
 	}
 	
-	public ActorFactory createReplica(int cacheSize, AckMode ackMode, PodContext context) {
+	@Deprecated
+	public ActorFactory create(int instances, int cacheSize, AckMode ackMode) {
+		throw new UnsupportedOperationException();
+	}
+	
+	public ActorFactory createReplicaAsActorFactory(int cacheSize, AckMode ackMode, PodContext context) {
 		if (context.isShard())
 			cacheAlias = cacheAlias + context.shardId();
 		
@@ -97,49 +88,19 @@ public class PodVolatileActorCacheManager<K, V> {
 			};
 	}
 	
-	public void init(UUID replica) {
+	public UUID replica() {
+		return replica;
+	}
+	
+	public void replica(UUID replica) {
 		this.replica = replica;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Pair<K, V> get(ActorMessage<?> message) {	
-		if (message.tag()==GET && message.value()!=null && message.value() instanceof VolatileDTO) {
-			VolatileDTO<K, V> dto = (VolatileDTO<K, V>)message.value();
-			return Pair.of(dto.key(), (V)dto.value());
-		}
-		else
-			return null;
+	public UUID createReplica(int cacheSize, UUID dataAccess, PodContext context) {
+		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, PRIMARY, context));
 	}
 	
-	public void get(K key) {
-		actorRef.tell(VolatileDTO.create(key, actorRef.self()), GET, replica);
-	}
-	
-	public void get(K key, UUID intercation) {
-		actorRef.tell(VolatileDTO.create(key, actorRef.self()), GET, replica, intercation);
-	}
-	
-	public void set(K key, V value) {
-		actorRef.tell(VolatileDTO.create(key, value, actorRef.self()), SET, replica);
-	}
-	
-	public void del(K key) {
-		actorRef.tell(VolatileDTO.create(key, actorRef.self()), DEL, replica);
-	}
-	
-	public void delAll() {
-		actorRef.tell(VolatileDTO.create(actorRef.self()), DEL_ALL, replica);
-	}
-	
-	public void clear() {
-		actorRef.tell(VolatileDTO.create(actorRef.self()), CLEAR, replica);
-	}
-	
-	public void evict(long duration) {
-		actorRef.tell(duration, EVICT, replica);
-	}
-	
-	public void evict(long duration, TimeUnit unit) {
-		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, replica);
+	public UUID createReplica(int cacheSize, UUID dataAccess, AckMode ackMode, PodContext context) {
+		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, ackMode, context));
 	}
 }

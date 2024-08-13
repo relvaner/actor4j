@@ -28,11 +28,13 @@ import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.core.data.access.AckMode;
+import io.actor4j.core.data.access.DataAccessActor;
 import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.data.access.DataAccessType;
 import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
+import io.actor4j.core.data.access.SqlPersistentContext;
 import io.actor4j.core.json.JsonObject;
 import static io.actor4j.core.data.access.AckMode.*;
 import static io.actor4j.core.data.access.DataAccessType.*;
@@ -46,6 +48,8 @@ public class PersistentActorCacheManager<K, V> {
 	
 	protected String keyname;
 	protected String collectionName;
+	
+	protected UUID replica;
 	
 	public PersistentActorCacheManager(ActorRef actorRef, String cacheAlias, String keyname, String collectionName) {
 		super();
@@ -95,23 +99,30 @@ public class PersistentActorCacheManager<K, V> {
 		else
 			return null;
 	}
+	
+	protected void tell(Object value, int tag) {
+		if (replica!=null)
+			actorRef.tell(value, tag, replica);
+		else
+			actorRef.tell(value, tag, cacheAlias);
+	}
 
 	public void get(K key) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
-				actorRef.tell(PersistentDTO.create(key, DocPersistentContext.of(keyname, collectionName), actorRef.self()), GET, cacheAlias);
+				tell(PersistentDTO.create(key, DocPersistentContext.of(keyname, collectionName), actorRef.self()), GET);
 		}
 		else
-			actorRef.tell(PersistentDTO.create(key, null, actorRef.self()), GET, cacheAlias);
+			tell(PersistentDTO.create(key, null, actorRef.self()), GET);
 	}
 	
 	public void set(K key, V value) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
-				actorRef.tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, collectionName), actorRef.self()), SET, cacheAlias);
+				tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, collectionName), actorRef.self()), SET);
 		}
 		else
-			actorRef.tell(PersistentDTO.create(key, value, actorRef.self()), SET, cacheAlias);
+			tell(PersistentDTO.create(key, value, actorRef.self()), SET);
 	}
 	
 	public void writeAround(K key, V value) {
@@ -126,10 +137,10 @@ public class PersistentActorCacheManager<K, V> {
 	public void update(K key, V value, JsonObject update) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
-				actorRef.tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, update, collectionName), actorRef.self()), SET, cacheAlias);
+				tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, update, collectionName), actorRef.self()), SET);
 		}
 		else
-			actorRef.tell(PersistentDTO.create(key, value, actorRef.self()), SET, cacheAlias);
+			tell(PersistentDTO.create(key, value, actorRef.self()), SET);
 	}
 	
 	public void writeAround(K key, V value, JsonObject update) {
@@ -141,38 +152,48 @@ public class PersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(key, value, actorRef.self(), false), SET, dataAccess);
 	}
 	
+	public void queryOne(String query) {
+		if (dataAccessType==SQL)
+			actorRef.tell(PersistentDTO.create(SqlPersistentContext.of(query), actorRef.self()), DataAccessActor.QUERY_ONE, dataAccess);
+	}
+	
+	public void queryAll(String query) {
+		if (dataAccessType==SQL)
+			actorRef.tell(PersistentDTO.create(SqlPersistentContext.of(query), actorRef.self()), DataAccessActor.QUERY_ALL, dataAccess);
+	}
+	
 	public void del(K key) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
-				actorRef.tell(PersistentDTO.create(key, null, DocPersistentContext.of(keyname, collectionName), actorRef.self()), DEL, cacheAlias);
+				tell(PersistentDTO.create(key, null, DocPersistentContext.of(keyname, collectionName), actorRef.self()), DEL);
 		}
 		else
-			actorRef.tell(PersistentDTO.create(key, null, actorRef.self()), DEL, cacheAlias);
+			tell(PersistentDTO.create(key, null, actorRef.self()), DEL);
 	}
 	
 	public void delAll() {
 		if (dataAccessType==DOC)
-			actorRef.tell(PersistentDTO.create(null, null, DocPersistentContext.of(collectionName), actorRef.self()), DEL_ALL, cacheAlias);
+			tell(PersistentDTO.create(null, null, DocPersistentContext.of(collectionName), actorRef.self()), DEL_ALL);
 		else
-			actorRef.tell(PersistentDTO.create(null, null, actorRef.self()), DEL_ALL, cacheAlias);
+			tell(PersistentDTO.create(null, null, actorRef.self()), DEL_ALL);
 	}
 	
 	public void clear() {
-		actorRef.tell(PersistentDTO.create(null, null, actorRef.self()), CLEAR, cacheAlias);
+		tell(PersistentDTO.create(null, null, actorRef.self()), CLEAR);
 	}
 	
 	public void evict(long duration) {
-		actorRef.tell(duration, EVICT, cacheAlias);
+		tell(duration, EVICT);
 	}
 	
 	public void evict(long duration, TimeUnit unit) {
-		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, cacheAlias);
+		tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT);
 	}
 	
 	public void syncWithStorage() {
 		if (dataAccessType==DOC)
-			actorRef.tell(PersistentDTO.create(null, null, DocPersistentContext.of(keyname, collectionName), actorRef.self()), SYNC_WITH_STORAGE, cacheAlias);
+			tell(PersistentDTO.create(null, null, DocPersistentContext.of(keyname, collectionName), actorRef.self()), SYNC_WITH_STORAGE);
 		else
-			actorRef.tell(PersistentDTO.create(null, null, actorRef.self()), SYNC_WITH_STORAGE, cacheAlias);
+			tell(PersistentDTO.create(null, null, actorRef.self()), SYNC_WITH_STORAGE);
 	}
 }

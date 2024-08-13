@@ -17,6 +17,7 @@ package io.actor4j.core.data.access.utils;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,7 +36,8 @@ import static io.actor4j.core.data.access.AckMode.*;
 public class VolatileActorCacheManager<K, V> {
 	protected ActorRef actorRef;
 	protected String cacheAlias;
-	protected AckMode ackMode;
+	
+	protected UUID replica;
 	
 	public VolatileActorCacheManager(ActorRef actorRef, String cacheAlias) {
 		super();
@@ -76,31 +78,38 @@ public class VolatileActorCacheManager<K, V> {
 			return null;
 	}
 	
+	protected void tell(Object value, int tag) {
+		if (replica!=null)
+			actorRef.tell(value, tag, replica);
+		else
+			actorRef.tell(value, tag, cacheAlias);
+	}
+	
 	public void get(K key) {
-		actorRef.tell(VolatileDTO.create(key, actorRef.self()), GET, cacheAlias);
+		tell(VolatileDTO.create(key, actorRef.self()), GET);
 	}
 	
 	public void set(K key, V value) {
-		actorRef.tell(VolatileDTO.create(key, value, actorRef.self()), SET, cacheAlias);
+		tell(VolatileDTO.create(key, value, actorRef.self()), SET);
 	}
 	
 	public void del(K key) {
-		actorRef.tell(VolatileDTO.create(key, actorRef.self()), DEL, cacheAlias);
+		tell(VolatileDTO.create(key, actorRef.self()), DEL);
 	}
 	
 	public void delAll() {
-		actorRef.tell(VolatileDTO.create(actorRef.self()), DEL_ALL, cacheAlias);
+		tell(VolatileDTO.create(actorRef.self()), DEL_ALL);
 	}
 	
 	public void clear() {
-		actorRef.tell(VolatileDTO.create(actorRef.self()), CLEAR, cacheAlias);
+		tell(VolatileDTO.create(actorRef.self()), CLEAR);
 	}
 	
 	public void evict(long duration) {
-		actorRef.tell(duration, EVICT, cacheAlias);
+		tell(duration, EVICT);
 	}
 	
 	public void evict(long duration, TimeUnit unit) {
-		actorRef.tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT, cacheAlias);
+		tell(TimeUnit.MILLISECONDS.convert(duration, unit), EVICT);
 	}
 }

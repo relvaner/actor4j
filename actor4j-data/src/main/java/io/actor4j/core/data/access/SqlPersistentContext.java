@@ -20,11 +20,11 @@ public record SqlPersistentContext(String query, String entityName) implements P
 		this(null, entityName);
 	}
 	
-	public SqlPersistentContext of(String query, String entityName){
+	public static SqlPersistentContext of(String query, String entityName){
 		return new SqlPersistentContext(query, entityName);
 	}
 	
-	public SqlPersistentContext of(String entityName){
+	public static SqlPersistentContext of(String entityName){
 		return new SqlPersistentContext(entityName);
 	}
 }
