@@ -152,22 +152,22 @@ public class PersistentActorCacheManager<K, V> {
 			actorRef.tell(PersistentDTO.create(key, value, actorRef.self(), false), SET, dataAccess);
 	}
 	
-	public void compareAndSet(K key, V value) {
+	public void compareAndSet(K key, V expectedValue, V newValue) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
-				tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, collectionName), actorRef.self()), CAS);
+				tell(PersistentDTO.create(key, newValue, expectedValue.hashCode(), DocPersistentContext.of(keyname, collectionName), actorRef.self()), CAS);
 		}
 		else
-			tell(PersistentDTO.create(key, value, actorRef.self()), CAS);
+			tell(PersistentDTO.create(key, newValue, expectedValue.hashCode(), actorRef.self()), CAS);
 	}
 	
-	public void compareAndUpdate(K key, V value) {
+	public void compareAndUpdate(K key, V expectedValue, V newValue) {
 		if (dataAccessType==DOC) {
 			if (keyname!=null)
-				tell(PersistentDTO.create(key, value, DocPersistentContext.of(keyname, collectionName), actorRef.self()), CAU);
+				tell(PersistentDTO.create(key, newValue, expectedValue.hashCode(), DocPersistentContext.of(keyname, collectionName), actorRef.self()), CAU);
 		}
 		else
-			tell(PersistentDTO.create(key, value, actorRef.self()), CAU);
+			tell(PersistentDTO.create(key, newValue, expectedValue.hashCode(), actorRef.self()), CAU);
 	}
 	
 	public void queryOne(String query) {

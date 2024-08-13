@@ -18,9 +18,13 @@ package io.actor4j.core.data.access;
 import java.util.List;
 import java.util.UUID;
 
-public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, UUID source, Object reserved) implements VolatileDTO<K, V>  {
+public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, UUID source, Object reserved) implements VolatileDTO<K, V>  {
+	public VolatileDataAccessDTO(K key, V value, int hashCodeExpected, UUID source) {
+		this(UUID.randomUUID(), false, key, value, hashCodeExpected, source, null);
+	}
+	
 	public VolatileDataAccessDTO(K key, V value, UUID source) {
-		this(UUID.randomUUID(), false, key, value, source, null);
+		this(UUID.randomUUID(), false, key, value, 0, source, null);
 	}
 	
 	public VolatileDataAccessDTO(UUID source) {
@@ -33,11 +37,11 @@ public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Obj
 	
 	public VolatileDataAccessDTO<K, V> shallowCopy(V value) {
 		// Presume keyExists=true
-		return new VolatileDataAccessDTO<K, V>(id, true, key, value, source, reserved);
+		return new VolatileDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, source, reserved);
 	}
 	
 	public VolatileDataAccessDTO<K, V> shallowCopyWithReserved(Object reserved) {
-		return new VolatileDataAccessDTO<K, V>(id, keyExists, key, value, source, reserved);
+		return new VolatileDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, source, reserved);
 	}
 	
 	@SuppressWarnings("unchecked")

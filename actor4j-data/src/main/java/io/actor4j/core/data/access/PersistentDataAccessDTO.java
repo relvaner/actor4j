@@ -18,65 +18,65 @@ package io.actor4j.core.data.access;
 import java.util.List;
 import java.util.UUID;
 
-public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, PersistentContext context, UUID source, Object reserved) implements PersistentDTO<K, V> {
-	public PersistentDataAccessDTO(K key, V value, PersistentContext context, UUID source, Object reserved) {
-		this(UUID.randomUUID(), false, key, value, context, source, reserved);
+public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, PersistentContext context, UUID source, Object reserved) implements PersistentDTO<K, V> {
+	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, PersistentContext context, UUID source, Object reserved) {
+		this(UUID.randomUUID(), false, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO(K key, V value, PersistentContext context, UUID source) {
-		this(key, value, context, source, null);
+		this(key, value, 0, context, source, null);
 	}
 	
 	public PersistentDataAccessDTO(K key, PersistentContext context, UUID source) {
-		this(key, null, context, source, null);
+		this(key, null, 0, context, source, null);
 	}
 	
 	public PersistentDataAccessDTO(PersistentContext context, UUID source) {
-		this(null, null, context, source, null);
+		this(null, null, 0, context, source, null);
 	}
 	
 	public PersistentDataAccessDTO(K key, V value, UUID source) {
-		this(key, value, null, source, null);
+		this(key, value, 0, null, source, null);
 	}
 	
 	public PersistentDataAccessDTO(K key, UUID source) {
-		this(key, null, null, source, null);
+		this(key, null, 0, null, source, null);
 	}
 	
 	public PersistentDataAccessDTO(UUID source) {
-		this(null, null, null, source, null);
+		this(null, null, 0, null, source, null);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(boolean keyExists) {
-		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, context, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithKey(K key) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, value, context, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(V value) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, value, context, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithEntities(List<V> entities) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, entities, context, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, entities, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(K key, V value) {
 		// Presume keyExists=true
-		return new PersistentDataAccessDTO<K, V>(id, true, key, value, context, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, true, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopyWithReserved(Object reserved) {
-		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, context, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	public PersistentDataAccessDTO<K, V> shallowCopy(UUID source) {
-		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, context, source, reserved);
+		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
 	@SuppressWarnings("unchecked")

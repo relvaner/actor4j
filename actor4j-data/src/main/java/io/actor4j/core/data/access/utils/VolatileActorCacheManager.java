@@ -93,12 +93,12 @@ public class VolatileActorCacheManager<K, V> {
 		tell(VolatileDTO.create(key, value, actorRef.self()), SET);
 	}
 	
-	public void compareAndSet(K key, V value) {
-		tell(VolatileDTO.create(key, value, actorRef.self()), CAS);
+	public void compareAndSet(K key, V expectedValue, V newValue) {
+		tell(VolatileDTO.create(key, newValue, expectedValue.hashCode(), actorRef.self()), CAS);
 	}
 	
-	public void compareAndUpdate(K key, V value) {
-		tell(VolatileDTO.create(key, value, actorRef.self()), CAU);
+	public void compareAndUpdate(K key, V expectedValue, V newValue) {
+		tell(VolatileDTO.create(key, newValue, expectedValue.hashCode(), actorRef.self()), CAU);
 	}
 	
 	public void del(K key) {

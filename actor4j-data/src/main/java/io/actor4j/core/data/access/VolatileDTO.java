@@ -24,6 +24,7 @@ public interface VolatileDTO<K, V> {
 	
 	public K key();
 	public Object value();
+	public int hashCodeExpected();
 	public List<V> valueAsList();
 	public V entity();
 	public List<V> entities();
@@ -41,5 +42,9 @@ public interface VolatileDTO<K, V> {
 	
 	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, V value, UUID source) {
 		return new VolatileDataAccessDTO<K, V>(key, value, source);
+	}
+	
+	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, V value, int hashCodeExpected, UUID source) {
+		return new VolatileDataAccessDTO<K, V>(key, value, hashCodeExpected, source);
 	}
 }

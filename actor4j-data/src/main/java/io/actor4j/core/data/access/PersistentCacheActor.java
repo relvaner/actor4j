@@ -114,7 +114,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 				}
 				else if (message.tag()==CAS || message.tag()==CAU) {
 					V value = cache.get(dto.key());
-					if (value.hashCode()==dto.value().hashCode()/*value == expectedValue*/) {
+					if (value.hashCode()==dto.hashCodeExpected()/*value == expectedValue*/) {
 						int tag = SET;
 						if (message.tag()==CAU)
 							tag = UPDATE;
