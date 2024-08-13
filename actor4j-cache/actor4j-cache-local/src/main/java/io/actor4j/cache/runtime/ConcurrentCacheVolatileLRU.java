@@ -221,6 +221,40 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		clients.decrementAndGet();
 	}
 	
+	// Works only if already available in the cache and if the value is non-null
+	@Override
+	public boolean compareAndSet(K key, V expectedValue, V newValue) {
+		boolean result = false;
+		
+		while (disabled.get());
+
+		clients.incrementAndGet();
+		lockManager.lock(key);
+		try {
+			Pair<V> pairGet = map.get(key);
+			if (pairGet!=null && pairGet.value!=null && pairGet.value.equals(expectedValue)) {
+				long timestamp = System.nanoTime();
+				Pair<V> pair = map.put(key, new Pair<V>(newValue, timestamp));
+				
+				lru.remove(pair.timestamp);
+				lru.put(timestamp, key);
+				
+				if (storageWriter!=null) {
+					if (cacheDel.contains(key))
+						cacheDel.remove(key);
+					cacheDirty.add(key);
+					storageWriter.put(key, newValue, () -> removeDirty(key, pair));
+				}
+			}
+		}
+		finally {
+			lockManager.unLock(key);
+		}
+		clients.decrementAndGet();
+
+		return result;
+	}
+	
 	@Override
 	public void remove(K key) {
 		while (disabled.get());

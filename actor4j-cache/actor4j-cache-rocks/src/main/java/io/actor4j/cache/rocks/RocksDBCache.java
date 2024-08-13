@@ -123,6 +123,13 @@ public class RocksDBCache<K, V> implements Cache<K, V> {
 			throw new CacheWriterException(e);
 		}
 	}
+	
+	@Override
+	public boolean compareAndSet(K key, V expectedValue, V newValue) {
+		// https://github.com/facebook/rocksdb/wiki/Merge-Operator
+		
+		return false;
+	}
 
 	@Override
 	public void remove(K key) {

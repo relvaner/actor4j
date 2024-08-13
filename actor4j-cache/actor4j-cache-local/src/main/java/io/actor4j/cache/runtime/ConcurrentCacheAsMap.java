@@ -177,6 +177,36 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 		clients.decrementAndGet();
 	}
 	
+	// Works only if already available in the cache and if the value is non-null
+	@Override
+	public boolean compareAndSet(K key, V expectedValue, V newValue) {
+		boolean result = false;
+		
+		while (disabled.get());
+
+		clients.incrementAndGet();
+		lockManager.lock(key);
+		try {
+			V value = map.get(key);
+			if (value!=null && value.equals(expectedValue)) {
+				map.put(key, newValue);
+				
+				if (storageWriter!=null) {
+					if (cacheDel.contains(key))
+						cacheDel.remove(key);
+					cacheDirty.add(key);
+					storageWriter.put(key, newValue, () -> removeDirty(key, newValue));
+				}
+			}
+		}
+		finally {
+			lockManager.unLock(key);
+		}
+		clients.decrementAndGet();
+
+		return result;
+	}
+	
 	@Override
 	public void remove(K key) {
 		while (disabled.get());
