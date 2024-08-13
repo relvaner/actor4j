@@ -68,14 +68,14 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 						unhandled(message);
 				}
 				else {
-					if (message.tag()==SET)
-						publish(dto, SET);
-					else if (message.tag()==UPDATE)
-						; // empty
-					else if (message.tag()==DEL)
-						publish(dto, DEL);
-					else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
-						publish(dto, DEL_ALL);
+					if (message.tag()==SET || 
+						message.tag()==UPDATE ||
+						message.tag()==DEL ||
+						message.tag()==DEL_ALL || 
+						message.tag()==CLEAR ||
+						message.tag()==CAS ||
+						message.tag()==CAU)
+						publish(message);
 					else {
 						unhandled = true;
 						unhandled(message);

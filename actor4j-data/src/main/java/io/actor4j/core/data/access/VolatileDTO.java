@@ -28,6 +28,8 @@ public interface VolatileDTO<K, V> {
 	public V entity();
 	public List<V> entities();
 	public UUID source();
+	
+	public Object reserved();
 
 	public static <K, V> VolatileDataAccessDTO<K, V> create(UUID source) {
 		return new VolatileDataAccessDTO<K, V>(source);

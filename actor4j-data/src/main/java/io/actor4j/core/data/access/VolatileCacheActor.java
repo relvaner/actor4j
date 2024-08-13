@@ -69,6 +69,17 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 					cache.remove(dto.key());
 				else if (message.tag()==DEL_ALL || message.tag()==CLEAR)
 					cache.clear();
+				else if (message.tag()==CAS || message.tag()==CAU) {
+					V value = cache.get(dto.key());
+					if (value.hashCode()==dto.value().hashCode()/*value == expectedValue*/) {
+						int tag = SET;
+						if (message.tag()==CAU)
+							tag = UPDATE;
+						receive(message.shallowCopy(tag));
+					}
+					else
+						tell(dto.shallowCopyWithReserved(true)/*Indicating CAS/CAU failed*/, message.tag(), dto.source(), message.interaction());
+				}
 				else {
 					unhandled = true;
 					unhandled(message);

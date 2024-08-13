@@ -64,7 +64,7 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 					publish(dto, SET);
 				}
 				else if (message.tag()==UPDATE)
-					; // empty
+					throw new UnsupportedOperationException();
 				else if (message.tag()==DEL) {
 					cache.remove(dto.key());
 					publish(dto, DEL);
@@ -72,6 +72,17 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 				else if (message.tag()==DEL_ALL || message.tag()==CLEAR) {
 					cache.clear();
 					publish(dto, DEL_ALL);
+				}
+				else if (message.tag()==CAS || message.tag()==CAU) {
+					V value = cache.get(dto.key());
+					if (value.hashCode()==dto.value().hashCode()/*value == expectedValue*/) {
+						int tag = SET;
+						if (message.tag()==CAU)
+							tag = UPDATE;
+						receive(message.shallowCopy(tag));
+					}
+					else
+						tell(dto.shallowCopyWithReserved(true)/*Indicating CAS/CAU failed*/, message.tag(), dto.source(), message.interaction());
 				}
 				else {
 					unhandled = true;

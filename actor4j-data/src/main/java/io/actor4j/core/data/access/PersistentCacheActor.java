@@ -114,14 +114,14 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 				}
 				else if (message.tag()==CAS || message.tag()==CAU) {
 					V value = cache.get(dto.key());
-					if (value.hashCode()==dto.hashCodeExpected()) {
+					if (value.hashCode()==dto.value().hashCode()/*value == expectedValue*/) {
 						int tag = SET;
 						if (message.tag()==CAU)
 							tag = UPDATE;
 						receive(message.shallowCopy(tag));
 					}
 					else
-						tell(dto, message.tag(), dto.source(), message.interaction());
+						tell(dto.shallowCopyWithReserved(true)/*Indicating CAS/CAU failed*/, message.tag(), dto.source(), message.interaction());
 				}
 				else if (message.tag()==SYNC_WITH_STORAGE) {
 					((AsyncCache<K,V>)cache).synchronizeWithStorage(
