@@ -259,6 +259,11 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	}
 	
 	@Override
+	public boolean compareAndSet(K key, V expectedValue, V newValue) {
+		return false;
+	}
+	
+	@Override
 	public void close() {
 		// empty
 	}
