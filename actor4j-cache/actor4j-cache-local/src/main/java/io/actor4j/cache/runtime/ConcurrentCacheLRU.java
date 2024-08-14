@@ -209,6 +209,12 @@ public class ConcurrentCacheLRU<K, V> implements ConcurrentCache<K, V> {
 		clients.decrementAndGet();
 	}
 	
+	@Override
+	public void writeAround(K key, V value) {
+		if (storageWriter!=null)
+			storageWriter.put(key, value, null);
+	}
+	
 	// Works only if already available in the cache and if the value is non-null
 	@Override
 	public boolean compareAndSet(K key, V expectedValue, V newValue) {
