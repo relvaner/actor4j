@@ -121,7 +121,7 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 						receive(message.shallowCopy(tag));
 					}
 					else
-						tell(dto.shallowCopyWithReserved(true)/*Indicating CAS/CAU failed*/, message.tag(), dto.source(), message.interaction());
+						tell(PersistentSuccessDTO.of(dto, message.tag()), ActorWithCache.NO_SUCCESS/*Indicating CAS/CAU failed*/, dto.source(), message.interaction());
 				}
 				else if (message.tag()==SYNC_WITH_STORAGE) {
 					((AsyncCache<K,V>)cache).synchronizeWithStorage(

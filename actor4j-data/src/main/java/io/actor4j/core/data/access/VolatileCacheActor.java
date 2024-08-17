@@ -78,7 +78,7 @@ public class VolatileCacheActor<K, V> extends ActorWithCache<K, V> {
 						receive(message.shallowCopy(tag));
 					}
 					else
-						tell(dto.shallowCopyWithReserved(true)/*Indicating CAS/CAU failed*/, message.tag(), dto.source(), message.interaction());
+						tell(VolatileSuccessDTO.of(dto, message.tag()), ActorWithCache.NO_SUCCESS/*Indicating CAS/CAU failed*/, dto.source(), message.interaction());
 				}
 				else {
 					unhandled = true;

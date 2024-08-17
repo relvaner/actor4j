@@ -20,6 +20,7 @@ import static io.actor4j.core.actors.ActorWithCache.*;
 import java.util.UUID;
 import java.util.function.Function;
 
+import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.actors.PrimaryActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
@@ -82,7 +83,7 @@ public class PrimaryVolatileCacheActor<K, V> extends PrimaryActor {
 						receive(message.shallowCopy(tag));
 					}
 					else
-						tell(dto.shallowCopyWithReserved(true)/*Indicating CAS/CAU failed*/, message.tag(), dto.source(), message.interaction());
+						tell(VolatileSuccessDTO.of(dto, message.tag()), ActorWithCache.NO_SUCCESS/*Indicating CAS/CAU failed*/, dto.source(), message.interaction());
 				}
 				else {
 					unhandled = true;
