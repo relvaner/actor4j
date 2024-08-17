@@ -15,15 +15,6 @@
  */
 package io.actor4j.core.data.access;
 
-public interface SqlPersistentContext extends PersistentContext {
-	public String query();
-	public String entityName();
-	
-	public static SqlPersistentContext of(String query, String entityName){
-		return new DefaultSqlPersistentContext(query, entityName);
-	}
-	
-	public static SqlPersistentContext of(String entityName){
-		return new DefaultSqlPersistentContext(null, entityName);
-	}
+public record DefaultSqlPersistentContext(String query, String entityName) implements SqlPersistentContext {
+
 }

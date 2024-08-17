@@ -123,8 +123,7 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	@Override
 	public void findOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (dto.context() instanceof DocPersistentContext ctx) {
-			@SuppressWarnings("unchecked")
-			E entity = convertToEntity(MongoOperations.findOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), client, databaseName, ctx.collectionName()), entityType);
+			E entity = convertToEntity(MongoOperations.findOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext)ctx).encode()), client, databaseName, ctx.collectionName()), entityType);
 			if (entity!=null)
 				dataAccess.tell(dto.shallowCopy(entity), FIND_ONE, msg.source(), msg.interaction());
 			else
@@ -147,13 +146,12 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 			throw new IllegalArgumentException("Wrong context");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean hasOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		boolean result = false;
 		
 		if (dto.context() instanceof DocPersistentContext ctx)
-			result = MongoOperations.hasOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), client, databaseName, ctx.collectionName());
+			result = MongoOperations.hasOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext)ctx).encode()), client, databaseName, ctx.collectionName());
 		else
 			throw new IllegalArgumentException("Wrong context");
 		
@@ -168,29 +166,26 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 			throw new IllegalArgumentException("Wrong context");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (dto.context() instanceof DocPersistentContext ctx)
-			MongoOperations.replaceOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), convertToDocument(dto.value()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+			MongoOperations.replaceOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext)ctx).encode()), convertToDocument(dto.value()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
 		else
 			throw new IllegalArgumentException("Wrong context");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (dto.context() instanceof DocPersistentContext ctx)
-			MongoOperations.updateOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), Document.parse(ctx.update().encode()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+			MongoOperations.updateOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext)ctx).encode()), Document.parse(ctx.update().encode()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
 		else
 			throw new IllegalArgumentException("Wrong context");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (dto.context() instanceof DocPersistentContext ctx)
-			MongoOperations.deleteOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext<K>)ctx).encode()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+			MongoOperations.deleteOne(Document.parse(filterWithPrimary(dto.key(), (DocPersistentContext)ctx).encode()), dto.id(), client, databaseName, ctx.collectionName(), selectedBulkWriter);
 		else
 			throw new IllegalArgumentException("Wrong context");
 	}
@@ -221,7 +216,7 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 			dataAccess.tell(PersistentFailureDTO.of(dto, msg.tag(), t), FAILURE, msg.source(), msg.interaction());
 	}
 	
-	protected JsonObject filterWithPrimary(K key, DocPersistentContext<K> ctx) {
+	protected JsonObject filterWithPrimary(K key, DocPersistentContext ctx) {
 		JsonObject result = ctx.filter();
 		
 		if(result==null)

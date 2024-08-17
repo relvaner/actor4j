@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.data.access;
+package io.actor4j.core.data.access.jpa;
 
-public interface SqlPersistentContext extends PersistentContext {
-	public String query();
-	public String entityName();
+import io.actor4j.core.data.access.SqlPersistentContext;
+
+public record JPAPersistentContext(String query, String entityName) implements SqlPersistentContext {
+	public JPAPersistentContext(String entityName) {
+		this(null, entityName);
+	}
 	
 	public static SqlPersistentContext of(String query, String entityName){
-		return new DefaultSqlPersistentContext(query, entityName);
+		return new JPAPersistentContext(query, entityName);
 	}
 	
 	public static SqlPersistentContext of(String entityName){
-		return new DefaultSqlPersistentContext(null, entityName);
+		return new JPAPersistentContext(null, entityName);
 	}
 }

@@ -94,7 +94,7 @@ public class PersistentCacheFeature {
 				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestEntity>(
 						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestEntity>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
 
-				DocPersistentContext<String> ctx = DocPersistentContext.of("key", "test");
+				DocPersistentContext ctx = DocPersistentContext.of("key", "test");
 				tell(PersistentDTO.create("key1", new TestEntity("key1", "value1"), ctx, self(), false), ActorWithCache.SET, "dataAccess");
 				tell(PersistentDTO.create("key2", new TestEntity("key2", "value2"), ctx, self(), false), ActorWithCache.SET, "dataAccess");
 				tell(PersistentDTO.create("key3", new TestEntity("key3", "value3"), ctx, self(), false), ActorWithCache.SET, "dataAccess");
@@ -163,7 +163,7 @@ public class PersistentCacheFeature {
 				system.addActor(() -> new PrimaryPersistentCacheActor<String, TestEntity>(
 						"primary", group, "cache1", (id) -> () -> new SecondaryPersistentCacheActor<String, TestEntity>("secondary-"+k.getAndIncrement(), group, id, 500), COUNT-1, 500, dataAccess, NONE));
 
-				DocPersistentContext<String> ctx = DocPersistentContext.of("key", "test");
+				DocPersistentContext ctx = DocPersistentContext.of("key", "test");
 				tell(PersistentDTO.create("key1", new TestEntity("key1", "value1"), ctx, self()), ActorWithCache.SET, "cache1");
 				tell(PersistentDTO.create("key2", new TestEntity("key2", "value2"), ctx, self()), ActorWithCache.SET, "cache1");
 				tell(PersistentDTO.create("key3", new TestEntity("key3", "value3"), ctx, self()), ActorWithCache.SET, "cache1");
