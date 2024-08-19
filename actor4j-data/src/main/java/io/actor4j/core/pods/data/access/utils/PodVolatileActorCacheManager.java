@@ -20,12 +20,15 @@ import java.util.UUID;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.data.access.AckMode;
+import io.actor4j.core.data.access.VolatileDTO;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.data.access.PodPrimaryVolatileCacheActor;
 import io.actor4j.core.pods.data.access.PodSecondaryVolatileCacheActor;
+
+import static io.actor4j.core.actors.ActorWithCache.GET;
 import static io.actor4j.core.data.access.AckMode.*;
 
 public class PodVolatileActorCacheManager<K, V> extends VolatileActorCacheManager<K, V> {
@@ -96,11 +99,15 @@ public class PodVolatileActorCacheManager<K, V> extends VolatileActorCacheManage
 		this.replica = replica;
 	}
 	
-	public UUID createReplica(int cacheSize, UUID dataAccess, PodContext context) {
+	public UUID createReplica(int cacheSize, PodContext context) {
 		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, PRIMARY, context));
 	}
 	
-	public UUID createReplica(int cacheSize, UUID dataAccess, AckMode ackMode, PodContext context) {
+	public UUID createReplica(int cacheSize, AckMode ackMode, PodContext context) {
 		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, ackMode, context));
+	}
+	
+	public void get(K key, UUID interaction) {
+		actorRef.tell(VolatileDTO.create(key, actorRef.self()), GET, replica, interaction);
 	}
 }
