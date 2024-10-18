@@ -45,5 +45,6 @@
 		<module>actor4j-web-coap-server</module>
 		<module>actor4j-web-opcua-client</module>
 		<module>actor4j-web-opcua-server</module>
+		<module>actor4j-web-kafka</module>
 	</modules>
 </project>
