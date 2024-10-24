@@ -79,6 +79,8 @@ public abstract class MQTTResourceActor extends ResourceActor {
 	
 	@Override
 	public void receive(ActorMessage<?> message) {
+		reconnect();
+		
 		if (message.tag()==PUBLISH && message.value()!=null && message.value() instanceof MQTTPublish)
 			publish((MQTTPublish)message.value());
 		else if (message.tag()==SUBSCRIBE && message.value()!=null && message.value() instanceof String)
@@ -87,6 +89,15 @@ public abstract class MQTTResourceActor extends ResourceActor {
 			unsubscribe(message.valueAsString());
 		else
 			unhandled(message);
+	}
+	
+	protected void reconnect() {
+		if (!client.isConnected())
+			try {
+				client.reconnect();
+			} catch (MqttException e) {
+				e.printStackTrace();
+			}
 	}
 	
 	public void publish(MQTTPublish publish) {
