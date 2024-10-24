@@ -27,6 +27,8 @@ import io.actor4j.core.actors.ResourceActor;
 import io.actor4j.core.messages.ActorMessage;
 import static io.actor4j.core.messages.ActorReservedTag.*;
 
+import java.util.Set;
+
 public abstract class MQTTResourceActor extends ResourceActor {
 	public static final int PUBLISH     = RESERVED_PUBSUB_PUBLISH;
 	public static final int SUBSCRIBE   = RESERVED_PUBSUB_SUBSCRIBE;
@@ -34,7 +36,7 @@ public abstract class MQTTResourceActor extends ResourceActor {
 	
 	protected volatile MqttClient client;
 	protected final String broker;
-	
+
 	public MQTTResourceActor(String broker) {
 		this(null, broker);
 	}
@@ -103,9 +105,25 @@ public abstract class MQTTResourceActor extends ResourceActor {
 		}
 	}
 	
+	public void subscribe(Set<String> topicFilters) {
+		try {
+			client.subscribe((String[]) topicFilters.toArray());
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void unsubscribe(String topicFilter) {
 		try {
 			client.unsubscribe(topicFilter);
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void unsubscribe(Set<String> topicFilters) {
+		try {
+			client.unsubscribe((String[]) topicFilters.toArray());
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
