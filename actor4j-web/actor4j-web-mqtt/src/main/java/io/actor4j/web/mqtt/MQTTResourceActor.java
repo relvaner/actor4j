@@ -17,8 +17,6 @@ package io.actor4j.web.mqtt;
 
 import static io.actor4j.core.logging.ActorLogger.logger;
 
-import java.util.UUID;
-
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -54,7 +52,7 @@ public abstract class MQTTResourceActor extends ResourceActor {
 		super.preStart();
 		
 		try {
-			client = new MqttClient(broker, clientId().toString(), new MemoryPersistence());
+			client = new MqttClient(broker, clientId(), new MemoryPersistence());
 			MqttConnectOptions connectOptions = new MqttConnectOptions();
 			configure(connectOptions);
 			client.setCallback(callback());
@@ -113,5 +111,5 @@ public abstract class MQTTResourceActor extends ResourceActor {
 		}
 	}
 	
-	public abstract UUID clientId();
+	public abstract String clientId();
 }

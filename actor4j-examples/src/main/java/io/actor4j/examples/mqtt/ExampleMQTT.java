@@ -80,8 +80,8 @@ public class ExampleMQTT {
 			}
 
 			@Override
-			public UUID clientId() {
-				return UUID.fromString("470ceda2-219a-4d6d-997a-88c97a501a9b");
+			public String clientId() {
+				return UUID.fromString("470ceda2-219a-4d6d-997a-88c97a501a9b").toString();
 			}
 		});
 		
