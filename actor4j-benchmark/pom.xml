@@ -56,11 +56,14 @@
 			<version>2.5.32</version>
 		</dependency>
 		-->
+		
+		<!--
 		<dependency>
 			<groupId>com.tilab.jade</groupId>
 			<artifactId>jade</artifactId>
 			<version>4.5.0</version>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
