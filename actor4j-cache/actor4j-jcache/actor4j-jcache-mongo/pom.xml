@@ -28,13 +28,7 @@
 
 		<dependency>
 			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-json-jackson</artifactId>
-			<version>${actor4j.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-cache-caffeine</artifactId>
+			<artifactId>actor4j-dataformat-json-jackson</artifactId>
 			<version>${actor4j.version}</version>
 			<scope>test</scope>
 		</dependency>
