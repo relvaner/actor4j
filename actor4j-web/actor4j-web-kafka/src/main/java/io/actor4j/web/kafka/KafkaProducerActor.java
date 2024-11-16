@@ -35,17 +35,23 @@ public abstract class KafkaProducerActor<K, V> extends ResourceActor {
 	
 	protected final String broker;
 	protected final Properties config;
+	protected final String clientId;
 	
 	protected /*quasi final*/KafkaProducer<K, V> producer;
 	
 	public KafkaProducerActor(String broker) {
-		this(null, broker);
+		this(null, broker, null);
+	}
+	
+	public KafkaProducerActor(String name, String broker) {
+		this(name, broker, name);
 	}
 
-	public KafkaProducerActor(String name, String broker) {
+	public KafkaProducerActor(String name, String broker, String clientId) {
 		super(name, true, false);
 		
 		this.broker = broker;
+		this.clientId = clientId;
 		
 		config = new Properties(); 
 	}
@@ -58,7 +64,6 @@ public abstract class KafkaProducerActor<K, V> extends ResourceActor {
 		super.preStart();
 		
 		config.put(CommonClientConfigs.CLIENT_ID_CONFIG, clientId());
-		config.put(CommonClientConfigs.GROUP_ID_CONFIG, groupId());
 		config.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, broker);
 		configure(config);
 		
@@ -94,6 +99,7 @@ public abstract class KafkaProducerActor<K, V> extends ResourceActor {
 			}
 	}
 	
-	public abstract String clientId();
-	public abstract String groupId();
+	public String clientId() {
+		return clientId;
+	}
 }

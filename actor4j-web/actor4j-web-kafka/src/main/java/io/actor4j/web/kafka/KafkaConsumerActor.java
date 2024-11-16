@@ -34,6 +34,9 @@ public abstract class KafkaConsumerActor<K, V> extends ResourceActor {
 	
 	protected final String broker;
 	protected final Properties config;
+	
+	protected final String clientId;
+	protected final String groupId;
 
 	protected final Set<String> topics;
 	protected /*quasi final*/ KafkaConsumer<K, V> consumer;
@@ -52,10 +55,16 @@ public abstract class KafkaConsumerActor<K, V> extends ResourceActor {
 	}
 	
 	public KafkaConsumerActor(String name, String broker, Set<String> topics) {
+		this(name, broker, topics, name, name);
+	}
+	
+	public KafkaConsumerActor(String name, String broker, Set<String> topics, String clientId, String groupId) {
 		super(name, true, false);
 		
 		this.broker = broker;
 		this.topics = topics;
+		this.clientId = clientId;
+		this.groupId = groupId;
 		
 		config = new Properties();
 	}
@@ -112,6 +121,11 @@ public abstract class KafkaConsumerActor<K, V> extends ResourceActor {
 			consumerRunnable.cancel();
 	}
 	
-	public abstract String clientId();
-	public abstract String groupId();
+	public String clientId() {
+		return clientId;
+	}
+	
+	public String groupId() {
+		return groupId;
+	}
 }
