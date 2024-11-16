@@ -100,6 +100,6 @@ public abstract class KafkaProducerActor<K, V> extends ResourceActor {
 	}
 	
 	public String clientId() {
-		return clientId;
+		return clientId!=null ? clientId : self().toString();
 	}
 }

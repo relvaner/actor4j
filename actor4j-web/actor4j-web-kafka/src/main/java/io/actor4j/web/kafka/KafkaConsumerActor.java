@@ -122,10 +122,10 @@ public abstract class KafkaConsumerActor<K, V> extends ResourceActor {
 	}
 	
 	public String clientId() {
-		return clientId;
+		return clientId!=null ? clientId : self().toString();
 	}
 	
 	public String groupId() {
-		return groupId;
+		return groupId!=null ? groupId : self().toString();
 	}
 }
