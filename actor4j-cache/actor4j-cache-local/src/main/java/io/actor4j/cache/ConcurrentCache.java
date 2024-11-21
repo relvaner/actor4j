@@ -19,6 +19,7 @@ import io.actor4j.core.utils.Cache;
 
 public interface ConcurrentCache<K, V> extends Cache<K, V> {
 	public String name();
+	public boolean isPrimary();
 	
 	public void writeAround(K key, V value);
 	

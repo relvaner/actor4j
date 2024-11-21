@@ -46,7 +46,13 @@ public class ConcurrentCacheLRU<K, V> implements ConcurrentCache<K, V> {
 	private final StorageReader<K, V> storageReader;
 	private final StorageWriter<K, V> storageWriter;
 	
+	private final boolean primaryCache;
+	
 	public ConcurrentCacheLRU(String cacheName, int size, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter) {
+		this(cacheName, size, storageReader, storageWriter, true);
+	}
+	
+	public ConcurrentCacheLRU(String cacheName, int size, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter, boolean primaryCache) {
 		super();
 		
 		map = new ConcurrentHashMap<>(size);
@@ -62,6 +68,7 @@ public class ConcurrentCacheLRU<K, V> implements ConcurrentCache<K, V> {
 		this.size = size;
 		this.storageReader = storageReader;
 		this.storageWriter = storageWriter;
+		this.primaryCache = primaryCache;
 	}
 	
 	public ConcurrentCacheLRU(String cacheName, int size) {
@@ -83,6 +90,11 @@ public class ConcurrentCacheLRU<K, V> implements ConcurrentCache<K, V> {
 	
 	public int size() {
 		return size;
+	}
+	
+	@Override
+	public boolean isPrimary() {
+		return primaryCache;
 	}
 	
 	@Override

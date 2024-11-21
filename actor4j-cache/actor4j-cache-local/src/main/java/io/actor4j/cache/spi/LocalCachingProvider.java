@@ -17,19 +17,19 @@ package io.actor4j.cache.spi;
 
 import io.actor4j.core.pods.api.Caching;
 
-public class CachingProvider implements Caching<LocalActorCacheManager> {
+public class LocalCachingProvider implements Caching<LocalActorCacheManager> {
 	private final LocalActorCacheManager cacheManager;
 	
 	// Initialization-on-demand holder idiom
 	private static class LazyHolder {
-		private final static CachingProvider INSTANCE = new CachingProvider();
+		private final static LocalCachingProvider INSTANCE = new LocalCachingProvider();
 	}
 	
-	private CachingProvider() {
+	private LocalCachingProvider() {
 		cacheManager = new LocalActorCacheManager();
 	}
 	
-	public static CachingProvider getCachingProvider() {
+	public static LocalCachingProvider getCachingProvider() {
 		return LazyHolder.INSTANCE;
 	}
 	

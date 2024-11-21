@@ -54,7 +54,13 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 	private final StorageReader<K, V> storageReader;
 	private final StorageWriter<K, V> storageWriter;
 	
+	private final boolean primaryCache;
+	
 	public ConcurrentCacheVolatileLRU(String cacheName, int size, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter) {
+		this(cacheName, size, storageReader, storageWriter, true);
+	}
+	
+	public ConcurrentCacheVolatileLRU(String cacheName, int size, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter, boolean primaryCache) {
 		map = new ConcurrentHashMap<>(size);
 		lru = new ConcurrentSkipListMap<>();
 		cacheMiss = ConcurrentHashMap.newKeySet();
@@ -68,6 +74,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		this.size = size;
 		this.storageReader = storageReader;
 		this.storageWriter = storageWriter;
+		this.primaryCache = primaryCache;
 	}
 	
 	public ConcurrentCacheVolatileLRU(String cacheName, int size) {
@@ -89,6 +96,11 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 	
 	public int size() {
 		return size;
+	}
+	
+	@Override
+	public boolean isPrimary() {
+		return primaryCache;
 	}
 	
 	@Override

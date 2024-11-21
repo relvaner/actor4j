@@ -42,7 +42,13 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 	private final StorageReader<K, V> storageReader;
 	private final StorageWriter<K, V> storageWriter;
 	
+	private final boolean primaryCache;
+	
 	public ConcurrentCacheAsMap(String cacheName, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter) {
+		this(cacheName, storageReader, storageWriter, true);
+	}
+	
+	public ConcurrentCacheAsMap(String cacheName, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter, boolean primaryCache) {
 		map = new ConcurrentHashMap<>();
 		cacheMiss = ConcurrentHashMap.newKeySet();
 		cacheDirty = ConcurrentHashMap.newKeySet();
@@ -54,6 +60,7 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 		this.cacheName = cacheName;
 		this.storageReader = storageReader;
 		this.storageWriter = storageWriter;
+		this.primaryCache = primaryCache;
 	}
 	
 	public ConcurrentCacheAsMap(String cacheName) {
@@ -67,6 +74,11 @@ public class ConcurrentCacheAsMap<K, V> implements ConcurrentCache<K, V> {
 	@Override
 	public String name() {
 		return cacheName;
+	}
+	
+	@Override
+	public boolean isPrimary() {
+		return primaryCache;
 	}
 	
 	@Override
