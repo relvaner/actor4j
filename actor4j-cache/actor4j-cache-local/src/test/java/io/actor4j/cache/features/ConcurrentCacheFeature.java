@@ -28,7 +28,6 @@ import static org.junit.Assert.*;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -72,12 +71,12 @@ public class ConcurrentCacheFeature {
 		cache.get(data[5][0]);
 		cache.get(data[4][0]);
 		
-		Iterator<Entry<Long, String>> iterator = cache.getLru().entrySet().iterator();
-		assertEquals(data[2][0], iterator.next().getValue());
-		assertEquals(data[3][0], iterator.next().getValue());
-		assertEquals(data[6][0], iterator.next().getValue());
-		assertEquals(data[5][0], iterator.next().getValue());
-		assertEquals(data[4][0], iterator.next().getValue());
+		Iterator<String> iterator = cache.getLru().iterator();
+		assertEquals(data[2][0], iterator.next());
+		assertEquals(data[3][0], iterator.next());
+		assertEquals(data[6][0], iterator.next());
+		assertEquals(data[5][0], iterator.next());
+		assertEquals(data[4][0], iterator.next());
 	}
 	
 	@Test

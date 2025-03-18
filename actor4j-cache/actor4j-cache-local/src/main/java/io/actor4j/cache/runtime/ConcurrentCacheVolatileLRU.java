@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
+r * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package io.actor4j.cache.runtime;
 
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.SortedMap;
 
 import io.actor4j.cache.StorageReader;
 import io.actor4j.cache.StorageWriter;
@@ -33,14 +33,18 @@ import io.actor4j.cache.ConcurrentCache;
 public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  {
 	private final String cacheName;
 	
-	private static record Pair<V>(V value, long timestamp) {
-		public static <V> Pair<V> of(V value, long timestamp) {
-			return new Pair<V>(value, timestamp);
+	private static class Pair<V> {
+		public final V value;
+		public long timestamp;
+		
+		public Pair(V value, long timestamp) {
+			this.value = value;
+			this.timestamp = timestamp;
 		}
 	}
 	
 	private final Map<K, Pair<V>> map;
-	private final SortedMap<Long, K> lru;
+	private final Deque<K> lru;
 	private final Set<K> cacheMiss;
 	private final Set<K> cacheDirty;
 	private final Set<K> cacheDel;
@@ -62,7 +66,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 	
 	public ConcurrentCacheVolatileLRU(String cacheName, int size, StorageReader<K, V> storageReader, StorageWriter<K, V> storageWriter, boolean primaryCache) {
 		map = new ConcurrentHashMap<>(size);
-		lru = new ConcurrentSkipListMap<>();
+		lru = new ConcurrentLinkedDeque<>();
 		cacheMiss = ConcurrentHashMap.newKeySet();
 		cacheDirty = ConcurrentHashMap.newKeySet();
 		cacheDel = ConcurrentHashMap.newKeySet();
@@ -85,7 +89,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		return map;
 	}
 	
-	public SortedMap<Long, K> getLru() {
+	public Deque<K> getLru() {
 		return lru;
 	}
 	
@@ -142,11 +146,10 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 				}
 			}
 			else {
-				lru.remove(pair.timestamp());
-				long timestamp = System.nanoTime();
-				map.put(key, new Pair<V>(pair.value(), timestamp));
-				lru.put(timestamp, key);
-				result = pair.value();
+				lru.remove(key);
+				pair.timestamp = System.nanoTime();
+				lru.addLast(key);
+				result = pair.value;
 			}
 		}
 		finally {
@@ -164,11 +167,11 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		lockManager.lock(key);
 		try {
 			long timestamp = System.nanoTime();
-			Pair<V> oldPair = map.putIfAbsent(key, Pair.of(value, timestamp));
+			Pair<V> oldPair = map.putIfAbsent(key, new Pair<V>(value, timestamp));
 			
 			if (oldPair==null) {
 				resize();
-				lru.put(timestamp, key);
+				lru.addLast(key);
 				cacheMiss.remove(key);
 			}
 		}
@@ -192,19 +195,19 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 			
 			if (pair==null) {
 				resize();
-				lru.put(timestamp, key);
+				lru.addLast(key);
 			}
 			else {
-				lru.remove(pair.timestamp);
-				lru.put(timestamp, key);
-				result = pair.value();
+				lru.remove(key);
+				lru.addLast(key);
+				result = pair.value;
 			}
 			
 			if (storageWriter!=null) {
 				if (cacheDel.contains(key))
 					cacheDel.remove(key);
 				cacheDirty.add(key);
-				storageWriter.put(key, value, () -> removeDirty(key, pair));
+				storageWriter.put(key, value, () -> removeDirty(key, value));
 			}
 		}
 		finally {
@@ -215,7 +218,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		return result;
 	}
 	
-	private void removeDirty(K key, Pair<V> pair) {
+	private void removeDirty(K key, V value) {
 		while (disabled.get());
 
 		clients.incrementAndGet();
@@ -223,7 +226,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		try {
 			if (cacheDirty.contains(key)) {
 				Pair<V> current = map.get(key);
-				if (current!=null && current.equals(pair))
+				if (current!=null && current.value!=null && current.value.equals(value))
 					cacheDirty.remove(key);
 			}
 		}
@@ -252,16 +255,16 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 			Pair<V> pairGet = map.get(key);
 			if (pairGet!=null && pairGet.value!=null && pairGet.value.equals(expectedValue)) {
 				long timestamp = System.nanoTime();
-				Pair<V> pair = map.put(key, new Pair<V>(newValue, timestamp));
+				map.put(key, new Pair<V>(newValue, timestamp));
 				
-				lru.remove(pair.timestamp);
-				lru.put(timestamp, key);
+				lru.remove(key);
+				lru.addLast(key);
 				
 				if (storageWriter!=null) {
 					if (cacheDel.contains(key))
 						cacheDel.remove(key);
 					cacheDirty.add(key);
-					storageWriter.put(key, newValue, () -> removeDirty(key, pair));
+					storageWriter.put(key, newValue, () -> removeDirty(key, newValue));
 				}
 			}
 		}
@@ -280,8 +283,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 		clients.incrementAndGet();
 		lockManager.lock(key);
 		try {
-			Pair<V> pair = map.get(key);
-			lru.remove(pair.timestamp());
+			lru.remove(key);
 			map.remove(key);
 			
 			if (storageWriter!=null)
@@ -329,24 +331,36 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 	
 	private void resize() {
 		if (map.size()>size) {
-			long timestamp = lru.firstKey();
-			map.remove(lru.get(timestamp));
-			lru.remove(timestamp);
+			map.remove(lru.getFirst());
+			lru.removeFirst();
 		}
 	}
 	
 	@Override
 	public void evict(long duration) {
+		if (disabled.get())
+			return;
+
+		clients.incrementAndGet();
 		long currentTime = System.currentTimeMillis();
-		
-		Iterator<Entry<Long, K>> iterator = lru.entrySet().iterator();
+		Iterator<Entry<K, Pair<V>>> iterator = map.entrySet().iterator();
 		while (iterator.hasNext()) {
-			Entry<Long, K> entry = iterator.next();
-			if (currentTime-entry.getKey()/1_000_000>duration) {
-				map.remove(entry.getValue());
-				iterator.remove();
+			Entry<K, Pair<V>> entry = iterator.next();
+			if (currentTime-entry.getValue().timestamp/1_000_000>duration) {
+				K key = entry.getKey();
+				lockManager.lock(key);
+				try {
+					if (!cacheDirty.contains(key)) {
+						lru.remove(key);
+						iterator.remove();
+					}
+				}
+				finally {
+					lockManager.unLock(key);
+				}
 			}
 		}
+		clients.decrementAndGet();
 	}
 	
 	@Override
@@ -358,7 +372,8 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 			lockManager.lock(key);
 			try {
 				Pair<V> pair = map.get(key);
-				storageWriter.put(key, pair.value(), () -> removeDirty(key, pair));
+				if (pair!=null)
+					storageWriter.put(key, pair.value, () -> removeDirty(key, pair.value));
 			}
 			finally {
 				lockManager.unLock(key);
