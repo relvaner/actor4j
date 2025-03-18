@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -343,21 +342,21 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 
 		clients.incrementAndGet();
 		long currentTime = System.currentTimeMillis();
-		Iterator<Entry<K, Pair<V>>> iterator = map.entrySet().iterator();
+		Iterator<K> iterator = map.keySet().iterator();
 		while (iterator.hasNext()) {
-			Entry<K, Pair<V>> entry = iterator.next();
-			if (currentTime-entry.getValue().timestamp/1_000_000>duration) {
-				K key = entry.getKey();
-				lockManager.lock(key);
-				try {
+			K key = iterator.next();
+			lockManager.lock(key);
+			try {
+				Pair<V> pairGet = map.get(key);
+				if (pairGet!=null && currentTime-pairGet.timestamp/1_000_000>duration) {
 					if (!cacheDirty.contains(key)) {
 						lru.remove(key);
 						iterator.remove();
 					}
 				}
-				finally {
-					lockManager.unLock(key);
-				}
+			}
+			finally {
+				lockManager.unLock(key);
 			}
 		}
 		clients.decrementAndGet();
