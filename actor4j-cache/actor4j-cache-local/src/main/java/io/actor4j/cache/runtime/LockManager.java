@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Yannis Cosmadopoulos
  * @author Greg Luck
  */
-//Changed implementation
+// Changed implementation
 public final class LockManager<K> {
 	private final ConcurrentHashMap<K, ReentrantLock> locks;
 	
@@ -52,18 +52,17 @@ public final class LockManager<K> {
 	 * @param key the key
 	 */
 	public void lock(K key) {
-		ReentrantLock lock = lockFactory.aquire();
+		ReentrantLock newLock  = lockFactory.aquire();
 
 		while (true) {
-			ReentrantLock oldLock = locks.putIfAbsent(key, lock);
-			if (oldLock == null)
+			ReentrantLock existingLock = locks.putIfAbsent(key, newLock);
+			if (existingLock == null)
 				return;
 
-			// there was a lock
-			oldLock.lock();
-			// now we have it. Because of possibility that someone had it for remove,
-			// we don't re-use directly
-			oldLock.unlock();
+			// A lock already associated with the given key, we have to wait until release
+			existingLock.lock();
+			// Now we have it, we will release the lock so its potentially available for reuse (see LockFactory, capacity)
+			existingLock.unlock();
 		}
 	}
 
@@ -74,7 +73,8 @@ public final class LockManager<K> {
 	 */
 	public void unLock(K key) {
 		ReentrantLock lock = locks.remove(key);
-
-		lockFactory.release(lock);
+		
+		if (lock != null)
+			lockFactory.release(lock);
 	}
 }

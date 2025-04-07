@@ -23,45 +23,53 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A factory for {@link ReentrantLock}s.
+ * 
+ * Provides a pool of ReentrantLocks to minimize object creation.
  */
-//Changed implementation
+// Changed implementation
 public final class LockFactory {
 	private final int capacity;
 	private final ReentrantLock lockFactoryLock;
-	private final Queue<ReentrantLock> sharedLocks;
+	private final Queue<ReentrantLock> lockPool;
 	
 	public LockFactory(int capacity) {
 		super();
 		this.capacity = capacity;
 		
 		lockFactoryLock = new ReentrantLock();
-		sharedLocks = new LinkedList<ReentrantLock>(); // MpmcArrayQueue (based on a ConcurrentCircularArrayQueue) from JCTools
+		lockPool = new LinkedList<ReentrantLock>(); // MpmcArrayQueue (based on a ConcurrentCircularArrayQueue) from JCTools
 	}
 
+	/**
+     * Acquires a lock from the pool or creates a new one if necessary.
+     */
 	public ReentrantLock aquire() {
 		ReentrantLock result = null;
 		
 		lockFactoryLock.lock();
 		try {
-			if (!sharedLocks.isEmpty())
-				result = sharedLocks.poll();
+			result = lockPool.poll();
 		} finally {
 			lockFactoryLock.unlock();
 		}
 
-		result = result != null ? result : new ReentrantLock();
+		if (result == null)
+			 result = new ReentrantLock();
 		result.lock();
 
 		return result;
 	}
 
+	/**
+     * Releases the lock and returns it to the pool if there is capacity.
+     */
 	public void release(ReentrantLock lock) {
 		lock.unlock();
 		
 		lockFactoryLock.lock();
 		try {
-			if (sharedLocks.size() < capacity)
-				sharedLocks.offer(lock);
+			if (lockPool.size() < capacity)
+				lockPool.offer(lock);
 		} finally {
 			lockFactoryLock.unlock();
 		}
