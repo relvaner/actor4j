@@ -57,7 +57,7 @@ public class BenchmarkApplication {
 		return null;
 	}
 	
-	public void main(String[] args) {
+	public void run(String[] args) {
 		Options options = new Options();
 		
 		frameworkOptions(options);
