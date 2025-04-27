@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.UUID;
 
 import io.actor4j.analyzer.runtime.visual.Utils;
-import io.actor4j.core.runtime.ActorProcessPoolHandler;
-import io.actor4j.core.runtime.DefaultActorProcessPoolHandler;
+import io.actor4j.core.runtime.ActorExecutionUnitPoolHandler;
+import io.actor4j.core.runtime.DefaultActorExecutionUnitPoolHandler;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorExecutorService;
 import io.actor4j.core.runtime.InternalActorSystem;
@@ -132,12 +132,12 @@ public abstract class VisualActorStructureView {
 					
 					String color = null;
 					if (colorize) {
-						ActorProcessPoolHandler<?> poolHandler = ((InternalActorExecutorService<?>)system.get().getExecutorService()).getActorProcessPool().getActorProcessPoolHandler();
-        				if (poolHandler instanceof DefaultActorProcessPoolHandler<?> ph) {
+						ActorExecutionUnitPoolHandler<?> poolHandler = ((InternalActorExecutorService<?>)system.get().getExecutorService()).getExecutionUnitPool().getExecutionUnitPoolHandler();
+        				if (poolHandler instanceof DefaultActorExecutionUnitPoolHandler<?> ph) {
 	        				Long threadId = ph.getCellsMap().get(child.getId());
 	        				if (threadId!=null)
 	        					color = Utils.randomColorAsHex(
-	        						ph.getProcessList().indexOf(threadId), 
+	        						ph.getExecutionUnitList().indexOf(threadId), 
 	        						system.get().getConfig().parallelism()*system.get().getConfig().parallelismFactor());
 	        				else
 	        					color = "#F0F0F0";
