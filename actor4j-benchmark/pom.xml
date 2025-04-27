@@ -24,48 +24,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-core-sdk</artifactId>
-			<version>${actor4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-core-runtime</artifactId>
-			<version>${actor4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-data</artifactId>
-			<version>${actor4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-streams</artifactId>
-			<version>${actor4j.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-actor_3</artifactId>
-			<version>2.6.20</version>
-		</dependency>
-		<!--
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-actor_2.13</artifactId>
-			<version>2.5.32</version>
-		</dependency>
-		-->
-		
-		<!--
-		<dependency>
-			<groupId>com.tilab.jade</groupId>
-			<artifactId>jade</artifactId>
-			<version>4.5.0</version>
-		</dependency>
-		-->
-
-		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
