@@ -69,7 +69,7 @@
 		<module>actor4j-analyzer-swing</module>
 		<module>actor4j-analyzer-fx</module>
 		
-		<module>actor4j-benchmark</module>
+		<module>actor4j-benchmark-cli</module>
 		
 		<module>actor4j-patterns</module>
 		<module>actor4j-examples</module>
