@@ -40,12 +40,25 @@ public class BenchmarkSamplesApplication {
 		return buffer.toString();
 	}
 	
-	public static void main(String[] args) {
+	public void frameworkOptions(Options options) {
+//		Option optionFrameworkActor4j = Option.builder("actor4j").desc("using the Actor4j framework").argName("actor4j").build();
+//		options.addOption(optionFrameworkActor4j);
+	}
+	
+	public String frameworkClasspath(CommandLine line) {
+//		String result = null;
+//		
+//		if (line.hasOption("actor4j"))
+//			result = "actor4j.benchmark.samples.";
+//		
+//		return result;
+		return null;
+	}
+	
+	public void main(String[] args) {
 		Options options = new Options();
 		
-		Option optionFrameworkOther = Option.builder("other").desc("using plain JAVA").argName("other").build();
-		Option optionFrameworkAkka = Option.builder("akka").desc("using the Akka framework").argName("akka").build();
-		Option optionFrameworkJADE = Option.builder("jade").desc("using the JADE framework").argName("jade").build();
+		frameworkOptions(options);
 		
 		Option optionClass = Option.builder("class").hasArg().desc("the class name prefix").argName("class").build();
 		Option optionActors = Option.builder("actors").hasArg().desc("actors per thread").argName("actors").build();
@@ -58,19 +71,12 @@ public class BenchmarkSamplesApplication {
 		Option optionParallelismFactor = Option.builder("factor").hasArg().desc("the parallelism factor").argName("factor").build();
 		Option optionThroughput = Option.builder("throughput").hasArg().desc("the throughput").argName("throughput").build();
 		
-		Option optionPingPongGroupedBenchmark = Option.builder("b_pingpong").desc("PingPong-Grouped benchmark (Actor4j)").argName("b_pingpong").build();
-		Option optionNFoldRingBenchmark = Option.builder("b_ring").desc("NFoldRing benchmark (Actor4j)").argName("b_ring").build();
-		
 		Option optionParam1 = Option.builder("param1").desc("the first parameter").argName("param1").build();
 		Option optionParam2 = Option.builder("param2").desc("the second parameter").argName("param2").build();
 		
 		options.addOption("?", "help", false, "print this message");
 		options.addOption("version", false, "print the version information and exit");
-		
-		options.addOption(optionFrameworkOther);
-		options.addOption(optionFrameworkAkka);
-		options.addOption(optionFrameworkJADE);
-		
+				
 		options.addOption(optionClass);
 		options.addOption(optionActors);
 		options.addOption(optionWarmupIterations);
@@ -79,10 +85,7 @@ public class BenchmarkSamplesApplication {
 		options.addOption(optionParallelismMin);
 		options.addOption(optionParallelismFactor);
 		options.addOption(optionThroughput);
-		
-		options.addOption(optionPingPongGroupedBenchmark);
-		options.addOption(optionNFoldRingBenchmark);
-		
+
 		options.addOption(optionParam1);
 		options.addOption(optionParam2);
 		
@@ -95,7 +98,7 @@ public class BenchmarkSamplesApplication {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("benchmark [-options]",
 						"Benchmark Application for Actor4j. Options:", options,
-						"For more details, see https://github.com/relvaner/actor4j-benchmark");
+						"For more details, see https://github.com/relvaner/actor4j");
 				return;
 			} else if (line.hasOption("version")) {
 				System.out.printf("benchmark version \"%s\"%n", VERSION);
@@ -126,14 +129,7 @@ public class BenchmarkSamplesApplication {
 			if (line.hasOption("class")) {
 				Class<?> clazz;
 				try {
-					String framework = "actor4j.benchmark.samples.";
-					if (line.hasOption("other"))
-						framework = "other.benchmark.samples.";
-					else if (line.hasOption("akka"))
-						framework = "akka.benchmark.samples.";
-					else if (line.hasOption("jade"))
-						framework = "jade.benchmark.samples.";
-					
+					String framework = frameworkClasspath(line);
 					clazz = Class.forName(framework+line.getOptionValue("class")+".Benchmark"+prefixToName(line.getOptionValue("class")));
 					Constructor<?> constructor = clazz.getConstructor(BenchmarkConfig.class);
 					constructor.newInstance(config);

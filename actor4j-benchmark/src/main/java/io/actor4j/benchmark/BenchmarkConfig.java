@@ -16,8 +16,6 @@
 package io.actor4j.benchmark;
 
 public class BenchmarkConfig {
-	
-	
 	public int numberOfActors;
 	
 	public int warmupIterations;
