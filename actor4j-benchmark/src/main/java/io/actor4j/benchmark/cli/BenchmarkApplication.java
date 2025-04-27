@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.benchmark;
+package io.actor4j.benchmark.cli;
 
 import java.lang.reflect.Constructor;
 
@@ -25,7 +25,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-public class BenchmarkSamplesApplication {
+import io.actor4j.benchmark.BenchmarkConfig;
+
+public class BenchmarkApplication {
 	protected static final String VERSION = "2.1.0";
 	
 	public static String prefixToName(String prefix) {
@@ -49,7 +51,7 @@ public class BenchmarkSamplesApplication {
 //		String result = null;
 //		
 //		if (line.hasOption("actor4j"))
-//			result = "actor4j.benchmark.samples.";
+//			result = "actor4j.benchmark.scenarios.";
 //		
 //		return result;
 		return null;

@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.benchmark;
+package io.actor4j.benchmark.cli;
 
-public class BenchmarkSample {
+import io.actor4j.benchmark.BenchmarkConfig;
+
+public class BenchmarkScenario {
 	protected BenchmarkConfig config;
 	
-	public BenchmarkSample(BenchmarkConfig config) {
+	public BenchmarkScenario(BenchmarkConfig config) {
 		super();
 		
 		this.config = config;
