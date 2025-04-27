@@ -56,7 +56,7 @@ public class VisualActorFrame extends JFrame {
 	}
 	
 	public void initialize() {
-		setBounds(0, 0, 1024, 768);
+		setBounds(0, 0, 1280, 800);
 		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

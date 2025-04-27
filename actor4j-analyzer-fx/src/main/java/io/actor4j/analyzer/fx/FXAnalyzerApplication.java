@@ -85,7 +85,7 @@ public class FXAnalyzerApplication extends FXAbstractApplication {
 		borderPane = new BorderPane();
 		visualStage = new FXVisualActorStage(borderPane, system);
 
-		scene = new Scene(borderPane, 800, 600);
+		scene = new Scene(borderPane, 1280, 800);
 //		scene.getStylesheets().add(getClass().getClassLoader().getResource("css/file.css").toExternalForm());
         primaryStage.setScene(scene);
 	}
