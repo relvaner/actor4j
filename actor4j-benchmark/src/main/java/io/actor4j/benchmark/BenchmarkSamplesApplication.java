@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package shared.benchmark;
+package io.actor4j.benchmark;
 
 import java.lang.reflect.Constructor;
 
@@ -24,8 +24,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
-import io.actor4j.core.runtime.ActorThreadMode;
 
 public class BenchmarkSamplesApplication {
 	protected static final String VERSION = "2.1.0";
@@ -112,22 +110,8 @@ public class BenchmarkSamplesApplication {
 				config.warmupIterations = Integer.valueOf(line.getOptionValue("warmup"));
 			if (line.hasOption("duration"))
 				config.duration = Long.valueOf(line.getOptionValue("duration"));
-			if (line.hasOption("mode")) {
-				switch (String.valueOf(line.getOptionValue("mode")).toLowerCase()) {
-					case "park": 
-						config.threadMode = ActorThreadMode.PARK;
-						break;
-					case "sleep": 
-						config.threadMode = ActorThreadMode.SLEEP;
-						break;
-					case "yield": 
-						config.threadMode = ActorThreadMode.YIELD;
-						break;
-					default:
-						config.threadMode = ActorThreadMode.SLEEP;
-						break;
-				}
-			}
+			if (line.hasOption("mode"))
+				config.threadMode = line.getOptionValue("mode");
 			if (line.hasOption("threads"))
 				config.parallelism = Integer.valueOf(line.getOptionValue("threads"));
 			if (line.hasOption("factor"))

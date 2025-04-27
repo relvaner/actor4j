@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package shared.benchmark;
-
-import static io.actor4j.core.logging.ActorLogger.*;
-
-import io.actor4j.core.runtime.ActorThreadMode;
+package io.actor4j.benchmark;
 
 public class BenchmarkConfig {
-	static {
-		systemLogger().setLevel(ERROR); // default actor4j-core system logger
-		logger().setLevel(ERROR); // default actor4j-core user logger
-	}
+	
 	
 	public int numberOfActors;
 	
@@ -35,7 +28,7 @@ public class BenchmarkConfig {
 	
 	public int throughput;
 	
-	public ActorThreadMode threadMode;
+	public String threadMode;
 	
 	public String param1;
 	public String param2;
@@ -73,22 +66,22 @@ public class BenchmarkConfig {
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor) {
-		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.PARK);
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, "park");
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, String param1) {
-		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.PARK, param1, null);
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, "park", param1, null);
 	}
 	
 	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, String param1, String param2) {
-		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, ActorThreadMode.PARK, param1, param2);
+		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, 100, "park", param1, param2);
 	}
 	
-	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, int throughput, ActorThreadMode threadMode) {
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, int throughput, String threadMode) {
 		this(numberOfActors, warmupIterations, duration, parallelism, parallelismFactor, throughput, threadMode, null, null);
 	}
 	
-	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, int throughput, ActorThreadMode threadMode, String param1, String param2) {
+	public BenchmarkConfig(int numberOfActors, int warmupIterations, long duration, int parallelism, int parallelismFactor, int throughput, String threadMode, String param1, String param2) {
 		super();
 		this.numberOfActors = numberOfActors;
 		

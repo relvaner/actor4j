@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package shared.benchmark;
+package io.actor4j.benchmark;
 
 import java.text.DecimalFormat;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import tools4j.utils.TimeMeasurement;
+import io.actor4j.benchmark.utils.TimeMeasurement;
 
 public class Benchmark {
 	protected BenchmarkConfig config;

@@ -1,4 +1,4 @@
-package shared.benchmark;
+package io.actor4j.benchmark;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;

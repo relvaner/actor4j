@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package shared.benchmark;
+package io.actor4j.benchmark;
 
 public class BenchmarkSample {
 	protected BenchmarkConfig config;
