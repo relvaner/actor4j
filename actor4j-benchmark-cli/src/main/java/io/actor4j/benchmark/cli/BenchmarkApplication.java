@@ -73,8 +73,8 @@ public class BenchmarkApplication {
 		Option optionParallelismFactor = Option.builder("factor").hasArg().desc("the parallelism factor").argName("factor").build();
 		Option optionThroughput = Option.builder("throughput").hasArg().desc("the throughput").argName("throughput").build();
 		
-		Option optionParam1 = Option.builder("param1").desc("the first parameter").argName("param1").build();
-		Option optionParam2 = Option.builder("param2").desc("the second parameter").argName("param2").build();
+		Option optionParam1 = Option.builder("param1").hasArg().desc("the first parameter").argName("param1").build();
+		Option optionParam2 = Option.builder("param2").hasArg().desc("the second parameter").argName("param2").build();
 		
 		options.addOption("?", "help", false, "print this message");
 		options.addOption("version", false, "print the version information and exit");
