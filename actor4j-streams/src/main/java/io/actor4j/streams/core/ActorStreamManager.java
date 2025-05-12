@@ -26,6 +26,7 @@ import java.util.concurrent.CountDownLatch;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -79,7 +80,7 @@ public class ActorStreamManager {
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 		process.configureAsRoot(this, countDownLatch);
 		
-		UUID root = system.addActor(() ->
+		ActorId root = system.addActor(() ->
 			new StreamDecompActor<>("node-"+process.node.id.toString(), process.node, result, aliases, debugDataEnabled, data)
 		);
 

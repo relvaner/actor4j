@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
@@ -50,7 +51,7 @@ public class StreamDecompActor<T, R> extends Actor {
 	// ThreadSafe
 	protected final Map<String, UUID> aliases;
 	
-	protected final Set<UUID> waitForChildren;
+	protected final Set<ActorId> waitForChildren;
 	protected int waitForParents;
 	
 	protected static final Object lock = new Object();
@@ -89,7 +90,7 @@ public class StreamDecompActor<T, R> extends Actor {
 
 		if (node.sucs!=null)
 			for (ActorStreamDecompNode<?, ?> suc : node.sucs) {
-				UUID ref = null;
+				ActorId ref = null;
 				if (suc.pres.size()>1) {
 					// uses Double-Check-Idiom a la Bloch
 					ref = getSystem().getActorFromAlias("node-"+suc.id.toString());
@@ -137,7 +138,7 @@ public class StreamDecompActor<T, R> extends Actor {
 		node.nTasks = adjustSizeForMapReduce(node.nTasks, node.data.size(), node.threshold);
 		for (int i=0; i<node.nTasks; i++) {
 			final int i_ = i;
-			UUID task = addChild(() -> 
+			ActorId task = addChild(() -> 
 				new StreamMapReduceTaskActor<>("task-"+UUID.randomUUID().toString()+"-rank-"+i_, node.operations, group, hubGroup, dest_tag)
 			);
 			group.add(task);
@@ -150,7 +151,7 @@ public class StreamDecompActor<T, R> extends Actor {
 		ActorGroup scatter_group = new ActorGroupList();
 		checkData(node.data);
 		if (node.data.size()<node.threshold) {
-			UUID task = addChild(() -> 
+			ActorId task = addChild(() -> 
 				new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, 
 					group, hubGroup, dest_tag, 1, node.recursiveDecompScatter)
 			);
@@ -167,7 +168,7 @@ public class StreamDecompActor<T, R> extends Actor {
 				node.nTasks = node.recursiveDecomp;
 				// Guardian
 				addChild(() -> new Actor() {
-					protected Set<UUID> waitForChildren;
+					protected Set<ActorId> waitForChildren;
 					protected Map<Long, List<R>> resultMap;
 					protected Object criterion = triple.b();
 					
@@ -177,7 +178,7 @@ public class StreamDecompActor<T, R> extends Actor {
 						
 						for (int i=0; i<node.nTasks; i++) {
 							final int i_ = i;
-							UUID task = addChild(() -> 
+							ActorId task = addChild(() -> 
 								new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), node.operations, node.recursiveDecomp, node.threshold, 
 									group, null, dest_tag, i_+1, node.recursiveDecompScatter)
 							);

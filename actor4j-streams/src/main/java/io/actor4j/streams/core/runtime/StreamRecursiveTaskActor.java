@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
@@ -40,7 +41,7 @@ public class StreamRecursiveTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 	protected final int threshold;
 	protected final long rank;
 	
-	protected final Set<UUID> waitForChildren;
+	protected final Set<ActorId> waitForChildren;
 	protected final Map<Long, List<R>> resultMap;
 	
 	protected Object criterion;
@@ -82,7 +83,7 @@ public class StreamRecursiveTaskActor<T, R> extends StreamDecompTaskActor<T, R> 
 				}
 				for (int i=0; i<recursiveDecomp; i++) {
 					final int i_ = i;
-					UUID task = addChild(() -> 
+					ActorId task = addChild(() -> 
 						new StreamRecursiveTaskActor<>("task-"+UUID.randomUUID().toString(), operations, recursiveDecomp, threshold, 
 								group, hubGroup, dest_tag, (rank<<recursiveDecomp/2)+i_+1, recursiveDecompScatter)
 					);
