@@ -15,11 +15,10 @@
  */
 package io.actor4j.core.pods.data.access;
 
-import java.util.UUID;
-
 import io.actor4j.core.actors.ActorGroupMember;
 import io.actor4j.core.actors.ActorIgnoreDistributedGroupMember;
 import io.actor4j.core.data.access.SecondaryVolatileCacheActor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.pods.PodContext;
 
@@ -27,13 +26,13 @@ public abstract class PodSecondaryVolatileCacheActor<K, V> extends SecondaryVola
 	protected final PodContext context;
 	protected final String cacheAlias;
 	
-	public PodSecondaryVolatileCacheActor(ActorGroup group, String cacheAlias, UUID primary, int cacheSize, PodContext podContext) {
+	public PodSecondaryVolatileCacheActor(ActorGroup group, String cacheAlias, ActorId primary, int cacheSize, PodContext podContext) {
 		super(group, primary, cacheSize);
 		this.context = podContext;
 		this.cacheAlias = cacheAlias;
 	}
 
-	public PodSecondaryVolatileCacheActor(String name, ActorGroup group, String cacheAlias, UUID primary, int cacheSize, PodContext podContext) {
+	public PodSecondaryVolatileCacheActor(String name, ActorGroup group, String cacheAlias, ActorId primary, int cacheSize, PodContext podContext) {
 		super(name, group, primary, cacheSize);
 		this.context = podContext;
 		this.cacheAlias = cacheAlias;

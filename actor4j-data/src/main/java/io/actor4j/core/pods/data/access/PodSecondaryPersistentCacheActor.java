@@ -15,11 +15,10 @@
  */
 package io.actor4j.core.pods.data.access;
 
-import java.util.UUID;
-
 import io.actor4j.core.actors.ActorGroupMember;
 import io.actor4j.core.actors.ActorIgnoreDistributedGroupMember;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.pods.PodContext;
 
@@ -27,13 +26,13 @@ public abstract class PodSecondaryPersistentCacheActor<K, V> extends SecondaryPe
 	protected final PodContext context;
 	protected final String cacheAlias;
 	
-	public PodSecondaryPersistentCacheActor(ActorGroup group, String cacheAlias, UUID primary, int cacheSize, PodContext podContext) {
+	public PodSecondaryPersistentCacheActor(ActorGroup group, String cacheAlias, ActorId primary, int cacheSize, PodContext podContext) {
 		super(group, primary, cacheSize);
 		this.context = podContext;
 		this.cacheAlias = cacheAlias;
 	}
 
-	public PodSecondaryPersistentCacheActor(String name, ActorGroup group, String cacheAlias, UUID primary, int cacheSize, PodContext podContext) {
+	public PodSecondaryPersistentCacheActor(String name, ActorGroup group, String cacheAlias, ActorId primary, int cacheSize, PodContext podContext) {
 		super(name, group, primary, cacheSize);
 		this.context = podContext;
 		this.cacheAlias = cacheAlias;

@@ -17,7 +17,6 @@ package io.actor4j.core.data.access.utils;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,13 +30,15 @@ import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.PrimaryVolatileCacheActor;
 import io.actor4j.core.data.access.SecondaryVolatileCacheActor;
 import io.actor4j.core.data.access.VolatileDTO;
+import io.actor4j.core.id.ActorId;
+
 import static io.actor4j.core.data.access.AckMode.*;
 
 public class VolatileActorCacheManager<K, V> {
 	protected ActorRef actorRef;
 	protected String cacheAlias;
 	
-	protected UUID replica;
+	protected ActorId replica;
 	
 	public VolatileActorCacheManager(ActorRef actorRef, String cacheAlias) {
 		super();

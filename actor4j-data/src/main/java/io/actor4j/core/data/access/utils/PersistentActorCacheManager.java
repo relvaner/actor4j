@@ -17,7 +17,6 @@ package io.actor4j.core.data.access.utils;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -35,6 +34,7 @@ import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
 import io.actor4j.core.data.access.SqlPersistentContext;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.json.JsonObject;
 import static io.actor4j.core.data.access.AckMode.*;
 import static io.actor4j.core.data.access.DataAccessType.*;
@@ -43,13 +43,13 @@ public class PersistentActorCacheManager<K, V> {
 	protected ActorRef actorRef;
 	protected String cacheAlias;
 
-	protected UUID dataAccess;
+	protected ActorId dataAccess;
 	protected DataAccessType dataAccessType;
 	
 	protected String keyname;
 	protected String collectionName;
 	
-	protected UUID replica;
+	protected ActorId replica;
 	
 	public PersistentActorCacheManager(ActorRef actorRef, String cacheAlias, String keyname, String collectionName) {
 		super();
@@ -70,11 +70,11 @@ public class PersistentActorCacheManager<K, V> {
 		this.dataAccessType = dataAccessType;
 	}
 	
-	public ActorFactory create(int instances, int cacheSize, UUID dataAccess) {
+	public ActorFactory create(int instances, int cacheSize, ActorId dataAccess) {
 		return create(instances, cacheSize, dataAccess, PRIMARY);
 	}
 	
-	public ActorFactory create(int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
+	public ActorFactory create(int instances, int cacheSize, ActorId dataAccess, AckMode ackMode) {
 		this.dataAccess = dataAccess;
 		
 		ActorGroup group = new ActorGroupSet();
@@ -83,7 +83,7 @@ public class PersistentActorCacheManager<K, V> {
 				"primary-"+cacheAlias, group, cacheAlias, (id) -> () -> new SecondaryPersistentCacheActor<K, V>("secondary-"+cacheAlias+"-"+k.getAndIncrement(), group, id, cacheSize), instances-1, cacheSize, dataAccess, ackMode);		
 	}
 	
-	public static ActorFactory create(int instances, int cacheSize, UUID dataAccess, String cacheAlias, String keyname, String collectionName, AckMode ackMode) {
+	public static ActorFactory create(int instances, int cacheSize, ActorId dataAccess, String cacheAlias, String keyname, String collectionName, AckMode ackMode) {
 		ActorGroup group = new ActorGroupSet();
 		AtomicInteger k = new AtomicInteger(0);
 		return () -> new PrimaryPersistentCacheActor<Object, Object>(
