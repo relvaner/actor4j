@@ -17,7 +17,6 @@ package io.actor4j.core.persistence.drivers.mongo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.bson.Document;
 
@@ -29,6 +28,7 @@ import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.ActorSystem;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.json.JsonArray;
 import io.actor4j.core.json.JsonObject;
@@ -58,7 +58,7 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 	}
 
 	@Override
-	public void preStart(UUID id) {
+	public void preStart(ActorId id) {
 		super.preStart(id);
 		
 		database = ((MongoDBPersistenceDriver)driver).client.getDatabase(driver.getDatabaseName());

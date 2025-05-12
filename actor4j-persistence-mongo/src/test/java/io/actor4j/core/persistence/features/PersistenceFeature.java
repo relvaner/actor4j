@@ -20,6 +20,7 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.Recovery;
@@ -56,7 +57,7 @@ public class PersistenceFeature {
 		ActorSystem system = ActorSystem.create(ActorRuntime.factory(), config);
 		
 		AtomicBoolean first = new AtomicBoolean(true);
-		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
+		ActorId id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				saveSnapshot(null, null, new MyState("I am the first state!"));
