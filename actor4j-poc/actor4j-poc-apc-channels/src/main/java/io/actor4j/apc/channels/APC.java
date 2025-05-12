@@ -17,11 +17,11 @@ package io.actor4j.apc.channels;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 import io.actor4j.apc.channels.runtime.APCLinkedBlockingQueue;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class APC {
@@ -48,7 +48,7 @@ public class APC {
 	
 	public <T> void fork(Callable<T> callable, Channel<T> channel) {
 		if (system!=null) {
-			UUID dest = system.addActor(() -> new Actor() {
+			ActorId dest = system.addActor(() -> new Actor() {
 				@Override
 				public void receive(ActorMessage<?> message) {
 					if (message.tag()==APC_CALL)
