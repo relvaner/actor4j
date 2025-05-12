@@ -15,11 +15,11 @@
  */
 package io.actor4j.core.reactive.streams;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.function.Procedure;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class ProcessorImpl extends PublisherImpl {
@@ -36,27 +36,27 @@ public class ProcessorImpl extends PublisherImpl {
 		subscriberImpl.receive(message);
 	}
 	
-	public void subscribe(UUID dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete) {
+	public void subscribe(ActorId dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete) {
 		subscriberImpl.subscribe(dest, onNext, onError, onComplete);
 	}
 	
-	public void unsubscribe(UUID dest) {
+	public void unsubscribe(ActorId dest) {
 		subscriberImpl.unsubscribe(dest);
 	}
 	
-	public void request(long n, UUID dest) {
+	public void request(long n, ActorId dest) {
 		subscriberImpl.request(n, dest);
 	}
 	
-	public void requestReset(long n, UUID dest) {
+	public void requestReset(long n, ActorId dest) {
 		subscriberImpl.requestReset(n, dest);
 	}
 	
-	public void bulk(UUID dest) {
+	public void bulk(ActorId dest) {
 		subscriberImpl.bulk(dest);
 	}
 	
-	public void cancelBulk(UUID dest) {
+	public void cancelBulk(ActorId dest) {
 		subscriberImpl.cancelBulk(dest);
 	}
 }

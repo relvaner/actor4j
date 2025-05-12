@@ -15,9 +15,8 @@
  */
 package io.actor4j.core.reactive.streams;
 
-import java.util.UUID;
-
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class PublisherActor extends Actor {
@@ -41,19 +40,19 @@ public class PublisherActor extends Actor {
 		publisherImpl.broadcast(value);
 	}
 	
-	public boolean isBulk(UUID dest) {
+	public boolean isBulk(ActorId dest) {
 		return publisherImpl.isBulk(dest);
 	}
 	
-	public <T> boolean onNext(T value, UUID dest) {
+	public <T> boolean onNext(T value, ActorId dest) {
 		return publisherImpl.onNext(value, dest);
 	}
 	
-	public void onError(String error, UUID dest) {
+	public void onError(String error, ActorId dest) {
 		publisherImpl.onError(error, dest);
 	}
 	
-	public void onComplete(UUID dest) {
+	public void onComplete(ActorId dest) {
 		publisherImpl.onComplete(dest);
 	}
 }

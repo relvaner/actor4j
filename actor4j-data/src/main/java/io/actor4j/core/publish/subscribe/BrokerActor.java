@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import static io.actor4j.core.messages.ActorReservedTag.*;
 
@@ -30,7 +30,7 @@ import static io.actor4j.core.messages.ActorReservedTag.*;
  * subscribe && unsubscribe only over the broker
  */
 public class BrokerActor extends Actor {
-	protected Map<String, UUID> topics;
+	protected Map<String, ActorId> topics;
 	protected Map<String, Integer> counter;
 	
 	public static final int GET_TOPIC_ACTOR = RESERVED_PUBSUB_GET_TOPIC_ACTOR;
@@ -55,7 +55,7 @@ public class BrokerActor extends Actor {
 				int tag = message.tag();
 				
 				final String topic = ((Topic)message.value()).topic();
-				UUID dest = topics.get(topic);
+				ActorId dest = topics.get(topic);
 				if (dest==null) {
 					if (message.value() instanceof Unsubscribe)
 						return; // Abort, the topic was not found

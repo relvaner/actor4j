@@ -15,11 +15,11 @@
  */
 package io.actor4j.core.reactive.streams;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.function.Procedure;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class ProcessorActor extends Actor {
@@ -43,43 +43,43 @@ public class ProcessorActor extends Actor {
 		processorImpl.broadcast(value);
 	}
 	
-	public boolean isBulk(UUID dest) {
+	public boolean isBulk(ActorId dest) {
 		return processorImpl.isBulk(dest);
 	}
 	
-	public <T> boolean onNext(T value, UUID dest) {
+	public <T> boolean onNext(T value, ActorId dest) {
 		return processorImpl.onNext(value, dest);
 	}
 	
-	public void onError(String error, UUID dest) {
+	public void onError(String error, ActorId dest) {
 		processorImpl.onError(error, dest);
 	}
 	
-	public void onComplete(UUID dest) {
+	public void onComplete(ActorId dest) {
 		processorImpl.onComplete(dest);
 	}
 	
-	public void subscribe(UUID dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete) {
+	public void subscribe(ActorId dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete) {
 		processorImpl.subscribe(dest, onNext, onError, onComplete);
 	}
 	
-	public void unsubscribe(UUID dest) {
+	public void unsubscribe(ActorId dest) {
 		processorImpl.unsubscribe(dest);
 	}
 	
-	public void request(long n, UUID dest) {
+	public void request(long n, ActorId dest) {
 		processorImpl.request(n, dest);
 	}
 	
-	public void requestReset(long n, UUID dest) {
+	public void requestReset(long n, ActorId dest) {
 		processorImpl.requestReset(n, dest);
 	}
 	
-	public void bulk(UUID dest) {
+	public void bulk(ActorId dest) {
 		processorImpl.bulk(dest);
 	}
 	
-	public void cancelBulk(UUID dest) {
+	public void cancelBulk(ActorId dest) {
 		processorImpl.cancelBulk(dest);
 	}
 }

@@ -20,6 +20,7 @@ import static io.actor4j.core.publish.subscribe.BrokerActor.*;
 import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorOptional;
@@ -30,9 +31,9 @@ import io.actor4j.core.publish.subscribe.Unsubscribe;
 
 public class PubSubActorManager<T> {
 	protected ActorRef actorRef;
-	protected UUID broker;
+	protected ActorId broker;
 	
-	public PubSubActorManager(ActorRef actorRef, UUID broker) {
+	public PubSubActorManager(ActorRef actorRef, ActorId broker) {
 		this.actorRef = actorRef;
 		this.broker = broker;
 	}
@@ -64,7 +65,7 @@ public class PubSubActorManager<T> {
 		actorRef.send(ActorMessage.create(value, GET_TOPIC_ACTOR, actorRef.getId(), broker));
 	}
 	
-	public void publish(Publish<T> value, UUID topic) {
+	public void publish(Publish<T> value, ActorId topic) {
 		actorRef.send(ActorMessage.create(value, 0, actorRef.getId(), topic));
 	}
 	

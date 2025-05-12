@@ -20,9 +20,9 @@ import static io.actor4j.core.reactive.streams.ActorReactiveStreamsTag.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
@@ -31,9 +31,9 @@ public class PublisherImpl {
 	protected ActorRef actorRef;
 	
 	protected ActorGroup subscribers;
-	protected Iterator<UUID> iteratorSubscribers;
-	protected Map<UUID, Long> requests;
-	protected Map<UUID, Boolean> bulks;
+	protected Iterator<ActorId> iteratorSubscribers;
+	protected Map<ActorId, Long> requests;
+	protected Map<ActorId, Boolean> bulks;
 	
 	public PublisherImpl(ActorRef actorRef) {
 		super();
@@ -64,7 +64,7 @@ public class PublisherImpl {
 		}
 	}
 	
-	public void cancel(UUID dest) {
+	public void cancel(ActorId dest) {
 		if (iteratorSubscribers!=null)
 			iteratorSubscribers.remove();
 		else
@@ -80,11 +80,11 @@ public class PublisherImpl {
 		iteratorSubscribers = null;
 	}
 	
-	public boolean isBulk(UUID dest) {
+	public boolean isBulk(ActorId dest) {
 		return bulks.get(dest)!=null;
 	}
 	
-	public <T> boolean onNext(T value, UUID dest) {
+	public <T> boolean onNext(T value, ActorId dest) {
 		boolean result = false;
 		
 		if (dest!=null) {
@@ -108,12 +108,12 @@ public class PublisherImpl {
 		return result;
 	}
 	
-	public void onError(String error, UUID dest) {
+	public void onError(String error, ActorId dest) {
 		actorRef.tell(error, ON_ERROR, dest);
 		cancel(dest);
 	}
 	
-	public void onComplete(UUID dest) {
+	public void onComplete(ActorId dest) {
 		actorRef.tell(null, ON_COMPLETE, dest);
 		cancel(dest);
 	}

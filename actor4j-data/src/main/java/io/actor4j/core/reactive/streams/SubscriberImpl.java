@@ -17,21 +17,21 @@ package io.actor4j.core.reactive.streams;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.function.Procedure;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 import static io.actor4j.core.reactive.streams.ActorReactiveStreamsTag.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class SubscriberImpl {
 	protected ActorRef actorRef;
 	
-	protected Map<UUID, Consumer<Object>> onNextMap;
-	protected Map<UUID, Consumer<String>> onErrorMap; 
-	protected Map<UUID, Procedure> onCompleteMap;
+	protected Map<ActorId, Consumer<Object>> onNextMap;
+	protected Map<ActorId, Consumer<String>> onErrorMap; 
+	protected Map<ActorId, Procedure> onCompleteMap;
 	
 	public SubscriberImpl(ActorRef actorRef) {
 		super();
@@ -62,7 +62,7 @@ public class SubscriberImpl {
 		}
 	}
 	
-	public void subscribe(UUID dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete) {
+	public void subscribe(ActorId dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete) {
 		if (onNext!=null)
 			onNextMap.put(dest, onNext);
 		if (onError!=null)
@@ -71,7 +71,7 @@ public class SubscriberImpl {
 			onCompleteMap.put(dest, onComplete);
 	}
 	
-	public void unsubscribe(UUID dest) {
+	public void unsubscribe(ActorId dest) {
 		cancel(dest);
 		
 		onNextMap.remove(dest);
@@ -79,23 +79,23 @@ public class SubscriberImpl {
 		onCompleteMap.remove(dest);
 	}
 	
-	public void request(long n, UUID dest) {
+	public void request(long n, ActorId dest) {
 		actorRef.tell(n, SUBSCRIPTION_REQUEST, dest);
 	}
 	
-	public void requestReset(long n, UUID dest) {
+	public void requestReset(long n, ActorId dest) {
 		actorRef.tell(n, SUBSCRIPTION_REQUEST_RESET, dest);
 	}
 	
-	protected void cancel(UUID dest) {
+	protected void cancel(ActorId dest) {
 		actorRef.tell(null, SUBSCRIPTION_CANCEL, dest);
 	}
 	
-	public void bulk(UUID dest) {
+	public void bulk(ActorId dest) {
 		actorRef.tell(null, SUBSCRIPTION_BULK, dest);
 	}
 	
-	public void cancelBulk(UUID dest) {
+	public void cancelBulk(ActorId dest) {
 		actorRef.tell(null, SUBSCRIPTION_CANCEL_BULK, dest);
 	}
 }
