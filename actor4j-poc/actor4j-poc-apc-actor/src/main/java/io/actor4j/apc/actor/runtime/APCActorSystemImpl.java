@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import io.actor4j.apc.actor.APCActorRef;
 import io.actor4j.apc.actor.APCActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.DefaultActorSystemImpl;
 
 public class APCActorSystemImpl extends DefaultActorSystemImpl implements APCActorSystem {
@@ -44,7 +45,7 @@ public class APCActorSystemImpl extends DefaultActorSystemImpl implements APCAct
 
 	@Override
 	public <I, T extends I> APCActorRef<I> addAPCActor(Class<I> interf, T obj) {
-		UUID id = addActor(() -> new APCActor(interf, obj));
+		ActorId id = addActor(() -> new APCActor(interf, obj));
 		
 		return new APCActorRef<>(interf, this, id);
 	}

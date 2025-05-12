@@ -23,14 +23,15 @@ import java.util.concurrent.Future;
 
 import io.actor4j.apc.actor.runtime.APCActorPair;
 import io.actor4j.apc.actor.runtime.APCActorSystemImpl;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class APCActorRef<I> {
 	protected Class<I> interf;
 	protected APCActorSystem system;
-	protected UUID id;
+	protected ActorId id;
 
-	public APCActorRef(Class<I> interf, APCActorSystem system, UUID id) {
+	public APCActorRef(Class<I> interf, APCActorSystem system, ActorId id) {
 		super();
 		this.interf = interf;
 		this.system = system;
@@ -61,11 +62,11 @@ public class APCActorRef<I> {
 		return result;
 	}
 
-	public UUID getId() {
+	public ActorId getId() {
 		return id;
 	}
 	
-	public UUID self() {
+	public ActorId self() {
 		return id;
 	}
 }
