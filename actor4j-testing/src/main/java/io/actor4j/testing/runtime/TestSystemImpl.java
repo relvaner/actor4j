@@ -109,11 +109,11 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 	
 	@Override
 	public void testAllActors() {
-		Function<InternalActorCell, Boolean> testAll = (cell) -> {
+		Function<InternalActorCell, Boolean> testAction = (cell) -> {
 			testActor(cell.getActor());
 			return false;
 		};
-		internal_iterateCell((InternalActorCell)USER_ID, testAll);
+		internal_iterateCell((InternalActorCell)USER_ID, testAction);
 	}
 
 	@Override

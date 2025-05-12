@@ -16,6 +16,7 @@
 package io.actor4j.verification.runtime;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -45,10 +46,14 @@ public class VerificatorActorSystemImpl extends DefaultActorSystemImpl implement
 	
 	@Override
 	public void verify(Consumer<ActorVerificationSM> consumer) {
-		if (consumer!=null)
-			for (InternalActorCell cell : cells.values())
+		if (consumer!=null) {
+			Function<InternalActorCell, Boolean> testAll = (cell) -> {
 				if (cell.getActor() instanceof ActorVerification)
-					consumer.accept(((ActorVerification)cell.getActor()).verify());		
+					consumer.accept(((ActorVerification)cell.getActor()).verify());
+				return false;
+			};
+			internal_iterateCell((InternalActorCell)USER_ID, testAll);
+		}				
 	}
 	
 	@Override
