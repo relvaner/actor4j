@@ -47,12 +47,12 @@ public class VerificatorActorSystemImpl extends DefaultActorSystemImpl implement
 	@Override
 	public void verify(Consumer<ActorVerificationSM> consumer) {
 		if (consumer!=null) {
-			Function<InternalActorCell, Boolean> testAll = (cell) -> {
+			Function<InternalActorCell, Boolean> verifyAction = (cell) -> {
 				if (cell.getActor() instanceof ActorVerification)
 					consumer.accept(((ActorVerification)cell.getActor()).verify());
 				return false;
 			};
-			internal_iterateCell((InternalActorCell)USER_ID, testAll);
+			internal_iterateCell((InternalActorCell)USER_ID, verifyAction);
 		}				
 	}
 	
