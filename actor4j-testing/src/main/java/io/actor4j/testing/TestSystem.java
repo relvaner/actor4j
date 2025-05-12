@@ -15,7 +15,6 @@
  */
 package io.actor4j.testing;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -23,6 +22,7 @@ import io.actor4j.core.ActorCell;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.testing.config.TestSystemConfig;
 import io.actor4j.testing.runtime.TestSystemImpl;
@@ -44,10 +44,10 @@ public interface TestSystem extends ActorSystem {
 	
 	public boolean setConfig(TestSystemConfig config);
 	
-	public ActorCell underlyingCell(UUID id);
-	public Actor underlyingActor(UUID id);
+	public ActorCell underlyingCell(ActorId id);
+	public Actor underlyingActor(ActorId id);
 	
-	public void testActor(UUID id);
+	public void testActor(ActorId id);
 	public void testAllActors();
 	
 	public ActorMessage<?> awaitMessage(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException;

@@ -15,12 +15,12 @@
  */
 package io.actor4j.testing.runtime;
 
-import java.util.UUID;
 import java.util.function.BiConsumer;
 
 import io.actor4j.core.runtime.ActorSystemImpl;
 import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.runtime.DefaultActorMessageDispatcher;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class TestActorMessageDispatcher extends DefaultActorMessageDispatcher {
@@ -30,7 +30,7 @@ public class TestActorMessageDispatcher extends DefaultActorMessageDispatcher {
 	}
 	
 	@Override
-	public void post(ActorMessage<?> message, UUID source, String alias) {
+	public void post(ActorMessage<?> message, ActorId source, String alias) {
 		super.post(redirect(message), source, alias);
 	}
 	

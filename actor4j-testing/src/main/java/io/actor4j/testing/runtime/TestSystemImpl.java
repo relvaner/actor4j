@@ -15,19 +15,18 @@
  */
 package io.actor4j.testing.runtime;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.Map.Entry;
 
 import io.actor4j.bdd.Story;
 import io.actor4j.core.ActorCell;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.PseudoActor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.DefaultActorSystemImpl;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.messages.ActorMessage;
@@ -39,8 +38,8 @@ import static org.junit.Assert.*;
 
 public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem {
 	protected PseudoActor pseudoActor;
-	protected volatile UUID pseudoActorId;
-	protected volatile UUID testActorId;
+	protected volatile ActorId pseudoActorId;
+	protected volatile ActorId testActorId;
 	protected volatile CompletableFuture<ActorMessage<?>> actualMessage;
 	
 	public TestSystemImpl() {
@@ -75,13 +74,13 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 	}
 
 	@Override
-	public ActorCell underlyingCell(UUID id) {
-		return getCells().get(id);
+	public ActorCell underlyingCell(ActorId id) {
+		return (ActorCell)id;
 	}
 	
 	@Override
-	public Actor underlyingActor(UUID id) {
-		InternalActorCell cell = getCells().get(id);
+	public Actor underlyingActor(ActorId id) {
+		InternalActorCell cell = (InternalActorCell)id;
 		return (cell!=null)? cell.getActor() : null;
 	}
 	
@@ -104,15 +103,17 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 	}
 	
 	@Override
-	public void testActor(UUID id) {
+	public void testActor(ActorId id) {
 		testActor(underlyingActor(id));
 	}
 	
 	@Override
 	public void testAllActors() {
-		Iterator<Entry<UUID, InternalActorCell>> iterator = getCells().entrySet().iterator();
-		while (iterator.hasNext())
-			testActor(iterator.next().getValue().getActor());
+		Function<InternalActorCell, Boolean> testAll = (cell) -> {
+			testActor(cell.getActor());
+			return false;
+		};
+		internal_iterateCell((InternalActorCell)USER_ID, testAll);
 	}
 
 	@Override
