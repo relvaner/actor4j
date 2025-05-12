@@ -22,18 +22,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.utils.Pair;
 
 public class AckWatcher<K> {
-	protected Map<K, Set<Pair<UUID, UUID>>> watcher;
+	protected Map<K, Set<Pair<ActorId, UUID>>> watcher;
 	
 	public AckWatcher() {
 		super();
 		watcher = new HashMap<>();
 	}
 	
-	public void watch(K key, UUID source, UUID interaction) {
-		Set<Pair<UUID, UUID>> set = watcher.get(key);
+	public void watch(K key, ActorId source, UUID interaction) {
+		Set<Pair<ActorId, UUID>> set = watcher.get(key);
 		if (set==null) {
 			set = new HashSet<>();
 			watcher.put(key, set);
@@ -41,20 +42,20 @@ public class AckWatcher<K> {
 		set.add(Pair.of(source, interaction));
 	}
 	
-	public void unwatch(K key, UUID source, UUID interaction) {
-		Set<Pair<UUID, UUID>> set = watcher.get(key);
+	public void unwatch(K key, ActorId source, UUID interaction) {
+		Set<Pair<ActorId, UUID>> set = watcher.get(key);
 		if (set!=null)
 			set.remove(Pair.of(source, interaction));
 	}
 	
-	public Set<Pair<UUID, UUID>> watchers(K key) {
+	public Set<Pair<ActorId, UUID>> watchers(K key) {
 		return watcher.get(key);
 	}
 	
-	public void trigger(K key, BiConsumer<UUID, UUID> handler) {
-		Set<Pair<UUID, UUID>> set = watcher.get(key);
+	public void trigger(K key, BiConsumer<ActorId, UUID> handler) {
+		Set<Pair<ActorId, UUID>> set = watcher.get(key);
 		if (set!=null) {
-			for (Pair<UUID, UUID> pair : set)
+			for (Pair<ActorId, UUID> pair : set)
 				handler.accept(pair.left()/*source*/, pair.right()/*interaction*/);
 			set.clear();
 		}

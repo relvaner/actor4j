@@ -18,20 +18,22 @@ package io.actor4j.core.data.access;
 import java.util.List;
 import java.util.UUID;
 
-public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, UUID source, Object reserved) implements VolatileDTO<K, V>  {
-	public VolatileDataAccessDTO(K key, V value, int hashCodeExpected, UUID source) {
+import io.actor4j.core.id.ActorId;
+
+public record VolatileDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, ActorId source, Object reserved) implements VolatileDTO<K, V>  {
+	public VolatileDataAccessDTO(K key, V value, int hashCodeExpected, ActorId source) {
 		this(UUID.randomUUID(), false, key, value, hashCodeExpected, source, null);
 	}
 	
-	public VolatileDataAccessDTO(K key, V value, UUID source) {
+	public VolatileDataAccessDTO(K key, V value, ActorId source) {
 		this(UUID.randomUUID(), false, key, value, 0, source, null);
 	}
 	
-	public VolatileDataAccessDTO(UUID source) {
+	public VolatileDataAccessDTO(ActorId source) {
 		this(null, null, source);
 	}
 	
-	public VolatileDataAccessDTO(K key, UUID source) {
+	public VolatileDataAccessDTO(K key, ActorId source) {
 		this(key, null, source);
 	}
 	

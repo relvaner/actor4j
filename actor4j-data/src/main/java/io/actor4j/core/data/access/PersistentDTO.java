@@ -15,40 +15,40 @@
  */
 package io.actor4j.core.data.access;
 
-import java.util.UUID;
+import io.actor4j.core.id.ActorId;
 
 public interface PersistentDTO<K, V> extends VolatileDTO<K, V> {
 	public PersistentContext context();
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, UUID source) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, ActorId source) {
 		return new PersistentDataAccessDTO<K, V>(key, source);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, PersistentContext context, UUID source) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, PersistentContext context, ActorId source) {
 		return new PersistentDataAccessDTO<K, V>(key, context, source);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, UUID source) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, ActorId source) {
 		return new PersistentDataAccessDTO<K, V>(key, value, source);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, PersistentContext context, UUID source) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, PersistentContext context, ActorId source) {
 		return new PersistentDataAccessDTO<K, V>(key, value, context, source);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, int hashCodeExpected, UUID source) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, int hashCodeExpected, ActorId source) {
 		return new PersistentDataAccessDTO<K, V>(key, value, hashCodeExpected, null, source, false);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, int hashCodeExpected,PersistentContext context, UUID source) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, int hashCodeExpected,PersistentContext context, ActorId source) {
 		return new PersistentDataAccessDTO<K, V>(key, value, hashCodeExpected, context, source, false);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, UUID source, boolean cacheHit) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, ActorId source, boolean cacheHit) {
 		return new PersistentDataAccessDTO<K, V>(key, value, 0, null, source, cacheHit);
 	}
 	
-	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, PersistentContext context, UUID source, boolean cacheHit) {
+	public static <K, V> PersistentDataAccessDTO<K, V> create(K key, V value, PersistentContext context, ActorId source, boolean cacheHit) {
 		return new PersistentDataAccessDTO<K, V>(key, value, 0, context, source, cacheHit);
 	}
 }

@@ -18,6 +18,8 @@ package io.actor4j.core.data.access;
 import java.util.List;
 import java.util.UUID;
 
+import io.actor4j.core.id.ActorId;
+
 public interface VolatileDTO<K, V> {
 	public UUID id();
 	public boolean keyExists();
@@ -28,23 +30,23 @@ public interface VolatileDTO<K, V> {
 	public List<V> valueAsList();
 	public V entity();
 	public List<V> entities();
-	public UUID source();
+	public ActorId source();
 	
 	public Object reserved();
 
-	public static <K, V> VolatileDataAccessDTO<K, V> create(UUID source) {
+	public static <K, V> VolatileDataAccessDTO<K, V> create(ActorId source) {
 		return new VolatileDataAccessDTO<K, V>(source);
 	}
 	
-	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, UUID source) {
+	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, ActorId source) {
 		return new VolatileDataAccessDTO<K, V>(key, source);
 	}
 	
-	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, V value, UUID source) {
+	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, V value, ActorId source) {
 		return new VolatileDataAccessDTO<K, V>(key, value, source);
 	}
 	
-	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, V value, int hashCodeExpected, UUID source) {
+	public static <K, V> VolatileDataAccessDTO<K, V> create(K key, V value, int hashCodeExpected, ActorId source) {
 		return new VolatileDataAccessDTO<K, V>(key, value, hashCodeExpected, source);
 	}
 }

@@ -15,14 +15,14 @@
  */
 package io.actor4j.core.data.access;
 
-import java.util.UUID;
+import io.actor4j.core.id.ActorId;
 
 public record PersistentSuccessDTO<K, V>(PersistentDataAccessDTO<K, V> dto, int tag) {
 	public static <K, V> PersistentSuccessDTO<K, V> of(PersistentDataAccessDTO<K, V> dto, int tag) {
 		return new PersistentSuccessDTO<K, V>(dto, tag);
 	}
 	
-	public PersistentSuccessDTO<K, V> shallowCopy(UUID source) {
+	public PersistentSuccessDTO<K, V> shallowCopy(ActorId source) {
 		return new PersistentSuccessDTO<K, V>(dto.shallowCopy(source), tag);
 	}
 }

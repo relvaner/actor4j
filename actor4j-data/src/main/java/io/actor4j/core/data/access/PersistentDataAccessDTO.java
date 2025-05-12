@@ -18,32 +18,34 @@ package io.actor4j.core.data.access;
 import java.util.List;
 import java.util.UUID;
 
-public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, PersistentContext context, UUID source, Object reserved) implements PersistentDTO<K, V> {
-	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, PersistentContext context, UUID source, Object reserved) {
+import io.actor4j.core.id.ActorId;
+
+public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, Object value, int hashCodeExpected, PersistentContext context, ActorId source, Object reserved) implements PersistentDTO<K, V> {
+	public PersistentDataAccessDTO(K key, V value, int hashCodeExpected, PersistentContext context, ActorId source, Object reserved) {
 		this(UUID.randomUUID(), false, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
-	public PersistentDataAccessDTO(K key, V value, PersistentContext context, UUID source) {
+	public PersistentDataAccessDTO(K key, V value, PersistentContext context, ActorId source) {
 		this(key, value, 0, context, source, null);
 	}
 	
-	public PersistentDataAccessDTO(K key, PersistentContext context, UUID source) {
+	public PersistentDataAccessDTO(K key, PersistentContext context, ActorId source) {
 		this(key, null, 0, context, source, null);
 	}
 	
-	public PersistentDataAccessDTO(PersistentContext context, UUID source) {
+	public PersistentDataAccessDTO(PersistentContext context, ActorId source) {
 		this(null, null, 0, context, source, null);
 	}
 	
-	public PersistentDataAccessDTO(K key, V value, UUID source) {
+	public PersistentDataAccessDTO(K key, V value, ActorId source) {
 		this(key, value, 0, null, source, null);
 	}
 	
-	public PersistentDataAccessDTO(K key, UUID source) {
+	public PersistentDataAccessDTO(K key, ActorId source) {
 		this(key, null, 0, null, source, null);
 	}
 	
-	public PersistentDataAccessDTO(UUID source) {
+	public PersistentDataAccessDTO(ActorId source) {
 		this(null, null, 0, null, source, null);
 	}
 	
@@ -75,7 +77,7 @@ public record PersistentDataAccessDTO<K, V>(UUID id, boolean keyExists, K key, O
 		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	
-	public PersistentDataAccessDTO<K, V> shallowCopy(UUID source) {
+	public PersistentDataAccessDTO<K, V> shallowCopy(ActorId source) {
 		return new PersistentDataAccessDTO<K, V>(id, keyExists, key, value, hashCodeExpected, context, source, reserved);
 	}
 	

@@ -18,6 +18,7 @@ package io.actor4j.core.data.access;
 import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.data.access.cache.AsyncCache;
 import io.actor4j.core.data.access.cache.AsyncCacheLRU;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.utils.Cache;
@@ -26,16 +27,14 @@ import io.actor4j.core.utils.DeepCopyable;
 import static io.actor4j.core.data.access.DataAccessActor.*;
 import static io.actor4j.core.data.access.AckMode.*;
 
-import java.util.UUID;
-
 public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
-	protected UUID dataAccess;
+	protected ActorId dataAccess;
 	protected AckMode ackMode;
 	
 	protected AckWatcher<K> getWatcher;
 	protected AckWatcher<K> delWatcher;
 	
-	public PersistentCacheActor(String name, int cacheSize, UUID dataAccess, AckMode ackMode) {
+	public PersistentCacheActor(String name, int cacheSize, ActorId dataAccess, AckMode ackMode) {
 		super(name, cacheSize);
 		this.dataAccess = dataAccess;
 		this.ackMode = ackMode;
@@ -44,15 +43,15 @@ public class PersistentCacheActor<K, V> extends ActorWithCache<K, V> {
 		delWatcher = new AckWatcher<>();
 	}
 	
-	public PersistentCacheActor(String name, int cacheSize, UUID dataAcess) {
+	public PersistentCacheActor(String name, int cacheSize, ActorId dataAcess) {
 		this(null, cacheSize, dataAcess, PRIMARY);
 	}
 	
-	public PersistentCacheActor(int cacheSize, UUID dataAcess, AckMode ackMode) {
+	public PersistentCacheActor(int cacheSize, ActorId dataAcess, AckMode ackMode) {
 		this(null, cacheSize, dataAcess, ackMode);
 	}
 	
-	public PersistentCacheActor(int cacheSize, UUID dataAcess) {
+	public PersistentCacheActor(int cacheSize, ActorId dataAcess) {
 		this(null, cacheSize, dataAcess, PRIMARY);
 	}
 	
