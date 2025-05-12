@@ -19,6 +19,7 @@ import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.actors.PrimaryActor;
 import io.actor4j.core.data.access.cache.AsyncCache;
 import io.actor4j.core.data.access.cache.AsyncCacheVolatileLRU;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
@@ -26,7 +27,6 @@ import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.DeepCopyable;
 
-import java.util.UUID;
 import java.util.function.Function;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
@@ -38,17 +38,17 @@ public class PrimaryPersistentCacheActor<K, V> extends PrimaryActor {
 	protected int cacheSize;
 	protected Cache<K, V> cache;
 	
-	protected UUID dataAccess;
+	protected ActorId dataAccess;
 	protected AckMode ackMode;
 	
 	protected AckWatcher<K> getWatcher;
 	protected AckWatcher<K> delWatcher;
 	
-	public PrimaryPersistentCacheActor(ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
+	public PrimaryPersistentCacheActor(ActorGroup group, String alias, Function<ActorId, ActorFactory> secondary, int instances, int cacheSize, ActorId dataAccess, AckMode ackMode) {
 		this(null, group, alias, secondary, instances, cacheSize, dataAccess, ackMode);
 	}
 
-	public PrimaryPersistentCacheActor(String name, ActorGroup group, String alias, Function<UUID, ActorFactory> secondary, int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
+	public PrimaryPersistentCacheActor(String name, ActorGroup group, String alias, Function<ActorId, ActorFactory> secondary, int instances, int cacheSize, ActorId dataAccess, AckMode ackMode) {
 		super(name, group, alias, secondary, instances);
 		
 		this.cacheSize = cacheSize;

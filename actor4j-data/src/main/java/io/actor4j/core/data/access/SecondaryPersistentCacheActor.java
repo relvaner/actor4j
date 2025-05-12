@@ -17,12 +17,11 @@ package io.actor4j.core.data.access;
 
 import io.actor4j.core.actors.SecondaryActor;
 import io.actor4j.core.data.access.cache.AsyncCacheVolatileLRU;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.DeepCopyable;
-
-import java.util.UUID;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 
@@ -30,11 +29,11 @@ public class SecondaryPersistentCacheActor<K, V> extends SecondaryActor {
 	protected int cacheSize;
 	protected Cache<K, V> cache;
 	
-	public SecondaryPersistentCacheActor(ActorGroup group, UUID primary, int cacheSize) {
+	public SecondaryPersistentCacheActor(ActorGroup group, ActorId primary, int cacheSize) {
 		this(null, group, primary, cacheSize);
 	}
 
-	public SecondaryPersistentCacheActor(String name, ActorGroup group, UUID primary, int cacheSize) {
+	public SecondaryPersistentCacheActor(String name, ActorGroup group, ActorId primary, int cacheSize) {
 		super(name, group, primary);
 		
 		this.cacheSize = cacheSize;

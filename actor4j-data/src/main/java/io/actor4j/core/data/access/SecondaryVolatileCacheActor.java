@@ -17,9 +17,8 @@ package io.actor4j.core.data.access;
 
 import static io.actor4j.core.actors.ActorWithCache.*;
 
-import java.util.UUID;
-
 import io.actor4j.core.actors.SecondaryActor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.Cache;
@@ -30,11 +29,11 @@ public class SecondaryVolatileCacheActor<K, V> extends SecondaryActor {
 	protected int cacheSize;
 	protected Cache<K, V> cache;
 
-	public SecondaryVolatileCacheActor(ActorGroup group, UUID primary, int cacheSize) {
+	public SecondaryVolatileCacheActor(ActorGroup group, ActorId primary, int cacheSize) {
 		this(null, group, primary, cacheSize);
 	}
 
-	public SecondaryVolatileCacheActor(String name, ActorGroup group, UUID primary, int cacheSize) {
+	public SecondaryVolatileCacheActor(String name, ActorGroup group, ActorId primary, int cacheSize) {
 		super(name, group, primary);
 		
 		this.cacheSize = cacheSize;
