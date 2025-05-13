@@ -18,6 +18,7 @@ package io.actor4j.patterns.messages;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.messages.ActorMessageUtils;
 import io.actor4j.core.utils.DeepCopyable;
@@ -27,13 +28,13 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 	private final CompletableFuture<T> future;
 	private final T value;
 	private final int tag; 
-	private final UUID source; 
-	private final UUID dest; 
+	private final ActorId source; 
+	private final ActorId dest; 
 	private final UUID interaction; 
 	private final String protocol; 
 	private final String domain;
 	
-	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest, UUID interaction,
+	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, ActorId source, ActorId dest, UUID interaction,
 			String protocol, String domain) {
 		super();
 		this.future = future;
@@ -46,11 +47,11 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 		this.domain = domain;
 	}
 
-	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, UUID source, UUID dest) {
+	public FutureActorMessage(CompletableFuture<T> future, T value, int tag, ActorId source, ActorId dest) {
 		this(future, value, tag, source, dest, null, null, null);
 	}
 
-	public FutureActorMessage(CompletableFuture<T> future, T value, Enum<?> tag, UUID source, UUID dest) {
+	public FutureActorMessage(CompletableFuture<T> future, T value, Enum<?> tag, ActorId source, ActorId dest) {
 		this(future, value, tag.ordinal(), source, dest);
 	}
 	
@@ -84,19 +85,19 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 	}
 	
 	@Override
-	public ActorMessage<T> shallowCopy(UUID source, UUID dest) {
+	public ActorMessage<T> shallowCopy(ActorId source, ActorId dest) {
 		return !ActorMessageUtils.equals(this.source, source) || !ActorMessageUtils.equals(this.dest, dest) ? 
 			new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
 	
 	@Override
-	public ActorMessage<T> shallowCopy(UUID dest) {
+	public ActorMessage<T> shallowCopy(ActorId dest) {
 		return !ActorMessageUtils.equals(this.dest, dest) ? 
 			new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
 	
 	@Override
-	public ActorMessage<T> shallowCopy(int tag, UUID dest) {
+	public ActorMessage<T> shallowCopy(int tag, ActorId dest) {
 		return this.tag!=tag || !ActorMessageUtils.equals(this.dest, dest) ?
 			new FutureActorMessage<T>(future, value, tag, source, dest, interaction, protocol, domain) : this;
 	}
@@ -120,7 +121,7 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public ActorMessage<T> copy(UUID dest) {
+	public ActorMessage<T> copy(ActorId dest) {
 		if (value!=null) { 
 			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
 				return !ActorMessageUtils.equals(this.dest, dest) ? new FutureActorMessage<T>(future,value, tag, source, dest, interaction, protocol, domain) : this;
@@ -156,12 +157,12 @@ public final class FutureActorMessage<T> implements ActorMessage<T> {
 	}
 
 	@Override
-	public UUID source() {
+	public ActorId source() {
 		return source;
 	}
 
 	@Override
-	public UUID dest() {
+	public ActorId dest() {
 		return dest;
 	}
 

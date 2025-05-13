@@ -16,10 +16,10 @@
 package io.actor4j.patterns.actors;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Predicate;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorMessageMatcher;
 
@@ -45,7 +45,7 @@ public class RouterActor extends Actor {
 		matcher.apply(message);
 	}
 	
-	public void add(Predicate<ActorMessage<?>> predicate, UUID routee) {
+	public void add(Predicate<ActorMessage<?>> predicate, ActorId routee) {
 		matcher.match(predicate, (msg) -> forward(msg, routee));
 	}
 }

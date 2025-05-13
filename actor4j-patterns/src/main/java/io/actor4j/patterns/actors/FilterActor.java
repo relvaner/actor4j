@@ -15,18 +15,18 @@
  */
 package io.actor4j.patterns.actors;
 
-import java.util.UUID;
 import java.util.function.BiFunction;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class FilterActor extends PipeActor {
-	public FilterActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> filter, UUID next) {
+	public FilterActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> filter, ActorId next) {
 		super(filter, next);
 	}
 	
-	public FilterActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> filter, UUID next) {
+	public FilterActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> filter, ActorId next) {
 		super(name, filter, next);
 	}
 }

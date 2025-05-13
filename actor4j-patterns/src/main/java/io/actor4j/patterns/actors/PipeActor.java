@@ -15,21 +15,21 @@
  */
 package io.actor4j.patterns.actors;
 
-import java.util.UUID;
 import java.util.function.BiFunction;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class PipeActor extends Actor {
 	protected BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler;
-	protected UUID next;
+	protected ActorId next;
 	
-	public PipeActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, UUID next) {
+	public PipeActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, ActorId next) {
 		this(null, handler, next);
 	}
 	
-	public PipeActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, UUID next) {
+	public PipeActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, ActorId next) {
 		super(name);
 		
 		this.handler = handler;

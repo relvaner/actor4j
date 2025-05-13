@@ -15,18 +15,18 @@
  */
 package io.actor4j.patterns.actors;
 
-import java.util.UUID;
 import java.util.function.BiFunction;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class BridgeActor extends PipeActor {
-	public BridgeActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, UUID next) {
+	public BridgeActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, ActorId next) {
 		super(handler, next);
 	}
 	
-	public BridgeActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, UUID next) {
+	public BridgeActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> handler, ActorId next) {
 		super(name, handler, next);
 	}
 }

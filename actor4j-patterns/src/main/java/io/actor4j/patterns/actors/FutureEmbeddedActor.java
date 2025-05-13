@@ -15,22 +15,22 @@
  */
 package io.actor4j.patterns.actors;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import io.actor4j.core.actors.EmbeddedActor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.patterns.messages.FutureActorMessage;
 
 public class FutureEmbeddedActor extends EmbeddedActor {
 	protected CompletableFuture<Object> future;
-	protected UUID dest;
+	protected ActorId dest;
 	
-	public FutureEmbeddedActor(UUID dest) {
+	public FutureEmbeddedActor(ActorId dest) {
 		this(null, dest);
 	}
 	
-	public FutureEmbeddedActor(String name, UUID dest) {
+	public FutureEmbeddedActor(String name, ActorId dest) {
 		super(name);
 		this.dest = dest;
 	}

@@ -15,18 +15,18 @@
  */
 package io.actor4j.patterns.actors;
 
-import java.util.UUID;
 import java.util.function.BiFunction;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class TranslateActor extends PipeActor {
-	public TranslateActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> translate, UUID next) {
+	public TranslateActor(BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> translate, ActorId next) {
 		super(translate, next);
 	}
 	
-	public TranslateActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> translate, UUID next) {
+	public TranslateActor(String name, BiFunction<Actor, ActorMessage<?>, ActorMessage<?>> translate, ActorId next) {
 		super(name, translate, next);
 	}
 }

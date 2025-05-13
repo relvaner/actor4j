@@ -15,16 +15,16 @@
  */
 package io.actor4j.patterns.actors;
 
-import java.util.UUID;
 import java.util.function.Predicate;
 
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class RouteeHandler {
 	protected Predicate<ActorMessage<?>> predicate;
-	protected UUID routee;
+	protected ActorId routee;
 	
-	public RouteeHandler(Predicate<ActorMessage<?>> predicate, UUID routee) {
+	public RouteeHandler(Predicate<ActorMessage<?>> predicate, ActorId routee) {
 		super();
 		this.predicate = predicate;
 		this.routee = routee;
@@ -38,11 +38,11 @@ public class RouteeHandler {
 		this.predicate = predicate;
 	}
 	
-	public UUID getRoutee() {
+	public ActorId getRoutee() {
 		return routee;
 	}
 	
-	public void setRoutee(UUID routee) {
+	public void setRoutee(ActorId routee) {
 		this.routee = routee;
 	}
 }

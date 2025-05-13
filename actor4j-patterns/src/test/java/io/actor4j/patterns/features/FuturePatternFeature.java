@@ -15,7 +15,6 @@
  */
 package io.actor4j.patterns.features;
 
-import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CountDownLatch;
@@ -26,6 +25,7 @@ import org.junit.Test;
 import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.patterns.utils.FuturePattern;
 
@@ -38,9 +38,9 @@ public class FuturePatternFeature {
 		
 		ActorSystem system = ActorSystem.create(ActorRuntime.factory());
 		
-		UUID parent = system.addActor(() -> new Actor("parent") {
+		ActorId parent = system.addActor(() -> new Actor("parent") {
 			protected Future<String> future;
-			protected UUID child;
+			protected ActorId child;
 			
 			@Override
 			public void preStart() {

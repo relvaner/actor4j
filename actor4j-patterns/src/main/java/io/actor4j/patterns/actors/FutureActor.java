@@ -15,24 +15,24 @@
  */
 package io.actor4j.patterns.actors;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.patterns.messages.FutureActorMessage;
 
 public class FutureActor extends Actor {
 	protected CompletableFuture<Object> future;
-	protected UUID dest;
+	protected ActorId dest;
 	
 	protected boolean stopOnComplete;
 	
-	public FutureActor(UUID dest, boolean stopOnComplete) {
+	public FutureActor(ActorId dest, boolean stopOnComplete) {
 		this(null, dest, stopOnComplete);
 	}
 
-	public FutureActor(String name, UUID dest, boolean stopOnComplete) {
+	public FutureActor(String name, ActorId dest, boolean stopOnComplete) {
 		super(name);
 		this.dest = dest;
 		this.stopOnComplete = stopOnComplete;

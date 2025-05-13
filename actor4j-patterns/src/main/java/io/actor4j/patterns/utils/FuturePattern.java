@@ -15,36 +15,36 @@
  */
 package io.actor4j.patterns.utils;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.patterns.actors.FutureActor;
 import io.actor4j.patterns.messages.FutureActorMessage;
 
 public final class FuturePattern {
-	public static <T> Future<T> ask(T value, int tag, UUID dest, ActorRef actorRef) {
-		UUID mediator = actorRef.getSystem().addActor(() -> new FutureActor(dest, true));
+	public static <T> Future<T> ask(T value, int tag, ActorId dest, ActorRef actorRef) {
+		ActorId mediator = actorRef.getSystem().addActor(() -> new FutureActor(dest, true));
 		
 		return askWithMediator(value, tag, mediator, actorRef);
 	}
 	
-	public static <T> Future<T> askWithMediator(T value, int tag, UUID mediator, ActorRef actorRef) {	
+	public static <T> Future<T> askWithMediator(T value, int tag, ActorId mediator, ActorRef actorRef) {	
 		CompletableFuture<T> result = new CompletableFuture<>();
 		actorRef.send(new FutureActorMessage<T>(result, value, tag, actorRef.self(), mediator));
 		
 		return result;
 	}
 	
-	public static <T> Future<T> ask(T value, int tag, UUID dest, ActorSystem system) {
-		UUID mediator = system.addActor(() -> new FutureActor(dest, true));
+	public static <T> Future<T> ask(T value, int tag, ActorId dest, ActorSystem system) {
+		ActorId mediator = system.addActor(() -> new FutureActor(dest, true));
 		
 		return askWithMediator(value, tag, mediator, system);
 	}
 	
-	public static <T> Future<T> askWithMediator(T value, int tag, UUID mediator, ActorSystem system) {	
+	public static <T> Future<T> askWithMediator(T value, int tag, ActorId mediator, ActorSystem system) {	
 		CompletableFuture<T> result = new CompletableFuture<>();
 		system.send(new FutureActorMessage<T>(result, value, tag, system.SYSTEM_ID(), mediator));
 		
