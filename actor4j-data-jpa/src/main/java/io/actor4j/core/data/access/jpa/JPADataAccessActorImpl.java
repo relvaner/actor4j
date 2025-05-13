@@ -29,6 +29,7 @@ import io.actor4j.core.data.access.PersistentDataAccessDTO;
 import io.actor4j.core.data.access.PersistentFailureDTO;
 import io.actor4j.core.data.access.PersistentSuccessDTO;
 import io.actor4j.core.data.access.SqlPersistentContext;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.database.jpa.JPABatchWriter;
@@ -41,7 +42,7 @@ import jakarta.persistence.Persistence;
 import static io.actor4j.core.data.access.DataAccessActor.*;
 
 public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> {
-	protected record BatchWriterRequest<K, E>(int tag, UUID interaction, UUID source, PersistentDataAccessDTO<K, E> dto) {
+	protected record BatchWriterRequest<K, E>(int tag, UUID interaction, ActorId source, PersistentDataAccessDTO<K, E> dto) {
 	}
 	
 	protected EntityManagerFactory entityManagerFactory;
