@@ -34,6 +34,7 @@ import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.data.access.PersistentDataAccessDTO;
 import io.actor4j.core.data.access.PersistentFailureDTO;
 import io.actor4j.core.data.access.PersistentSuccessDTO;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
@@ -43,7 +44,7 @@ import io.actor4j.database.mongo.MongoOperations;
 import static io.actor4j.database.mongo.MongoOperations.*;
 
 public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> {
-	protected record BulkWriterRequest<K, E>(int tag, UUID interaction, UUID source, PersistentDataAccessDTO<K, E> dto) {
+	protected record BulkWriterRequest<K, E>(int tag, UUID interaction, ActorId source, PersistentDataAccessDTO<K, E> dto) {
 	}
 	
 	protected final MongoClient client;
