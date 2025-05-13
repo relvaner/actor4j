@@ -31,6 +31,8 @@ import io.actor4j.core.data.access.DataAccessType;
 import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
+import io.actor4j.core.id.ActorId;
+
 import static io.actor4j.core.data.access.AckMode.*;
 import static io.actor4j.core.data.access.DataAccessType.DOC;
 
@@ -50,16 +52,16 @@ public class PodPersistentActorCacheManager<K, V> extends PersistentActorCacheMa
 	}
 	
 	@Deprecated
-	public ActorFactory create(int instances, int cacheSize, UUID dataAccess) {
+	public ActorFactory create(int instances, int cacheSize, ActorId dataAccess) {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Deprecated
-	public ActorFactory create(int instances, int cacheSize, UUID dataAccess, AckMode ackMode) {
+	public ActorFactory create(int instances, int cacheSize, ActorId dataAccess, AckMode ackMode) {
 		throw new UnsupportedOperationException();
 	}
 	
-	public ActorFactory createReplicaAsActorFactory(int cacheSize, UUID dataAccess, AckMode ackMode, PodContext context) {
+	public ActorFactory createReplicaAsActorFactory(int cacheSize, ActorId dataAccess, AckMode ackMode, PodContext context) {
 		this.dataAccess = dataAccess;
 		
 		if (context.isShard())
@@ -101,19 +103,19 @@ public class PodPersistentActorCacheManager<K, V> extends PersistentActorCacheMa
 			};
 	}
 	
-	public UUID replica() {
+	public ActorId replica() {
 		return replica;
 	}
 	
-	public void replica(UUID replica) {
+	public void replica(ActorId replica) {
 		this.replica = replica;
 	}
 	
-	public UUID createReplica(int cacheSize, UUID dataAccess, PodContext context) {
+	public ActorId createReplica(int cacheSize, ActorId dataAccess, PodContext context) {
 		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, dataAccess, PRIMARY, context));
 	}
 	
-	public UUID createReplica(int cacheSize, UUID dataAccess, AckMode ackMode, PodContext context) {
+	public ActorId createReplica(int cacheSize, ActorId dataAccess, AckMode ackMode, PodContext context) {
 		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, dataAccess, ackMode, context));
 	}
 	

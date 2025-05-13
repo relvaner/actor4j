@@ -17,8 +17,6 @@ package io.actor4j.core.publish.subscribe.utils;
 
 import static io.actor4j.core.publish.subscribe.BrokerActor.*;
 
-import java.util.UUID;
-
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
@@ -54,9 +52,9 @@ public class PubSubActorManager<T> {
 			return ActorOptional.none();
 	}
 	
-	public ActorOptional<UUID> getTopic(ActorMessage<?> message) {
+	public ActorOptional<ActorId> getTopic(ActorMessage<?> message) {
 		if (message.source().equals(broker) && message.tag()==GET_TOPIC_ACTOR)
-			return ActorOptional.of(message.valueAsUUID());
+			return ActorOptional.of(message.valueAsId());
 		else
 			return ActorOptional.none();
 	}

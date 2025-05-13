@@ -27,13 +27,13 @@ import io.actor4j.core.data.access.PrimaryVolatileCacheActor;
 import io.actor4j.core.data.access.SecondaryVolatileCacheActor;
 import io.actor4j.core.data.access.VolatileDTO;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
+import io.actor4j.core.id.ActorId;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import static io.actor4j.core.data.access.AckMode.*;
@@ -47,7 +47,7 @@ public class VolatileCacheFeature {
 		
 		CountDownLatch testDone = new CountDownLatch(12);
 		
-		UUID mediator = system.addActor(() -> new Actor("mediator") {
+		ActorId mediator = system.addActor(() -> new Actor("mediator") {
 			protected final String[] keys = {"key1", "key2", "key3", "key4"};
 			protected final String[] values = {"value1", "value2", "value3", "value4"};
 			protected int i = 0;
@@ -171,7 +171,7 @@ public class VolatileCacheFeature {
 		
 		CountDownLatch testDone = new CountDownLatch(12);
 		
-		UUID mediator = system.addActor(() -> new Actor("mediator") {
+		ActorId mediator = system.addActor(() -> new Actor("mediator") {
 			protected VolatileActorCacheManager<String, String> manager;
 			
 			protected final String[] keys = {"key1", "key2", "key3", "key4"};

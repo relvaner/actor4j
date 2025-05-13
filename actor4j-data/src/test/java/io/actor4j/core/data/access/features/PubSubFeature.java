@@ -18,7 +18,6 @@ package io.actor4j.core.data.access.features;
 import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +25,7 @@ import org.junit.Test;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorOptional;
 import io.actor4j.core.publish.subscribe.BrokerActor;
@@ -41,9 +41,9 @@ public class PubSubFeature {
 		CountDownLatch testDone = new CountDownLatch(2);
 		
 		final int[] values = new int[] { -1, 341, 351, 451, 318, 292, 481, 240, 478, 382, 502, 158, 401, 438, 353, 165, 344, 6, 9, 18, 31, 77, 90, 45, 63, 190, 1 };
-		UUID broker = system.addActor(() -> new BrokerActor());
+		ActorId broker = system.addActor(() -> new BrokerActor());
 		
-		UUID subscriberA = system.addActor(() -> new Actor("subscriberA") {
+		ActorId subscriberA = system.addActor(() -> new Actor("subscriberA") {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
@@ -54,7 +54,7 @@ public class PubSubFeature {
 					testDone.countDown();
 			}
 		});
-		UUID subscriberB = system.addActor(() -> new Actor("subscriberB") {
+		ActorId subscriberB = system.addActor(() -> new Actor("subscriberB") {
 			protected int i = 0;
 			@Override
 			public void receive(ActorMessage<?> message) {
@@ -84,7 +84,7 @@ public class PubSubFeature {
 							return ActorMessage.create(new Publish<Integer>("MyTopic", values[i++]), 0, null, null);
 						else
 							throw new RuntimeException("Task canceled");
-					}, message.valueAsUUID(), 0, 25, TimeUnit.MILLISECONDS);
+					}, message.valueAsId(), 0, 25, TimeUnit.MILLISECONDS);
 			}
 		});
 		
@@ -106,7 +106,7 @@ public class PubSubFeature {
 		CountDownLatch testDone = new CountDownLatch(2);
 		
 		final int[] values = new int[] { -1, 341, 351, 451, 318, 292, 481, 240, 478, 382, 502, 158, 401, 438, 353, 165, 344, 6, 9, 18, 31, 77, 90, 45, 63, 190, 1 };
-		UUID broker = system.addActor(PubSubActorManager.createBrokerWithFactory());
+		ActorId broker = system.addActor(PubSubActorManager.createBrokerWithFactory());
 		
 		system.addActor(() -> new Actor("subscriberA") {
 			protected PubSubActorManager<Integer> manager = new PubSubActorManager<>(this, broker);
@@ -146,15 +146,15 @@ public class PubSubFeature {
 			}
 		});
 		
-		UUID publisher = system.addActor(() -> new Actor("publisher") {
+		ActorId publisher = system.addActor(() -> new Actor("publisher") {
 			protected PubSubActorManager<Integer> manager = new PubSubActorManager<>(this, broker);
 			protected int i = 1;
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (message.source().equals(getSystem().SYSTEM_ID()))
+				if (message.source()==getSystem().SYSTEM_ID())
 					manager.publish(new Publish<Integer>("MyTopic", -1));
 				
-				ActorOptional<UUID> optional = manager.getTopic(message);
+				ActorOptional<ActorId> optional = manager.getTopic(message);
 				if (optional.isDone())
 					system.timer().schedule(() -> {
 						if (i<values.length)

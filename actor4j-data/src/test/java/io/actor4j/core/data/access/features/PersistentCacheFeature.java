@@ -29,13 +29,13 @@ import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
 import io.actor4j.core.data.access.ims.IMSDataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
+import io.actor4j.core.id.ActorId;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import static io.actor4j.core.data.access.AckMode.*;
@@ -48,14 +48,14 @@ public class PersistentCacheFeature {
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
 		
-		UUID mediator = system.addActor(() -> new Actor("mediator") {
+		ActorId mediator = system.addActor(() -> new Actor("mediator") {
 			protected final String[] keys = {"key4", "key1", "key3", "key2"};
 			protected final String[] values = {"value4", "value1", "value3", "value2"};
 			protected int i = 0;
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
+				ActorId dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
 				
 				ActorGroup group = new ActorGroupSet();
 				AtomicInteger k = new AtomicInteger(0);
@@ -118,7 +118,7 @@ public class PersistentCacheFeature {
 		
 		CountDownLatch testDone = new CountDownLatch(COUNT);
 		
-		UUID mediator = system.addActor(() -> new Actor("mediator") {
+		ActorId mediator = system.addActor(() -> new Actor("mediator") {
 			protected PersistentActorCacheManager<String, TestObject> manager;
 			
 			protected final String[] keys = {"key4", "key1", "key3", "key2"};
@@ -127,7 +127,7 @@ public class PersistentCacheFeature {
 			
 			@Override 
 			public void preStart() {
-				UUID dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
+				ActorId dataAccess = system.addActor(() -> new IMSDataAccessActor<String, TestObject>("dc"));
 				
 				manager = new PersistentActorCacheManager<>(this, "cache1", "key", "test");
 				system.addActor(manager.create(COUNT, 500, dataAccess, NONE));

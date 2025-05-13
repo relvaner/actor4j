@@ -22,6 +22,7 @@ import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.VolatileDTO;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.pods.PodContext;
@@ -91,19 +92,19 @@ public class PodVolatileActorCacheManager<K, V> extends VolatileActorCacheManage
 			};
 	}
 	
-	public UUID replica() {
+	public ActorId replica() {
 		return replica;
 	}
 	
-	public void replica(UUID replica) {
+	public void replica(ActorId replica) {
 		this.replica = replica;
 	}
 	
-	public UUID createReplica(int cacheSize, PodContext context) {
+	public ActorId createReplica(int cacheSize, PodContext context) {
 		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, PRIMARY, context));
 	}
 	
-	public UUID createReplica(int cacheSize, AckMode ackMode, PodContext context) {
+	public ActorId createReplica(int cacheSize, AckMode ackMode, PodContext context) {
 		return replica = ((Actor)actorRef).addChild(createReplicaAsActorFactory(cacheSize, ackMode, context));
 	}
 	
