@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.elements.exception.ConnectorException;
 
+import io.actor4j.core.id.GlobalId;
 import io.actor4j.web.coap.client.COAPActorClient;
 import io.actor4j.web.utils.RemoteActorMessageDTO;
 import io.actor4j.web.utils.rest.databind.COAPActorResponse;
@@ -44,9 +45,9 @@ public class ExampleClientCoap {
 		COAPActorResponse response =  COAPActorClient.convert(COAPActorClient.getActorsFromAlias(client, "coap://localhost", "coap"));
 		System.out.println(response);
 		UUID coap = UUID.fromString((String)response.dataAsList().get(0));
-		System.out.println(COAPActorClient.convert(COAPActorClient.sendMessage(client, "coap://localhost", new RemoteActorMessageDTO("Hello World!", 0, UUID.randomUUID(), coap))));
+		System.out.println(COAPActorClient.convert(COAPActorClient.sendMessage(client, "coap://localhost", new RemoteActorMessageDTO("Hello World!", 0, null, GlobalId.of(coap)))));
 
 		System.out.println(COAPActorClient.convert(COAPActorClient.getActorFromPath(client, "coap://localhost", "/")));
-		System.out.println(COAPActorClient.convert(COAPActorClient.sendMessage(client, "coap://localhost", new RemoteActorMessageDTO("Hello World!", 0, null, UUID.randomUUID()))));
+		System.out.println(COAPActorClient.convert(COAPActorClient.sendMessage(client, "coap://localhost", new RemoteActorMessageDTO("Hello World!", 0, null, GlobalId.random()))));
 	}
 }
