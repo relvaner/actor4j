@@ -27,6 +27,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.web.mqtt.MQTTPublish;
@@ -40,7 +41,7 @@ public class ExampleMQTT {
 		
 		CountDownLatch done = new CountDownLatch(2);
 		
-		UUID receiver = system.addActor(() -> new Actor("receiver") {
+		ActorId receiver = system.addActor(() -> new Actor("receiver") {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				if (message.tag()==PUBLISH && message.value()!=null) {
@@ -49,7 +50,7 @@ public class ExampleMQTT {
 				}
 			}
 		});
-		UUID mqtt = system.addActor(() -> new MQTTResourceActor("mqtt", "tcp://localhost:1883") {
+		ActorId mqtt = system.addActor(() -> new MQTTResourceActor("mqtt", "tcp://localhost:1883") {
 			@Override
 			public void configure(MqttConnectOptions connectOptions) {
 				/*

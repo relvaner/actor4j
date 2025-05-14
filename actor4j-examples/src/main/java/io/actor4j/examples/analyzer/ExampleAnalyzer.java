@@ -15,11 +15,11 @@
  */
 package io.actor4j.examples.analyzer;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
@@ -37,20 +37,20 @@ public class ExampleAnalyzer {
 		ActorGroup group = new ActorGroupSet();
 		for (int i=0; i<size; i++) {
 			final int f_i = i;
-			UUID id = system.addActor(new ActorFactory() {
+			ActorId id = system.addActor(new ActorFactory() {
 				@Override
 				public Actor create() {
 					return new Actor("group-"+f_i) {
 						protected boolean first = true;
-						protected UUID last;
+						protected ActorId last;
 						@Override
 						public void receive(ActorMessage<?> message) {
 							if (first) {
-								UUID next = self();
+								ActorId next = self();
 								for (int i=0; i<3; i++) {
 									final int f_i = i;
-									final UUID f_next = next;
-									UUID current = addChild(() -> new Sender("child-"+f_i, f_next));
+									final ActorId f_next = next;
+									ActorId current = addChild(() -> new Sender("child-"+f_i, f_next));
 									next = current;
 								}
 								last = next;
@@ -64,7 +64,7 @@ public class ExampleAnalyzer {
 			});
 			group.add(id);
 		}
-		UUID id = system.addActor(new ActorFactory() {
+		ActorId id = system.addActor(new ActorFactory() {
 			@Override
 			public Actor create() {
 				return new Actor("group-"+size) {
@@ -75,7 +75,7 @@ public class ExampleAnalyzer {
 						if (first) {
 							for (int i=0; i<4; i++) {
 								final int f_i = i;
-								UUID childId = addChild(new ActorFactory() {
+								ActorId childId = addChild(new ActorFactory() {
 									@Override
 									public Actor create() {
 										return new Actor("child-"+f_i){
@@ -96,12 +96,12 @@ public class ExampleAnalyzer {
 		});
 		group.add(id);
 		
-		UUID ping = system.addActor(new ActorFactory() {
+		ActorId ping = system.addActor(new ActorFactory() {
 			@Override
 			public Actor create() {
 				return new Actor("ping") {
 					protected boolean first = true;
-					protected UUID pong;
+					protected ActorId pong;
 					@Override
 					public void receive(ActorMessage<?> message) {
 						if (first) {

@@ -18,7 +18,6 @@ package io.actor4j.examples.amqp;
 import static io.actor4j.web.amqp.AMQPResourceActor.*;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
@@ -30,6 +29,7 @@ import com.rabbitmq.client.Envelope;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.web.amqp.AMQPPublish;
@@ -43,7 +43,7 @@ public class ExampleAMQP {
 		
 		CountDownLatch done = new CountDownLatch(2);
 		
-		UUID receiver = system.addActor(() -> new Actor("receiver") {
+		ActorId receiver = system.addActor(() -> new Actor("receiver") {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				if (message.tag()==PUBLISH && message.value()!=null) {
@@ -52,7 +52,7 @@ public class ExampleAMQP {
 				}
 			}
 		});
-		UUID amqp = system.addActor(() -> new AMQPResourceActor("amqp", "localhost", 5672) {
+		ActorId amqp = system.addActor(() -> new AMQPResourceActor("amqp", "localhost", 5672) {
 			@Override
 			public void configure(ConnectionFactory factory) {
 				/*

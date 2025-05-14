@@ -15,7 +15,6 @@
  */
 package io.actor4j.examples.data.access.jpa;
 
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import io.actor4j.core.ActorRuntime;
@@ -30,6 +29,7 @@ import io.actor4j.core.data.access.PersistentFailureDTO;
 import io.actor4j.core.data.access.PersistentSuccessDTO;
 import io.actor4j.core.data.access.jpa.JPADataAccessActor;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
+import io.actor4j.core.id.ActorId;
 
 public class ExamplePersistentCache {
 	public ExamplePersistentCache() {
@@ -43,7 +43,7 @@ public class ExamplePersistentCache {
 			protected PersistentActorCacheManager<String, ExampleEntity> manager;
 			@Override 
 			public void preStart() {
-				UUID dataAccess = addChild(() -> new JPADataAccessActor<String, ExampleEntity>("dataAccess", "actor4j-test", ExampleEntity.class));
+				ActorId dataAccess = addChild(() -> new JPADataAccessActor<String, ExampleEntity>("dataAccess", "actor4j-test", ExampleEntity.class));
 				
 				manager = new PersistentActorCacheManager<String, ExampleEntity>(this, "cache", DataAccessType.SQL);
 				addChild(manager.create(INSTANCES, 500, dataAccess));

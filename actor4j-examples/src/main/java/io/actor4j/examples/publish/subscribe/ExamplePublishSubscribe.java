@@ -19,11 +19,11 @@ import static io.actor4j.core.logging.ActorLogger.DEBUG;
 import static io.actor4j.core.logging.ActorLogger.logger;
 
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.publish.subscribe.BrokerActor;
 import io.actor4j.core.publish.subscribe.Publish;
@@ -34,15 +34,15 @@ public class ExamplePublishSubscribe {
 	public ExamplePublishSubscribe() {
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
-		UUID broker = system.addActor(() -> new BrokerActor());
+		ActorId broker = system.addActor(() -> new BrokerActor());
 		
-		UUID subscriberA = system.addActor(() -> new Actor("subscriberA") {
+		ActorId subscriberA = system.addActor(() -> new Actor("subscriberA") {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value()));
 			}
 		});
-		UUID subscriberB = system.addActor(() -> new Actor("subscriberB") {
+		ActorId subscriberB = system.addActor(() -> new Actor("subscriberB") {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				logger().log(DEBUG, String.format("Message received (%s): %s", name, ((Publish<?>)message.value()).value()));
@@ -63,7 +63,7 @@ public class ExamplePublishSubscribe {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				if (message.tag()==BrokerActor.GET_TOPIC_ACTOR) { 
-					system.timer().schedule(() -> ActorMessage.create(new Publish<String>("MyTopic", String.valueOf(random.nextInt(512))), 0, null, null), message.valueAsUUID(), 0, 100, TimeUnit.MILLISECONDS);
+					system.timer().schedule(() -> ActorMessage.create(new Publish<String>("MyTopic", String.valueOf(random.nextInt(512))), 0, null, null), message.valueAsId(), 0, 100, TimeUnit.MILLISECONDS);
 				}
 			}
 		});

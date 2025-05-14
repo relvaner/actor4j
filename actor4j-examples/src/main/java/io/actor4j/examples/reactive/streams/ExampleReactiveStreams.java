@@ -19,10 +19,10 @@ import static io.actor4j.core.logging.ActorLogger.DEBUG;
 import static io.actor4j.core.logging.ActorLogger.logger;
 
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.actor4j.core.ActorSystem;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.reactive.streams.PublisherActor;
 import io.actor4j.core.reactive.streams.SubscriberActor;
@@ -32,7 +32,7 @@ public class ExampleReactiveStreams {
 	public ExampleReactiveStreams() {
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
-		UUID publisher = system.addActor(() -> new PublisherActor("publisher") {
+		ActorId publisher = system.addActor(() -> new PublisherActor("publisher") {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				super.receive(message);

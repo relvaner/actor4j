@@ -18,6 +18,7 @@ package io.actor4j.examples.persistence;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.PersistentActor;
 import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.persistence.Recovery;
@@ -42,7 +43,7 @@ public class ExamplePersistence {
 			.build();
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
 		
-		UUID id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
+		ActorId id = system.addActor(() -> new PersistentActor<MyState, MyEvent>("example") {
 			@Override
 			public void receive(ActorMessage<?> message) {
 				saveSnapshot(null, null, new MyState("I am a state!"));

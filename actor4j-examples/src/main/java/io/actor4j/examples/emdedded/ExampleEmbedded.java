@@ -17,11 +17,10 @@ package io.actor4j.examples.emdedded;
 
 import static io.actor4j.core.logging.ActorLogger.logger;
 
-import java.util.UUID;
-
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.EmbeddedActor;
 import io.actor4j.core.actors.EmbeddedHostActor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.examples.shared.ExamplesSettings;
 
@@ -31,8 +30,8 @@ public class ExampleEmbedded {
 	public ExampleEmbedded() {
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory());
 		
-		UUID host = system.addActor(() -> new EmbeddedHostActor("host") {
-			protected UUID client;
+		ActorId host = system.addActor(() -> new EmbeddedHostActor("host") {
+			protected ActorId client;
 			@Override
 			public void preStart() {
 				client = addEmbeddedChild(() -> new EmbeddedActor("host:client") {
