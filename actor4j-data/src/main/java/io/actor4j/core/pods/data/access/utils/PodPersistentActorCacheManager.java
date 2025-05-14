@@ -32,12 +32,13 @@ import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.data.access.PersistentDTO;
 import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 import io.actor4j.core.id.ActorId;
+import io.actor4j.core.id.GlobalId;
 
 import static io.actor4j.core.data.access.AckMode.*;
 import static io.actor4j.core.data.access.DataAccessType.DOC;
 
 public class PodPersistentActorCacheManager<K, V> extends PersistentActorCacheManager<K, V> {
-	public static final UUID PRIMARY_FROM_CACHE_COORDINATOR = UUID.randomUUID();
+	public static final ActorId PRIMARY_FROM_CACHE_COORDINATOR = GlobalId.random();
 	
 	protected UUID groupId;
 	
@@ -72,7 +73,7 @@ public class PodPersistentActorCacheManager<K, V> extends PersistentActorCacheMa
 				@Override
 				public void preStart() {
 					super.preStart();
-					UUID redirect = UUID.randomUUID();
+					ActorId redirect = ActorId.ofRedirect();
 					getSystem().setAlias(redirect, cacheAlias+"-primary"); // workaround for setting second alias
 					getSystem().addRedirection(redirect, self());
 				}

@@ -23,6 +23,7 @@ import io.actor4j.core.data.access.AckMode;
 import io.actor4j.core.data.access.VolatileDTO;
 import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 import io.actor4j.core.id.ActorId;
+import io.actor4j.core.id.GlobalId;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.pods.PodContext;
@@ -33,7 +34,7 @@ import static io.actor4j.core.actors.ActorWithCache.GET;
 import static io.actor4j.core.data.access.AckMode.*;
 
 public class PodVolatileActorCacheManager<K, V> extends VolatileActorCacheManager<K, V> {
-	public static final UUID PRIMARY_FROM_CACHE_COORDINATOR = UUID.randomUUID();
+	public static final ActorId PRIMARY_FROM_CACHE_COORDINATOR = GlobalId.random();
 	
 	protected UUID groupId;
 	
@@ -61,7 +62,7 @@ public class PodVolatileActorCacheManager<K, V> extends VolatileActorCacheManage
 				@Override
 				public void preStart() {
 					super.preStart();
-					UUID redirect = UUID.randomUUID();
+					ActorId redirect = ActorId.ofRedirect();
 					getSystem().setAlias(redirect, cacheAlias+"-primary"); // workaround for setting second alias
 					getSystem().addRedirection(redirect, self());
 				}
