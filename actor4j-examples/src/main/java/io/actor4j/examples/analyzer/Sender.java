@@ -15,15 +15,14 @@
  */
 package io.actor4j.examples.analyzer;
 
-import java.util.UUID;
-
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class Sender extends Actor {
-	protected UUID next;
+	protected ActorId next;
 	
-	public Sender(String name, UUID next) {
+	public Sender(String name, ActorId next) {
 		super(name);
 		
 		this.next = next;
