@@ -19,7 +19,6 @@ import static io.actor4j.core.logging.ActorLogger.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -32,6 +31,7 @@ import javax.websocket.server.ServerEndpoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.web.utils.BulkRemoteActorMessageDTO;
 import io.actor4j.web.utils.RemoteActorMessage;
 import io.actor4j.web.utils.RemoteActorMessageDTO;
@@ -68,13 +68,13 @@ public abstract class ActorServerEndpoint {
     			result = CLIENT + id + result;
     		}; break;
     		case GET_ACTORS_FROM_ALIAS : {
-    			List<UUID> list = service.getActorsFromAlias(data);
-    			result = (!list.isEmpty()) ? new ObjectMapper().writeValueAsString(list) : "[]";
+    			List<ActorId> list = service.getActorsFromAlias(data);
+    			result = (!list.isEmpty()) ? new ObjectMapper().writeValueAsString(list.stream().map(actorId -> actorId.globalId()).toList()) : "[]";
     			result = CLIENT + id + result;
     		}; break;
     		case GET_ACTOR_FROM_PATH : {
-    			UUID uuid = service.getActorFromPath(data);
-    			result = (uuid!=null) ? uuid.toString() : "null";
+    			ActorId actorId = service.getActorFromPath(data);
+    			result = (id!=null) ? actorId.globalId().toString() : "null";
     			result = CLIENT + id + result;
     		}; break;
     		case SEND_MESSAGE : {
@@ -102,7 +102,7 @@ public abstract class ActorServerEndpoint {
     			if (bulk_buf!=null) {
     				for (RemoteActorMessageDTO buf : bulk_buf.value()) {
     					if (buf.dest()==null && buf.destPath()!=null) {
-    						UUID dest = service.getActorFromPath(buf.destPath());
+    						ActorId dest = service.getActorFromPath(buf.destPath());
     		    			if (dest!=null)
     		    				service.sendAsServer(new RemoteActorMessage<Object>(buf.value(), buf.tag(), buf.source(), dest));
     					}

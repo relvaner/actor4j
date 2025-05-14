@@ -15,8 +15,6 @@
  */
 package io.actor4j.web.rest.server.resources;
 
-import java.util.UUID;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -26,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.actor4j.core.ActorService;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.web.utils.rest.databind.RESTActorResponse;
 
 @Path("/getActorFromPath/{path}")
@@ -36,11 +35,11 @@ public class GetActorFromPathResource {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getActorFromPath(@PathParam("path") String path) {
-		UUID uuid = service.getActorFromPath(path);
-		if (uuid != null)
+		ActorId id = service.getActorFromPath(path);
+		if (id != null)
 			return Response.ok().entity(
 					new RESTActorResponse(
-							RESTActorResponse.SUCCESS, 200, uuid.toString(), "")).build();
+							RESTActorResponse.SUCCESS, 200, id.globalId().toString(), "")).build();
 		else
 			return Response.ok().entity(
 					new RESTActorResponse(

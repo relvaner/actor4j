@@ -16,7 +16,6 @@
 package io.actor4j.web.coap.server.resources;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
@@ -26,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.web.utils.rest.databind.COAPActorResponse;
 
 public class GetActorsFromAliasResource extends COAPActorResource {
@@ -37,12 +37,12 @@ public class GetActorsFromAliasResource extends COAPActorResource {
 		
 	public void handleGET(CoapExchange exchange) {
 		String alias = exchange.getQueryParameter("alias");
-		List<UUID> list = service.getActorsFromAlias(alias);
+		List<ActorId> list = service.getActorsFromAlias(alias);
 		if (!list.isEmpty()) {
 			try {
 				exchange.respond(
 					CoAP.ResponseCode.CONTENT, 
-					new ObjectMapper().writeValueAsString(new COAPActorResponse(COAPActorResponse.SUCCESS, 200, list, "")),
+					new ObjectMapper().writeValueAsString(new COAPActorResponse(COAPActorResponse.SUCCESS, 200, list.stream().map(id -> id.globalId()).toList(), "")),
 					MediaTypeRegistry.APPLICATION_JSON
 				);
 			} catch (JsonProcessingException e) {

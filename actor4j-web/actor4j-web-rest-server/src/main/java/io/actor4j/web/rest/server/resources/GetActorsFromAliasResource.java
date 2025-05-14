@@ -16,7 +16,6 @@
 package io.actor4j.web.rest.server.resources;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -30,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.web.utils.rest.databind.RESTActorResponse;
 
 @Path("/getActorsFromAlias/{alias}")
@@ -40,11 +40,11 @@ public class GetActorsFromAliasResource {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getActorsFromAlias(@PathParam("alias") String alias) {
-		List<UUID> list = service.getActorsFromAlias(alias);
+		List<ActorId> list = service.getActorsFromAlias(alias);
 		if (!list.isEmpty()) {
 			String json = "[]";
 			try {
-				json = new ObjectMapper().writeValueAsString(list);
+				json = new ObjectMapper().writeValueAsString(list.stream().map(id -> id.globalId()).toList());
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
 			}

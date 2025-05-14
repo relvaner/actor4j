@@ -16,12 +16,12 @@
 package io.actor4j.web.grpc.server;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass;
 import io.actor4j.web.grpc.ActorGrpcServiceGrpc.ActorGRPCServiceImplBase;
 import io.actor4j.web.grpc.ActorGrpcServiceOuterClass.ActorGRPCResponse;
@@ -56,16 +56,16 @@ public class ActorGrpcServiceImpl extends ActorGRPCServiceImplBase {
     			builder.setMessage((service.hasActor(request.getMessage())) ? "1" : "0");
     		}; break;
     		case GET_ACTORS_FROM_ALIAS : {
-    			List<UUID> list = service.getActorsFromAlias(request.getMessage());
+    			List<ActorId> list = service.getActorsFromAlias(request.getMessage());
     			try {
-					builder.setMessage((!list.isEmpty()) ? new ObjectMapper().writeValueAsString(list) : "[]");
+					builder.setMessage((!list.isEmpty()) ? new ObjectMapper().writeValueAsString(list.stream().map(id -> id.globalId()).toList()) : "[]");
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
     		}; break;
     		case GET_ACTOR_FROM_PATH : {
-    			UUID uuid = service.getActorFromPath(request.getMessage());
-    			builder.setMessage((uuid!=null) ? uuid.toString() : "null");
+    			ActorId id = service.getActorFromPath(request.getMessage());
+    			builder.setMessage((id.globalId()!=null) ? id.globalId().toString() : "null");
     		}; break;
     		case SEND_MESSAGE : {
     			RemoteActorMessageDTO buf = null;

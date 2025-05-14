@@ -15,8 +15,6 @@
  */
 package io.actor4j.web.coap.server.resources;
 
-import java.util.UUID;
-
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
@@ -25,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.actor4j.core.ActorService;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.web.utils.rest.databind.COAPActorResponse;
 
 public class GetActorFromPathResource extends COAPActorResource {
@@ -36,12 +35,12 @@ public class GetActorFromPathResource extends COAPActorResource {
 		
 	public void handleGET(CoapExchange exchange) {
 		String path = exchange.getQueryParameter("path");
-		UUID uuid = service.getActorFromPath(path);
+		ActorId id = service.getActorFromPath(path);
 		try {
-			if (uuid != null)
+			if (id != null)
 				exchange.respond(
 					CoAP.ResponseCode.CONTENT, 
-					new ObjectMapper().writeValueAsString(new COAPActorResponse(COAPActorResponse.SUCCESS, 200, uuid.toString(), "")),
+					new ObjectMapper().writeValueAsString(new COAPActorResponse(COAPActorResponse.SUCCESS, 200, id.globalId().toString(), "")),
 					MediaTypeRegistry.APPLICATION_JSON
 				);
 			else

@@ -17,12 +17,14 @@ package io.actor4j.web.utils;
 
 import java.util.UUID;
 
-public record RemoteActorMessageDTO(Object value, int tag, UUID source, UUID dest, String destPath, UUID id) {
-	public RemoteActorMessageDTO(Object value, int tag, UUID source, UUID dest) {
+import io.actor4j.core.id.ActorId;
+
+public record RemoteActorMessageDTO(Object value, int tag, ActorId source, ActorId dest, String destPath, UUID id) {
+	public RemoteActorMessageDTO(Object value, int tag, ActorId source, ActorId dest) {
 		this(value, tag, source, dest, null, UUID.randomUUID());
 	}
 
-	public RemoteActorMessageDTO(Object value, int tag, UUID source, String destPath) {
+	public RemoteActorMessageDTO(Object value, int tag, ActorId source, String destPath) {
 		this(value, tag, source, null, destPath, UUID.randomUUID());
 	}
 }
