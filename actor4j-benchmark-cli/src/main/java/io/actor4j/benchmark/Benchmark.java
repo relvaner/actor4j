@@ -29,8 +29,8 @@ public class Benchmark {
 		this(10, times);
 	}
 	
-	public Benchmark(int warmupIterations, int times) {
-		this(new BenchmarkConfig(warmupIterations, times));
+	public Benchmark(int warmupIterations, int iterations ) {
+		this(new BenchmarkConfig().warmupIterations(warmupIterations).iterations(iterations));
 	}
 	
 	public Benchmark(BenchmarkConfig config) {
@@ -46,13 +46,13 @@ public class Benchmark {
 		
 		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,###");
 		final TimeMeasurement timeMeasurement = new TimeMeasurement();
-		for (int i=1; i<=config.warmupIterations+config.duration; i++) {
+		for (int i=1; i<=config.warmupIterations()+config.iterations(); i++) {
 			if (runnable!=null)
 				runnable.accept(timeMeasurement, i);
-			if (statistics!=null && i>config.warmupIterations)
+			if (statistics!=null && i>config.warmupIterations())
 				statistics.addValue(timeMeasurement.getTime());
-			if (i>config.warmupIterations)
-				System.out.printf("%-2d : %s ms%n", i-config.warmupIterations, decimalFormat.format(timeMeasurement.getTime()));
+			if (i>config.warmupIterations())
+				System.out.printf("%-2d : %s ms%n", i-config.warmupIterations(), decimalFormat.format(timeMeasurement.getTime()));
 			else
 				System.out.printf("Warmup %-2d : %s ms%n", i, decimalFormat.format(timeMeasurement.getTime()));
 			timeMeasurement.reset();

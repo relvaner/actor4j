@@ -66,7 +66,7 @@ public class BenchmarkApplication {
 		Option optionActors = Option.builder("actors").hasArg().desc("actors per thread").argName("actors").build();
 
 		Option optionWarmupIterations = Option.builder("warmup").hasArg().desc("the warmup iterations for the benchmark").argName("warmup").build();
-		Option optionDuration = Option.builder("duration").hasArg().desc("the benchmark duration").argName("duration").build();
+		Option optionIterations = Option.builder("iters").hasArg().desc("the benchmark iterations").argName("iters").build();
 		
 		Option optionThreadMode = Option.builder("mode").hasArg().desc("the thread mode").argName("mode").build();
 		Option optionParallelismMin = Option.builder("threads").hasArg().desc("the number of threads").argName("threads").build();
@@ -82,7 +82,7 @@ public class BenchmarkApplication {
 		options.addOption(optionClass);
 		options.addOption(optionActors);
 		options.addOption(optionWarmupIterations);
-		options.addOption(optionDuration);
+		options.addOption(optionIterations);
 		options.addOption(optionThreadMode);
 		options.addOption(optionParallelismMin);
 		options.addOption(optionParallelismFactor);
@@ -110,23 +110,23 @@ public class BenchmarkApplication {
 			BenchmarkConfig config = new BenchmarkConfig();
 			
 			if (line.hasOption("actors"))
-				config.numberOfActors = Integer.valueOf(line.getOptionValue("actors"));
+				config.numberOfActors(Integer.valueOf(line.getOptionValue("actors")));
 			if (line.hasOption("warmup"))
-				config.warmupIterations = Integer.valueOf(line.getOptionValue("warmup"));
-			if (line.hasOption("duration"))
-				config.duration = Long.valueOf(line.getOptionValue("duration"));
+				config.warmupIterations(Integer.valueOf(line.getOptionValue("warmup")));
+			if (line.hasOption("iters"))
+				config.iterations(Integer.valueOf(line.getOptionValue("iters")));
 			if (line.hasOption("mode"))
-				config.threadMode = line.getOptionValue("mode");
+				config.threadMode(line.getOptionValue("mode"));
 			if (line.hasOption("threads"))
-				config.parallelism = Integer.valueOf(line.getOptionValue("threads"));
+				config.parallelism(Integer.valueOf(line.getOptionValue("threads")));
 			if (line.hasOption("factor"))
-				config.parallelismFactor = Integer.valueOf(line.getOptionValue("factor"));
+				config.parallelismFactor(Integer.valueOf(line.getOptionValue("factor")));
 			if (line.hasOption("throughput"))
-				config.throughput = Integer.valueOf(line.getOptionValue("throughput"));
+				config.throughput(Integer.valueOf(line.getOptionValue("throughput")));
 			if (line.hasOption("param1"))
-				config.param1 = line.getOptionValue("param1");
+				config.param1(line.getOptionValue("param1"));
 			if (line.hasOption("param2"))
-				config.param2 = line.getOptionValue("param2");
+				config.param2(line.getOptionValue("param2"));
 			
 			if (line.hasOption("class")) {
 				Class<?> clazz;
