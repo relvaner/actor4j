@@ -27,7 +27,7 @@ public class MessageThroughputMeasurement {
 	protected Timer timer;
 	protected TimerTask timerTask;
 
-	public MessageThroughputMeasurement(final Supplier<Long> counter, final long warmupIterations, final AtomicLong warmupCount, final DescriptiveStatistics statistics, final boolean console) {
+	public MessageThroughputMeasurement(final Supplier<Long> counter, final long warmupIterations, final AtomicLong warmupCounter, final DescriptiveStatistics statistics, final boolean console) {
 		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###");
 		
 		timer = new Timer();
@@ -42,7 +42,7 @@ public class MessageThroughputMeasurement {
 				if (statistics!=null && iteration>warmupIterations)
 					statistics.addValue(diff);
 				else
-					warmupCount.set(count);
+					warmupCounter.set(count);
 				if (console && iteration>warmupIterations)
 					System.out.printf("%-2d : %s msg/s%n", iteration-warmupIterations, decimalFormat.format(diff));
 				else
