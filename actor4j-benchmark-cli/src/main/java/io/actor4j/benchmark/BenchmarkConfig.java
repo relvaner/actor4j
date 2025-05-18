@@ -68,7 +68,7 @@ public class BenchmarkConfig {
 		return this;
 	}
 	
-	public long iterations() {
+	public int iterations() {
 		return iterations ;
 	}
 
