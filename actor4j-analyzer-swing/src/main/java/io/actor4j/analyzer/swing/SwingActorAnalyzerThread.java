@@ -15,8 +15,7 @@
  */
 package io.actor4j.analyzer.swing;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -40,12 +39,12 @@ public class SwingActorAnalyzerThread extends BaseActorAnalyzerThread {
 	}
 
 	@Override
-	protected void update(final Map<UUID, InternalActorCell> cells) {
+	protected void update(final Set<InternalActorCell> actorCells) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				visualAnalyzer.analyzeStructure(cells, showDefaultRoot, showRootSystem, colorize);
-				String status = visualAnalyzer.analyzeBehaviour(cells, deliveryRoutes, showRootSystem, colorize);
+				visualAnalyzer.analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
+				String status = visualAnalyzer.analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 				visualAnalyzer.setStatus(status);
 			}
 		});

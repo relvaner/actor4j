@@ -16,13 +16,13 @@
 package io.actor4j.analyzer.runtime;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 
 import io.actor4j.core.runtime.ActorSystemImpl;
 import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.runtime.DefaultActorMessageDispatcher;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatcher {
@@ -31,11 +31,11 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 	}
 
 	@Override
-	public void post(ActorMessage<?> message, UUID source, String alias) {
+	public void post(ActorMessage<?> message, ActorId source, String alias) {
 		
-		UUID dest = message.dest();
+		ActorId dest = message.dest();
 		if (alias!=null) {
-			List<UUID> destinations = system.getActorsFromAlias(alias);
+			List<ActorId> destinations = system.getActorsFromAlias(alias);
 
 			dest = null;
 			if (!destinations.isEmpty()) {
@@ -45,9 +45,9 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 					dest = destinations.get(ThreadLocalRandom.current().nextInt(destinations.size()));
 			}
 			if (dest==null)
-				dest = ALIAS_ID;
+				dest = system.ALIAS_ID();
 		}
-		UUID redirect = system.getRedirector().get(dest);
+		ActorId redirect = system.getRedirector().get(dest);
 		if (redirect!=null) 
 			dest = redirect;
 		analyze(alias==null && redirect==null ? message.copy() : message.copy(dest));
@@ -75,6 +75,6 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 	
 	protected void analyze(ActorMessage<?> message) {
 		if (message!=null && ((AnalyzerActorSystemImpl)system).getAnalyzeMode().get())
-				((AnalyzerActorSystemImpl)system).getAnalyzerThread().getOuterQueue().offer(message);
+			((AnalyzerActorSystemImpl)system).getAnalyzerThread().getOuterQueue().offer(message);
 	}
 }

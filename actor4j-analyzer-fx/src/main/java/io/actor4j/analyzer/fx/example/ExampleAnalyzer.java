@@ -27,6 +27,7 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.actors.ActorWithBothGroups;
 import io.actor4j.core.actors.ActorWithDistributedGroup;
 import io.actor4j.core.actors.ActorWithGroup;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorFactory;
 import io.actor4j.core.utils.ActorGroup;
@@ -57,20 +58,20 @@ public class ExampleAnalyzer extends FXAnalyzerApplication {
 		for (int i=0; i<size; i++) {
 			ActorGroup ringGroup = new ActorGroupSet();
 			final int f_i = i;
-			UUID id = system.addActor(new ActorFactory() {
+			ActorId id = system.addActor(new ActorFactory() {
 				@Override
 				public Actor create() {
 					return new ActorWithBothGroups("group-"+f_i, distributedGroup) {
 						protected boolean first = true;
-						protected UUID last;
+						protected ActorId last;
 						@Override
 						public void receive(ActorMessage<?> message) {
 							if (first) {
-								UUID next = self();
+								ActorId next = self();
 								for (int j=0; j<3; j++) {
 									final int f_j = j;
-									final UUID f_next = next;
-									UUID current = addChild(() -> new Sender("child-"+f_j, ringGroup, f_next));
+									final ActorId f_next = next;
+									ActorId current = addChild(() -> new Sender("child-"+f_j, ringGroup, f_next));
 									next = current;
 								}
 								last = next;
@@ -90,7 +91,7 @@ public class ExampleAnalyzer extends FXAnalyzerApplication {
 		}
 
 		ActorGroup hubGroup = new ActorGroupSet();
-		UUID id = system.addActor(new ActorFactory() {
+		ActorId id = system.addActor(new ActorFactory() {
 			@Override
 			public Actor create() {
 				return new ActorWithGroup("group-"+size, hubGroup) {
@@ -101,7 +102,7 @@ public class ExampleAnalyzer extends FXAnalyzerApplication {
 						if (first) {
 							for (int i=0; i<4; i++) {
 								final int f_i = i;
-								UUID childId = addChild(new ActorFactory() {
+								ActorId childId = addChild(new ActorFactory() {
 									@Override
 									public Actor create() {
 										return new ActorWithGroup("child-"+f_i, hubGroup){
@@ -124,12 +125,12 @@ public class ExampleAnalyzer extends FXAnalyzerApplication {
 		
 		
 		ActorGroup pingpongGroup = new ActorGroupSet();
-		UUID ping = system.addActor(new ActorFactory() {
+		ActorId ping = system.addActor(new ActorFactory() {
 			@Override
 			public Actor create() {
 				return new ActorWithDistributedGroup("ping", pingpongGroup) {
 					protected boolean first = true;
-					protected UUID pong;
+					protected ActorId pong;
 					@Override
 					public void receive(ActorMessage<?> message) {
 						if (first) {

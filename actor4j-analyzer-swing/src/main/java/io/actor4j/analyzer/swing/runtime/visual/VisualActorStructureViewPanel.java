@@ -15,13 +15,11 @@
  */
 package io.actor4j.analyzer.swing.runtime.visual;
 
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.SwingConstants;
-
-import java.util.UUID;
 
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxGraphLayout;
@@ -81,7 +79,7 @@ public class VisualActorStructureViewPanel extends VisualActorViewPanel {
 		add("Structure", paDesign);
 	}
 			
-	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		visualActorStructureView.analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 

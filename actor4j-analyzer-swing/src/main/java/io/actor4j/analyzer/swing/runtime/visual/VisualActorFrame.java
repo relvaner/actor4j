@@ -21,7 +21,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,6 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 
@@ -115,12 +116,12 @@ public class VisualActorFrame extends JFrame {
 		statusLabel.setText(status);
 	}
 
-	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultParent, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultParent, boolean showRootSystem, boolean colorize) {
 		((VisualActorStructureViewPanel)leftViewPanel).analyzeStructure(actorCells, showDefaultParent, showRootSystem, colorize);
 		((VisualActorStructureViewPanel)leftViewPanel).updateStructure();
 	}
 	
-	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public String analyzeBehaviour(Set<InternalActorCell> actorCells, Map<ActorId, Map<ActorId, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		String result = ((VisualActorBehaviourViewPanel)rightViewPanel).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 		((VisualActorBehaviourViewPanel)rightViewPanel).updateStructure();
 		

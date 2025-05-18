@@ -16,11 +16,10 @@
 package io.actor4j.analyzer.runtime;
 
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -53,7 +52,9 @@ public abstract class ActorAnalyzerThread extends Thread {
 		timerTask = new TimerTask() {
 			@Override
 			public void run() {
-				update(system.getCells());
+				((AnalyzerActorSystemImpl)system).getActorCells();
+				
+				update(((AnalyzerActorSystemImpl)system).getActorCells());
 			}
 		};
 		this.period = period;
@@ -79,7 +80,7 @@ public abstract class ActorAnalyzerThread extends Thread {
 	
 	protected abstract void analyze(ActorMessage<?> message);
 	
-	protected abstract void update(Map<UUID, InternalActorCell> cells);
+	protected abstract void update(Set<InternalActorCell> actorCells);
 	
 	@Override
 	public void run() {

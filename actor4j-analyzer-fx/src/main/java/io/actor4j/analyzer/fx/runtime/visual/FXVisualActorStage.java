@@ -16,9 +16,10 @@
 package io.actor4j.analyzer.fx.runtime.visual;
 
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 import javafx.scene.control.Label;
@@ -83,11 +84,11 @@ public class FXVisualActorStage {
 		rightView.afterShow();
 	}
 	
-	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		((FXVisualActorStructureViewTab)leftView).analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 	
-	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public String analyzeBehaviour(Set<InternalActorCell> actorCells, Map<ActorId, Map<ActorId, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		return ((FXVisualActorBehaviourViewTab)rightView).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 	}
 	

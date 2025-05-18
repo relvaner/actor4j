@@ -15,15 +15,13 @@
  */
 package io.actor4j.analyzer.fx.runtime.visual;
 
-import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.brunomnsilva.smartgraph.graph.Vertex;
-
-import java.util.UUID;
 
 import io.actor4j.analyzer.runtime.VisualActorStructureView;
 import io.actor4j.core.runtime.InternalActorCell;
@@ -100,7 +98,7 @@ public class FXVisualActorStructureViewTab extends FXVisualActorViewTab {
 		lastLayoutIndex = -1;
 	}
 			
-	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		visualActorStructureView.analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 }

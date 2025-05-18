@@ -21,11 +21,12 @@ import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
 
 import io.actor4j.analyzer.runtime.VisualActorBehaviourView;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -98,7 +99,7 @@ public class VisualActorBehaviourViewPanel extends VisualActorViewPanel  {
 		add("Behaviour", paDesign);
 	}
 	
-	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public String analyzeBehaviour(Set<InternalActorCell> actorCells, Map<ActorId, Map<ActorId, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		return visualActorBehaviourView.analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 	}
 

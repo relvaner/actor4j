@@ -15,8 +15,7 @@
  */
 package io.actor4j.analyzer.fx;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 import io.actor4j.analyzer.BaseActorAnalyzerThread;
 import io.actor4j.analyzer.VisualActorAnalyzer;
@@ -39,12 +38,12 @@ public class FXActorAnalyzerThread extends BaseActorAnalyzerThread {
 	}
 
 	@Override
-	protected void update(final Map<UUID, InternalActorCell> cells) {
+	protected void update(final Set<InternalActorCell> actorCells) {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				visualAnalyzer.analyzeStructure(cells, showDefaultRoot, showRootSystem, colorize);
-				String status = visualAnalyzer.analyzeBehaviour(cells, deliveryRoutes, showRootSystem, colorize);
+				visualAnalyzer.analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
+				String status = visualAnalyzer.analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 				visualAnalyzer.setStatus(status);
 			}
 		});

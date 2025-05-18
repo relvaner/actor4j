@@ -20,11 +20,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.UUID;
 
 import io.actor4j.analyzer.runtime.visual.Utils;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.ActorExecutionUnitPoolHandler;
 import io.actor4j.core.runtime.DefaultActorExecutionUnitPoolHandler;
 import io.actor4j.core.runtime.InternalActorCell;
@@ -34,8 +35,8 @@ import io.actor4j.core.runtime.InternalActorSystem;
 public abstract class VisualActorStructureView {
 	protected final AtomicReference<InternalActorSystem> system;
 	
-	protected final Map<UUID, Boolean> activeCells;
-	protected final Map<UUID, Object>  cells;
+	protected final Map<ActorId, Boolean> activeCells;
+	protected final Map<ActorId, Object>  cells;
 	
 	protected Object defaultRoot;
 	protected boolean changed;
@@ -51,8 +52,8 @@ public abstract class VisualActorStructureView {
 		return changed;
 	}
 
-	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
-		Iterator<Entry<UUID, Boolean>> iteratorActiveCells = activeCells.entrySet().iterator();
+	public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+		Iterator<Entry<ActorId, Boolean>> iteratorActiveCells = activeCells.entrySet().iterator();
 		while (iteratorActiveCells.hasNext())
 			iteratorActiveCells.next().setValue(false);
 		changed = false;
@@ -61,17 +62,17 @@ public abstract class VisualActorStructureView {
         	if (showDefaultRoot && defaultRoot==null)
         		defaultRoot = addVertex("actor4j", "white");
         	
-        	analyzeRootActor(actorCells, actorCells.get(system.get().USER_ID()), "yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, (InternalActorCell)system.get().USER_ID(), "yellow", showDefaultRoot, colorize);
         	if (showRootSystem)
-        		analyzeRootActor(actorCells, actorCells.get(system.get().SYSTEM_ID()), "yellow", showDefaultRoot, colorize);
+        		analyzeRootActor(actorCells, (InternalActorCell)system.get().SYSTEM_ID(), "yellow", showDefaultRoot, colorize);
         	else
-        		showOnlyRootActor(actorCells, actorCells.get(system.get().SYSTEM_ID()), "yellow", showDefaultRoot);
-        	analyzeRootActor(actorCells, actorCells.get(system.get().UNKNOWN_ID()), "yellow", showDefaultRoot, colorize);
-        	analyzeRootActor(actorCells, actorCells.get(system.get().PSEUDO_ID()), "yellow", showDefaultRoot, colorize);
+        		showOnlyRootActor(actorCells, (InternalActorCell)system.get().SYSTEM_ID(), "yellow", showDefaultRoot);
+        	analyzeRootActor(actorCells, (InternalActorCell)system.get().UNKNOWN_ID(), "yellow", showDefaultRoot, colorize);
+        	analyzeRootActor(actorCells, (InternalActorCell)system.get().PSEUDO_ID(), "yellow", showDefaultRoot, colorize);
         	
 //        	Iterator<Entry<UUID, Boolean>> iteratorActiveCells_ = activeCells.entrySet().iterator();
         	while (iteratorActiveCells.hasNext()) {
-        		Entry<UUID, Boolean> entry = iteratorActiveCells.next();
+        		Entry<ActorId, Boolean> entry = iteratorActiveCells.next();
         		if (!entry.getValue()) {
         			//graph.removeCells(graph.getChildVertices(cells.get(entry.getKey())), true);
         			//graph.removeCells(new Object[] {cells.get(entry.getKey())}, true);
@@ -84,7 +85,7 @@ public abstract class VisualActorStructureView {
 		});
 	}
 	
-	public void showOnlyRootActor(Map<UUID, InternalActorCell> actorCells, InternalActorCell root, String color, boolean showDefaultRoot) {
+	public void showOnlyRootActor(Set<InternalActorCell> actorCells, InternalActorCell root, String color, boolean showDefaultRoot) {
 		if (root!=null) {
 			if (activeCells.put(root.getId(), true)==null) {
 				Object rootVertex;
@@ -102,7 +103,7 @@ public abstract class VisualActorStructureView {
 		}
 	}
 	
-	public void analyzeRootActor(Map<UUID, InternalActorCell> actorCells, InternalActorCell root, String color, boolean showDefaultRoot, boolean colorize) {
+	public void analyzeRootActor(Set<InternalActorCell> actorCells, InternalActorCell root, String color, boolean showDefaultRoot, boolean colorize) {
 		if (root!=null) {
 			if (activeCells.put(root.getId(), true)==null) {
 				Object rootVertex;
@@ -122,53 +123,54 @@ public abstract class VisualActorStructureView {
 		}
 	}
 	
-	public void analyzeActor(Map<UUID, InternalActorCell> actorCells, InternalActorCell parent, Object parentVertex, boolean colorize) {
-		Iterator<UUID> iterator = parent.getChildren().iterator();
-		while (iterator.hasNext()) {
-			InternalActorCell child = actorCells.get(iterator.next());
-			if (child!=null) {
-				if (activeCells.put(child.getId(), true)==null) {
-					Object childVertex;
-					
-					String color = null;
-					if (colorize) {
-						ActorExecutionUnitPoolHandler<?> poolHandler = ((InternalActorExecutorService<?>)system.get().getExecutorService()).getExecutionUnitPool().getExecutionUnitPoolHandler();
-        				if (poolHandler instanceof DefaultActorExecutionUnitPoolHandler<?> ph) {
-	        				Long threadId = ph.getCellsMap().get(child.getId());
-	        				if (threadId!=null)
-	        					color = Utils.randomColorAsHex(
-	        						ph.getExecutionUnitList().indexOf(threadId), 
-	        						system.get().getConfig().parallelism()*system.get().getConfig().parallelismFactor());
-	        				else
-	        					color = "#F0F0F0";
-        				}
-        				else
-        					color = "#F0F0F0";
-        			}
-        			else
-        				color = "#00FF00";
-					
-					if (child.getActor().getName()!=null)
-						childVertex = addVertex(child.getActor().getName(), color);
-					else {
-    					Optional<Entry<String, Queue<UUID>>> optional = system.get().getAliases().entrySet()
-    						.stream().filter((entry) -> entry.getValue().contains(child.getId())).findFirst();
-    					if (optional.isPresent())
-    						childVertex = addVertex(optional.get().getKey(), color);
-    					else
-    						childVertex = addVertex(child.getId().toString(), color);
-    				}	
-				
-					addEdge(null, parentVertex, childVertex);
-					
-					cells.put(child.getId(), childVertex);
-					changed = true;
+	public void analyzeActor(InternalActorCell cell, Object parentVertex, boolean colorize) {
+		if (activeCells.put(cell.getId(), true)==null) {
+			Object childVertex;
+			
+			String color = null;
+			if (colorize) {
+				ActorExecutionUnitPoolHandler<?> poolHandler = ((InternalActorExecutorService<?>)system.get().getExecutorService()).getExecutionUnitPool().getExecutionUnitPoolHandler();
+				if (poolHandler instanceof DefaultActorExecutionUnitPoolHandler<?> ph) {
+    				Long threadId = cell.getThreadId();
+    				if (threadId>0)
+    					color = Utils.randomColorAsHex(
+    						ph.getExecutionUnitList().indexOf(threadId), 
+    						system.get().getConfig().parallelism()*system.get().getConfig().parallelismFactor());
+    				else
+    					color = "#F0F0F0";
 				}
-				
-				
-				analyzeActor(actorCells, child, cells.get(child.getId()), colorize);
+				else
+					color = "#F0F0F0";
 			}
+			else
+				color = "#00FF00";
+			
+			if (cell.getActor().getName()!=null)
+				childVertex = addVertex(cell.getActor().getName(), color);
+			else {
+				Optional<Entry<String, Queue<ActorId>>> optional = system.get().getAliases().entrySet()
+					.stream().filter((entry) -> entry.getValue().contains(cell.getId())).findFirst();
+				if (optional.isPresent())
+					childVertex = addVertex(optional.get().getKey(), color);
+				else
+					childVertex = addVertex(cell.getId().toString(), color);
+			}	
+		
+			addEdge(null, parentVertex, childVertex);
+			
+			cells.put(cell.getId(), childVertex);
+			changed = true;
 		}
+	}
+	
+	public void analyzeActor(Set<InternalActorCell> actorCells, InternalActorCell parent, Object parentVertex, boolean colorize) {
+		system.get().internal_iterateCell(parent, (cell) -> {
+			if (cell!=parent) {
+				ActorId parentId = ((InternalActorCell)cell.getParent()).getId();
+				analyzeActor(cell, cells.get(parentId), colorize);
+			}
+			return false;
+		});
 	}
 
 	public abstract void removeVertex(Object source);

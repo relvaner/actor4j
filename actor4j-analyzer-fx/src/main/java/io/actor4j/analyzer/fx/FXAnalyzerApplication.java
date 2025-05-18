@@ -16,7 +16,7 @@
 package io.actor4j.analyzer.fx;
 
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,6 +24,7 @@ import io.actor4j.analyzer.VisualActorAnalyzer;
 import io.actor4j.analyzer.fx.runtime.visual.FXAbstractApplication;
 import io.actor4j.analyzer.fx.runtime.visual.FXVisualActorAnalyzer;
 import io.actor4j.analyzer.fx.runtime.visual.FXVisualActorStage;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 import javafx.scene.Scene;
@@ -55,14 +56,14 @@ public class FXAnalyzerApplication extends FXAbstractApplication {
 			}
 			
 			@Override
-			public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot,
+			public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultRoot,
 					boolean showRootSystem, boolean colorize) {
 				FXAnalyzerApplication.this.analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 			}
 
 			@Override
-			public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells,
-					Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+			public String analyzeBehaviour(Set<InternalActorCell> actorCells,
+					Map<ActorId, Map<ActorId, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 				return FXAnalyzerApplication.this.analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 			}
 
@@ -101,12 +102,12 @@ public class FXAnalyzerApplication extends FXAbstractApplication {
 		return visualActorAnalyzer;
 	}
 	
-	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		if (started.get())
 			visualStage.analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 	
-	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public String analyzeBehaviour(Set<InternalActorCell> actorCells, Map<ActorId, Map<ActorId, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		String result = null;
 		
 		if (started.get())

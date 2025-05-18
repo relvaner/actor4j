@@ -17,11 +17,12 @@ package io.actor4j.analyzer.swing;
 
 import java.awt.event.WindowEvent;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 import io.actor4j.analyzer.VisualActorAnalyzer;
 import io.actor4j.analyzer.swing.runtime.visual.SwingSubApplication;
 import io.actor4j.analyzer.swing.runtime.visual.VisualActorFrame;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.runtime.InternalActorSystem;
 
@@ -56,12 +57,12 @@ public class SwingVisualActorAnalyzer implements VisualActorAnalyzer {
 	}
 	
 	@Override
-	public void analyzeStructure(Map<UUID, InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
+	public void analyzeStructure(Set<InternalActorCell> actorCells, boolean showDefaultRoot, boolean showRootSystem, boolean colorize) {
 		((VisualActorFrame)application.getFrame()).analyzeStructure(actorCells, showDefaultRoot, showRootSystem, colorize);
 	}
 	
 	@Override
-	public String analyzeBehaviour(Map<UUID, InternalActorCell> actorCells, Map<UUID, Map<UUID, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
+	public String analyzeBehaviour(Set<InternalActorCell> actorCells, Map<ActorId, Map<ActorId, Long>> deliveryRoutes, boolean showRootSystem, boolean colorize) {
 		return ((VisualActorFrame)application.getFrame()).analyzeBehaviour(actorCells, deliveryRoutes, showRootSystem, colorize);
 	}
 	

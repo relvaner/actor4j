@@ -16,17 +16,17 @@
 package io.actor4j.analyzer;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.actor4j.analyzer.runtime.ActorAnalyzerThread;
 import io.actor4j.core.runtime.InternalActorSystem;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
 public abstract class BaseActorAnalyzerThread extends ActorAnalyzerThread {
 	protected final VisualActorAnalyzer visualAnalyzer;
 	
-	protected final Map<UUID, Map<UUID, Long>> deliveryRoutes;
+	protected final Map<ActorId, Map<ActorId, Long>> deliveryRoutes;
 	
 	protected final boolean showDefaultRoot;
 	protected final boolean showRootSystem;
@@ -60,15 +60,15 @@ public abstract class BaseActorAnalyzerThread extends ActorAnalyzerThread {
 	
 	@Override
 	protected void analyze(ActorMessage<?> message) {
-		UUID source = message.source();
-		UUID dest = message.dest();
+		ActorId source = message.source();
+		ActorId dest = message.dest();
 		
 		if (message.source()==null)
 			source = system.UNKNOWN_ID();
 		if (message.dest()==null)
 			dest = system.UNKNOWN_ID();
 		
-		Map<UUID, Long> routes = deliveryRoutes.get(source);
+		Map<ActorId, Long> routes = deliveryRoutes.get(source);
 		if (routes==null) {
 			routes = new ConcurrentHashMap<>();
 			deliveryRoutes.put(source, routes);

@@ -15,16 +15,23 @@
  */
 package io.actor4j.analyzer.runtime;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.actor4j.analyzer.ActorAnalyzer;
 import io.actor4j.analyzer.config.ActorAnalyzerConfig;
+import io.actor4j.core.actors.PseudoActor;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.runtime.ActorSystemImpl;
 import io.actor4j.core.runtime.DefaultActorSystemImpl;
+import io.actor4j.core.runtime.InternalActorCell;
 
 public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl implements ActorAnalyzer {
 	protected AtomicBoolean analyzeMode;
 	protected ActorAnalyzerThread analyzerThread;
+	
+	protected final Set<InternalActorCell> actorCells; // current workaround
 	
 	private AnalyzerActorSystemImpl (ActorAnalyzerConfig config) {
 		super(config!=null ? config : ActorAnalyzerConfig.create());
@@ -32,17 +39,34 @@ public class AnalyzerActorSystemImpl extends DefaultActorSystemImpl implements A
 		analyzeMode = new AtomicBoolean(false);
 		
 		messageDispatcher = new AnalyzerActorMessageDispatcher(this);
+		
+		actorCells = ConcurrentHashMap.newKeySet();
+		actorCells.add((InternalActorCell)USER_ID);
+		actorCells.add((InternalActorCell)SYSTEM_ID);
+		actorCells.add((InternalActorCell)UNKNOWN_ID);
+		actorCells.add((InternalActorCell)PSEUDO_ID);
 	}
 	
 	public AnalyzerActorSystemImpl(ActorAnalyzerThread analyzerThread, ActorAnalyzerConfig config) {
 		this(config);
-		
+
 		analyze(analyzerThread);
+	}
+	
+	public Set<InternalActorCell> getActorCells() {
+		return actorCells;
 	}
 	
 	@Override
 	public boolean setConfig(ActorAnalyzerConfig config) {
 		return super.setConfig(config);
+	}
+	
+	@Override
+	public ActorId internal_addCell(InternalActorCell cell) {
+		if (actorCells!=null && !(cell.getActor() instanceof PseudoActor))
+			actorCells.add(cell);
+		return super.internal_addCell(cell);
 	}
 	
 	public ActorSystemImpl analyze(ActorAnalyzerThread analyzerThread) {

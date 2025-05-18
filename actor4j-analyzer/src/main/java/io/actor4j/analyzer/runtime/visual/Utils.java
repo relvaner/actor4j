@@ -24,10 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.Map.Entry;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+import io.actor4j.core.id.ActorId;
 
 public final class Utils {
 	public static record Triple<A, B, C>(A a, B b, C c) {
@@ -85,17 +86,17 @@ public final class Utils {
 		return colorToHex(randomColor(index, parallelism));
 	}
 	
-	public static Triple<Integer, Integer, Double> complexity(Map<UUID, Map<UUID, Long>> deliveryRoutes, Set<UUID> filter) {
-		Iterator<Entry<UUID,Map<UUID,Long>>> iterator = deliveryRoutes.entrySet().iterator();
+	public static Triple<Integer, Integer, Double> complexity(Map<ActorId, Map<ActorId, Long>> deliveryRoutes, Set<ActorId> filter) {
+		Iterator<Entry<ActorId,Map<ActorId,Long>>> iterator = deliveryRoutes.entrySet().iterator();
 		 
 		int countActors = 0;
 		int countEdges = 0;
 		while (iterator.hasNext()) {
-			Entry<UUID,Map<UUID,Long>> entry = iterator.next();
+			Entry<ActorId,Map<ActorId,Long>> entry = iterator.next();
 			if (filter.contains(entry.getKey()))
 				continue;
 			
-			Map<UUID,Long> map = entry.getValue();
+			Map<ActorId,Long> map = entry.getValue();
 			if (map!=null && map.size()>0) {
 				countEdges += map.size();
 				countActors += 1;
@@ -110,16 +111,16 @@ public final class Utils {
 	 * Symmetric:     Mod=Median=Mean
 	 * Negative Skew: Mod>Median>Mean
 	 */
-	public static DescriptiveStatistics weightStatistics(Map<UUID, Map<UUID, Long>> deliveryRoutes, Set<UUID> filter) {
+	public static DescriptiveStatistics weightStatistics(Map<ActorId, Map<ActorId, Long>> deliveryRoutes, Set<ActorId> filter) {
 		DescriptiveStatistics result = new DescriptiveStatistics();
 		
-		Iterator<Entry<UUID,Map<UUID,Long>>> iterator = deliveryRoutes.entrySet().iterator();
+		Iterator<Entry<ActorId,Map<ActorId,Long>>> iterator = deliveryRoutes.entrySet().iterator();
 		while (iterator.hasNext()) {
-			Entry<UUID,Map<UUID,Long>> entry = iterator.next();
+			Entry<ActorId,Map<ActorId,Long>> entry = iterator.next();
 			if (filter.contains(entry.getKey()))
 				continue;
 			
-			Map<UUID,Long> map = entry.getValue();
+			Map<ActorId,Long> map = entry.getValue();
 			if (map!=null && map.size()>0)
 				for (long value : map.values())
 					result.addValue(value);

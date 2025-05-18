@@ -15,16 +15,15 @@
  */
 package io.actor4j.analyzer.swing.example;
 
-import java.util.UUID;
-
 import io.actor4j.core.actors.ActorWithGroup;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 
 public class Sender extends ActorWithGroup {
-	protected UUID next;
+	protected ActorId next;
 	
-	public Sender(String name, ActorGroup group, UUID next) {
+	public Sender(String name, ActorGroup group, ActorId next) {
 		super(name, group);
 		
 		this.next = next;
