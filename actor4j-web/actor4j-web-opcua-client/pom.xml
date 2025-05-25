@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>io.actor4j</groupId>
 		<artifactId>actor4j-web</artifactId>
-		<version>2.1.0</version>
+		<version>${revision}</version>
 	</parent>
 	<groupId>actor4j-web</groupId>
 	<artifactId>actor4j-web-opcua-client</artifactId>

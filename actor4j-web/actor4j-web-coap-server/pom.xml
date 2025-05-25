@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>io.actor4j</groupId>
 		<artifactId>actor4j-web</artifactId>
-		<version>2.1.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>actor4j-web-coap-server</artifactId>
 
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-utils</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 
 		<dependency>

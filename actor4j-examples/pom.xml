@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>io.actor4j</groupId>
 		<artifactId>actor4j</artifactId>
-		<version>2.1.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>actor4j-examples</artifactId>
 	
@@ -28,43 +28,43 @@
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core-sdk</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core-runtime</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-dataformat-json-org</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-dataformat-json-jackson</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-persistence-mongo</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-data</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-data-mongo</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-data-jpa</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
@@ -74,49 +74,49 @@
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-testing</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-poc-verification</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-analyzer</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-analyzer-swing</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-mqtt</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-amqp</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-coap-client</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-web-coap-server</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-poc-apc-actor</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		
 		<dependency>

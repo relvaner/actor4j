@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>io.actor4j</groupId>
 		<artifactId>actor4j</artifactId>
-		<version>2.1.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>actor4j-web</artifactId>
 	<packaging>pom</packaging>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core-sdk</artifactId>
-			<version>${actor4j.version}</version>
+			<version>${revision}</version>
 		</dependency>
 	</dependencies>
 		
