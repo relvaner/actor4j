@@ -44,11 +44,34 @@
 	
 	<properties>
 		<revision>2.4.0</revision>
+		<actor4j.core.version>2.4.0</actor4j.core.version>
 		<junit.version>5.11.3</junit.version>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	
+	<build>
+		<plugins>
+    		<plugin>
+      			<groupId>org.codehaus.mojo</groupId>
+      			<artifactId>flatten-maven-plugin</artifactId>
+      			<version>1.7.0</version>
+      			<configuration>
+        			<updatePomFile>true</updatePomFile>
+      			</configuration>
+      			<executions>
+        			<execution>
+          				<id>flatten</id>
+          				<phase>verify</phase>
+          				<goals>
+            				<goal>flatten</goal>
+          				</goals>
+        			</execution>
+      			</executions>
+    		</plugin>
+    	</plugins>
+    </build>
 	
 	<modules>
 		<module>actor4j-database-jpa-sync</module>

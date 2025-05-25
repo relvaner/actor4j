@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-core-sdk</artifactId>
-			<version>${revision}</version>
+			<version>${actor4j.core.version}</version>
 		</dependency>
 	</dependencies>
 		
