@@ -22,7 +22,7 @@
 	<version>${revision}</version>
 	<packaging>pom</packaging>
 	
-	<name>actor4j</name>
+	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Actor4j is an actor-oriented Java framework.</description>
 	<url>https://github.com/relvaner/actor4j</url>
 	<inceptionYear>2015</inceptionYear>
@@ -42,6 +42,12 @@
 		</developer>
 	</developers>
 	
+	<scm>
+		<connection>scm:git:https://github.com/relvaner/actor4j.git</connection>
+		<developerConnection>scm:git:git@github.com:relvaner/actor4j.git</developerConnection>
+		<url>https://github.com/relvaner/actor4j/</url>
+	</scm>
+	
 	<properties>
 		<revision>2.4.0</revision>
 		<actor4j.core.version>2.4.0</actor4j.core.version>
@@ -53,6 +59,60 @@
 	
 	<build>
 		<plugins>
+			<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-source-plugin</artifactId>
+      			<version>3.3.1</version>
+      			<executions>
+        			<execution>
+          				<id>attach-sources</id>
+          				<goals>
+            				<goal>jar-no-fork</goal>
+          				</goals>
+        			</execution>
+      			</executions>
+    		</plugin>
+    		<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-javadoc-plugin</artifactId>
+      			<version>3.11.2</version>
+      			<executions>
+        			<execution>
+          				<id>attach-javadocs</id>
+          				<goals>
+            				<goal>jar</goal>
+          				</goals>
+        			</execution>
+      			</executions>
+    		</plugin>
+    		
+    		<plugin>
+       			<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-assembly-plugin</artifactId>
+        		<version>3.7.1</version>
+        		<configuration>
+        			<descriptorRefs>
+            			<descriptorRef>jar-with-dependencies</descriptorRef>
+          			</descriptorRefs>
+              		<finalName>${project.artifactId}-${project.version}</finalName>
+              		<appendAssemblyId>false</appendAssemblyId>
+              		<archive>
+            			<manifestEntries>
+                			<Automatic-Module-Name>io.actor4j.core</Automatic-Module-Name>
+            			</manifestEntries>
+        			</archive>
+            	</configuration>
+        		<executions>
+          			<execution>
+            			<id>make-assembly</id>
+            			<phase>package</phase>
+            			<goals>
+              				<goal>single</goal>
+            			</goals>
+          			</execution>
+        		</executions>
+    		</plugin>
+    		
     		<plugin>
       			<groupId>org.codehaus.mojo</groupId>
       			<artifactId>flatten-maven-plugin</artifactId>
@@ -67,6 +127,23 @@
           				<phase>verify</phase>
           				<goals>
             				<goal>flatten</goal>
+          				</goals>
+        			</execution>
+      			</executions>
+    		</plugin>
+    		<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-gpg-plugin</artifactId>
+      			<version>3.2.7</version>
+      			<configuration>
+    				<skip>true</skip>
+				</configuration>
+      			<executions>
+        			<execution>
+          				<id>sign-artifacts</id>
+          				<phase>verify</phase>
+          				<goals>
+            				<goal>sign</goal>
           				</goals>
         			</execution>
       			</executions>
