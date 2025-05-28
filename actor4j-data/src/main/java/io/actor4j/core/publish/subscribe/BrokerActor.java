@@ -26,8 +26,8 @@ import io.actor4j.core.messages.ActorMessage;
 import static io.actor4j.core.messages.ActorReservedTag.*;
 
 /**
- * publish over broker or directly to the topic actor (Tag=GET_TOPIC_ACTOR), watch(TOPIC_ACTOR) on starvation (no subscribers)
- * subscribe && unsubscribe only over the broker
+ * Publish over broker or directly to the topic actor (Tag=GET_TOPIC_ACTOR), watch(TOPIC_ACTOR) on starvation (no subscribers)
+ * Subscribe and unsubscribe only over the broker
  */
 public class BrokerActor extends Actor {
 	protected Map<String, ActorId> topics;
