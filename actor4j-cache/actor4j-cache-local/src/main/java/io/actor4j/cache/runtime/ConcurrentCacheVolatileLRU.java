@@ -341,7 +341,7 @@ public class ConcurrentCacheVolatileLRU<K, V> implements ConcurrentCache<K, V>  
 			return;
 
 		clients.incrementAndGet();
-		long currentTime = System.currentTimeMillis();
+		long currentTime = System.nanoTime();
 		Iterator<K> iterator = map.keySet().iterator();
 		while (iterator.hasNext()) {
 			K key = iterator.next();

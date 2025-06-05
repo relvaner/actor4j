@@ -204,7 +204,7 @@ public class AsyncCacheVolatileLRU<K, V> implements AsyncCache<K, V>  {
 	
 	@Override
 	public void evict(long duration) {
-		long currentTime = System.currentTimeMillis();
+		long currentTime = System.nanoTime();
 		
 		Iterator<Entry<Long, K>> iterator = lru.entrySet().iterator();
 		while (iterator.hasNext()) {
