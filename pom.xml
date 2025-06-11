@@ -180,16 +180,45 @@
 		<module>actor4j-analyzer-swing</module>
 		<module>actor4j-analyzer-fx</module>
 		
-		<module>actor4j-benchmark-cli</module>
-		<module>actor4j-benchmark</module>
-		
-		<module>actor4j-patterns</module>
-		<module>actor4j-examples</module>
-		
-		<module>actor4j-poc</module>
-		
 		<module>actor4j-web</module>
 		
 		<module>actor4j-streams</module>
 	</modules>
+	
+	<profiles>
+		<profile>
+			<id>all</id>
+			<modules>
+				<module>actor4j-database-jpa-sync</module>
+				<module>actor4j-database-mongo-sync</module>
+		
+				<module>actor4j-cache</module>
+				
+				<module>actor4j-dataformat</module>
+				<module>actor4j-data</module>
+				<module>actor4j-data-jpa</module>
+				<module>actor4j-data-mongo</module>
+				
+				<module>actor4j-persistence-mongo</module>
+				
+				<module>actor4j-testing</module>
+		
+				<module>actor4j-analyzer</module>
+				<module>actor4j-analyzer-swing</module>
+				<module>actor4j-analyzer-fx</module>
+				
+				<module>actor4j-benchmark-cli</module>
+				<module>actor4j-benchmark</module>
+				
+				<module>actor4j-patterns</module>
+				<module>actor4j-examples</module>
+				
+				<module>actor4j-poc</module>
+				
+				<module>actor4j-web</module>
+				
+				<module>actor4j-streams</module>
+			</modules>
+    	</profile>
+	</profiles>
 </project>

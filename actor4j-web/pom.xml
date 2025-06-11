@@ -35,16 +35,30 @@
 		
 	<modules>
 		<module>actor4j-web-utils</module>
-		<module>actor4j-web-rest-server</module>
-		<module>actor4j-web-rest-client</module>
-		<module>actor4j-web-websocket</module>
-		<module>actor4j-web-grpc</module>
 		<module>actor4j-web-mqtt</module>
 		<module>actor4j-web-amqp</module>
 		<module>actor4j-web-coap-client</module>
 		<module>actor4j-web-coap-server</module>
-		<module>actor4j-web-opcua-client</module>
-		<module>actor4j-web-opcua-server</module>
 		<module>actor4j-web-kafka</module>
 	</modules>
+	
+	<profiles>
+		<profile>
+			<id>all</id>
+			<modules>
+				<module>actor4j-web-utils</module>
+				<module>actor4j-web-rest-server</module>
+				<module>actor4j-web-rest-client</module>
+				<module>actor4j-web-websocket</module>
+				<module>actor4j-web-grpc</module>
+				<module>actor4j-web-mqtt</module>
+				<module>actor4j-web-amqp</module>
+				<module>actor4j-web-coap-client</module>
+				<module>actor4j-web-coap-server</module>
+				<module>actor4j-web-opcua-client</module>
+				<module>actor4j-web-opcua-server</module>
+				<module>actor4j-web-kafka</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>

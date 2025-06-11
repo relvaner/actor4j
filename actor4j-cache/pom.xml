@@ -12,9 +12,18 @@
 	
 	<modules>
 		<module>actor4j-cache-local</module>
-		<module>actor4j-cache-rocks</module>
-		<module>actor4j-jcache</module>
-		
-		<module>actor4j-cache-mongo</module>
 	</modules>
+	
+	<profiles>
+		<profile>
+			<id>all</id>
+			<modules>
+				<module>actor4j-cache-local</module>
+				<module>actor4j-cache-rocks</module>
+				<module>actor4j-jcache</module>
+		
+				<module>actor4j-cache-mongo</module>
+			</modules>
+		</profile>
+	</profiles>
 </project>
