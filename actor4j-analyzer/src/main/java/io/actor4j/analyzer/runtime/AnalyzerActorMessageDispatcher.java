@@ -22,7 +22,6 @@ import java.util.function.BiConsumer;
 import io.actor4j.core.runtime.ActorSystemImpl;
 import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.runtime.DefaultActorMessageDispatcher;
-import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 
@@ -48,7 +47,7 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 			if (dest==null)
 				dest = system.ALIAS_ID();
 		}
-		ActorId redirect = ((InternalActorCell)dest).getRedirect();
+		ActorId redirect = dest.redirectId();
 		if (redirect!=null) 
 			dest = redirect;
 		analyze(alias==null && redirect==null ? message.copy() : message.copy(dest));
