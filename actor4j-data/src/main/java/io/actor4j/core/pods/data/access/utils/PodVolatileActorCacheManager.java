@@ -62,9 +62,8 @@ public class PodVolatileActorCacheManager<K, V> extends VolatileActorCacheManage
 				@Override
 				public void preStart() {
 					super.preStart();
-					ActorId redirect = ActorId.ofRedirect();
+					ActorId redirect = ActorId.ofRedirect(self());
 					getSystem().setAlias(redirect, cacheAlias+"-primary"); // workaround for setting second alias
-					getSystem().addRedirection(redirect, self());
 				}
 				
 				@Override
