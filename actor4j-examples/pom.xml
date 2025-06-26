@@ -115,7 +115,7 @@
 		
 		<dependency>
 			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-poc-apc-actor</artifactId>
+			<artifactId>actor4j-lang-apc-actor</artifactId>
 			<version>${revision}</version>
 		</dependency>
 		

@@ -20,9 +20,12 @@ import static io.actor4j.core.logging.ActorLogger.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import io.actor4j.apc.actor.APCActorRef;
-import io.actor4j.apc.actor.APCActorSystem;
-import io.actor4j.apc.actor.APCObject;
+import io.actor4j.core.ActorSystem;
+import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.examples.shared.ExamplesSettings;
+import io.actor4j.lang.apc.actor.APC;
+import io.actor4j.lang.apc.actor.APCActorRef;
+import io.actor4j.lang.apc.actor.APCFuture;
 
 public class ExampleAPCActor {
 	public static interface Greeter {
@@ -33,7 +36,7 @@ public class ExampleAPCActor {
 		Future<Integer> task(Integer number);
 	}
 	
-	public static class GreeterImpl extends APCObject implements Greeter {
+	public static class GreeterImpl extends APCFuture implements Greeter {
 		@Override
 		public void sayGreeting() {
 			logger().log(DEBUG, String.format("sayGreeting: Hello Developer!"));
@@ -61,15 +64,20 @@ public class ExampleAPCActor {
 	}
 	
 	public ExampleAPCActor() {
-		APCActorSystem system = APCActorSystem.create();
-		APCActorRef<Greeter> ref = system.addAPCActor(Greeter.class, new GreeterImpl());
+		ActorSystemConfig config = ActorSystemConfig.builder()
+			.parallelism(4)
+			.build();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
+		
+		APC apc = APC.create(system);
+		APCActorRef<Greeter> ref = apc.addActor(Greeter.class, new GreeterImpl());
 		
 		ref.tell().sayGreeting();
 		ref.tell().sayGreeting("David");
 		ref.tell().sayGreeting(5);
 		ref.tell().sayGreeting(5, "Robot");
 		
-		system.start();
+		apc.start();
 		
 		try {
 			logger().log(DEBUG, String.format("task: Result is %d", ref.tell().task(41).get()));
@@ -83,7 +91,7 @@ public class ExampleAPCActor {
 			e.printStackTrace();
 		}
 		
-		system.shutdownWithActors(true);
+		apc.shutdownWithActors(true);
 	}
 
 	public static void main(String[] args) {

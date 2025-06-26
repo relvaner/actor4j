@@ -183,6 +183,8 @@
 		<module>actor4j-web</module>
 		
 		<module>actor4j-streams</module>
+		
+		<module>actor4j-lang</module>
 	</modules>
 	
 	<profiles>
@@ -218,6 +220,8 @@
 				<module>actor4j-web</module>
 				
 				<module>actor4j-streams</module>
+				
+				<module>actor4j-lang</module>
 			</modules>
     	</profile>
 	</profiles>
