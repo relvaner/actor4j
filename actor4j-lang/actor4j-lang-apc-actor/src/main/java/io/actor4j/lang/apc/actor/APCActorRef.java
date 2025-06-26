@@ -26,10 +26,10 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.lang.apc.actor.runtime.APCActorPair;
 
 public class APCActorRef<I> {
-	protected Class<I> interf;
-	protected Object obj;
-	protected APC apc;
-	protected ActorId id;
+	protected final Class<I> interf;
+	protected final Object obj;
+	protected final APC apc;
+	protected final ActorId id;
 
 	public APCActorRef(Class<I> interf, Object obj, APC apc, ActorId id) {
 		super();
