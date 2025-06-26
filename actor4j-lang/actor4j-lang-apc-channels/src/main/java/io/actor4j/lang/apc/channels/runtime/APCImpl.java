@@ -25,9 +25,10 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.lang.apc.channels.APC;
 import io.actor4j.lang.apc.channels.Callable;
 import io.actor4j.lang.apc.channels.Channel;
+import static io.actor4j.core.messages.ActorReservedTag.*;
 
 public class APCImpl implements APC {
-	protected final int APC_CALL = 1010;
+	protected final int APC_CALL = RESERVED_LANG_APC_CALL;
 	
 	protected final ActorSystem system;
 
