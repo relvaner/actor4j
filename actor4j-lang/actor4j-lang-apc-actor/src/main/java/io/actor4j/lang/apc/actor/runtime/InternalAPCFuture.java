@@ -13,22 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.lang.apc.actor;
+package io.actor4j.lang.apc.actor.runtime;
 
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
-import io.actor4j.lang.apc.actor.runtime.InternalAPCFuture;
-
-public class APCFuture {
-	private final InternalAPCFuture internalAPCFuture = new InternalAPCFuture();
+public class InternalAPCFuture {
+	protected final Map<UUID, CompletableFuture<?>> futureMap;
+	protected UUID currentFutureId;
 	
-	public InternalAPCFuture underlyingImpl() {
-		return internalAPCFuture;
+	public InternalAPCFuture() {
+		super();
+		futureMap = new ConcurrentHashMap<>();
+	}
+	
+	public Map<UUID, CompletableFuture<?>> getFutureMap() {
+		return futureMap;
 	}
 
+	public void setCurrentFutureId(UUID currentFutureId) {
+		this.currentFutureId = currentFutureId;
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> Future<T> handleFuture(Consumer<CompletableFuture<T>> consumer) {
-		return internalAPCFuture.handleFuture(consumer);
+		CompletableFuture<T> result = (CompletableFuture<T>)futureMap.get(currentFutureId);
+		if (result!=null) {
+			consumer.accept(result);
+			futureMap.remove(currentFutureId);
+		}
+		
+		return result!=null ? (Future<T>)result : null;
 	}
 }

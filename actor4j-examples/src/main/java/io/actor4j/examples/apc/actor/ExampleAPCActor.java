@@ -24,8 +24,8 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.examples.shared.ExamplesSettings;
 import io.actor4j.lang.apc.actor.APC;
-import io.actor4j.lang.apc.actor.APCActorRef;
 import io.actor4j.lang.apc.actor.APCFuture;
+import io.actor4j.lang.apc.actor.APCActorRef;
 
 public class ExampleAPCActor {
 	public static interface Greeter {

@@ -18,7 +18,6 @@ package io.actor4j.lang.apc.actor.runtime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.lang.apc.actor.APC;
-import io.actor4j.lang.apc.actor.APCActor;
 import io.actor4j.lang.apc.actor.APCActorRef;
 
 public class APCImpl implements APC {
@@ -38,7 +37,7 @@ public class APCImpl implements APC {
 	public <I, T extends I> APCActorRef<I> addActor(Class<I> interf, T obj) {
 		ActorId id = system.addActor(() -> new APCActor(interf, obj, this));
 		
-		return new APCActorRef<>(interf, obj, this, id);
+		return new APCActorRefImpl<>(interf, obj, this, id);
 	}
 	
 	@Override

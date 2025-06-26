@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.lang.apc.actor;
+package io.actor4j.lang.apc.actor.runtime;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,9 +22,12 @@ import java.util.concurrent.Future;
 
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.lang.apc.actor.runtime.APCActorPair;
+import io.actor4j.lang.apc.actor.APC;
+import io.actor4j.lang.apc.actor.APCFuture;
 
-// Asynchronous Procedure Call Actor
+/* 
+ * Asynchronous Procedure Call Actor
+ */
 public class APCActor extends Actor {
 	protected final Class<?> interf;
 	protected final Object obj;
@@ -85,6 +88,6 @@ public class APCActor extends Actor {
 	public void handleOptionalFuture(Method method, UUID interaction) {
 		if (method.getReturnType()==Future.class)
 			if (obj instanceof APCFuture)
-				((APCFuture)obj).setCurrentFutureId(interaction);
+				((APCFuture)obj).underlyingImpl().setCurrentFutureId(interaction);
 	}
 }

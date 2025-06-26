@@ -13,62 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package io.actor4j.lang.apc.actor;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-
 import io.actor4j.core.id.ActorId;
-import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.lang.apc.actor.runtime.APCActorPair;
 
-public class APCActorRef<I> {
-	protected final Class<I> interf;
-	protected final Object obj;
-	protected final APC apc;
-	protected final ActorId id;
-
-	public APCActorRef(Class<I> interf, Object obj, APC apc, ActorId id) {
-		super();
-		this.interf = interf;
-		this.obj = obj;
-		this.apc = apc;
-		this.id = id;
-	}
-
-	public I tell() {
-		@SuppressWarnings("unchecked")
-		I result = (I)Proxy.newProxyInstance(interf.getClassLoader(), new java.lang.Class[] { interf },
-                new java.lang.reflect.InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-						Object result = null;
-
-						UUID interaction = null;
-						if (method.getReturnType()==Future.class) {
-							interaction = UUID.randomUUID();
-							result = new CompletableFuture<>();
-							if (obj instanceof APCFuture o)
-								o.futureMap.put(interaction, (CompletableFuture<I>)result);
-						}
-						
-						apc.getSystem().send(ActorMessage.create(new APCActorPair(method.getName(), args), 0, apc.getSystem().SYSTEM_ID(), id, interaction , null, null));
-						
-						return result;
-					}
-                });
-		
-		return result;
-	}
-
-	public ActorId getId() {
-		return id;
-	}
+public interface APCActorRef<I> {
+	public I tell();
 	
-	public ActorId self() {
-		return id;
-	}
+	public ActorId getId();
+	public ActorId self();
 }
