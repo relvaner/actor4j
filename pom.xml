@@ -175,16 +175,17 @@
 		<module>actor4j-persistence-mongo</module>
 		
 		<module>actor4j-testing</module>
+		<module>actor4j-verification</module>
 
 		<module>actor4j-analyzer</module>
 		<module>actor4j-analyzer-swing</module>
 		<module>actor4j-analyzer-fx</module>
 		
+		<module>actor4j-lang</module>
+		
 		<module>actor4j-web</module>
 		
 		<module>actor4j-streams</module>
-		
-		<module>actor4j-lang</module>
 	</modules>
 	
 	<profiles>
@@ -204,6 +205,7 @@
 				<module>actor4j-persistence-mongo</module>
 				
 				<module>actor4j-testing</module>
+				<module>actor4j-verification</module>
 		
 				<module>actor4j-analyzer</module>
 				<module>actor4j-analyzer-swing</module>
@@ -215,13 +217,11 @@
 				<module>actor4j-patterns</module>
 				<module>actor4j-examples</module>
 				
-				<module>actor4j-poc</module>
+				<module>actor4j-lang</module>
 				
 				<module>actor4j-web</module>
 				
 				<module>actor4j-streams</module>
-				
-				<module>actor4j-lang</module>
 			</modules>
     	</profile>
 	</profiles>
