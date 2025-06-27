@@ -52,6 +52,6 @@ public class Application1 {
 			return result;
 		};
 		
-		launcher.start(task, config.parallelism());
+		launcher.run(task, config.parallelism());
 	}
 }

@@ -43,7 +43,7 @@ public class AMPILauncher {
 		return new AMPILauncher(system);
 	}
 
-	public void start(Function<AMPI, Boolean> task, int instances) {
+	public void run(Function<AMPI, Boolean> task, int instances) {
 		CountDownLatch countDownLatch = new CountDownLatch(instances);
 		Consumer<AMPI> internalAMPITask = (ampi) -> {
 			if (task!=null && task.apply(ampi))
