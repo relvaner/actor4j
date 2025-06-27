@@ -78,7 +78,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
-			<artifactId>actor4j-poc-verification</artifactId>
+			<artifactId>actor4j-verification</artifactId>
 			<version>${revision}</version>
 		</dependency>
 		<dependency>

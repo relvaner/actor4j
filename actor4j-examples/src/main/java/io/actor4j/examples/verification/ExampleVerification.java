@@ -26,6 +26,7 @@ import io.actor4j.verification.ActorVerification;
 import io.actor4j.verification.ActorVerificationSM;
 import io.actor4j.verification.ActorVerificationUtils;
 import io.actor4j.verification.ActorVerificator;
+import io.actor4j.verification.config.ActorVerificationConfig;
 
 public class ExampleVerification {
 	public static final int PING = 100;
@@ -86,7 +87,10 @@ public class ExampleVerification {
 	}
 
 	public static void main(String[] args) {
-		ActorVerificator verificator = ActorVerificator.create();
+		ActorVerificationConfig config = ActorVerificationConfig.builder()
+			.parallelism(4)
+			.build();
+		ActorVerificator verificator = ActorVerificator.create(config);
 		
 		verificator.addActor(() -> new Ping("ping"));
 		verificator.addActor(() -> new Pong("pong"));

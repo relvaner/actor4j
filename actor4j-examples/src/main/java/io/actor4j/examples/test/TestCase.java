@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import io.actor4j.testing.ActorTest;
 import io.actor4j.testing.TestSystem;
+import io.actor4j.testing.config.TestSystemConfig;
 import io.actor4j.bdd.Story;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
@@ -86,7 +87,10 @@ public class TestCase {
 	
 	@Before
 	public void before() {
-		system = TestSystem.create();
+		TestSystemConfig config = TestSystemConfig.builder()
+			.parallelism(4)
+			.build();
+		system = TestSystem.create(config);
 		
 		system.addActor(() -> new MyActor());
 
