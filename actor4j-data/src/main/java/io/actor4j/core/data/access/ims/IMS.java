@@ -20,10 +20,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-// In-Memory Storage (IMS)
+// In-Memory Storage (IMS) with Multi-Index-Support
 public class IMS<K, V> {
-	protected Map<K, V> data;
-	protected Map<String, IMSIndex<K, V>> indexMap;
+	protected final Map<K, V> data;
+	protected final Map<String, IMSIndex<K, V>> indexMap;
 
 	public IMS() {
 		data = new HashMap<>();
@@ -33,21 +33,13 @@ public class IMS<K, V> {
 	public Map<K, V> getData() {
 		return data;
 	}
-	
-	public void setData(Map<K, V> data) {
-		this.data = data;
-	}
 
 	public Map<String, IMSIndex<K, V>> getIndexMap() {
 		return indexMap;
 	}
 
-	public void setIndexMap(Map<String, IMSIndex<K, V>> indexMap) {
-		this.indexMap = indexMap;
-	}
-
 	public void create(IMSIndex<K, V> indexObject) {
-		indexObject.map = indexObject.create.apply(data);
+		indexObject.idxMap = indexObject.idxCreate.apply(data);
 	}
 	
 	public void add(IMSIndex<K, V> indexObject) {
@@ -56,13 +48,13 @@ public class IMS<K, V> {
 	
 	public void put(K key, V value, IMSIndex<K, V> indexObject) {
 		data.put(key, value);
-		if (indexObject.setd!=null)
-			indexObject.setd.accept(key, value);
+		if (indexObject.insertToIdx!=null)
+			indexObject.insertToIdx.accept(key, value);
 	}
 	
 	public void remove(K key, IMSIndex<K, V> indexObject) {
-		if (indexObject.removed!=null)
-			indexObject.removed.accept(key, data.get(key));
+		if (indexObject.removeFromIdx!=null)
+			indexObject.removeFromIdx.accept(key, data.get(key));
 		
 		data.remove(key);
 	}
@@ -73,8 +65,8 @@ public class IMS<K, V> {
 		Iterator<Entry<String, IMSIndex<K, V>>> iterator = indexMap.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, IMSIndex<K, V>> entry = iterator.next();
-			if (entry.getValue().setd!=null)
-				entry.getValue().setd.accept(key, value);
+			if (entry.getValue().insertToIdx!=null)
+				entry.getValue().insertToIdx.accept(key, value);
 		}
 	}
 	
@@ -82,8 +74,8 @@ public class IMS<K, V> {
 		Iterator<Entry<String, IMSIndex<K, V>>> iterator = indexMap.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, IMSIndex<K, V>> entry = iterator.next();
-			if (entry.getValue().removed!=null)
-				entry.getValue().removed.accept(key, data.get(key));
+			if (entry.getValue().removeFromIdx!=null)
+				entry.getValue().removeFromIdx.accept(key, data.get(key));
 		}
 		
 		data.remove(key);
