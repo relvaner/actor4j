@@ -186,7 +186,6 @@
 		<module>actor4j-web</module>
 		
 		<module>actor4j-streams</module>
-		<module>actor4j-agents</module>
 	</modules>
 	
 	<profiles>
