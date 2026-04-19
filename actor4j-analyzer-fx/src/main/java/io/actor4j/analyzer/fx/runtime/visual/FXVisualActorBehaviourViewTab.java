@@ -112,7 +112,7 @@ public class FXVisualActorBehaviourViewTab extends FXVisualActorViewTab  {
 				Platform.runLater(() -> {
 					Pair<Vertex<VertexElement>, String> pair = null;
 					for (; (pair=styleUpdateQueue.poll())!=null;)
-						graphView.getStylableVertex(pair.a()).setStyle("-fx-fill: "+pair.b()+";");
+						graphView.getStylableVertex(pair.a()).setStyleInline("-fx-fill: "+pair.b()+";");
 				});
 			}
 
