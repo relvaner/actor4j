@@ -22,7 +22,8 @@ import java.util.List;
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.immutable.ImmutableList;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.mutable.MutableObject;
+import io.actor4j.core.mutable.MutableBoolean;
+import io.actor4j.core.mutable.MutableInt;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupList;
 import io.actor4j.core.utils.Triple;
@@ -81,16 +82,16 @@ public class SortRecursiveStream<T extends Comparable<? super T>> extends ActorS
 		mergeRec((map, pivot) -> {
 			List<T> result = new ArrayList<>();
 			
-			MutableObject<Integer> index = new MutableObject<>();
-			MutableObject<Boolean> first = new MutableObject<>(true);
+			MutableInt index = new MutableInt(0);
+			MutableBoolean first = new MutableBoolean(true);
 			map.forEach((rank, list) -> {
-				if (first.getValue()) {
-					index.setValue(list.size());
-					first.setValue(false);
+				if (first.get()) {
+					index.set(list.size());
+					first.set(false);
 				}
 				result.addAll(list);
 			});
-			result.add(index.getValue(), (T)pivot);
+			result.add(index.get(), (T)pivot);
 			
 			return result;
 		});
