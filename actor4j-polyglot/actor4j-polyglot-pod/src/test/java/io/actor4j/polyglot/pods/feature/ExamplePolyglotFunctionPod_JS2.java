@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.polyglot.pod.feature;
+package io.actor4j.polyglot.pods.feature;
 
-import io.actor4j.polyglot.pod.PolyglotContext;
-import io.actor4j.polyglot.pod.PolyglotFunctionPod;
+import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.polyglot.pods.PolyglotContext;
+import io.actor4j.polyglot.pods.PolyglotFunctionPod;
 
-public class ExamplePolyglotFunctionPod_JS3 extends PolyglotFunctionPod {
+public class ExamplePolyglotFunctionPod_JS2 extends PolyglotFunctionPod {
 	@Override
 	public String domain() {
-		return "ExamplePolyglotFunctionPod_JS3";
+		return "ExamplePolyglotFunctionPod_JS2";
 	}
 
 	@Override
@@ -35,9 +36,16 @@ public class ExamplePolyglotFunctionPod_JS3 extends PolyglotFunctionPod {
 			function execute(api, message) {
 				api.info("welcome");
 				api.info(message.value());
+				
+				api.send({value: "Hello Test2!", tag: 423}, 423, null, message.value());
 					
-				return ["value", "Hello Test!", "tag", 42];
+				return {value: "Hello Test!", tag: 42};
 			}
 		""";
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ActorMessage<?> filter(ActorMessage<?> message) {
+		return ((ActorMessage<String>)message).shallowCopy(message.valueAsId().globalId().toString());
 	}
 }

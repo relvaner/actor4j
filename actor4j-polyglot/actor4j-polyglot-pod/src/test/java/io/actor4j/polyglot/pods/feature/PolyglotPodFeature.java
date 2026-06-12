@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.polyglot.pod.feature;
+package io.actor4j.polyglot.pods.feature;
 
 import java.util.concurrent.CountDownLatch;
 

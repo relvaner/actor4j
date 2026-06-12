@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.polyglot.pod.feature;
+package io.actor4j.polyglot.pods.feature;
 
-import io.actor4j.polyglot.pod.PolyglotContext;
-import io.actor4j.polyglot.pod.PolyglotFunctionPod;
+import io.actor4j.polyglot.pods.PolyglotContext;
+import io.actor4j.polyglot.pods.PolyglotFunctionPod;
 
-public class ExamplePolyglotFunctionPod_PY2 extends PolyglotFunctionPod {
+public class ExamplePolyglotFunctionPod_PY3 extends PolyglotFunctionPod {
 	@Override
 	public String domain() {
-		return "ExamplePolyglotFunctionPod_PY2";
+		return "ExamplePolyglotFunctionPod_PY3";
 	}
 
 	@Override
@@ -36,8 +36,8 @@ public class ExamplePolyglotFunctionPod_PY2 extends PolyglotFunctionPod {
 			def execute(api, message):		
 				api.info("welcome")
 				api.info(message.value())
-				
-				return 67
+
+				return ["value", "Hello Test!", "tag", 42]
 			""";
 	}
 }

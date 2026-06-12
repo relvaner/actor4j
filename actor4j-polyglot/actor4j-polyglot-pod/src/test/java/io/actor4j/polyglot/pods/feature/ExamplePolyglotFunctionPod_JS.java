@@ -13,31 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.polyglot.pod.feature;
+package io.actor4j.polyglot.pods.feature;
 
-import io.actor4j.polyglot.pod.PolyglotContext;
-import io.actor4j.polyglot.pod.PolyglotFunctionPod;
+import io.actor4j.polyglot.pods.PolyglotContext;
+import io.actor4j.polyglot.pods.PolyglotFunctionPod;
 
-public class ExamplePolyglotFunctionPod_PY extends PolyglotFunctionPod {
+public class ExamplePolyglotFunctionPod_JS extends PolyglotFunctionPod {
 	@Override
 	public String domain() {
-		return "ExamplePolyglotFunctionPod_PY";
+		return "ExamplePolyglotFunctionPod_JS";
 	}
 
 	@Override
 	public String languageId() {
-		return PolyglotContext.LANGUAGE_ID_PYTHON;
+		return PolyglotContext.LANGUAGE_ID_JS;
 	}
 
 	@Override
 	public CharSequence script() {
-		return 
-			"""
-			def execute(api, message):		
-				api.info("welcome")
-				api.info(message.value())
-
-				return {"value": "Hello Test!", "tag": 42}
-			""";
+		return """
+			function execute(api, message) {
+				api.info("welcome");
+				api.info(message.value());
+				
+				return {value: "Hello Test!", tag: 42};
+			}
+		""";
 	}
 }
