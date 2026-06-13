@@ -15,9 +15,12 @@
 	</properties>
 	
 	<modules>
-		<module>actor4j-polyglot-js</module>
 		<module>actor4j-polyglot-api</module>
 		<module>actor4j-polyglot-pod</module>
+	
+		<module>actor4j-polyglot-js</module>
 		<module>actor4j-polyglot-python</module>
+		<module>actor4j-polyglot-java</module>
+		<module>actor4j-polyglot-wasm</module>
 	</modules>
 </project>

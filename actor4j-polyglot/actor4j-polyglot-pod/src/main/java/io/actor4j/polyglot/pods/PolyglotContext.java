@@ -21,6 +21,7 @@ import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.PolyglotAccess;
 import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.io.IOAccess;
+import org.graalvm.polyglot.Context.Builder;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
@@ -35,11 +36,15 @@ public class PolyglotContext {
 	public static final String LANGUAGE_ID_JS      = "js";
 	public static final String LANGUAGE_ID_PYTHON  = "python";
 	
+	public static final String LANGUAGE_ID_JAVA    = "java";
+	public static final String LANGUAGE_ID_WASM    = "wasm";
+	
 	public static final String API            = "api";
 	public static final String MESSAGE        = "message";
 	
 	public static final String EXECUTE        = "execute";
 	public static final String EXECUTE_PYTHON = "_internal_execute_wrapper";
+	public static final String CLASS_JAVA     = "Script";
 	
 	public static final String VALUE          = "value";
 	public static final String TAG            = "tag";
@@ -85,28 +90,36 @@ public class PolyglotContext {
 	}
 	
 	public Context build(IOAccess ioAccess) {
-		return Context.newBuilder(languageId)
+		Builder builder = Context.newBuilder(languageId)
 			.engine(SHARED_ENGINE)
 			.allowPolyglotAccess(PolyglotAccess.NONE)
 			.allowHostAccess(HostAccess.EXPLICIT)
-			.allowHostClassLookup(s -> false)
+			.allowHostClassLookup((s) -> false)
 			.allowIO(ioAccess)
 			.allowCreateThread(false)
 			.allowNativeAccess(false)
-			.allowAllAccess(false)
-			.build();
+			.allowAllAccess(false);
+		
+		if (languageId.equalsIgnoreCase(LANGUAGE_ID_JAVA))
+			builder.allowNativeAccess(true);
+			
+		return builder.build();
 	}
 
 	public Value executeFunction(ActorRef host, PodContext podContext, ActorMessage<?> message, CharSequence script) {
 		Value executeFunction = null;
 		
-		if (languageId.equalsIgnoreCase(LANGUAGE_ID_PYTHON)) {
+		if (languageId.equalsIgnoreCase(LANGUAGE_ID_JS)) {
+			context.eval(languageId, script);
+			executeFunction = context.getBindings(languageId).getMember(PolyglotContext.EXECUTE);
+		}
+		else if (languageId.equalsIgnoreCase(LANGUAGE_ID_PYTHON)) {
 			context.eval(languageId, script+WRAPPER_PYTHON);
 			executeFunction = context.getBindings(languageId).getMember(PolyglotContext.EXECUTE_PYTHON);
 		}
-		else {
+		else if (languageId.equalsIgnoreCase(LANGUAGE_ID_JAVA)) {
 			context.eval(languageId, script);
-			executeFunction = context.getBindings(languageId).getMember(PolyglotContext.EXECUTE);
+			executeFunction = context.getBindings(languageId).getMember(PolyglotContext.CLASS_JAVA).getMember(PolyglotContext.EXECUTE);
 		}
 		
 		if (executeFunction != null && executeFunction.canExecute())
