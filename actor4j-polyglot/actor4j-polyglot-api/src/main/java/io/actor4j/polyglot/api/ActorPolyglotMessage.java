@@ -22,7 +22,10 @@ import org.graalvm.polyglot.HostAccess.Export;
 import io.actor4j.core.messages.ActorMessage;
 
 public class ActorPolyglotMessage {
-	protected ActorMessage<?> message;
+	protected final ActorMessage<?> message;
+	
+	public static final long SOURCE = -1;
+	public static final long DEST   = -2;
 	
 	public ActorPolyglotMessage(ActorMessage<?> message) {
 		this.message = message;
@@ -50,12 +53,22 @@ public class ActorPolyglotMessage {
 	}
 	
 	@Export
-	public String source() {
+	public long source() {
+		return SOURCE;
+	}
+	
+	@Export
+	public long dest() {
+		return DEST;
+	}
+	
+	@Export
+	public String sourceAsGlobalId() {
 		return idToString(message.source().globalId());
 	}
 	
 	@Export
-	public String dest() {
+	public String destAsGlobalId() {
 		return idToString(message.dest().globalId());
 	}
 	

@@ -15,6 +15,8 @@
  */
 package io.actor4j.polyglot.pods;
 
+import java.util.Map;
+
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;
@@ -24,6 +26,7 @@ import org.graalvm.polyglot.io.IOAccess;
 import org.graalvm.polyglot.Context.Builder;
 
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
@@ -32,6 +35,9 @@ import io.actor4j.polyglot.api.ActorPolyglotMessage;
 public class PolyglotContext {
 	protected final Context context;
 	protected final String languageId;
+
+	protected /*quasi final*/ ActorPolyglotAPI api;
+	protected final Map<Long, ActorId> routes;
 
 	public static final String LANGUAGE_ID_JS      = "js";
 	public static final String LANGUAGE_ID_PYTHON  = "python";
@@ -74,19 +80,24 @@ public class PolyglotContext {
 		SHARED_ENGINE = Engine.newBuilder().build();
 	}
 	
-	public static PolyglotContext create(String languageId) {
-		return new PolyglotContext(languageId);
+	public static PolyglotContext create(String languageId, Map<Long, ActorId> routes) {
+		return new PolyglotContext(languageId, routes);
 	}
 	
-	public PolyglotContext(String languageId, IOAccess ioAccess) {
+	public PolyglotContext(String languageId, IOAccess ioAccess, Map<Long, ActorId> routes) {
 		super();
 		this.languageId = languageId;
+		this.routes = routes;
 		
 		context = build(ioAccess);
 	}
 	
-	public PolyglotContext(String languageId) {
-		this(languageId, IOAccess.NONE);
+	public PolyglotContext(String languageId, Map<Long, ActorId> routes) {
+		this(languageId, IOAccess.NONE, routes);
+	}
+	
+	protected ActorPolyglotAPI createAPI(ActorRef host, PodContext podContext) {
+		return ActorPolyglotAPI.create(host, podContext);
 	}
 	
 	public Context build(IOAccess ioAccess) {
@@ -122,8 +133,14 @@ public class PolyglotContext {
 			executeFunction = context.getBindings(languageId).getMember(PolyglotContext.CLASS_JAVA).getMember(PolyglotContext.EXECUTE);
 		}
 		
-		if (executeFunction != null && executeFunction.canExecute())
-			return executeFunction.execute(ActorPolyglotAPI.create(host, podContext), ActorPolyglotMessage.of(message));
+		if (executeFunction != null && executeFunction.canExecute()) {
+			if (api==null) {
+				api = createAPI(host, podContext);
+				api.router().putAll(routes);
+			}
+			
+			return executeFunction.execute(api, ActorPolyglotMessage.of(message));
+		}
 		else
 			return null;
 	}
@@ -134,6 +151,10 @@ public class PolyglotContext {
 
 	public String languageId() {
 		return languageId;
+	}
+	
+	public ActorPolyglotAPI api() {
+		return api;
 	}
 	
 	public void close() {

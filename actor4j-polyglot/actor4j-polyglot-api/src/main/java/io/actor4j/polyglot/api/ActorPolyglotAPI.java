@@ -60,6 +60,10 @@ public class ActorPolyglotAPI {
 		return new ActorPolyglotAPI(host, context);
 	}
 	
+	public RouterPattern<Long> router() {
+		return router;
+	}
+	
 	@Export
 	public void sendViaGlobalId(Value value, int tag, String interaction, String globalId) {
 		send(value, tag, interaction, globalId, null);

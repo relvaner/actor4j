@@ -15,12 +15,17 @@
  */
 package io.actor4j.polyglot.pods;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.polyglot.api.ActorPolyglotMessage;
 
 public abstract class PolyglotFunctionPod extends ActorPod {
 	@Override
@@ -28,17 +33,21 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 		return new PodActor() {
 			protected PolyglotContext contextPolyglot;
 			protected PodFunction podFunction;
+			protected Map<Long, ActorId> routes;
 			
 			@Override
 			public void preStart() {
-				expose();
+				if (isExposed())
+					expose();
 				
 				if (getContext().isShard())
 					setAlias(domain()+getContext().shardId());
 				else
 					setAlias(domain());
 				
+				routes = new HashMap<>();
 				register();
+				registerRoutes(routes);
 			}
 			
 			@Override
@@ -48,6 +57,15 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
+				if (contextPolyglot.api()!=null) {
+					contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, message.source());
+					contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, message.dest());
+				}
+				else {
+					routes.put(ActorPolyglotMessage.SOURCE, message.source());
+					routes.put(ActorPolyglotMessage.DEST, message.dest());
+				}
+				
 				Pair<Object, Integer> result = podFunction.handle(filter(message));
 				if (result!=null)
 					internal_callback(this, message, result);
@@ -55,7 +73,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 
 			@Override
 			public void register() {
-				contextPolyglot = PolyglotContext.create(languageId());
+				contextPolyglot = PolyglotContext.create(languageId(), routes);
 				podFunction = new PolyglotPodFuction(this, getContext(), contextPolyglot, script());
 			}
 		};
@@ -70,5 +88,13 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	
 	public ActorMessage<?> filter(ActorMessage<?> message) {
 		return message;
+	}
+	
+	public boolean isExposed() {
+		return true;
+	}
+	
+	public void registerRoutes(Map<Long, ActorId> routes) {
+		// empty
 	}
 }

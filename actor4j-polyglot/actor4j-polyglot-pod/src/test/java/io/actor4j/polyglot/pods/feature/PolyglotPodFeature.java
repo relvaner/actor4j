@@ -263,4 +263,66 @@ public class PolyglotPodFeature {
 		}
 		system.shutdownWithActors(true);
 	}
+	
+	
+	@Test(timeout=5000)
+	public void test_factory_ExamplePolyglotFunctionPod_JS4() {
+		CountDownLatch testDone = new CountDownLatch(3);
+		
+		system.deployPods(
+				() -> new ExamplePolyglotFunctionPod_JS4(), 
+				new PodConfiguration("ExamplePolyglotFunctionPod_JS4", ExamplePolyglotFunctionPod_JS4.class.getName(), 1, 1));
+		ActorId client = system.addActor(() -> new Actor(){
+			@Override
+			public void receive(ActorMessage<?> message) {
+				logger().log(DEBUG, String.format("client received a message ('%s') from ExamplePolyglotFunctionPod_JS4", message.valueAsJsonObject()));
+				if (message.tag()==99) {
+					assertEquals(99, message.tag());
+					assertTrue(message.value()!=null);
+					assertTrue(message.value() instanceof JsonObject);
+					if (message.value() instanceof JsonObject obj)
+						assertTrue(obj.getString("value").startsWith("Hello Test3!"));
+						
+					testDone.countDown();
+				}
+				else {
+					assertEquals(42, message.tag());
+					assertTrue(message.value()!=null);
+					assertTrue(message.value() instanceof JsonObject);
+					if (message.value() instanceof JsonObject obj)
+						assertTrue(obj.getString("value").startsWith("Hello Test!"));
+					testDone.countDown();
+				}
+			}
+		});
+		ActorId other = system.addActor(() -> new Actor(){
+			@Override
+			public void preStart() {
+				expose();
+			}
+			
+			@Override
+			public void receive(ActorMessage<?> message) {
+				logger().log(DEBUG, String.format("client received a message ('%s') from ExamplePolyglotFunctionPod_JS4", message.valueAsJsonObject()));
+				
+				assertEquals(423, message.tag());
+				assertTrue(message.value()!=null);
+				assertTrue(message.value() instanceof JsonObject);
+				if (message.value() instanceof JsonObject obj)
+					assertTrue(obj.getString("value").startsWith("Hello Test2!"));
+					
+				testDone.countDown();
+			}
+		});
+		system.start();
+		
+		system.sendViaAlias(ActorMessage.create(other, 0, client, null), "ExamplePolyglotFunctionPod_JS4");
+		
+		try {
+			testDone.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		system.shutdownWithActors(true);
+	}
 }
