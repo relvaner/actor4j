@@ -19,8 +19,10 @@ import org.graalvm.polyglot.HostAccess.Export;
 import org.graalvm.polyglot.Value;
 
 import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.PodActorMessage;
 import io.actor4j.core.pods.PodContext;
+import io.actor4j.core.utils.RouterPattern;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 
@@ -34,12 +36,16 @@ public class ActorPolyglotAPI {
 	protected final PodContext context;
 	
 	protected final Function<Value, Object> defaultMapper;
+	
+	protected final RouterPattern<Long> router;
 
 	public ActorPolyglotAPI(ActorRef host, PodContext context, Function<Value, Object> defaultMapper) {
 		super();
 		this.host = host;
 		this.context = context;
 		this.defaultMapper = defaultMapper;
+		
+		router = new RouterPattern<>(host);
 	}
 	
 	public ActorPolyglotAPI(ActorRef host, PodContext context) {
@@ -55,15 +61,25 @@ public class ActorPolyglotAPI {
 	}
 	
 	@Export
-	public void send(Value value, int tag, String interaction, String dest) {
-		send(value, tag, interaction, dest, null);
+	public void sendViaGlobalId(Value value, int tag, String interaction, String globalId) {
+		send(value, tag, interaction, globalId, null);
+	}
+	
+	@Export
+	public void sendViaGlobalId(Value value, int tag, String interaction, String globalId, String protocol) {
+		send(value, tag, interaction, globalId, protocol);
+	}
+	
+	@Export
+	public void send(Value value, int tag, String interaction, String globalId) {
+		send(value, tag, interaction, globalId, null);
 	}
 
 	@Export
-	public boolean send(Value value, int tag, String interaction, String dest, String protocol) {
+	public boolean send(Value value, int tag, String interaction, String globalId, String protocol) {
 		boolean result = false;
 
-		if (dest != null) {
+		if (globalId != null) {
 			host.sendViaGlobalId(
 				PodActorMessage.create(
 					defaultMapper.apply(value), 
@@ -73,7 +89,44 @@ public class ActorPolyglotAPI {
 					interaction != null ? UUID.fromString(interaction) : null, 
 					protocol, 
 					context.domain()),
-				UUID.fromString(dest));
+				UUID.fromString(globalId));
+			result = true;
+		}
+
+		return result;
+	}
+	
+	@Export
+	public void sendViaRouteId(Value value, int tag, String interaction, long routeId) {
+		send(value, tag, interaction, routeId, null);
+	}
+	
+	@Export
+	public void sendViaRouteId(Value value, int tag, String interaction, long routeId, String protocol) {
+		send(value, tag, interaction, routeId, protocol);
+	}
+	
+	@Export
+	public void send(Value value, int tag, String interaction, long routeId) {
+		send(value, tag, interaction, routeId, null);
+	}
+
+	@Export
+	public boolean send(Value value, int tag, String interaction, long routeId, String protocol) {
+		boolean result = false;
+
+		ActorId dest = router.resolve(routeId);
+		if (dest != null) {
+			host.send(
+				PodActorMessage.create(
+					defaultMapper.apply(value), 
+					tag, 
+					host.getId(), 
+					dest,
+					interaction != null ? UUID.fromString(interaction) : null, 
+					protocol, 
+					context.domain())
+				);
 			result = true;
 		}
 
