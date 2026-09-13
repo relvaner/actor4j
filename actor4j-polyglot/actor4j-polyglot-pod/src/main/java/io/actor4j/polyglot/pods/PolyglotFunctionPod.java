@@ -26,6 +26,7 @@ import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
+import io.actor4j.polyglot.state.PolyglotStateStore;
 
 public abstract class PolyglotFunctionPod extends ActorPod {
 	@Override
@@ -48,6 +49,8 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 				routes = new HashMap<>();
 				register();
 				registerRoutes(routes);
+				
+				PolyglotFunctionPod.this.preStart(contextPolyglot);
 			}
 			
 			@Override
@@ -74,6 +77,9 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 			@Override
 			public void register() {
 				contextPolyglot = PolyglotContext.create(languageId(), routes);
+				PolyglotStateStore stateStore = createStateStore();
+				if (stateStore!=null)
+					contextPolyglot.injectStateStore(stateStore);
 				podFunction = new PolyglotPodFuction(this, getContext(), contextPolyglot, script());
 			}
 		};
@@ -81,6 +87,10 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	
 	protected void internal_callback(ActorRef host, ActorMessage<?> message, Pair<Object, Integer> result) {
 		host.tell(result.a(), result.b(), message.source(), message.interaction(), message.protocol(), message.domain());
+	}
+	
+	public PolyglotStateStore createStateStore() {
+		return null;
 	}
 
 	public abstract String languageId();
@@ -95,6 +105,10 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	}
 	
 	public void registerRoutes(Map<Long, ActorId> routes) {
+		// empty
+	}
+	
+	public void preStart(PolyglotContext contextPolyglot) {
 		// empty
 	}
 }

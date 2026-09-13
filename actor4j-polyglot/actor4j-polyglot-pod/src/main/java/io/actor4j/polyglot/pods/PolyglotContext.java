@@ -31,12 +31,14 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
+import io.actor4j.polyglot.state.PolyglotStateStore;
 
 public class PolyglotContext {
 	protected final Context context;
 	protected final String languageId;
 
 	protected /*quasi final*/ ActorPolyglotAPI api;
+	protected /*quasi final*/ PolyglotStateStore stateStore;
 	protected final Map<Long, ActorId> routes;
 
 	public static final String LANGUAGE_ID_JS      = "js";
@@ -100,6 +102,10 @@ public class PolyglotContext {
 		return ActorPolyglotAPI.create(host, podContext);
 	}
 	
+	public void injectStateStore(PolyglotStateStore stateStore) {
+		this.stateStore = stateStore;
+	}
+	
 	public Context build(IOAccess ioAccess) {
 		Builder builder = Context.newBuilder(languageId)
 			.engine(SHARED_ENGINE)
@@ -139,7 +145,10 @@ public class PolyglotContext {
 				api.router().putAll(routes);
 			}
 			
-			return executeFunction.execute(api, ActorPolyglotMessage.of(message));
+			if (stateStore!=null)
+				return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore);
+			else 
+				return executeFunction.execute(api, ActorPolyglotMessage.of(message));
 		}
 		else
 			return null;
@@ -155,6 +164,10 @@ public class PolyglotContext {
 	
 	public ActorPolyglotAPI api() {
 		return api;
+	}
+	
+	public PolyglotStateStore stateStore() {
+		return stateStore;
 	}
 	
 	public void close() {

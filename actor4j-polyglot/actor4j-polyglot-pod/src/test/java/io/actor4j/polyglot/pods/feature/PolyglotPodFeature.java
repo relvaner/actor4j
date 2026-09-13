@@ -325,4 +325,37 @@ public class PolyglotPodFeature {
 		}
 		system.shutdownWithActors(true);
 	}
+	
+	@Test(timeout=5000)
+	public void test_factory_ExamplePolyglotFunctionPod_JS5() {
+		CountDownLatch testDone = new CountDownLatch(2);
+		
+		system.deployPods(
+				() -> new ExamplePolyglotFunctionPod_JS5(), 
+				new PodConfiguration("ExamplePolyglotFunctionPod_JS5", ExamplePolyglotFunctionPod_JS5.class.getName(), 1, 1));
+		ActorId client = system.addActor(() -> new Actor(){
+			@Override
+			public void receive(ActorMessage<?> message) {
+				logger().log(DEBUG, String.format("client received a message ('%s') from ExamplePolyglotFunctionPod_JS5", message.valueAsJsonObject()));
+				
+				assertEquals(42+2-testDone.getCount(), message.tag());
+				assertTrue(message.value()!=null);
+				assertTrue(message.value() instanceof JsonObject);
+				if (message.value() instanceof JsonObject obj)
+					assertTrue(obj.getString("value").startsWith("Hello Test!"));
+				testDone.countDown();
+			}
+		});
+		system.start();
+		
+		system.sendViaAlias(ActorMessage.create("Test", 0, client, null), "ExamplePolyglotFunctionPod_JS5");
+		system.sendViaAlias(ActorMessage.create("Test", 0, client, null), "ExamplePolyglotFunctionPod_JS5");
+		
+		try {
+			testDone.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		system.shutdownWithActors(true);
+	}
 }
