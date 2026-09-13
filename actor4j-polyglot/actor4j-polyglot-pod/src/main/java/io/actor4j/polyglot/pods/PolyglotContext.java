@@ -31,6 +31,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
+import io.actor4j.polyglot.query.PolyglotQueryRequest;
 import io.actor4j.polyglot.state.PolyglotStateStore;
 import io.actor4j.polyglot.streams.PolyglotStreams;
 
@@ -41,6 +42,7 @@ public class PolyglotContext {
 	protected /*quasi final*/ ActorPolyglotAPI api;
 	protected /*quasi final*/ PolyglotStateStore stateStore;
 	protected /*quasi final*/ PolyglotStreams streams;
+	protected /*quasi final*/ PolyglotQueryRequest queryRequest;
 	protected final Map<Long, ActorId> routes;
 
 	public static final String LANGUAGE_ID_JS      = "js";
@@ -112,6 +114,10 @@ public class PolyglotContext {
 		this.streams = streams;
 	}
 	
+	public void injectQueryRequest(PolyglotQueryRequest queryRequest) {
+		this.queryRequest = queryRequest;
+	}
+	
 	public Context build(IOAccess ioAccess) {
 		Builder builder = Context.newBuilder(languageId)
 			.engine(SHARED_ENGINE)
@@ -151,14 +157,26 @@ public class PolyglotContext {
 				api.router().putAll(routes);
 			}
 			
-			if (stateStore!=null && streams!=null)
-				return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, streams);
-			else if (stateStore!=null)
-				return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore);
-			else if (streams!=null)
-				return executeFunction.execute(api, ActorPolyglotMessage.of(message), streams);
-			else
-				return executeFunction.execute(api, ActorPolyglotMessage.of(message));
+			if (streams==null) {
+				if (stateStore!=null && queryRequest!=null)
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, queryRequest);
+				else if (stateStore!=null)
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore);
+				else if (queryRequest!=null)
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message), queryRequest);
+				else
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message));
+			}
+			else {
+				if (stateStore!=null && queryRequest!=null)
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, queryRequest, streams);
+				else if (stateStore!=null)
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, streams);
+				else if (queryRequest!=null)
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message), queryRequest, streams);
+				else
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message), streams);
+			}
 		}
 		else
 			return null;
@@ -182,6 +200,10 @@ public class PolyglotContext {
 	
 	public PolyglotStreams streams() {
 		return streams;
+	}
+	
+	public PolyglotQueryRequest queryRequest() {
+		return queryRequest;
 	}
 	
 	public void close() {

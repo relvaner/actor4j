@@ -26,6 +26,7 @@ import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
+import io.actor4j.polyglot.query.PolyglotQueryRequest;
 import io.actor4j.polyglot.state.PolyglotStateStore;
 import io.actor4j.polyglot.streams.PolyglotStreams;
 
@@ -84,6 +85,9 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 				PolyglotStreams streams = createStreams();
 				if (streams!=null)
 					contextPolyglot.injectStreams(streams);
+				PolyglotQueryRequest queryRequest = createQueryRequest();
+				if (queryRequest!=null)
+					contextPolyglot.injectQueryRequest(queryRequest);
 				podFunction = new PolyglotPodFuction(this, getContext(), contextPolyglot, script());
 			}
 		};
@@ -98,6 +102,10 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	}
 	
 	public PolyglotStreams createStreams() {
+		return null;
+	}
+	
+	public PolyglotQueryRequest createQueryRequest() {
 		return null;
 	}
 
