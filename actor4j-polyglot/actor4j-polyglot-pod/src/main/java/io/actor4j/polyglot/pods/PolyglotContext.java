@@ -32,6 +32,7 @@ import io.actor4j.core.pods.PodContext;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
 import io.actor4j.polyglot.state.PolyglotStateStore;
+import io.actor4j.polyglot.streams.PolyglotStreams;
 
 public class PolyglotContext {
 	protected final Context context;
@@ -39,6 +40,7 @@ public class PolyglotContext {
 
 	protected /*quasi final*/ ActorPolyglotAPI api;
 	protected /*quasi final*/ PolyglotStateStore stateStore;
+	protected /*quasi final*/ PolyglotStreams streams;
 	protected final Map<Long, ActorId> routes;
 
 	public static final String LANGUAGE_ID_JS      = "js";
@@ -106,6 +108,10 @@ public class PolyglotContext {
 		this.stateStore = stateStore;
 	}
 	
+	public void injectStreams(PolyglotStreams streams) {
+		this.streams = streams;
+	}
+	
 	public Context build(IOAccess ioAccess) {
 		Builder builder = Context.newBuilder(languageId)
 			.engine(SHARED_ENGINE)
@@ -145,9 +151,13 @@ public class PolyglotContext {
 				api.router().putAll(routes);
 			}
 			
-			if (stateStore!=null)
+			if (stateStore!=null && streams!=null)
+				return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, streams);
+			else if (stateStore!=null)
 				return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore);
-			else 
+			else if (streams!=null)
+				return executeFunction.execute(api, ActorPolyglotMessage.of(message), streams);
+			else
 				return executeFunction.execute(api, ActorPolyglotMessage.of(message));
 		}
 		else
@@ -168,6 +178,10 @@ public class PolyglotContext {
 	
 	public PolyglotStateStore stateStore() {
 		return stateStore;
+	}
+	
+	public PolyglotStreams streams() {
+		return streams;
 	}
 	
 	public void close() {

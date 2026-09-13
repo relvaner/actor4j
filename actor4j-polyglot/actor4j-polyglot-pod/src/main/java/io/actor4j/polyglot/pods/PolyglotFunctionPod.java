@@ -27,6 +27,7 @@ import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
 import io.actor4j.polyglot.state.PolyglotStateStore;
+import io.actor4j.polyglot.streams.PolyglotStreams;
 
 public abstract class PolyglotFunctionPod extends ActorPod {
 	@Override
@@ -80,6 +81,9 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 				PolyglotStateStore stateStore = createStateStore();
 				if (stateStore!=null)
 					contextPolyglot.injectStateStore(stateStore);
+				PolyglotStreams streams = createStreams();
+				if (streams!=null)
+					contextPolyglot.injectStreams(streams);
 				podFunction = new PolyglotPodFuction(this, getContext(), contextPolyglot, script());
 			}
 		};
@@ -90,6 +94,10 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	}
 	
 	public PolyglotStateStore createStateStore() {
+		return null;
+	}
+	
+	public PolyglotStreams createStreams() {
 		return null;
 	}
 
