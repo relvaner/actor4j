@@ -15,6 +15,8 @@
  */
 package io.actor4j.polyglot.streams;
 
+import org.graalvm.polyglot.HostAccess.Export;
+
 public class PolyglotStreams implements PolyglotStreamsHandler {
 	protected final PolyglotStreamsHandler delegate;
 	
@@ -26,14 +28,20 @@ public class PolyglotStreams implements PolyglotStreamsHandler {
 		return new PolyglotStreams(delegate);
 	}
 	
+	@Export
+	@Override
 	public void publish(String topic, Object value) {
 		delegate.publish(topic, value);
 	}
 	
+	@Export
+	@Override
 	public void subscribe(String topic) {
 		delegate.subscribe(topic);
 	}
 	
+	@Export
+	@Override
 	public void unsubscribe(String topic) {
 		delegate.unsubscribe(topic);
 	}
