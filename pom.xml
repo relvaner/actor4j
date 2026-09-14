@@ -171,6 +171,7 @@
 		<module>actor4j-data</module>
 		<module>actor4j-data-jpa</module>
 		<module>actor4j-data-mongo</module>
+		<module>actor4j-query</module>
 		
 		<module>actor4j-persistence-mongo</module>
 		
@@ -203,6 +204,7 @@
 				<module>actor4j-data</module>
 				<module>actor4j-data-jpa</module>
 				<module>actor4j-data-mongo</module>
+				<module>actor4j-query</module>
 				
 				<module>actor4j-persistence-mongo</module>
 				
