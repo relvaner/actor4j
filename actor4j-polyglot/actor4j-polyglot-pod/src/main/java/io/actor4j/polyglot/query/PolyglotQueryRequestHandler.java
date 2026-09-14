@@ -16,5 +16,5 @@
 package io.actor4j.polyglot.query;
 
 public interface PolyglotQueryRequestHandler {
-	public void execute(String value);
+	public void execute(Object value);
 }
