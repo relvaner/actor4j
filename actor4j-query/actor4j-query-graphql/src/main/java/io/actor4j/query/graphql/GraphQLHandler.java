@@ -19,4 +19,5 @@ import graphql.schema.idl.RuntimeWiring.Builder;
 
 public interface GraphQLHandler {
 	void configure(Builder builder);
+	void execute(Object value);
 }
