@@ -61,7 +61,7 @@ public class PolyglotPodFuction extends PodFunction {
 				result = Pair.of(mappedObject, tag);
 			}
 			else 	
-				result = Pair.of(null, 0);
+				result = Pair.of(null, -1/*NO_REPLY*/);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

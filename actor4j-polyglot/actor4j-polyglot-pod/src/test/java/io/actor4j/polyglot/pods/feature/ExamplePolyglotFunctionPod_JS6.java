@@ -80,8 +80,6 @@ public class ExamplePolyglotFunctionPod_JS6 extends PolyglotFunctionPod {
 				api.info(state.get("result"));
 				state.put("result", state.get("result")+1);
 				streams.publish("MyTopic_out", state.get("result")+1);
-				
-				return {tag: -1}; // NO_REPLY
 			}
 		""";
 	}
