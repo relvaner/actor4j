@@ -15,7 +15,6 @@
  */
 package io.actor4j.polyglot.pods.feature;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Before;
@@ -78,10 +77,9 @@ public class PolyglotStreamsFeature {
 		system.start();
 		
 		system.send(ActorMessage.create(new Subscribe("MyTopic_out"), 0, subscriber, broker));
-		
-		List<ActorId> pods = system.getActorsFromAlias(domain);
-		system.send(ActorMessage.create(new Publish<Integer>("MyTopic_in", 1), 0, pods.getFirst(), broker));
-		system.send(ActorMessage.create(new Publish<Integer>("MyTopic_in", 2), 0, pods.getFirst(), broker));
+
+		system.send(ActorMessage.create(new Publish<Integer>("MyTopic_in", 1), 0, null, broker));
+		system.send(ActorMessage.create(new Publish<Integer>("MyTopic_in", 2), 0, null, broker));
 		
 		try {
 			testDone.await();
