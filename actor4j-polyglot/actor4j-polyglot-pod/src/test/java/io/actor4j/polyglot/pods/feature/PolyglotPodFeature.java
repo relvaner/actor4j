@@ -79,11 +79,6 @@ public class PolyglotPodFeature {
 	}
 	
 	@Test(timeout=5000)
-	public void test_factory_ExamplePolyglotFunctionPod_JS_WarmUp() {
-		test_factory_ExamplePolyglotFunctionPod_JS();
-	}
-	
-	@Test(timeout=5000)
 	public void test_factory_ExamplePolyglotFunctionPod_PY() {
 		CountDownLatch testDone = new CountDownLatch(1);
 		
@@ -113,11 +108,6 @@ public class PolyglotPodFeature {
 			e.printStackTrace();
 		}
 		system.shutdownWithActors(true);
-	}
-	
-	@Test(timeout=5000)
-	public void test_factory_ExamplePolyglotFunctionPod_PY_WarmUp() {
-		test_factory_ExamplePolyglotFunctionPod_PY();
 	}
 	
 	@Test(timeout=5000)

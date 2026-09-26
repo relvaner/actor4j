@@ -60,6 +60,14 @@ public class ActorPolyglotAPI {
 		return new ActorPolyglotAPI(host, context);
 	}
 	
+	public ActorRef host() {
+		return host;
+	}
+	
+	public PodContext podContext() {
+		return context;
+	}
+	
 	public RouterPattern<Long> router() {
 		return router;
 	}

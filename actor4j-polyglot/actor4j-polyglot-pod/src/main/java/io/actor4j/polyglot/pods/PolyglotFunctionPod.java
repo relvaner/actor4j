@@ -25,6 +25,7 @@ import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
 import io.actor4j.polyglot.query.PolyglotQueryRequest;
 import io.actor4j.polyglot.state.PolyglotStateStore;
@@ -62,32 +63,34 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				if (contextPolyglot.api()!=null) {
-					contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, message.source());
-					contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, message.dest());
-				}
-				else {
-					routes.put(ActorPolyglotMessage.SOURCE, message.source());
-					routes.put(ActorPolyglotMessage.DEST, message.dest());
-				}
+				contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, message.source());
+				contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, message.dest());
 				
 				Pair<Object, Integer> result = podFunction.handle(filter(message));
-				if (result!=null)
+				if (result!=null && result.b()>=0)
 					internal_callback(this, message, result);
+//				else
+//					NO_REPLY;
 			}
 
 			@Override
 			public void register() {
-				contextPolyglot = PolyglotContext.create(languageId(), routes);
+				contextPolyglot = PolyglotContext.create(languageId());
+				
+				ActorPolyglotAPI api = ActorPolyglotAPI.create(this, getContext());
+				api.router().putAll(routes);
+				contextPolyglot.injectAPI(api);
+				
 				PolyglotStateStore stateStore = createStateStore();
 				if (stateStore!=null)
 					contextPolyglot.injectStateStore(stateStore);
-				PolyglotStreams streams = createStreams();
+				PolyglotStreams streams = createStreams(contextPolyglot);
 				if (streams!=null)
 					contextPolyglot.injectStreams(streams);
 				PolyglotQueryRequest queryRequest = createQueryRequest();
 				if (queryRequest!=null)
 					contextPolyglot.injectQueryRequest(queryRequest);
+				
 				podFunction = new PolyglotPodFuction(this, getContext(), contextPolyglot, script());
 			}
 		};
@@ -101,7 +104,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 		return null;
 	}
 	
-	public PolyglotStreams createStreams() {
+	public PolyglotStreams createStreams(PolyglotContext contextPolyglot) {
 		return null;
 	}
 	
