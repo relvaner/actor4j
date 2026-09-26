@@ -189,6 +189,8 @@
 		<module>actor4j-streams</module>
 		
 		<module>actor4j-polyglot</module>
+		
+		<module>actor4j-agents</module>
 	</modules>
 	
 	<profiles>
@@ -228,6 +230,8 @@
 				<module>actor4j-streams</module>
 				
 				<module>actor4j-polyglot</module>
+				
+				<module>actor4j-agents</module>
 			</modules>
     		</profile>
 	</profiles>
