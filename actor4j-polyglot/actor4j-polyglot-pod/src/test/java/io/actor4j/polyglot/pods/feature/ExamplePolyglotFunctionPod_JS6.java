@@ -15,10 +15,13 @@
  */
 package io.actor4j.polyglot.pods.feature;
 
+import org.graalvm.polyglot.Value;
+
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.publish.subscribe.Publish;
 import io.actor4j.core.publish.subscribe.Subscribe;
 import io.actor4j.core.utils.CacheAsMap;
+import io.actor4j.polyglot.api.ValueMapper;
 import io.actor4j.polyglot.pods.PolyglotContext;
 import io.actor4j.polyglot.pods.PolyglotFunctionPod;
 import io.actor4j.polyglot.state.PolyglotStateStore;
@@ -45,10 +48,12 @@ public class ExamplePolyglotFunctionPod_JS6 extends PolyglotFunctionPod {
 	public PolyglotStreams createStreams(PolyglotContext contextPolyglot) {
 		return new PolyglotStreams(new PolyglotStreamsHandler() {
 			@Override
-			public void publish(String topic, Object value) {
+			public void publish(String topic, Value value) {
+				Object mappedObject = ValueMapper.convertValue(value);
+				
 				contextPolyglot.api().host().sendViaAlias(
 					ActorMessage.create(
-						new Publish<Object>(topic, value), 0, 
+						new Publish<Object>(topic, mappedObject), 0, 
 						contextPolyglot.api().host().self(), null), 
 					"broker");
 			}
