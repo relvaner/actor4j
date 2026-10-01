@@ -15,8 +15,10 @@
  */
 package io.actor4j.polyglot.streams;
 
+import org.graalvm.polyglot.Value;
+
 public interface PolyglotStreamsHandler {
-	public void publish(String topic, Object value);
+	public void publish(String topic, Value value);
 	
 	public void subscribe(String topic);
 	public void unsubscribe(String topic);

@@ -49,7 +49,7 @@ public class ActorPolyglotAPI {
 	}
 	
 	public ActorPolyglotAPI(ActorRef host, PodContext context) {
-		this(host, context, (v) -> ValueMapper.convertValue(v));
+		this(host, context, (v) -> ValueToJsonMapper.convertValue(v));
 	}
 
 	public static ActorPolyglotAPI create(ActorRef host, PodContext context, Function<Value, Object> defaultMapper) {

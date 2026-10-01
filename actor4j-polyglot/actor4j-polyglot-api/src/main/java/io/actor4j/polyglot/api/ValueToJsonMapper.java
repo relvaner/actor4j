@@ -15,18 +15,19 @@
  */
 package io.actor4j.polyglot.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.graalvm.polyglot.Value;
 
-public class ValueMapper {
-	protected static Map<String, Object> toMap(Value value) {
-		Map<String, Object> result = new HashMap<>();
+import io.actor4j.core.json.JsonArray;
+import io.actor4j.core.json.JsonObject;
 
-		if (value != null && !value.isNull() && value.hasMembers()) {
+public class ValueToJsonMapper {
+	protected static JsonObject toJsonObject(Value value) {
+		JsonObject result = null;
+
+		if (value == null || value.isNull() || !value.hasMembers())
+			result = JsonObject.empty();
+		else {
+			result = JsonObject.create();
 			for (String key : value.getMemberKeys()) {
 				Value member = value.getMember(key);
 				result.put(key, convertValue(member));
@@ -36,10 +37,13 @@ public class ValueMapper {
 		return result;
 	}
 
-	protected static List<Object> toList(Value value) {
-		List<Object> result = new ArrayList<>();
+	protected static JsonArray toJsonArray(Value value) {
+		JsonArray result = null;
 
-		if (value != null && !value.isNull() && value.hasArrayElements()) {
+		if (value == null || value.isNull() || !value.hasArrayElements())
+			result = JsonArray.empty();
+		else {
+			result = JsonArray.create();
 			long size = value.getArraySize();
 			for (long i = 0; i < size; i++) {
 				Value element = value.getArrayElement(i);
@@ -55,32 +59,12 @@ public class ValueMapper {
 
 		if (value != null && !value.isNull()) {
 			if (value.hasArrayElements())
-				result = toList(value);
+				result = toJsonArray(value);
 			else if (value.hasMembers())
-				result = toMap(value);
+				result = toJsonObject(value);
 			else
-				result = mapPrimitiveValue(value);
+				result = ValueMapper.mapPrimitiveValue(value);
 		}
-
-		return result;
-	}
-	
-	protected static Object mapPrimitiveValue(Value value) {
-		Object result = null;
-
-		if (value.isString())
-			result = value.asString();
-		else if (value.isBoolean())
-			result = value.asBoolean();
-		else if (value.isNumber()) {
-			if (value.fitsInInt())
-				result = value.asInt();
-			else if (value.fitsInLong())
-				result = value.asLong();
-			else
-				result = value.asDouble();
-		} else
-			result = value.as(Object.class);
 
 		return result;
 	}

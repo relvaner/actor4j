@@ -15,6 +15,8 @@
  */
 package io.actor4j.polyglot.query;
 
+import org.graalvm.polyglot.Value;
+
 public interface PolyglotQueryRequestHandler {
-	public void execute(Object value);
+	public void execute(Value value);
 }

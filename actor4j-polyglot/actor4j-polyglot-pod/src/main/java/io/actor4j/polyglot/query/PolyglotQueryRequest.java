@@ -16,6 +16,7 @@
 package io.actor4j.polyglot.query;
 
 import org.graalvm.polyglot.HostAccess.Export;
+import org.graalvm.polyglot.Value;
 
 public class PolyglotQueryRequest implements PolyglotQueryRequestHandler {
 	protected final PolyglotQueryRequestHandler delegate;
@@ -30,7 +31,7 @@ public class PolyglotQueryRequest implements PolyglotQueryRequestHandler {
 	
 	@Export
 	@Override
-	public void execute(Object value) {
+	public void execute(Value value) {
 		delegate.execute(value);
 	}
 }
