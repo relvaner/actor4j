@@ -21,15 +21,9 @@ import graphql.ExecutionInput;
 import graphql.GraphQL;
 
 public abstract class DefaultGraphQLHandler implements GraphQLHandler {
-	protected final GraphQL graphQL;
-
-	public DefaultGraphQLHandler(GraphQL graphQL) {
-		this.graphQL = graphQL;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public void execute(Object value) {
+	public void execute(Object value, GraphQL graphQL) {
 		String queryOrMutation = null;
 		Map<String, Object>  rawVariables = Map.of();
 		String operationName = null;
@@ -59,6 +53,9 @@ public abstract class DefaultGraphQLHandler implements GraphQLHandler {
 				executionInputBuilder.operationName(operationName);
 
 			graphQL.executeAsync(executionInputBuilder.build()).thenAccept(result -> {
+				if (!result.getErrors().isEmpty())
+			        System.err.println("GraphQL Errors: " + result.getErrors());
+				
 				Map<String, Object> responseMap = result.toSpecification();
 				handleAsyncResponse(responseMap);
 			});

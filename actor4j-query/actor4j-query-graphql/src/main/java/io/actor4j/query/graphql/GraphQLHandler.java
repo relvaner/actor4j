@@ -15,9 +15,10 @@
  */
 package io.actor4j.query.graphql;
 
+import graphql.GraphQL;
 import graphql.schema.idl.RuntimeWiring.Builder;
 
 public interface GraphQLHandler {
 	void configure(Builder builder);
-	void execute(Object value);
+	void execute(Object value, GraphQL graphQL);
 }
