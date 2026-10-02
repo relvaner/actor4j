@@ -25,6 +25,7 @@ public abstract class OpenAICompatibleAgentPod extends AgentFunctionPod {
 
 	public abstract OpenAiChatModel createOpenAiChatModel();
 
+	@Override
 	public void preStart(ActorRef host, PodContext context) {
 		model = createOpenAiChatModel();
 	}
