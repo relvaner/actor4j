@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import io.actor4j.core.actors.Actor;
 import io.actor4j.core.function.Procedure;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.reactive.streams.runtime.SubscriberImpl;
 
-public class SubscriberActor extends Actor {
+public class SubscriberActor extends Actor implements Subscriber {
 	protected SubscriberImpl subscriberImpl;
 	
 	public SubscriberActor() {
@@ -39,26 +40,32 @@ public class SubscriberActor extends Actor {
 		subscriberImpl.receive(message);
 	}
 	
+	@Override
 	public void subscribe(ActorId dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete) {
 		subscriberImpl.subscribe(dest, onNext, onError, onComplete);
 	}
 	
+	@Override
 	public void unsubscribe(ActorId dest) {
 		subscriberImpl.unsubscribe(dest);
 	}
 	
+	@Override
 	public void request(long n, ActorId dest) {
 		subscriberImpl.request(n, dest);
 	}
 	
+	@Override
 	public void requestReset(long n, ActorId dest) {
 		subscriberImpl.requestReset(n, dest);
 	}
 	
+	@Override
 	public void bulk(ActorId dest) {
 		subscriberImpl.bulk(dest);
 	}
 	
+	@Override
 	public void cancelBulk(ActorId dest) {
 		subscriberImpl.cancelBulk(dest);
 	}

@@ -13,36 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.reactive.streams;
+package io.actor4j.core.reactive.streams.runtime;
 
-import io.actor4j.core.actors.Actor;
+import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.reactive.streams.runtime.ProcessorImpl;
+import io.actor4j.core.reactive.streams.Publisher;
+import io.actor4j.core.reactive.streams.Subscriber;
 
-public class ProcessorActor extends Actor implements Processor {
-	protected ProcessorImpl processorImpl;
+public class ProcessorImpl implements InternalProcessor {
+	protected ActorRef actorRef;
 	
-	public ProcessorActor() {
-		this(null);
+	protected PublisherImpl publisherImpl;
+	protected SubscriberImpl subscriberImpl;
+	
+	public ProcessorImpl(ActorRef actorRef) {
+		super();
+		this.actorRef = actorRef;
+		
+		publisherImpl  = new PublisherImpl(actorRef);
+		subscriberImpl = new SubscriberImpl(actorRef);
 	}
 	
-	public ProcessorActor(String name) {
-		super(name);
-		processorImpl = new ProcessorImpl(this);
-	}
-	
-	@Override
-	public void receive(ActorMessage<?> message) {
-		processorImpl.receive(message);
-	}
-
 	@Override
 	public Publisher publisher() {
-		return processorImpl.publisher();
+		return publisherImpl;
 	}
 	
 	@Override
 	public Subscriber subscriber() {
-		return processorImpl.subscriber();
+		return subscriberImpl;
+	}
+	
+	public void receive(ActorMessage<?> message) {
+		publisherImpl.receive(message);
+		subscriberImpl.receive(message);
 	}
 }

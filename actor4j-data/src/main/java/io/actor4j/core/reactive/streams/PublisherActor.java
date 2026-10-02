@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ package io.actor4j.core.reactive.streams;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.reactive.streams.runtime.PublisherImpl;
 
-public class PublisherActor extends Actor {
+public class PublisherActor extends Actor implements Publisher {
 	protected PublisherImpl publisherImpl;
 	
 	public PublisherActor() {
@@ -36,23 +37,18 @@ public class PublisherActor extends Actor {
 		publisherImpl.receive(message);
 	}
 	
+	@Override
 	public <T> void broadcast(T value) {
 		publisherImpl.broadcast(value);
 	}
 	
+	@Override
+	public void broadcastComplete() {
+		publisherImpl.broadcastComplete();
+	}
+	
+	@Override
 	public boolean isBulk(ActorId dest) {
 		return publisherImpl.isBulk(dest);
-	}
-	
-	public <T> boolean onNext(T value, ActorId dest) {
-		return publisherImpl.onNext(value, dest);
-	}
-	
-	public void onError(String error, ActorId dest) {
-		publisherImpl.onError(error, dest);
-	}
-	
-	public void onComplete(ActorId dest) {
-		publisherImpl.onComplete(dest);
 	}
 }

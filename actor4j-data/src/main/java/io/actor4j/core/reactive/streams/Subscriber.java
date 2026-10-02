@@ -15,34 +15,18 @@
  */
 package io.actor4j.core.reactive.streams;
 
-import io.actor4j.core.actors.Actor;
-import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.reactive.streams.runtime.ProcessorImpl;
+import java.util.function.Consumer;
 
-public class ProcessorActor extends Actor implements Processor {
-	protected ProcessorImpl processorImpl;
-	
-	public ProcessorActor() {
-		this(null);
-	}
-	
-	public ProcessorActor(String name) {
-		super(name);
-		processorImpl = new ProcessorImpl(this);
-	}
-	
-	@Override
-	public void receive(ActorMessage<?> message) {
-		processorImpl.receive(message);
-	}
+import io.actor4j.core.function.Procedure;
+import io.actor4j.core.id.ActorId;
 
-	@Override
-	public Publisher publisher() {
-		return processorImpl.publisher();
-	}
+public interface Subscriber {
+	public void subscribe(ActorId dest, Consumer<Object> onNext, Consumer<String> onError, Procedure onComplete);
+	public void unsubscribe(ActorId dest);
 	
-	@Override
-	public Subscriber subscriber() {
-		return processorImpl.subscriber();
-	}
+	public void request(long n, ActorId dest);
+	public void requestReset(long n, ActorId dest);
+	
+	public void bulk(ActorId dest);
+	public void cancelBulk(ActorId dest);
 }
