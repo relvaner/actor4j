@@ -15,17 +15,29 @@
  */
 package io.actor4j.functions.pods;
 
+import io.actor4j.core.pods.PodContext;
 import io.actor4j.functions.query.QueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.Streams;
 
 public class FunctionPodContext {
+	protected final PodContext podContext;
+	
 	protected StateStore stateStore;
 	protected Streams streams;
 	protected QueryRequest queryRequest;
 	
-	public static FunctionPodContext create() {
-		return new FunctionPodContext();
+	public FunctionPodContext(PodContext podContext) {
+		super();
+		this.podContext = podContext;
+	}
+	
+	public static FunctionPodContext create(PodContext podContext) {
+		return new FunctionPodContext(podContext);
+	}
+	
+	public PodContext podContext() {
+		return podContext;
 	}
 	
 	public void injectStateStore(StateStore stateStore) {

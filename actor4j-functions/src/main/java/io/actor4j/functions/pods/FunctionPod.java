@@ -18,9 +18,7 @@ package io.actor4j.functions.pods;
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
-import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.actors.PodActor;
-import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.functions.query.QueryRequest;
 import io.actor4j.functions.state.StateStore;
@@ -31,7 +29,7 @@ public abstract class FunctionPod extends ActorPod {
 	public PodActor create() {
 		return new PodActor() {
 			protected FunctionPodContext contextFunction;
-			protected PodFunction podFunction;
+			protected PodFuction podFunction;
 			
 			@Override
 			public void preStart() {
@@ -42,15 +40,15 @@ public abstract class FunctionPod extends ActorPod {
 					setAlias(domain()+getContext().shardId());
 				else
 					setAlias(domain());
-				
+
 				register();
 				
-				FunctionPod.this.preStart(this, getContext());
+				FunctionPod.this.preStart(this, contextFunction);
 			}
 			
 			@Override
 			public void postStop() {
-				FunctionPod.this.postStop(this, getContext());
+				FunctionPod.this.postStop(this, contextFunction);
 			}
 
 			@Override
@@ -64,7 +62,7 @@ public abstract class FunctionPod extends ActorPod {
 			
 			@Override
 			public void register() {
-				contextFunction = FunctionPodContext.create();
+				contextFunction = FunctionPodContext.create(getContext());
 				
 				StateStore stateStore = createStateStore();
 				if (stateStore!=null)
@@ -76,7 +74,7 @@ public abstract class FunctionPod extends ActorPod {
 				if (queryRequest!=null)
 					contextFunction.injectQueryRequest(queryRequest);
 				
-				podFunction = createPodFunction(this, getContext());
+				podFunction = createPodFunction(this, contextFunction);
 			}
 		};
 	}
@@ -85,7 +83,7 @@ public abstract class FunctionPod extends ActorPod {
 		host.tell(result.a(), result.b(), message.source(), message.interaction(), message.protocol(), message.domain());
 	}
 	
-	public abstract PodFunction createPodFunction(ActorRef host, PodContext context);
+	public abstract PodFuction createPodFunction(ActorRef host, FunctionPodContext contextFunction);
 	
 	public StateStore createStateStore() {
 		return null;
@@ -107,11 +105,11 @@ public abstract class FunctionPod extends ActorPod {
 		return true;
 	}
 	
-	public void preStart(ActorRef host, PodContext context) {
+	public void preStart(ActorRef host, FunctionPodContext contextFunction) {
 		// empty
 	}
 	
-	public void postStop(ActorRef host, PodContext context) {
+	public void postStop(ActorRef host, FunctionPodContext contextFunction) {
 		// empty
 	}
 }

@@ -19,25 +19,22 @@ import java.util.function.Function;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.utils.Pair;
 
 public abstract class PodFuction {
 	protected final ActorRef host;
-	protected final PodContext context;
-	protected final FunctionPodContext contextFunction;
+	protected final FunctionPodContext context;
 	protected final Function<Object, Object> defaultMapper;
 	
-	public PodFuction(ActorRef host, PodContext context, FunctionPodContext contextFunction, Function<Object, Object> defaultMapper) {
+	public PodFuction(ActorRef host, FunctionPodContext context, Function<Object, Object> defaultMapper) {
 		super();
 		this.host = host;
 		this.context = context;
-		this.contextFunction = contextFunction;
 		this.defaultMapper = defaultMapper;
 	}
 	
-	public PodFuction(ActorRef host, PodContext context, FunctionPodContext contextFunction) {
-		this(host, context, contextFunction, (v) -> v);
+	public PodFuction(ActorRef host, FunctionPodContext context) {
+		this(host, context, (v) -> v);
 	}
 
 	public abstract Pair<Object, Integer> handle(ActorMessage<?> message);
