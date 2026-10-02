@@ -25,7 +25,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
-import io.actor4j.polyglot.api.ValueToJsonMapper;
+import io.actor4j.polyglot.api.utils.ValueToJsonMapper;
 
 public class PolyglotPodFuction extends PodFunction {
 	protected final PolyglotContext contextPolyglot;

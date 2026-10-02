@@ -22,7 +22,7 @@ import org.graalvm.polyglot.HostAccess.Export;
 import org.graalvm.polyglot.Value;
 
 import io.actor4j.core.utils.Cache;
-import io.actor4j.polyglot.api.ValueMapper;
+import io.actor4j.polyglot.api.utils.ValueMapper;
 
 public class PolyglotStateStore implements Cache<Object, Object>{
 	protected final Cache<Object, Object> delegate;

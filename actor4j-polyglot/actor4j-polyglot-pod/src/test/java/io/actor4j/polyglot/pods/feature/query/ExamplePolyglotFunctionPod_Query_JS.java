@@ -33,7 +33,7 @@ import io.actor4j.core.publish.subscribe.Subscribe;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.CacheAsMap;
 import io.actor4j.core.utils.CacheLRU;
-import io.actor4j.polyglot.api.ValueMapper;
+import io.actor4j.polyglot.api.utils.ValueMapper;
 import io.actor4j.polyglot.pods.PolyglotContext;
 import io.actor4j.polyglot.pods.PolyglotFunctionPod;
 import io.actor4j.polyglot.query.PolyglotQueryRequest;
