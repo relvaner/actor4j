@@ -20,9 +20,9 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.utils.Pair;
-import io.actor4j.functions.query.QueryRequest;
+import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
-import io.actor4j.functions.streams.Streams;
+import io.actor4j.functions.streams.AsyncStreams;
 
 public abstract class FunctionPod extends ActorPod {
 	@Override
@@ -67,10 +67,10 @@ public abstract class FunctionPod extends ActorPod {
 				StateStore stateStore = createStateStore();
 				if (stateStore!=null)
 					contextFunction.injectStateStore(stateStore);
-				Streams streams = createStreams(contextFunction);
+				AsyncStreams streams = createStreams(contextFunction);
 				if (streams!=null)
 					contextFunction.injectStreams(streams);
-				QueryRequest queryRequest = createQueryRequest();
+				AsyncQueryRequest queryRequest = createQueryRequest();
 				if (queryRequest!=null)
 					contextFunction.injectQueryRequest(queryRequest);
 				
@@ -89,11 +89,11 @@ public abstract class FunctionPod extends ActorPod {
 		return null;
 	}
 	
-	public Streams createStreams(FunctionPodContext contextFunctions) {
+	public AsyncStreams createStreams(FunctionPodContext contextFunctions) {
 		return null;
 	}
 	
-	public QueryRequest createQueryRequest() {
+	public AsyncQueryRequest createQueryRequest() {
 		return null;
 	}
 	

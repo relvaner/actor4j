@@ -15,7 +15,7 @@
  */
 package io.actor4j.functions.streams;
 
-public interface StreamsHandler {
+public interface AsyncStreamsHandler {
 	public void publish(String topic, Object value);
 	
 	public void subscribe(String topic);

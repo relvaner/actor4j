@@ -15,15 +15,15 @@
  */
 package io.actor4j.functions.query;
 
-public class QueryRequest implements QueryRequestHandler {
-	protected final QueryRequestHandler delegate;
+public class AsyncQueryRequest implements AsyncQueryRequestHandler {
+	protected final AsyncQueryRequestHandler delegate;
 	
-	public QueryRequest(QueryRequestHandler delegate) {
+	public AsyncQueryRequest(AsyncQueryRequestHandler delegate) {
 		this.delegate = delegate;
 	}
 	
-	public static QueryRequest create(QueryRequestHandler delegate) {
-		return new QueryRequest(delegate);
+	public static AsyncQueryRequest create(AsyncQueryRequestHandler delegate) {
+		return new AsyncQueryRequest(delegate);
 	}
 	
 	@Override

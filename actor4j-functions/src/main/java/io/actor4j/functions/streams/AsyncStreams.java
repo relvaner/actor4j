@@ -13,8 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.functions.query;
+package io.actor4j.functions.streams;
 
-public interface QueryRequestHandler {
-	public Object execute(Object value);
+public class AsyncStreams implements AsyncStreamsHandler {
+	protected final AsyncStreamsHandler delegate;
+	
+	public AsyncStreams(AsyncStreamsHandler delegate) {
+		this.delegate = delegate;
+	}
+	
+	public static AsyncStreams create(AsyncStreamsHandler delegate) {
+		return new AsyncStreams(delegate);
+	}
+	
+	@Override
+	public void publish(String topic, Object value) {
+		delegate.publish(topic, value);
+	}
+
+	@Override
+	public void subscribe(String topic) {
+		delegate.subscribe(topic);
+	}
+	
+	@Override
+	public void unsubscribe(String topic) {
+		delegate.unsubscribe(topic);
+	}
 }
