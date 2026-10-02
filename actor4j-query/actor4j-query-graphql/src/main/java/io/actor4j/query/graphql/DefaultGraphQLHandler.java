@@ -16,53 +16,105 @@
 package io.actor4j.query.graphql;
 
 import java.util.Map;
+import java.util.UUID;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import graphql.ExecutionInput;
+import graphql.ExecutionResult;
 import graphql.GraphQL;
 
 public abstract class DefaultGraphQLHandler implements GraphQLHandler {
 	@SuppressWarnings("unchecked")
 	@Override
-	public void execute(Object value, GraphQL graphQL) {
-		String queryOrMutation = null;
-		Map<String, Object>  rawVariables = Map.of();
+	public UUID  execute(Object value, GraphQL graphQL) {
+		String document = null;
+		Map<String, Object> rawVariables = Map.of();
+		String operationType = null;
 		String operationName = null;
+		String selection = null;
 
 		if (value instanceof String str)
-			queryOrMutation = str;
+			document = str;
 		else if (value instanceof Map<?, ?> map) {
 			if (map.get("query") instanceof String q)
-				queryOrMutation = q;
+				document = q;
 			else if (map.get("mutation") instanceof String m)
-				queryOrMutation = m;
+				document = m;
+			else if (map.get("subscription") instanceof String sub)
+				document = sub;
 
 			if (map.get("variables") instanceof Map<?, ?> vars)
-				 rawVariables = (Map<String, Object>) vars;
+				rawVariables = (Map<String, Object>) vars;
+
+			if (map.get("operationType") instanceof String t)
+				operationType = t;
 
 			if (map.get("operationName") instanceof String op)
 				operationName = op;
+
+			if (map.get("selection") instanceof String sel)
+				selection = sel;
 		}
 
-		if (queryOrMutation != null) {
-			ExecutionInput.Builder executionInputBuilder = ExecutionInput
-				.newExecutionInput()
-				.query(queryOrMutation)
-				.variables(rawVariables);
+		if (document == null && operationType != null && operationName != null)
+			document = GraphQLOperationGenerator.build(graphQL.getGraphQLSchema(), operationType, operationName, selection);
 
-			if (operationName != null)
-				executionInputBuilder.operationName(operationName);
+		if (document == null)
+			throw new IllegalArgumentException("Invalid payload: Missing 'query', 'mutation', 'subscription' or known 'operationType'/'operationName'.");
 
-			graphQL.executeAsync(executionInputBuilder.build()).thenAccept(result -> {
-				if (!result.getErrors().isEmpty())
-			        System.err.println("GraphQL Errors: " + result.getErrors());
-				
-				Map<String, Object> responseMap = result.toSpecification();
-				handleAsyncResponse(responseMap);
-			});
-		} 
-		else
-			throw new IllegalArgumentException("Invalid payload: Missing 'query' or 'mutation' string.");
+		ExecutionInput.Builder executionInputBuilder = ExecutionInput
+			.newExecutionInput()
+			.query(document)
+			.variables(rawVariables);
+
+		if (operationName != null)
+			executionInputBuilder.operationName(operationName);
+
+		final UUID requestId = UUID.randomUUID();
+		graphQL.executeAsync(executionInputBuilder.build()).thenAccept(result -> {
+			if (!result.getErrors().isEmpty())
+				System.err.println("GraphQL Errors: " + result.getErrors());
+
+			if (result.getData() instanceof Publisher<?> publisher)
+				subscribe(requestId, (Publisher<ExecutionResult>) publisher);
+			else
+				handleAsyncResponse(requestId, result.toSpecification());
+		});
+		
+		return requestId;
+	}
+
+	protected void subscribe(UUID requestId, Publisher<ExecutionResult> publisher) {
+		publisher.subscribe(new Subscriber<ExecutionResult>() {
+			@Override
+			public void onSubscribe(Subscription subscription) {
+				subscription.request(Long.MAX_VALUE);
+			}
+
+			@Override
+			public void onNext(ExecutionResult event) {
+				handleAsyncSubscription(requestId, event.toSpecification());
+			}
+
+			@Override
+			public void onError(Throwable throwable) {
+				System.err.println("GraphQL Subscription Error: " + throwable);
+			}
+
+			@Override
+			public void onComplete() {
+			}
+		});
+	}
+
+	public void handleAsyncResponse(UUID requestId, Map<String, Object> responseMap) {
+		// empty
 	}
 	
-	public abstract void handleAsyncResponse(Map<String, Object> responseMap);
+	public void handleAsyncSubscription(UUID requestId, Map<String, Object> responseMap) {
+		// empty
+	}
 }

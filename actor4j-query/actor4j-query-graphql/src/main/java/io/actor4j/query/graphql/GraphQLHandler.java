@@ -15,10 +15,12 @@
  */
 package io.actor4j.query.graphql;
 
+import java.util.UUID;
+
 import graphql.GraphQL;
 import graphql.schema.idl.RuntimeWiring.Builder;
 
 public interface GraphQLHandler {
 	void configure(Builder builder);
-	void execute(Object value, GraphQL graphQL);
+	UUID execute(Object value, GraphQL graphQL);
 }
