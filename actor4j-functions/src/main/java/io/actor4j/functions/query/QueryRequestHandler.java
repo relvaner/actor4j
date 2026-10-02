@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.agents.pods;
+package io.actor4j.functions.query;
 
-import io.actor4j.functions.pods.FunctionPod;
-
-public abstract class AgentFunctionPod extends FunctionPod {
-	
+public interface QueryRequestHandler {
+	public Object execute(Object value);
 }

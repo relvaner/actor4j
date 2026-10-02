@@ -13,10 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.agents.pods;
+package io.actor4j.functions.streams;
 
-import io.actor4j.functions.pods.FunctionPod;
-
-public abstract class AgentFunctionPod extends FunctionPod {
+public class Streams implements StreamsHandler {
+	protected final StreamsHandler delegate;
 	
+	public Streams(StreamsHandler delegate) {
+		this.delegate = delegate;
+	}
+	
+	public static Streams create(StreamsHandler delegate) {
+		return new Streams(delegate);
+	}
+	
+	@Override
+	public void publish(String topic, Object value) {
+		delegate.publish(topic, value);
+	}
+
+	@Override
+	public void subscribe(String topic) {
+		delegate.subscribe(topic);
+	}
+	
+	@Override
+	public void unsubscribe(String topic) {
+		delegate.unsubscribe(topic);
+	}
 }

@@ -7,11 +7,13 @@
 		<artifactId>actor4j</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>actor4j-agents</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>actor4j-functions</artifactId>
 	
-	<modules>
-		<module>actor4j-agents-langchain4j</module>
-		<module>actor4j-agents-pod</module>
-	</modules>
+	<dependencies>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-core-sdk</artifactId>
+			<version>${actor4j.core.version}</version>
+		</dependency>
+	</dependencies>
 </project>
