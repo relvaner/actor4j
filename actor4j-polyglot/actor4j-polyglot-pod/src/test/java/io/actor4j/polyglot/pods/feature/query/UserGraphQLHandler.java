@@ -19,6 +19,7 @@ import graphql.schema.idl.RuntimeWiring.Builder;
 import io.actor4j.query.graphql.DefaultGraphQLHandler;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class UserGraphQLHandler extends DefaultGraphQLHandler {
 	private final UserRepository repository;
@@ -44,7 +45,7 @@ public class UserGraphQLHandler extends DefaultGraphQLHandler {
 	}
 
 	@Override
-	public void handleAsyncResponse(Map<String, Object> responseMap) {
+	public void handleAsyncResponse(UUID requestId, Map<String, Object> responseMap) {
 		System.out.println(responseMap);
 	}
 }

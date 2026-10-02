@@ -31,7 +31,7 @@ public class PolyglotQueryRequest implements PolyglotQueryRequestHandler {
 	
 	@Export
 	@Override
-	public void execute(Value value) {
-		delegate.execute(value);
+	public Value execute(Value value) {
+		return delegate.execute(value);
 	}
 }

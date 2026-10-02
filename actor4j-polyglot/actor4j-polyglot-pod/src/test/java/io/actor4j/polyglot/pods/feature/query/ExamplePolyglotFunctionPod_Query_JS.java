@@ -15,9 +15,13 @@
  */
 package io.actor4j.polyglot.pods.feature.query;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 import org.graalvm.polyglot.Value;
 
 import graphql.GraphQL;
+import graphql.execution.preparsed.PreparsedDocumentEntry;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
@@ -26,7 +30,9 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.publish.subscribe.Publish;
 import io.actor4j.core.publish.subscribe.Subscribe;
+import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.CacheAsMap;
+import io.actor4j.core.utils.CacheLRU;
 import io.actor4j.polyglot.api.ValueMapper;
 import io.actor4j.polyglot.pods.PolyglotContext;
 import io.actor4j.polyglot.pods.PolyglotFunctionPod;
@@ -37,8 +43,17 @@ import io.actor4j.polyglot.streams.PolyglotStreams;
 import io.actor4j.polyglot.streams.PolyglotStreamsHandler;
 
 public class ExamplePolyglotFunctionPod_Query_JS extends PolyglotFunctionPod {
-	protected final UserRepository repository = new UserRepository();
+	protected final UserRepository repository;
+	
+	protected final Cache<String, PreparsedDocumentEntry> preparsedDocumentEntryCache;
 	protected GraphQL graphQL;
+
+	public ExamplePolyglotFunctionPod_Query_JS() {
+		super();
+		
+		repository = new UserRepository();
+		preparsedDocumentEntryCache = new CacheLRU<>(1_000);
+	}
 
 	@Override
 	public String domain() {
@@ -89,14 +104,27 @@ public class ExamplePolyglotFunctionPod_Query_JS extends PolyglotFunctionPod {
         handler.configure(wiringBuilder);
 		
         GraphQLSchema graphQLSchema = new SchemaGenerator().makeExecutableSchema(typeRegistry, wiringBuilder.build());
-        graphQL = GraphQL.newGraphQL(graphQLSchema).build();
-        
+        graphQL = GraphQL.newGraphQL(graphQLSchema)
+        		.preparsedDocumentProvider((executionInput, parseAndValidate) -> {
+        			String query = executionInput.getQuery();
+        			PreparsedDocumentEntry entry = preparsedDocumentEntryCache.get(query);
+        			if (entry==null) {
+        				entry = parseAndValidate.apply(executionInput);
+        				preparsedDocumentEntryCache.put(query, entry);
+        			}
+        				
+        			return CompletableFuture.completedFuture(entry);
+        		})
+        		.build();
+
 		return new PolyglotQueryRequest(new PolyglotQueryRequestHandler() {
 			@Override
-			public void execute(Value value) {
-				Object mappedObject = ValueMapper.convertValue(value);System.out.println(mappedObject);
+			public Value execute(Value value) {
+				Object mappedObject = ValueMapper.convertValue(value);
+				System.out.println(mappedObject);
 				
-				handler.execute(mappedObject, graphQL);
+				UUID requestId = handler.execute(mappedObject, graphQL);
+				return Value.asValue(requestId.toString());
 			}});
 	}
 	
@@ -117,7 +145,7 @@ public class ExamplePolyglotFunctionPod_Query_JS extends PolyglotFunctionPod {
 				streams.publish("MyTopic_out", state.get("result")+1);
 				
 				const id = state.get("result");
-				const gql = (query, variables = {}) => queryReq.execute({ query, variables });
+				const gql = (operationType, operationName, variables = {}, selection) => queryReq.execute({ operationType, operationName, variables, selection });
 				
 				const myUserObject = {
 					id,
@@ -125,10 +153,36 @@ public class ExamplePolyglotFunctionPod_Query_JS extends PolyglotFunctionPod {
 					email: "alice@example.com"
 				};
 				
-				gql(`mutation ($user: CreateUserInput!) { createUser(user: $user) { id } }`, { user: myUserObject });
+				gql("mutation", "createUser", { user: myUserObject });
 				
-				gql(`query ($id: Int!) { getUser(id: $id) { id name email } }`, { id });
+				const requestId = gql("query", "getUser", { id });
+				api.info(requestId.toString());
 			}
 		""";
 	}
 }
+
+//return """
+//		function execute(api, message, state, queryReq, streams) {
+//			api.info("welcome");
+//			api.info(message.value());
+//			
+//			api.info(state.get("result"));
+//			state.put("result", state.get("result")+1);
+//			streams.publish("MyTopic_out", state.get("result")+1);
+//			
+//			const id = state.get("result");
+//			const gql = (query, variables = {}) => queryReq.execute({ query, variables });
+//			
+//			const myUserObject = {
+//				id,
+//				name: "Alice Smith",
+//				email: "alice@example.com"
+//			};
+//			
+//			gql(`mutation ($user: CreateUserInput!) { createUser(user: $user) { id } }`, { user: myUserObject });
+//			
+//			gql(`query ($id: Int!) { getUser(id: $id) { id name email } }`, { id });
+//		}
+//	""";
+//}
