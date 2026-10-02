@@ -19,8 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.graalvm.polyglot.HostAccess.Export;
+import org.graalvm.polyglot.Value;
 
 import io.actor4j.core.utils.Cache;
+import io.actor4j.polyglot.api.ValueMapper;
 
 public class PolyglotStateStore implements Cache<Object, Object>{
 	protected final Cache<Object, Object> delegate;
@@ -54,19 +56,19 @@ public class PolyglotStateStore implements Cache<Object, Object>{
 	@Export
 	@Override
 	public Object put(Object key, Object value) {
-		return delegate.put(key, value);
+		return delegate.put(key, toJava(value));
 	}
 
 	@Export
 	@Override
 	public void put(Map<Object, Object> entries) {
-		delegate.put(entries);
+		delegate.put(toJavaMap(entries));
 	}
 
 	@Export
 	@Override
 	public boolean compareAndSet(Object key, Object expectedValue, Object newValue) {
-		return delegate.compareAndSet(key, expectedValue, newValue);
+		return delegate.compareAndSet(key, toJava(expectedValue), toJava(newValue));
 	}
 
 	@Export
@@ -97,5 +99,30 @@ public class PolyglotStateStore implements Cache<Object, Object>{
 	@Override
 	public void close() {
 		delegate.close();
+	}
+	
+	protected static Object toJava(Object value) {
+		if (value == null || value instanceof String || value instanceof Number || value instanceof Boolean)
+			return value;
+
+		Value v = value instanceof Value val ? val : Value.asValue(value);
+
+		if (v.isHostObject())
+			return v.asHostObject();
+
+		return ValueMapper.convertValue(v);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected static Map<Object, Object> toJavaMap(Map<Object, Object> entries) {
+		if (entries == null)
+			return null;
+
+		Value v = Value.asValue(entries);
+
+		if (v.isHostObject())
+			return entries;
+
+		return (Map<Object, Object>) ValueMapper.convertValue(v);
 	}
 }
