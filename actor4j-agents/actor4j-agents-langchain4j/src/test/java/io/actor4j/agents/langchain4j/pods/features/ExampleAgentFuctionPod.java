@@ -25,7 +25,7 @@ import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.functions.pods.FunctionPodContext;
-import io.actor4j.functions.pods.PodFuction;
+import io.actor4j.functions.pods.PodFunction;
 
 public class ExampleAgentFuctionPod extends OpenAICompatibleAgentPod {
 	public static final String BASE_URL = "http://localhost:9090/v1";
@@ -59,8 +59,8 @@ public class ExampleAgentFuctionPod extends OpenAICompatibleAgentPod {
 	}
 
 	@Override
-	public PodFuction createPodFunction(ActorRef host, FunctionPodContext contextFunction) {
-		return new PodFuction(host, contextFunction) {
+	public PodFunction createPodFunction(ActorRef host, FunctionPodContext contextFunction) {
+		return new PodFunction(host, contextFunction) {
 			@Override
 			public Pair<Object, Integer> handle(ActorMessage<?> message) {
 				TaskAnalysis result = agent.analyze(message.valueAsString());

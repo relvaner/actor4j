@@ -29,7 +29,7 @@ public abstract class FunctionPod extends ActorPod {
 	public PodActor create() {
 		return new PodActor() {
 			protected FunctionPodContext contextFunction;
-			protected PodFuction podFunction;
+			protected PodFunction podFunction;
 			
 			@Override
 			public void preStart() {
@@ -83,7 +83,7 @@ public abstract class FunctionPod extends ActorPod {
 		host.tell(result.a(), result.b(), message.source(), message.interaction(), message.protocol(), message.domain());
 	}
 	
-	public abstract PodFuction createPodFunction(ActorRef host, FunctionPodContext contextFunction);
+	public abstract PodFunction createPodFunction(ActorRef host, FunctionPodContext contextFunction);
 	
 	public StateStore createStateStore() {
 		return null;
