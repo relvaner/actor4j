@@ -62,15 +62,15 @@ public abstract class FunctionPod extends ActorPod {
 			
 			@Override
 			public void register() {
-				contextFunction = FunctionPodContext.create(getContext());
+				contextFunction = FunctionPodContext.create(this, getContext());
 				
-				StateStore stateStore = createStateStore();
+				StateStore stateStore = createStateStore(contextFunction);
 				if (stateStore!=null)
 					contextFunction.injectStateStore(stateStore);
 				AsyncStreams streams = createStreams(contextFunction);
 				if (streams!=null)
 					contextFunction.injectStreams(streams);
-				AsyncQueryRequest queryRequest = createQueryRequest();
+				AsyncQueryRequest queryRequest = createQueryRequest(contextFunction);
 				if (queryRequest!=null)
 					contextFunction.injectQueryRequest(queryRequest);
 				
@@ -85,7 +85,7 @@ public abstract class FunctionPod extends ActorPod {
 	
 	public abstract PodFunction createPodFunction(ActorRef host, FunctionPodContext contextFunction);
 	
-	public StateStore createStateStore() {
+	public StateStore createStateStore(FunctionPodContext contextFunctions) {
 		return null;
 	}
 	
@@ -93,7 +93,7 @@ public abstract class FunctionPod extends ActorPod {
 		return null;
 	}
 	
-	public AsyncQueryRequest createQueryRequest() {
+	public AsyncQueryRequest createQueryRequest(FunctionPodContext contextFunctions) {
 		return null;
 	}
 	
