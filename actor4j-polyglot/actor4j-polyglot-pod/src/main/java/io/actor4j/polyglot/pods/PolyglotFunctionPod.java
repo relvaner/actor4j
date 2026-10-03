@@ -60,9 +60,12 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 			
 			@Override
 			public void postStop() {
-				PolyglotFunctionPod.this.postStop(contextPolyglot);
-				
-				contextPolyglot.close();
+				try {
+					PolyglotFunctionPod.this.postStop(contextPolyglot);
+				}
+				finally {
+					contextPolyglot.close();
+				}
 			}
 			
 			@Override
