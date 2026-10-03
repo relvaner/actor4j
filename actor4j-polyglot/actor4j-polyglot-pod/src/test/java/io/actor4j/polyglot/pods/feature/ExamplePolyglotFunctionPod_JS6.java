@@ -40,7 +40,7 @@ public class ExamplePolyglotFunctionPod_JS6 extends PolyglotFunctionPod {
 	}
 	
 	@Override
-	public PolyglotStateStore createStateStore() {
+	public PolyglotStateStore createStateStore(PolyglotContext contextPolyglot) {
 		return new PolyglotStateStore(new CacheAsMap<>());
 	}
 	

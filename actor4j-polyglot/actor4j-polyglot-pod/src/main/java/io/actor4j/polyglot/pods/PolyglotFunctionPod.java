@@ -27,6 +27,8 @@ import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
+import io.actor4j.polyglot.pods.runtime.PolyglotContextImpl;
+import io.actor4j.polyglot.pods.runtime.PolyglotContextInternal;
 import io.actor4j.polyglot.query.PolyglotQueryRequest;
 import io.actor4j.polyglot.state.PolyglotStateStore;
 import io.actor4j.polyglot.streams.PolyglotStreams;
@@ -35,7 +37,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	@Override
 	public PodActor create() {
 		return new PodActor() {
-			protected PolyglotContext contextPolyglot;
+			protected PolyglotContextInternal contextPolyglot;
 			protected PodFunction podFunction;
 			protected Map<Long, ActorId> routes;
 			
@@ -58,6 +60,8 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 			
 			@Override
 			public void postStop() {
+				PolyglotFunctionPod.this.postStop(contextPolyglot);
+				
 				contextPolyglot.close();
 			}
 			
@@ -75,19 +79,19 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 
 			@Override
 			public void register() {
-				contextPolyglot = PolyglotContext.create(languageId());
+				contextPolyglot = PolyglotContextImpl.create(languageId());
 				
 				ActorPolyglotAPI api = ActorPolyglotAPI.create(this, getContext());
 				api.router().putAll(routes);
 				contextPolyglot.injectAPI(api);
 				
-				PolyglotStateStore stateStore = createStateStore();
+				PolyglotStateStore stateStore = createStateStore(contextPolyglot);
 				if (stateStore!=null)
 					contextPolyglot.injectStateStore(stateStore);
 				PolyglotStreams streams = createStreams(contextPolyglot);
 				if (streams!=null)
 					contextPolyglot.injectStreams(streams);
-				PolyglotQueryRequest queryRequest = createQueryRequest();
+				PolyglotQueryRequest queryRequest = createQueryRequest(contextPolyglot);
 				if (queryRequest!=null)
 					contextPolyglot.injectQueryRequest(queryRequest);
 				
@@ -100,7 +104,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 		host.tell(result.a(), result.b(), message.source(), message.interaction(), message.protocol(), message.domain());
 	}
 	
-	public PolyglotStateStore createStateStore() {
+	public PolyglotStateStore createStateStore(PolyglotContext contextPolyglot) {
 		return null;
 	}
 	
@@ -108,7 +112,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 		return null;
 	}
 	
-	public PolyglotQueryRequest createQueryRequest() {
+	public PolyglotQueryRequest createQueryRequest(PolyglotContext contextPolyglot) {
 		return null;
 	}
 
@@ -128,6 +132,10 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	}
 	
 	public void preStart(PolyglotContext contextPolyglot) {
+		// empty
+	}
+	
+	public void postStop(PolyglotContext contextPolyglot) {
 		// empty
 	}
 }

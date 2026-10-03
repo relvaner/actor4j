@@ -66,7 +66,7 @@ public class ExamplePolyglotFunctionPod_Query_JS extends PolyglotFunctionPod {
 	}
 	
 	@Override
-	public PolyglotStateStore createStateStore() {
+	public PolyglotStateStore createStateStore(PolyglotContext contextPolyglot) {
 		return new PolyglotStateStore(new CacheAsMap<>());
 	}
 	
@@ -96,7 +96,7 @@ public class ExamplePolyglotFunctionPod_Query_JS extends PolyglotFunctionPod {
 		});
 	}
 	
-	public PolyglotQueryRequest createQueryRequest() {
+	public PolyglotQueryRequest createQueryRequest(PolyglotContext contextPolyglot) {
 		TypeDefinitionRegistry typeRegistry = new SchemaParser().parse(UserRepository.schema());
 		RuntimeWiring.Builder wiringBuilder = RuntimeWiring.newRuntimeWiring();
 		

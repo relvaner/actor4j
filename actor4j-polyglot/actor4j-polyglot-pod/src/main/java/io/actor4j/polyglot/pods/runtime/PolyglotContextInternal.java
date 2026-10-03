@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.polyglot.pods;
+package io.actor4j.polyglot.pods.runtime;
 
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Value;
+
+import io.actor4j.core.actors.ActorRef;
+import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.pods.PodContext;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
+import io.actor4j.polyglot.pods.PolyglotContext;
 import io.actor4j.polyglot.query.PolyglotQueryRequest;
 import io.actor4j.polyglot.state.PolyglotStateStore;
 import io.actor4j.polyglot.streams.PolyglotStreams;
 
-public interface PolyglotContext {
-	public static final String LANGUAGE_ID_JS      = "js";
-	public static final String LANGUAGE_ID_PYTHON  = "python";
-	public static final String LANGUAGE_ID_JAVA    = "java";
-	public static final String LANGUAGE_ID_WASM    = "wasm";
+public interface PolyglotContextInternal extends PolyglotContext {
+	public Context context();
+	public void close();
 	
-	public static final String VALUE               = "value";
-	public static final String TAG                 = "tag";
-	public static final String ERROR               = "error";
+	public Value executeFunction(ActorRef host, PodContext podContext, ActorMessage<?> message, CharSequence script);
 	
-	public String languageId();
-	
-	public ActorPolyglotAPI api();
-	
-	public PolyglotStateStore stateStore();
-	public PolyglotStreams streams();
-	public PolyglotQueryRequest queryRequest();
+	public void injectAPI(ActorPolyglotAPI api);
+	public void injectStateStore(PolyglotStateStore stateStore);
+	public void injectStreams(PolyglotStreams streams);
+	public void injectQueryRequest(PolyglotQueryRequest queryRequest);
 }
