@@ -17,7 +17,6 @@ package io.actor4j.agents.langchain4j.pods;
 
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import io.actor4j.agents.pods.AgentFunctionPod;
-import io.actor4j.core.actors.ActorRef;
 import io.actor4j.functions.pods.FunctionPodContext;
 
 public abstract class OpenAICompatibleAgentPod extends AgentFunctionPod {
@@ -26,7 +25,7 @@ public abstract class OpenAICompatibleAgentPod extends AgentFunctionPod {
 	public abstract OpenAiChatModel createOpenAiChatModel();
 
 	@Override
-	public void preStart(ActorRef host, FunctionPodContext contextFunction) {
+	public void preStart(FunctionPodContext contextFunction) {
 		model = createOpenAiChatModel();
 	}
 }

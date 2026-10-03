@@ -43,12 +43,12 @@ public abstract class FunctionPod extends ActorPod {
 
 				register();
 				
-				FunctionPod.this.preStart(this, contextFunction);
+				FunctionPod.this.preStart(contextFunction);
 			}
 			
 			@Override
 			public void postStop() {
-				FunctionPod.this.postStop(this, contextFunction);
+				FunctionPod.this.postStop(contextFunction);
 			}
 
 			@Override
@@ -74,7 +74,7 @@ public abstract class FunctionPod extends ActorPod {
 				if (queryRequest!=null)
 					contextFunction.injectQueryRequest(queryRequest);
 				
-				podFunction = createPodFunction(this, contextFunction);
+				podFunction = createPodFunction(contextFunction);
 			}
 		};
 	}
@@ -83,7 +83,7 @@ public abstract class FunctionPod extends ActorPod {
 		host.tell(result.a(), result.b(), message.source(), message.interaction(), message.protocol(), message.domain());
 	}
 	
-	public abstract PodFunction createPodFunction(ActorRef host, FunctionPodContext contextFunction);
+	public abstract PodFunction createPodFunction(FunctionPodContext contextFunction);
 	
 	public StateStore createStateStore(FunctionPodContext contextFunctions) {
 		return null;
@@ -105,11 +105,11 @@ public abstract class FunctionPod extends ActorPod {
 		return true;
 	}
 	
-	public void preStart(ActorRef host, FunctionPodContext contextFunction) {
+	public void preStart(FunctionPodContext contextFunction) {
 		// empty
 	}
 	
-	public void postStop(ActorRef host, FunctionPodContext contextFunction) {
+	public void postStop(FunctionPodContext contextFunction) {
 		// empty
 	}
 }

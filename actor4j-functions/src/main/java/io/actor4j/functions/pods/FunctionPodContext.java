@@ -39,6 +39,10 @@ public class FunctionPodContext {
 		return new FunctionPodContext(host, podContext);
 	}
 	
+	public ActorRef host() {
+		return host;
+	}
+	
 	public PodContext podContext() {
 		return podContext;
 	}

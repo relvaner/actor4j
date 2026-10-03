@@ -21,7 +21,6 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
 import io.actor4j.agents.langchain4j.pods.OpenAICompatibleAgentPod;
-import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.functions.pods.FunctionPodContext;
@@ -59,8 +58,8 @@ public class ExampleAgentFuctionPod extends OpenAICompatibleAgentPod {
 	}
 
 	@Override
-	public PodFunction createPodFunction(ActorRef host, FunctionPodContext contextFunction) {
-		return new PodFunction(host, contextFunction) {
+	public PodFunction createPodFunction(FunctionPodContext contextFunction) {
+		return new PodFunction(contextFunction) {
 			@Override
 			public Pair<Object, Integer> handle(ActorMessage<?> message) {
 				TaskAnalysis result = agent.analyze(message.valueAsString());
@@ -69,8 +68,8 @@ public class ExampleAgentFuctionPod extends OpenAICompatibleAgentPod {
 		};
 	}
 	
-	public void preStart(ActorRef host, FunctionPodContext contextFunction) {
-		super.preStart(host, contextFunction);
+	public void preStart(FunctionPodContext contextFunction) {
+		super.preStart(contextFunction);
 		
 		agent = AiServices.create(AnalystAgent.class, model);
 	}
