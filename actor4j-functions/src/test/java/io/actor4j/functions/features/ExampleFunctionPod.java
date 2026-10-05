@@ -132,7 +132,7 @@ public class ExampleFunctionPod extends FunctionPod {
 	public static Object gql(String operationType, String operationName, Object variables, Object selection, FunctionPodContext ctx) {
 		Map<String, Object> map = Map.of("operationType", operationType, "operationName", operationName, 
 			"variables", objectMapper.convertValue(variables, new TypeReference<Map<String, Object>>() {}), 
-			"selection", objectMapper.convertValue(selection, new TypeReference<Map<String, Object>>() {}));
+			"selection", selection);
 		return ctx.queryRequest().execute(map);
 	}
 	
