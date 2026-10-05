@@ -19,7 +19,7 @@ import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
-import io.actor4j.core.utils.Pair;
+import io.actor4j.functions.pods.PodFunction.Reply;
 import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.AsyncStreams;
@@ -53,8 +53,8 @@ public abstract class FunctionPod extends ActorPod {
 
 			@Override
 			public void receive(ActorMessage<?> message) {
-				Pair<Object, Integer> result = podFunction.handle(filter(message));
-				if (result!=null && result.b()>=0)
+				Reply result = podFunction.handle(filter(message));
+				if (result!=null && result.tag()>=0)
 					internal_callback(this, message, result);
 //				else
 //					NO_REPLY;
@@ -79,8 +79,8 @@ public abstract class FunctionPod extends ActorPod {
 		};
 	}
 	
-	protected void internal_callback(ActorRef host, ActorMessage<?> message, Pair<Object, Integer> result) {
-		host.tell(result.a(), result.b(), message.source(), message.interaction(), message.protocol(), message.domain());
+	protected void internal_callback(ActorRef host, ActorMessage<?> message, Reply result) {
+		host.tell(result.value(), result.tag(), message.source(), message.interaction(), message.protocol(), message.domain());
 	}
 	
 	public abstract PodFunction createPodFunction(FunctionPodContext contextFunction);

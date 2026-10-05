@@ -24,7 +24,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.functions.PodFunction;
-import io.actor4j.core.utils.Pair;
+import io.actor4j.core.pods.functions.PodFunction.Reply;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
 import io.actor4j.polyglot.pods.runtime.PolyglotContextImpl;
@@ -73,8 +73,8 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 				contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, message.source());
 				contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, message.dest());
 				
-				Pair<Object, Integer> result = podFunction.handle(filter(message));
-				if (result!=null && result.b()>=0)
+				Reply result = podFunction.handle(filter(message));
+				if (result!=null && result.tag()>=0)
 					internal_callback(this, message, result);
 //				else
 //					NO_REPLY;
@@ -103,8 +103,8 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 		};
 	}
 	
-	protected void internal_callback(ActorRef host, ActorMessage<?> message, Pair<Object, Integer> result) {
-		host.tell(result.a(), result.b(), message.source(), message.interaction(), message.protocol(), message.domain());
+	protected void internal_callback(ActorRef host, ActorMessage<?> message, Reply result) {
+		host.tell(result.value(), result.tag(), message.source(), message.interaction(), message.protocol(), message.domain());
 	}
 	
 	public PolyglotStateStore createStateStore(PolyglotContext contextPolyglot) {

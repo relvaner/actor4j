@@ -35,7 +35,6 @@ import io.actor4j.core.publish.subscribe.Subscribe;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.CacheAsMap;
 import io.actor4j.core.utils.CacheLRU;
-import io.actor4j.core.utils.Pair;
 import io.actor4j.functions.pods.FunctionPod;
 import io.actor4j.functions.pods.FunctionPodContext;
 import io.actor4j.functions.pods.PodFunction;
@@ -147,7 +146,7 @@ public class ExampleFunctionPod extends FunctionPod {
 	public PodFunction createPodFunction(FunctionPodContext ctx) {
 		return new PodFunction(ctx) {
 			@Override
-			public Pair<Object, Integer> handle(ActorMessage<?> message) {
+			public Reply handle(ActorMessage<?> message) {
 				StateStore<String, Integer> stateStore = ctx.stateStore();
 				
 				logger().log(INFO, "welcome");
@@ -164,9 +163,8 @@ public class ExampleFunctionPod extends FunctionPod {
 				final UUID requestId = (UUID)gql("query", "getUser", Map.of("id", id), ctx);
 				logger().log(INFO, requestId.toString());
 				
-				return Pair.of(null, -1);
+				return Reply.none();
 			}
-			
 		};
 	}
 }

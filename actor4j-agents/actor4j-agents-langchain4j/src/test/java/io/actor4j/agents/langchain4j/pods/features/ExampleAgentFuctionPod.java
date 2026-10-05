@@ -22,7 +22,6 @@ import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
 import io.actor4j.agents.langchain4j.pods.OpenAICompatibleAgentPod;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.utils.Pair;
 import io.actor4j.functions.pods.FunctionPodContext;
 import io.actor4j.functions.pods.PodFunction;
 
@@ -61,9 +60,9 @@ public class ExampleAgentFuctionPod extends OpenAICompatibleAgentPod {
 	public PodFunction createPodFunction(FunctionPodContext contextFunction) {
 		return new PodFunction(contextFunction) {
 			@Override
-			public Pair<Object, Integer> handle(ActorMessage<?> message) {
+			public Reply handle(ActorMessage<?> message) {
 				TaskAnalysis result = agent.analyze(message.valueAsString());
-				return Pair.of(result, 0);
+				return Reply.of(result, 0);
 			}
 		};
 	}

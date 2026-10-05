@@ -24,7 +24,6 @@ import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.functions.PodFunction;
-import io.actor4j.core.utils.Pair;
 import io.actor4j.polyglot.api.utils.ValueToJsonMapper;
 import io.actor4j.polyglot.pods.runtime.PolyglotContextInternal;
 
@@ -45,8 +44,8 @@ public class PolyglotPodFuction extends PodFunction {
 	}
 
 	@Override
-	public Pair<Object, Integer> handle(ActorMessage<?> message) {
-		Pair<Object, Integer> result;
+	public Reply handle(ActorMessage<?> message) {
+		Reply result;
 		
 		try {
 			Value resultValue = contextPolyglot.executeFunction(host, context, message, script);
@@ -59,15 +58,15 @@ public class PolyglotPodFuction extends PodFunction {
 						tag = obj.getInteger(PolyglotContext.TAG);
 				}
 				
-				result = Pair.of(mappedObject, tag);
+				result = Reply.of(mappedObject, tag);
 			}
 			else 	
-				result = Pair.of(null, -1/*NO_REPLY*/);
+				result = Reply.none();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 			
-			result = Pair.of(JsonObject.create().put(PolyglotContext.ERROR, e.getMessage()), 0);
+			result = Reply.of(JsonObject.create().put(PolyglotContext.ERROR, e.getMessage()), 0);
 		}
 		
 		return result;
