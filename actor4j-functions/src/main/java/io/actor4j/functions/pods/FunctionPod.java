@@ -64,7 +64,7 @@ public abstract class FunctionPod extends ActorPod {
 			public void register() {
 				contextFunction = FunctionPodContext.create(this, getContext());
 				
-				StateStore stateStore = createStateStore(contextFunction);
+				StateStore<?, ?> stateStore = createStateStore(contextFunction);
 				if (stateStore!=null)
 					contextFunction.injectStateStore(stateStore);
 				AsyncStreams streams = createStreams(contextFunction);
@@ -85,7 +85,7 @@ public abstract class FunctionPod extends ActorPod {
 	
 	public abstract PodFunction createPodFunction(FunctionPodContext contextFunction);
 	
-	public StateStore createStateStore(FunctionPodContext contextFunctions) {
+	public StateStore<?, ?> createStateStore(FunctionPodContext contextFunctions) {
 		return null;
 	}
 	

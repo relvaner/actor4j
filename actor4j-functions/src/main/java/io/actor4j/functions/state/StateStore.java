@@ -20,54 +20,54 @@ import java.util.Map;
 
 import io.actor4j.core.utils.Cache;
 
-public class StateStore implements Cache<Object, Object>{
-	protected final Cache<Object, Object> delegate;
+public class StateStore<K, V> implements Cache<K, V>{
+	protected final Cache<K, V> delegate;
 	
-	public StateStore(Cache<Object, Object> delegate) {
+	public StateStore(Cache<K, V> delegate) {
 		this.delegate = delegate;
 	}
 	
-	public static StateStore create(Cache<Object, Object> delegate) {
-		return new StateStore(delegate);
+	public static <K, V> StateStore<K, V> create(Cache<K, V> delegate) {
+		return new StateStore<K, V>(delegate);
 	}
 
 	@Override
-	public boolean containsKey(Object key) {
+	public boolean containsKey(K key) {
 		return delegate.containsKey(key);
 	}
 
 	@Override
-	public Object get(Object key) {
+	public V get(K key) {
 		return delegate.get(key);
 	}
 
 	@Override
-	public Map<Object, Object> get(List<Object> keys) {
+	public Map<K, V> get(List<K> keys) {
 		return delegate.get(keys);
 	}
 
 	@Override
-	public Object put(Object key, Object value) {
+	public V put(K key, V value) {
 		return delegate.put(key, value);
 	}
 
 	@Override
-	public void put(Map<Object, Object> entries) {
+	public void put(Map<K, V> entries) {
 		delegate.put(entries);
 	}
 
 	@Override
-	public boolean compareAndSet(Object key, Object expectedValue, Object newValue) {
+	public boolean compareAndSet(K key, V expectedValue, V newValue) {
 		return delegate.compareAndSet(key, expectedValue, newValue);
 	}
 
 	@Override
-	public void remove(Object key) {
+	public void remove(K key) {
 		delegate.remove(key);
 	}
 
 	@Override
-	public void remove(List<Object> keys) {
+	public void remove(List<K> keys) {
 		delegate.remove(keys);
 	}
 

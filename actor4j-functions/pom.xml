@@ -15,5 +15,36 @@
 			<artifactId>actor4j-core-sdk</artifactId>
 			<version>${actor4j.core.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-core-runtime</artifactId>
+			<version>${revision}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-data</artifactId>
+			<version>${revision}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.actor4j</groupId>
+			<artifactId>actor4j-query-graphql</artifactId>
+			<version>${revision}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+      		<groupId>com.fasterxml.jackson.jaxrs</groupId>
+      		<artifactId>jackson-jaxrs-json-provider</artifactId>
+      		<version>2.16.1</version>
+      		<scope>test</scope>
+    		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

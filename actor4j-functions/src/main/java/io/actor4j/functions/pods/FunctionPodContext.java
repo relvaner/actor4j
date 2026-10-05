@@ -25,7 +25,7 @@ public class FunctionPodContext {
 	protected final ActorRef host;
 	protected final PodContext podContext;
 	
-	protected StateStore stateStore;
+	protected StateStore<?, ?> stateStore;
 	protected AsyncStreams streams;
 	protected AsyncQueryRequest queryRequest;
 	
@@ -47,7 +47,7 @@ public class FunctionPodContext {
 		return podContext;
 	}
 	
-	public void injectStateStore(StateStore stateStore) {
+	public void injectStateStore(StateStore<?, ?> stateStore) {
 		this.stateStore = stateStore;
 	}
 	
@@ -59,8 +59,9 @@ public class FunctionPodContext {
 		this.queryRequest = queryRequest;
 	}
 	
-	public StateStore stateStore() {
-		return stateStore;
+	@SuppressWarnings("unchecked")
+	public <K, V> StateStore<K, V> stateStore() {
+		return (StateStore<K, V>)stateStore;
 	}
 	
 	public AsyncStreams streams() {
