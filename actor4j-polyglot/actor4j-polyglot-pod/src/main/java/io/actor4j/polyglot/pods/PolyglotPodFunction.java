@@ -27,19 +27,19 @@ import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.polyglot.api.utils.ValueToJsonMapper;
 import io.actor4j.polyglot.pods.runtime.PolyglotContextInternal;
 
-public class PolyglotPodFuction extends PodFunction {
+public class PolyglotPodFunction extends PodFunction {
 	protected final PolyglotContextInternal contextPolyglot;
 	protected final CharSequence script;
 	protected final Function<Value, Object> defaultMapper;
 	
-	public PolyglotPodFuction(ActorRef host, PodContext context, PolyglotContextInternal contextPolyglot, CharSequence script, Function<Value, Object> defaultMapper) {
+	public PolyglotPodFunction(ActorRef host, PodContext context, PolyglotContextInternal contextPolyglot, CharSequence script, Function<Value, Object> defaultMapper) {
 		super(host, context);
 		this.contextPolyglot = contextPolyglot;
 		this.script = script;
 		this.defaultMapper = defaultMapper;
 	}
 	
-	public PolyglotPodFuction(ActorRef host, PodContext context, PolyglotContextInternal contextPolyglot, CharSequence script) {
+	public PolyglotPodFunction(ActorRef host, PodContext context, PolyglotContextInternal contextPolyglot, CharSequence script) {
 		this(host, context, contextPolyglot, script, (v) -> ValueToJsonMapper.convertValue(v));
 	}
 

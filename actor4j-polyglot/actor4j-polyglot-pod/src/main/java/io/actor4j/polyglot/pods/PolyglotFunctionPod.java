@@ -98,7 +98,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 				if (queryRequest!=null)
 					contextPolyglot.injectQueryRequest(queryRequest);
 				
-				podFunction = new PolyglotPodFuction(this, getContext(), contextPolyglot, script());
+				podFunction = new PolyglotPodFunction(this, getContext(), contextPolyglot, script());
 			}
 		};
 	}
