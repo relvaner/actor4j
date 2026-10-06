@@ -23,7 +23,6 @@ import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.messages.ActorMessageUtils;
 import io.actor4j.core.utils.DeepCopyable;
-import io.actor4j.core.utils.Shareable;
 
 public record RemoteActorMessage<T>(T value, int tag, ActorId source, ActorId dest, UUID interaction, String protocol, String domain) implements ActorMessage<T> {
 	public RemoteActorMessage(T value, int tag, ActorId source, ActorId dest) {
@@ -138,7 +137,7 @@ public record RemoteActorMessage<T>(T value, int tag, ActorId source, ActorId de
 	@Override
 	public ActorMessage<T> copy() {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
+			if (ActorMessageUtils.isShareable(value))
 				return this;
 			else if (value instanceof DeepCopyable)
 				return new RemoteActorMessage<>(((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
@@ -155,7 +154,7 @@ public record RemoteActorMessage<T>(T value, int tag, ActorId source, ActorId de
 	@Override
 	public ActorMessage<T> copy(ActorId dest) {
 		if (value!=null) { 
-			if (ActorMessageUtils.isSupportedType(value.getClass()) || value instanceof Record || value instanceof Shareable)
+			if (ActorMessageUtils.isShareable(value))
 				return !ActorMessageUtils.equals(this.dest, dest) ? new RemoteActorMessage<>(value, tag, source, dest, interaction, protocol, domain) : this;
 			else if (value instanceof DeepCopyable)
 				return new RemoteActorMessage<>(((DeepCopyable<T>)value).deepCopy(), tag, source, dest, interaction, protocol, domain);
