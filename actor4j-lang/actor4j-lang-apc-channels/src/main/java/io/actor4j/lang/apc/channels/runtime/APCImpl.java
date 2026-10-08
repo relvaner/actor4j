@@ -58,8 +58,10 @@ public class APCImpl implements APC {
 			ActorId dest = system.addActor(() -> new Actor() {
 				@Override
 				public void receive(ActorMessage<?> message) {
-					if (message.tag()==APC_CALL)
+					if (message.tag()==APC_CALL) {
 						callable.call(channel);
+						stop();
+					}
 				}});
 			system.send(ActorMessage.create(null, APC_CALL, system.SYSTEM_ID(), dest));
 		}
