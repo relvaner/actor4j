@@ -187,6 +187,7 @@
 		<module>actor4j-web</module>
 		
 		<module>actor4j-streams</module>
+		<module>actor4j-streams-reactive-bridge</module>
 		
 		<module>actor4j-functions</module>
 		<module>actor4j-polyglot</module>
@@ -228,6 +229,7 @@
 				<module>actor4j-web</module>
 				
 				<module>actor4j-streams</module>
+				<module>actor4j-streams-reactive-bridge</module>
 				
 				<module>actor4j-functions</module>
 				<module>actor4j-polyglot</module>
