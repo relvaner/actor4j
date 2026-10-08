@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.data.access.mongo;
+package io.actor4j.data.access.mongo;
 
 import com.mongodb.client.MongoClient;
 

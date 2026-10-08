@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.core.data.access.features;
+package io.actor4j.data.access.features;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,8 +37,8 @@ import io.actor4j.data.access.PersistentDTO;
 import io.actor4j.data.access.PrimaryPersistentCacheActor;
 import io.actor4j.data.access.SecondaryPersistentCacheActor;
 import io.actor4j.data.access.VolatileDTO;
+import io.actor4j.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.data.access.utils.PersistentActorCacheManager;
-import io.actor4j.core.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.core.id.ActorId;
 
 import static io.actor4j.core.logging.ActorLogger.*;

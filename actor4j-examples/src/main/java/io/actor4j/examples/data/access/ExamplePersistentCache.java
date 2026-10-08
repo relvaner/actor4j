@@ -31,9 +31,9 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
 import io.actor4j.data.access.PersistentFailureDTO;
 import io.actor4j.data.access.PersistentSuccessDTO;
+import io.actor4j.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.data.access.utils.PersistentActorCacheManager;
 import io.actor4j.examples.shared.ExamplesSettings;
-import io.actor4j.core.data.access.mongo.MongoDataAccessActor;
 import io.actor4j.core.id.ActorId;
 
 public class ExamplePersistentCache {
