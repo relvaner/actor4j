@@ -18,9 +18,9 @@ package io.actor4j.polyglot.pods.feature;
 import org.graalvm.polyglot.Value;
 
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.publish.subscribe.Publish;
-import io.actor4j.core.publish.subscribe.Subscribe;
 import io.actor4j.core.utils.CacheAsMap;
+import io.actor4j.data.publish.subscribe.Publish;
+import io.actor4j.data.publish.subscribe.Subscribe;
 import io.actor4j.polyglot.api.utils.ValueMapper;
 import io.actor4j.polyglot.pods.PolyglotContext;
 import io.actor4j.polyglot.pods.PolyglotFunctionPod;

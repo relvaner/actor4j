@@ -28,9 +28,9 @@ import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.PodConfiguration;
-import io.actor4j.core.publish.subscribe.BrokerActor;
-import io.actor4j.core.publish.subscribe.Publish;
-import io.actor4j.core.publish.subscribe.Subscribe;
+import io.actor4j.data.publish.subscribe.BrokerActor;
+import io.actor4j.data.publish.subscribe.Publish;
+import io.actor4j.data.publish.subscribe.Subscribe;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 import static org.junit.Assert.*;

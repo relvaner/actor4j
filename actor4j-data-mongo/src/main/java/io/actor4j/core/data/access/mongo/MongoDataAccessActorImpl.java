@@ -15,8 +15,6 @@
  */
 package io.actor4j.core.data.access.mongo;
 
-import static io.actor4j.core.data.access.DataAccessActor.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,18 +27,19 @@ import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.actors.ActorWithCache;
-import io.actor4j.core.data.access.BaseDataAccessActorImpl;
-import io.actor4j.core.data.access.DocPersistentContext;
-import io.actor4j.core.data.access.PersistentDataAccessDTO;
-import io.actor4j.core.data.access.PersistentFailureDTO;
-import io.actor4j.core.data.access.PersistentSuccessDTO;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.json.JsonObject;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.data.access.BaseDataAccessActorImpl;
+import io.actor4j.data.access.DocPersistentContext;
+import io.actor4j.data.access.PersistentDataAccessDTO;
+import io.actor4j.data.access.PersistentFailureDTO;
+import io.actor4j.data.access.PersistentSuccessDTO;
 import io.actor4j.database.mongo.MongoBufferedBulkWriter;
 import io.actor4j.database.mongo.MongoOperations;
 
+import static io.actor4j.data.access.DataAccessActor.*;
 import static io.actor4j.database.mongo.MongoOperations.*;
 
 public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> {

@@ -15,7 +15,7 @@
  */
 package io.actor4j.streams.reactive.bridge;
 
-import io.actor4j.core.reactive.streams.PublisherActor;
+import io.actor4j.data.reactive.streams.PublisherActor;
 
 public class ActorEgressActor extends PublisherActor {
 

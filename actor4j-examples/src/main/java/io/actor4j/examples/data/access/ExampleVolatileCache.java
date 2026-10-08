@@ -23,10 +23,10 @@ import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.data.access.VolatileFailureDTO;
+import io.actor4j.data.access.VolatileSuccessDTO;
+import io.actor4j.data.access.utils.VolatileActorCacheManager;
 import io.actor4j.examples.shared.ExamplesSettings;
-import io.actor4j.core.data.access.VolatileFailureDTO;
-import io.actor4j.core.data.access.VolatileSuccessDTO;
-import io.actor4j.core.data.access.utils.VolatileActorCacheManager;
 
 public class ExampleVolatileCache {
 	public ExampleVolatileCache() {

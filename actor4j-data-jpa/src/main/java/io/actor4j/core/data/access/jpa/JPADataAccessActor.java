@@ -16,7 +16,7 @@
 package io.actor4j.core.data.access.jpa;
 
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.data.access.DataAccessActor;
+import io.actor4j.data.access.DataAccessActor;
 
 public class JPADataAccessActor<K, E> extends DataAccessActor<K, E> {
 	protected JPADataAccessActorImpl<K, E> impl;

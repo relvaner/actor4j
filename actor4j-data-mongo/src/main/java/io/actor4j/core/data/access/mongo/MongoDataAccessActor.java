@@ -18,7 +18,7 @@ package io.actor4j.core.data.access.mongo;
 import com.mongodb.client.MongoClient;
 
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.data.access.DataAccessActor;
+import io.actor4j.data.access.DataAccessActor;
 
 public class MongoDataAccessActor<K, E> extends DataAccessActor<K, E> {
 	protected MongoDataAccessActorImpl<K, E> impl;

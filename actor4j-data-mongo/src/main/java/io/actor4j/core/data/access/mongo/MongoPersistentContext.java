@@ -15,8 +15,8 @@
  */
 package io.actor4j.core.data.access.mongo;
 
-import io.actor4j.core.data.access.DocPersistentContext;
 import io.actor4j.core.json.JsonObject;
+import io.actor4j.data.access.DocPersistentContext;
 
 public record MongoPersistentContext<K>(String keyName, JsonObject filter, JsonObject update, String collectionName) implements DocPersistentContext {
 	public MongoPersistentContext(String keyName, String collectionName) {

@@ -32,23 +32,23 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.ActorGroup;
 import io.actor4j.core.utils.ActorGroupSet;
 import io.actor4j.core.utils.Pair;
-import io.actor4j.core.data.access.DocPersistentContext;
-import io.actor4j.core.data.access.PersistentDTO;
-import io.actor4j.core.data.access.PrimaryPersistentCacheActor;
-import io.actor4j.core.data.access.SecondaryPersistentCacheActor;
-import io.actor4j.core.data.access.VolatileDTO;
+import io.actor4j.data.access.DocPersistentContext;
+import io.actor4j.data.access.PersistentDTO;
+import io.actor4j.data.access.PrimaryPersistentCacheActor;
+import io.actor4j.data.access.SecondaryPersistentCacheActor;
+import io.actor4j.data.access.VolatileDTO;
+import io.actor4j.data.access.utils.PersistentActorCacheManager;
 import io.actor4j.core.data.access.mongo.MongoDataAccessActor;
-import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 import io.actor4j.core.id.ActorId;
 
 import static io.actor4j.core.logging.ActorLogger.*;
+import static io.actor4j.data.access.AckMode.*;
 import static org.junit.Assert.*;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
-import static io.actor4j.core.data.access.AckMode.*;
 
 public class PersistentCacheFeature {
 	protected MongoServer mongoServer;

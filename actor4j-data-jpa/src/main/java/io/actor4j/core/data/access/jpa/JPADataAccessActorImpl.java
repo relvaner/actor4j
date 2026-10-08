@@ -15,6 +15,8 @@
  */
 package io.actor4j.core.data.access.jpa;
 
+import static io.actor4j.data.access.DataAccessActor.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,23 +25,21 @@ import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.actors.ActorWithCache;
-import io.actor4j.core.data.access.BaseDataAccessActorImpl;
-import io.actor4j.core.data.access.PersistentContext;
-import io.actor4j.core.data.access.PersistentDataAccessDTO;
-import io.actor4j.core.data.access.PersistentFailureDTO;
-import io.actor4j.core.data.access.PersistentSuccessDTO;
-import io.actor4j.core.data.access.SqlPersistentContext;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
+import io.actor4j.data.access.BaseDataAccessActorImpl;
+import io.actor4j.data.access.PersistentContext;
+import io.actor4j.data.access.PersistentDataAccessDTO;
+import io.actor4j.data.access.PersistentFailureDTO;
+import io.actor4j.data.access.PersistentSuccessDTO;
+import io.actor4j.data.access.SqlPersistentContext;
 import io.actor4j.database.jpa.JPABatchWriter;
 import io.actor4j.database.jpa.JPAOperations;
 import io.actor4j.database.jpa.JPAWriteModel;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-
-import static io.actor4j.core.data.access.DataAccessActor.*;
 
 public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> {
 	protected record BatchWriterRequest<K, E>(int tag, UUID interaction, ActorId source, PersistentDataAccessDTO<K, E> dto) {

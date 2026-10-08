@@ -24,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.reactive.streams.PublisherActor;
-import io.actor4j.core.reactive.streams.SubscriberActor;
+import io.actor4j.data.reactive.streams.PublisherActor;
+import io.actor4j.data.reactive.streams.SubscriberActor;
 import io.actor4j.examples.shared.ExamplesSettings;
 
 public class ExampleReactiveStreams {

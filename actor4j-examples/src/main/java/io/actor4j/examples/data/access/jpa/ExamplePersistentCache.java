@@ -24,11 +24,11 @@ import io.actor4j.core.actors.ActorWithCache;
 import io.actor4j.core.config.ActorSystemConfig;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Pair;
-import io.actor4j.core.data.access.DataAccessType;
-import io.actor4j.core.data.access.PersistentFailureDTO;
-import io.actor4j.core.data.access.PersistentSuccessDTO;
+import io.actor4j.data.access.DataAccessType;
+import io.actor4j.data.access.PersistentFailureDTO;
+import io.actor4j.data.access.PersistentSuccessDTO;
+import io.actor4j.data.access.utils.PersistentActorCacheManager;
 import io.actor4j.core.data.access.jpa.JPADataAccessActor;
-import io.actor4j.core.data.access.utils.PersistentActorCacheManager;
 import io.actor4j.core.id.ActorId;
 
 public class ExamplePersistentCache {

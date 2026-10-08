@@ -15,7 +15,7 @@
  */
 package io.actor4j.core.data.access.jpa;
 
-import io.actor4j.core.data.access.SqlPersistentContext;
+import io.actor4j.data.access.SqlPersistentContext;
 
 public record JPAPersistentContext(String query, String entityName) implements SqlPersistentContext {
 	public JPAPersistentContext(String entityName) {

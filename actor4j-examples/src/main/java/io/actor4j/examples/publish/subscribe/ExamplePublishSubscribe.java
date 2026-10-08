@@ -25,9 +25,9 @@ import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.publish.subscribe.BrokerActor;
-import io.actor4j.core.publish.subscribe.Publish;
-import io.actor4j.core.publish.subscribe.Subscribe;
+import io.actor4j.data.publish.subscribe.BrokerActor;
+import io.actor4j.data.publish.subscribe.Publish;
+import io.actor4j.data.publish.subscribe.Subscribe;
 import io.actor4j.examples.shared.ExamplesSettings;
 
 public class ExamplePublishSubscribe {
