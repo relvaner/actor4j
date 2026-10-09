@@ -15,8 +15,6 @@
  */
 package io.actor4j.analyzer.runtime;
 
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 
 import io.actor4j.core.runtime.ActorSystemImpl;
@@ -35,15 +33,7 @@ public class AnalyzerActorMessageDispatcher extends DefaultActorMessageDispatche
 		
 		ActorId dest = message.dest();
 		if (alias!=null) {
-			List<ActorId> destinations = system.getActorsFromAlias(alias);
-
-			dest = null;
-			if (!destinations.isEmpty()) {
-				if (destinations.size()==1)
-					dest = destinations.get(0);
-				else
-					dest = destinations.get(ThreadLocalRandom.current().nextInt(destinations.size()));
-			}
+			dest = system.internal_resolveAlias(alias);
 			if (dest==null)
 				dest = system.ALIAS_ID();
 		}
