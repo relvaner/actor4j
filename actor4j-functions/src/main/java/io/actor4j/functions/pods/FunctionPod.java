@@ -15,6 +15,10 @@
  */
 package io.actor4j.functions.pods;
 
+import static io.actor4j.core.logging.ActorLogger.ERROR;
+import static io.actor4j.core.logging.ActorLogger.systemLogger;
+import static io.actor4j.core.utils.ActorUtils.actorLabel;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -35,7 +39,7 @@ public abstract class FunctionPod extends ActorPod {
 		return new PodActor() {
 			protected FunctionPodContext contextFunction;
 			protected PodFunction podFunction;
-			protected Map<UUID, ActorMessage<?>> pendingHandler = new HashMap<>();
+			protected final Map<UUID, ActorMessage<?>> pendingHandler = new HashMap<>();
 			
 			@Override
 			public void preStart() {
@@ -63,15 +67,16 @@ public abstract class FunctionPod extends ActorPod {
 				
 				if (result!=null) {
 					if (result.isDone()) {
-						ActorMessage<?> originMessage = pendingHandler.get(result.interaction());
-							
-						internal_callback(this, originMessage!=null ? originMessage : message, result);
+						ActorMessage<?> originMessage = result.interaction()!=null ? pendingHandler.remove(result.interaction()) : null;
 						
-						if (originMessage!=null) 
-							pendingHandler.remove(result.interaction());	
+						internal_callback(this, originMessage!=null ? originMessage : message, result);
 					}
-					else if (result.isPending())
-						pendingHandler.putIfAbsent(message.interaction(), message);
+					else if (result.isPending()) {
+						if (message.interaction()!=null)
+							pendingHandler.putIfAbsent(message.interaction(), message);
+						else
+							systemLogger().log(ERROR, String.format("Pending reply without interaction from actor (%s)", actorLabel(this)));
+					}
 				}
 			}
 			

@@ -15,6 +15,10 @@
  */
 package io.actor4j.functions.pods;
 
+import static io.actor4j.core.logging.ActorLogger.ERROR;
+import static io.actor4j.core.logging.ActorLogger.systemLogger;
+import static io.actor4j.core.utils.ActorUtils.actorLabel;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -61,23 +65,29 @@ public abstract class RemoteFunctionPod extends ActorPod {
 				RemoteFunctionPod.this.postStop(contextFunction);
 			}
 			
-			public void handleReply(ActorMessage<?> message, Reply result) {
-				if (result!=null) {
-					if (result.isDone()) {
-						ActorMessage<?> originMessage = pendingHandler.get(result.interaction());
-						
-						if (originMessage.value() instanceof RemotePodMessage remoteMessage) {
-							if (remoteMessage.remotePodMessageDTO().reply())
+			public void handleReply(ActorMessage<?> message, Reply result, UUID interaction) {
+				result = result!=null ? result : Reply.none();
+				
+				if (!result.isPending()) {
+					ActorMessage<?> originMessage = result.interaction()!=null ? pendingHandler.remove(result.interaction()) : null;
+					ActorMessage<?> messageToProcess = originMessage!=null ? originMessage : message;
+					
+					if (messageToProcess.value() instanceof RemotePodMessage remoteMessage) {
+						if (remoteMessage.remotePodMessageDTO().reply()) {
+							if (result.isDone())
 								internal_callback(this, remoteMessage, result);
+							else
+								internal_callback(this, remoteMessage, handleRejectedReply(result));
 						}
-						else
-							internal_callback(this, message, result);
-						
-						if (originMessage!=null) 
-							pendingHandler.remove(result.interaction());	
 					}
-					else if (result.isPending())
-						pendingHandler.putIfAbsent(message.interaction(), message);
+					else if (result.isDone())
+						internal_callback(this, messageToProcess, result);	
+				}
+				else { // result.isPending()
+					if (interaction!=null)
+						pendingHandler.putIfAbsent(interaction, message);
+					else
+						systemLogger().log(ERROR, String.format("Pending reply without interaction from actor (%s)", actorLabel(this)));
 				}
 			}
 			
@@ -88,34 +98,13 @@ public abstract class RemoteFunctionPod extends ActorPod {
 				if (message.value() instanceof RemotePodMessage remoteMessage) {
 					UUID interaction = message.interaction()!=null ? message.interaction() : UUID.randomUUID();
 					result = podRemoteFunction.handle(remoteMessage, interaction);
-					if (result!=null && result.isDone())
-						internal_callback(this, remoteMessage, result);
+					handleReply(message, result, interaction);
 				}
 				else {
 					result = podRemoteFunction.handle(message);
-					handleReply(message, result);
+					handleReply(message, result, message.interaction());
 				}
 			}
-
-//			@Override
-//			public void receive(ActorMessage<?> message) {
-//				if (message.value() instanceof RemotePodMessage remoteMessage) {
-//					UUID interaction = message.interaction()!=null ? message.interaction() : UUID.randomUUID();
-//					
-//					Reply result = podRemoteFunction.handle(remoteMessage, interaction);
-//					if (remoteMessage.remotePodMessageDTO().reply()) {
-//						if (result!=null && result.tag()>=0)
-//							internal_callback(this, remoteMessage, result);
-//						else
-//							internal_callback(this, remoteMessage, handleRejectedReply(result));
-//					}
-//				}
-//				else {
-//					Reply result = podRemoteFunction.handle(message);
-//					if (result!=null && result.tag()>=0)
-//						internal_callback(this, message, result);
-//				}
-//			}
 			
 			@Override
 			public void register() {
