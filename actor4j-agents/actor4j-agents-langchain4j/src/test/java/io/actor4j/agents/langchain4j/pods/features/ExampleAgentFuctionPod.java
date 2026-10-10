@@ -16,6 +16,7 @@
 package io.actor4j.agents.langchain4j.pods.features;
 
 import java.util.List;
+import java.util.UUID;
 
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -67,6 +68,7 @@ public class ExampleAgentFuctionPod extends ChatModelPod {
 
 			@Override
 			public void receive(ActorMessage<?> message) {
+				System.out.println("ChatModelResourceActor.receive: " + message.value());
 				TaskAnalysis result = agent.analyze(message.valueAsString());
 				tell(result, 0, message.source(), message.interaction());
 			}
@@ -74,7 +76,7 @@ public class ExampleAgentFuctionPod extends ChatModelPod {
 	}
 
 	@Override
-	public Reply handleIoRequest(ActorMessage<?> message) {
-		return Reply.of(message.value(), 0, message.interaction());
+	public Reply handleIoRequest(ActorMessage<?> message, UUID interaction) {
+		return Reply.of(message.value(), 0, interaction);
 	}
 }

@@ -51,13 +51,13 @@ public abstract class ChatModelRemotePod extends AgentRemoteFunctionPod {
 	public PodRemoteFunction createPodRemoteFunction(FunctionPodContext ctx) {
 		return new PodRemoteFunction(ctx) {
 			@Override
-			public Reply handle(ActorMessage<?> message) {
+			public Reply handle(ActorMessage<?> message, UUID interaction) {
 				Reply result = null;
 				
 				if (resourceId.equals(message.source()))
-					result = handleIoRequest(message);
+					result = handleIoRequest(message, interaction);
 				else {
-					ctx.ioRequest().execute(message.value(), message.interaction());
+					ctx.ioRequest().execute(message.value(), interaction);
 					result = Reply.pending();
 				}
 
@@ -71,11 +71,11 @@ public abstract class ChatModelRemotePod extends AgentRemoteFunctionPod {
 			}
 			
 			@Override
-			public Reply handleIoRequest(ActorMessage<?> message) {
-				return ChatModelRemotePod.this.handleIoRequest(message);
+			public Reply handleIoRequest(ActorMessage<?> message, UUID interaction) {
+				return ChatModelRemotePod.this.handleIoRequest(message, interaction);
 			}
 		};
 	}
 	
-	public abstract Reply handleIoRequest(ActorMessage<?> message);
+	public abstract Reply handleIoRequest(ActorMessage<?> message, UUID interaction);
 }

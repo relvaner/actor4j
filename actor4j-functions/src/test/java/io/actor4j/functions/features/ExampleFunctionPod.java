@@ -159,8 +159,8 @@ public class ExampleFunctionPod extends FunctionPod {
 			protected Set<UUID> gqlHandler = new HashSet<>();
 			
 			@Override
-			public Reply handle(ActorMessage<?> message) {
-				if (!gqlHandler.remove(message.interaction())) {
+			public Reply handle(ActorMessage<?> message, UUID interaction) {
+				if (!gqlHandler.remove(interaction)) {
 					StateStore<String, Integer> stateStore = ctx.stateStore();
 					
 					logger().log(INFO, "welcome");
@@ -180,15 +180,15 @@ public class ExampleFunctionPod extends FunctionPod {
 					logger().log(INFO, requestId.toString());
 				}
 				else
-					handleQueryRequest(message);
+					handleQueryRequest(message, interaction);
 				
 				return Reply.none();
 			}
 			
 			@Override
-			public Reply handleQueryRequest(ActorMessage<?> message) {
+			public Reply handleQueryRequest(ActorMessage<?> message, UUID interaction) {
 				if (message.value() instanceof ImmutableMap map)
-					System.out.printf("handleQueryRequest (%s): %s%n", message.interaction().toString(), map.get().entrySet().toString());
+					System.out.printf("handleQueryRequest (%s): %s%n", interaction.toString(), map.get().entrySet().toString());
 				
 				return Reply.none();
 			}

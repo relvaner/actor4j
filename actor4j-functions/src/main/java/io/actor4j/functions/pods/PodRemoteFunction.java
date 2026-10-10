@@ -18,7 +18,6 @@ package io.actor4j.functions.pods;
 import java.util.UUID;
 import java.util.function.Function;
 
-import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.RemotePodMessage;
 import io.actor4j.core.utils.Reply;
 
@@ -32,12 +31,4 @@ public abstract class PodRemoteFunction extends PodFunction {
 	}
 	
 	public abstract Reply handle(RemotePodMessage remoteMessage, UUID interaction);
-	
-	public Reply handleQueryRequest(ActorMessage<?> message) {
-		return Reply.none();
-	}
-	
-	public Reply handleIoRequest(ActorMessage<?> message) {
-		return Reply.none();
-	}
 }
