@@ -185,6 +185,7 @@ public class ExampleFunctionPod extends FunctionPod {
 				return Reply.none();
 			}
 			
+			@Override
 			public Reply handleQueryRequest(ActorMessage<?> message) {
 				if (message.value() instanceof ImmutableMap map)
 					System.out.printf("handleQueryRequest (%s): %s%n", message.interaction().toString(), map.get().entrySet().toString());
