@@ -15,7 +15,9 @@
  */
 package io.actor4j.functions.features;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,6 +31,7 @@ import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import io.actor4j.core.immutable.ImmutableMap;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Cache;
 import io.actor4j.core.utils.CacheAsMap;
@@ -100,7 +103,14 @@ public class ExampleFunctionPod extends FunctionPod {
 		TypeDefinitionRegistry typeRegistry = new SchemaParser().parse(UserRepository.schema());
 		RuntimeWiring.Builder wiringBuilder = RuntimeWiring.newRuntimeWiring();
 		
-		UserGraphQLHandler handler = new UserGraphQLHandler(repository);
+		UserGraphQLHandler handler = new UserGraphQLHandler(repository) {
+			@Override
+			public void handleAsyncResponse(UUID requestId, Map<String, Object> responseMap) {
+				System.out.println(responseMap);
+				contextFunctions.host().getSystem().send(
+					ActorMessage.create(ImmutableMap.of(responseMap), 0, contextFunctions.host().getSystem().SYSTEM_ID(), contextFunctions.host().getId(), requestId));
+			}
+		};
         handler.configure(wiringBuilder);
 		
         GraphQLSchema graphQLSchema = new SchemaGenerator().makeExecutableSchema(typeRegistry, wiringBuilder.build());
@@ -146,23 +156,38 @@ public class ExampleFunctionPod extends FunctionPod {
 	@Override
 	public PodFunction createPodFunction(FunctionPodContext ctx) {
 		return new PodFunction(ctx) {
+			protected Set<UUID> gqlHandler = new HashSet<>();
+			
 			@Override
 			public Reply handle(ActorMessage<?> message) {
-				StateStore<String, Integer> stateStore = ctx.stateStore();
+				if (!gqlHandler.remove(message.interaction())) {
+					StateStore<String, Integer> stateStore = ctx.stateStore();
+					
+					logger().log(INFO, "welcome");
+					logger().log(INFO, message.value().toString());
+					
+					logger().log(INFO, ctx.stateStore().get("result").toString());
+					stateStore.put("result", stateStore.get("result")+1);
+					ctx.streams().publish("MyTopic_out", stateStore.get("result")+1);
+					
+					final int id = stateStore.get("result");
+					User user = new User(id, "Alice Smith", "alice@example.com");
+					UUID requestId = (UUID)gql("mutation", "createUser", Map.of("user", user), ctx);
+					gqlHandler.add(requestId);
+					
+					requestId = (UUID)gql("query", "getUser", Map.of("id", id), ctx);
+					gqlHandler.add(requestId);
+					logger().log(INFO, requestId.toString());
+				}
+				else
+					handleQueryRequest(message);
 				
-				logger().log(INFO, "welcome");
-				logger().log(INFO, message.value().toString());
-				
-				logger().log(INFO, ctx.stateStore().get("result").toString());
-				stateStore.put("result", stateStore.get("result")+1);
-				ctx.streams().publish("MyTopic_out", stateStore.get("result")+1);
-				
-				final int id = stateStore.get("result");
-				User user = new User(id, "Alice Smith", "alice@example.com");
-				gql("mutation", "createUser", Map.of("user", user), ctx);
-				
-				final UUID requestId = (UUID)gql("query", "getUser", Map.of("id", id), ctx);
-				logger().log(INFO, requestId.toString());
+				return Reply.none();
+			}
+			
+			public Reply handleQueryRequest(ActorMessage<?> message) {
+				if (message.value() instanceof ImmutableMap map)
+					System.out.printf("handleQueryRequest (%s): %s%n", message.interaction().toString(), map.get().entrySet().toString());
 				
 				return Reply.none();
 			}

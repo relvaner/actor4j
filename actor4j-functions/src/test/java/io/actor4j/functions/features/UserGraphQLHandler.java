@@ -19,9 +19,8 @@ import graphql.schema.idl.RuntimeWiring.Builder;
 import io.actor4j.query.graphql.DefaultGraphQLHandler;
 
 import java.util.Map;
-import java.util.UUID;
 
-public class UserGraphQLHandler extends DefaultGraphQLHandler {
+public abstract class UserGraphQLHandler extends DefaultGraphQLHandler {
 	private final UserRepository repository;
 
 	public UserGraphQLHandler(UserRepository repository) {
@@ -42,10 +41,5 @@ public class UserGraphQLHandler extends DefaultGraphQLHandler {
 			String email = (String) user.get("email");
 			return repository.save(id, name, email);
 		}));
-	}
-
-	@Override
-	public void handleAsyncResponse(UUID requestId, Map<String, Object> responseMap) {
-		System.out.println(responseMap);
 	}
 }
