@@ -39,10 +39,12 @@ public abstract class RemoteFunctionPod extends ActorPod {
 		return new PodActor() {
 			protected FunctionPodContext contextFunction;
 			protected PodRemoteFunction podRemoteFunction;
-			protected Map<UUID, ActorMessage<?>> pendingHandler = new HashMap<>();
+			protected Map<UUID, ActorMessage<?>> pendingHandler;
 
 			@Override
 			public void preStart() {
+				pendingHandler = new HashMap<>();
+				
 				if (isExposed())
 					expose();
 				

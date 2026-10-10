@@ -35,10 +35,12 @@ public abstract class FunctionPod extends ActorPod {
 		return new PodActor() {
 			protected FunctionPodContext contextFunction;
 			protected PodFunction podFunction;
-			protected final Map<UUID, ActorMessage<?>> pendingHandler = new HashMap<>();
+			protected Map<UUID, ActorMessage<?>> pendingHandler;
 			
 			@Override
 			public void preStart() {
+				pendingHandler = new HashMap<>();
+				
 				if (isExposed())
 					expose();
 				
