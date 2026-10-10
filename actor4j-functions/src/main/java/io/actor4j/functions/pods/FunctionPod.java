@@ -15,6 +15,10 @@
  */
 package io.actor4j.functions.pods;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
@@ -31,6 +35,7 @@ public abstract class FunctionPod extends ActorPod {
 		return new PodActor() {
 			protected FunctionPodContext contextFunction;
 			protected PodFunction podFunction;
+			protected Map<UUID, ActorMessage<?>> pendingHandler = new HashMap<>();
 			
 			@Override
 			public void preStart() {
@@ -54,11 +59,20 @@ public abstract class FunctionPod extends ActorPod {
 
 			@Override
 			public void receive(ActorMessage<?> message) {
-				Reply result = podFunction.handle(filter(message));
-				if (result!=null && result.tag()>=0)
-					internal_callback(this, message, result);
-//				else
-//					NO_REPLY;
+				Reply result = podFunction.handle(message);
+				
+				if (result!=null) {
+					if (result.isDone()) {
+						ActorMessage<?> originMessage = pendingHandler.get(result.interaction());
+							
+						internal_callback(this, originMessage!=null ? originMessage : message, result);
+						
+						if (originMessage!=null) 
+							pendingHandler.remove(result.interaction());	
+					}
+					else if (result.isPending())
+						pendingHandler.putIfAbsent(message.interaction(), message);
+				}
 			}
 			
 			@Override
@@ -103,10 +117,6 @@ public abstract class FunctionPod extends ActorPod {
 	
 	public AsyncIORequest createIORequest(FunctionPodContext contextFunctions) {
 		return null;
-	}
-	
-	public ActorMessage<?> filter(ActorMessage<?> message) {
-		return message;
 	}
 	
 	public boolean isExposed() {

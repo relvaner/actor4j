@@ -35,4 +35,12 @@ public abstract class PodFunction {
 	}
 
 	public abstract Reply handle(ActorMessage<?> message);
+	
+	public Reply handleQueryRequest(ActorMessage<?> message) {
+		return Reply.none();
+	}
+	
+	public Reply handleIoRequest(ActorMessage<?> message) {
+		return Reply.none();
+	}
 }

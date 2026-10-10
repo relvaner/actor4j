@@ -15,6 +15,8 @@
  */
 package io.actor4j.functions.io;
 
+import java.util.UUID;
+
 public class AsyncIORequest implements AsyncIORequestHandler {
 	protected final AsyncIORequestHandler delegate;
 	
@@ -27,7 +29,7 @@ public class AsyncIORequest implements AsyncIORequestHandler {
 	}
 	
 	@Override
-	public Object execute(Object value) {
-		return delegate.execute(value);
+	public void execute(Object value, UUID interaction) {
+		delegate.execute(value, interaction);
 	}
 }

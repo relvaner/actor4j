@@ -17,23 +17,21 @@ package io.actor4j.agents.langchain4j.pods.features;
 
 import java.util.List;
 
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
-import io.actor4j.agents.langchain4j.pods.OpenAICompatibleAgentPod;
+import io.actor4j.agents.langchain4j.pods.ChatModelPod;
+import io.actor4j.agents.langchain4j.pods.ChatModelResourceActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Reply;
-import io.actor4j.functions.pods.FunctionPodContext;
-import io.actor4j.functions.pods.PodFunction;
 
-public class ExampleAgentFuctionPod extends OpenAICompatibleAgentPod {
+public class ExampleAgentFuctionPod extends ChatModelPod {
 	public static final String BASE_URL = "http://localhost:9090/v1";
 	public static final String API_KEY = "dummy";
 	public static final String MODEL_NAME = "test";
 	public static final double TEMPERATURE = 0.2; 
-	
-	protected AnalystAgent agent;
-	
+
 	record TaskAnalysis(String summary, List<String> steps, double confidence) {
 	}
 
@@ -46,31 +44,37 @@ public class ExampleAgentFuctionPod extends OpenAICompatibleAgentPod {
 	public String domain() {
 		return "ExampleAgentFuctionPod";
 	}
-
+	
 	@Override
-	public OpenAiChatModel createOpenAiChatModel() {
-		return OpenAiChatModel.builder()
-			.baseUrl(BASE_URL)
-			.apiKey(API_KEY)
-			.modelName(MODEL_NAME)
-			.temperature(TEMPERATURE)
-			.build();
-	}
-
-	@Override
-	public PodFunction createPodFunction(FunctionPodContext contextFunction) {
-		return new PodFunction(contextFunction) {
+	public ChatModelResourceActor createChatModelResourceActor() {
+		return new ChatModelResourceActor() {
+			protected AnalystAgent agent;
+			
 			@Override
-			public Reply handle(ActorMessage<?> message) {
+			public ChatModel createAiChatModel() {
+				return OpenAiChatModel.builder()
+					.baseUrl(BASE_URL)
+					.apiKey(API_KEY)
+					.modelName(MODEL_NAME)
+					.temperature(TEMPERATURE)
+					.build();
+			}
+
+			@Override
+			public void createAiServices(ChatModel chatModel) {
+				agent = AiServices.create(AnalystAgent.class, chatModel);
+			}
+
+			@Override
+			public void receive(ActorMessage<?> message) {
 				TaskAnalysis result = agent.analyze(message.valueAsString());
-				return Reply.of(result, 0);
+				tell(result, 0, message.source(), message.interaction());
 			}
 		};
 	}
-	
-	public void preStart(FunctionPodContext contextFunction) {
-		super.preStart(contextFunction);
-		
-		agent = AiServices.create(AnalystAgent.class, model);
+
+	@Override
+	public Reply handleIoRequest(ActorMessage<?> message) {
+		return Reply.of(message.value(), 0, message.interaction());
 	}
 }

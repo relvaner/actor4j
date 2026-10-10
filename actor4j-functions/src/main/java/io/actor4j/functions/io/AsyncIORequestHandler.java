@@ -15,6 +15,8 @@
  */
 package io.actor4j.functions.io;
 
+import java.util.UUID;
+
 public interface AsyncIORequestHandler {
-	public Object execute(Object value);
+	public void execute(Object value, UUID interaction);
 }
