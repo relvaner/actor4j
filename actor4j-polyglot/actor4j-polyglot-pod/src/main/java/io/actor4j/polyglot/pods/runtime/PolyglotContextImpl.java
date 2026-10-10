@@ -15,6 +15,8 @@
  */
 package io.actor4j.polyglot.pods.runtime;
 
+import java.util.UUID;
+
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;
@@ -124,7 +126,7 @@ public class PolyglotContextImpl implements PolyglotContextInternal {
 	}
 
 	@Override
-	public Value executeFunction(ActorRef host, PodContext podContext, ActorMessage<?> message, CharSequence script) {
+	public Value executeFunction(ActorRef host, PodContext podContext, ActorMessage<?> message, UUID interaction, CharSequence script) {
 		Value executeFunction = null;
 		
 		if (languageId.equalsIgnoreCase(LANGUAGE_ID_JS)) {
@@ -143,23 +145,23 @@ public class PolyglotContextImpl implements PolyglotContextInternal {
 		if (executeFunction != null && executeFunction.canExecute()) {
 			if (streams==null) {
 				if (stateStore!=null && queryRequest!=null)
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, queryRequest);
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction), stateStore, queryRequest);
 				else if (stateStore!=null)
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore);
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction), stateStore);
 				else if (queryRequest!=null)
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message), queryRequest);
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction), queryRequest);
 				else
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message));
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction));
 			}
 			else {
 				if (stateStore!=null && queryRequest!=null)
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, queryRequest, streams);
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction), stateStore, queryRequest, streams);
 				else if (stateStore!=null)
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message), stateStore, streams);
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction), stateStore, streams);
 				else if (queryRequest!=null)
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message), queryRequest, streams);
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction), queryRequest, streams);
 				else
-					return executeFunction.execute(api, ActorPolyglotMessage.of(message), streams);
+					return executeFunction.execute(api, ActorPolyglotMessage.of(message, interaction), streams);
 			}
 		}
 		else

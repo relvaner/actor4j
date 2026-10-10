@@ -23,16 +23,18 @@ import io.actor4j.core.messages.ActorMessage;
 
 public class ActorPolyglotMessage {
 	protected final ActorMessage<?> message;
+	protected final UUID interaction;
 	
 	public static final long SOURCE = -1;
 	public static final long DEST   = -2;
 	
-	public ActorPolyglotMessage(ActorMessage<?> message) {
+	public ActorPolyglotMessage(ActorMessage<?> message, UUID interaction) {
 		this.message = message;
+		this.interaction = interaction;
 	}
 
-	public static ActorPolyglotMessage of(ActorMessage<?> message) {
-		return new ActorPolyglotMessage(message);
+	public static ActorPolyglotMessage of(ActorMessage<?> message, UUID interaction) {
+		return new ActorPolyglotMessage(message, interaction);
 	}
 	
 	protected String idToString(UUID id) {
@@ -74,7 +76,7 @@ public class ActorPolyglotMessage {
 	
 	@Export
 	public String interaction() {
-		return idToString(message.interaction());
+		return idToString(interaction);
 	}
 	
 	@Export

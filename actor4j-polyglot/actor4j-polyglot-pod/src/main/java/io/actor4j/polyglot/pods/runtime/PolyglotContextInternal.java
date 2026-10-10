@@ -15,6 +15,8 @@
  */
 package io.actor4j.polyglot.pods.runtime;
 
+import java.util.UUID;
+
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 
@@ -31,7 +33,7 @@ public interface PolyglotContextInternal extends PolyglotContext {
 	public Context context();
 	public void close();
 	
-	public Value executeFunction(ActorRef host, PodContext podContext, ActorMessage<?> message, CharSequence script);
+	public Value executeFunction(ActorRef host, PodContext podContext, ActorMessage<?> message, UUID interaction, CharSequence script);
 	
 	public void injectAPI(ActorPolyglotAPI api);
 	public void injectStateStore(PolyglotStateStore stateStore);

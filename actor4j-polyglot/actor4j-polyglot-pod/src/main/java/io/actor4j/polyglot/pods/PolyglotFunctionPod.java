@@ -17,6 +17,7 @@ package io.actor4j.polyglot.pods;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.id.ActorId;
@@ -39,10 +40,15 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 		return new PodActor() {
 			protected PolyglotContextInternal contextPolyglot;
 			protected PodFunction podFunction;
+			
+			protected Map<UUID, ActorMessage<?>> pendingHandler;
 			protected Map<Long, ActorId> routes;
 			
 			@Override
 			public void preStart() {
+				pendingHandler = new HashMap<>();
+				routes = new HashMap<>();
+				
 				if (isExposed())
 					expose();
 				
@@ -50,8 +56,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 					setAlias(domain()+getContext().shardId());
 				else
 					setAlias(domain());
-				
-				routes = new HashMap<>();
+
 				register();
 				registerRoutes(routes);
 				
@@ -73,11 +78,19 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 				contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, message.source());
 				contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, message.dest());
 				
-				Reply result = podFunction.handle(filter(message));
-				if (result!=null && result.tag()>=0)
-					internal_callback(this, message, result);
-//				else
-//					NO_REPLY;
+				UUID interaction = message.interaction()!=null ? message.interaction() : UUID.randomUUID();
+				
+				Reply result = podFunction.handle(message, interaction);
+				
+				if (result!=null) {
+					if (result.isDone()) {
+						ActorMessage<?> originMessage = result.interaction()!=null ? pendingHandler.remove(result.interaction()) : null;
+						
+						internal_callback(this, originMessage!=null ? originMessage : message, result);
+					}
+					else if (result.isPending())
+						pendingHandler.putIfAbsent(interaction, message);
+				}
 			}
 
 			@Override
@@ -121,10 +134,6 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 
 	public abstract String languageId();
 	public abstract CharSequence script();
-	
-	public ActorMessage<?> filter(ActorMessage<?> message) {
-		return message;
-	}
 	
 	public boolean isExposed() {
 		return true;

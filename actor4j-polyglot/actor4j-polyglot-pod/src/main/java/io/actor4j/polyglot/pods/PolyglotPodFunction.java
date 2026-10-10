@@ -15,6 +15,7 @@
  */
 package io.actor4j.polyglot.pods;
 
+import java.util.UUID;
 import java.util.function.Function;
 
 import org.graalvm.polyglot.Value;
@@ -45,11 +46,11 @@ public class PolyglotPodFunction extends PodFunction {
 	}
 
 	@Override
-	public Reply handle(ActorMessage<?> message) {
+	public Reply handle(ActorMessage<?> message, UUID interaction) {
 		Reply result;
 		
 		try {
-			Value resultValue = contextPolyglot.executeFunction(host, context, message, script);
+			Value resultValue = contextPolyglot.executeFunction(host, context, message, interaction, script);
 			if (resultValue!=null && !resultValue.isNull()) {
 				Object mappedObject = defaultMapper.apply(resultValue);
 				
@@ -59,7 +60,12 @@ public class PolyglotPodFunction extends PodFunction {
 						tag = obj.getInteger(PolyglotContext.TAG);
 				}
 				
-				result = Reply.of(mappedObject, tag);
+				if (tag>=0)
+					result = Reply.of(mappedObject, tag, interaction);
+				else if (tag==Reply.PENDING)
+					result = Reply.pending();
+				else 
+					result = Reply.none();
 			}
 			else 	
 				result = Reply.none();
@@ -67,7 +73,7 @@ public class PolyglotPodFunction extends PodFunction {
 		catch (Exception e) {
 			e.printStackTrace();
 			
-			result = Reply.of(JsonObject.create().put(PolyglotContext.ERROR, e.getMessage()), 0);
+			result = Reply.of(JsonObject.create().put(PolyglotContext.ERROR, e.getMessage()), 0, interaction);
 		}
 		
 		return result;
