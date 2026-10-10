@@ -24,7 +24,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.functions.PodFunction;
-import io.actor4j.core.pods.functions.PodFunction.Reply;
+import io.actor4j.core.utils.Reply;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
 import io.actor4j.polyglot.pods.runtime.PolyglotContextImpl;

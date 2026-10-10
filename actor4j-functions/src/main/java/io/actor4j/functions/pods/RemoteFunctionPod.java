@@ -25,7 +25,7 @@ import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.utils.PodStatus;
 import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.runtime.config.InternalServerCallback;
-import io.actor4j.functions.pods.PodFunction.Reply;
+import io.actor4j.core.utils.Reply;
 import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.AsyncStreams;

@@ -17,6 +17,7 @@ package io.actor4j.functions.pods;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.pods.PodContext;
+import io.actor4j.functions.io.AsyncIORequest;
 import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.AsyncStreams;
@@ -28,6 +29,7 @@ public class FunctionPodContext {
 	protected StateStore<?, ?> stateStore;
 	protected AsyncStreams streams;
 	protected AsyncQueryRequest queryRequest;
+	protected AsyncIORequest ioRequest;
 	
 	public FunctionPodContext(ActorRef host, PodContext podContext) {
 		super();
@@ -59,6 +61,10 @@ public class FunctionPodContext {
 		this.queryRequest = queryRequest;
 	}
 	
+	public void injectIORequest(AsyncIORequest ioRequest) {
+		this.ioRequest = ioRequest;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <K, V> StateStore<K, V> stateStore() {
 		return (StateStore<K, V>)stateStore;
@@ -70,5 +76,9 @@ public class FunctionPodContext {
 	
 	public AsyncQueryRequest queryRequest() {
 		return queryRequest;
+	}
+	
+	public AsyncIORequest ioRequest() {
+		return ioRequest;
 	}
 }

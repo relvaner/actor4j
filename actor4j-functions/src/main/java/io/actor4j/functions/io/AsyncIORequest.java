@@ -13,26 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.functions.pods;
+package io.actor4j.functions.io;
 
-import java.util.function.Function;
-
-import io.actor4j.core.messages.ActorMessage;
-import io.actor4j.core.utils.Reply;
-
-public abstract class PodFunction {
-	protected final FunctionPodContext context;
-	protected final Function<Object, Object> defaultMapper;
+public class AsyncIORequest implements AsyncIORequestHandler {
+	protected final AsyncIORequestHandler delegate;
 	
-	public PodFunction(FunctionPodContext context, Function<Object, Object> defaultMapper) {
-		super();
-		this.context = context;
-		this.defaultMapper = defaultMapper;
+	public AsyncIORequest(AsyncIORequestHandler delegate) {
+		this.delegate = delegate;
 	}
 	
-	public PodFunction(FunctionPodContext context) {
-		this(context, (v) -> v);
+	public static AsyncIORequest create(AsyncIORequestHandler delegate) {
+		return new AsyncIORequest(delegate);
 	}
-
-	public abstract Reply handle(ActorMessage<?> message);
+	
+	@Override
+	public Object execute(Object value) {
+		return delegate.execute(value);
+	}
 }

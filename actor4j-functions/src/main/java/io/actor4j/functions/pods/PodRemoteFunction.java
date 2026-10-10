@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import io.actor4j.core.pods.RemotePodMessage;
+import io.actor4j.core.utils.Reply;
 
 public abstract class PodRemoteFunction extends PodFunction {
 	public PodRemoteFunction(FunctionPodContext context, Function<Object, Object> defaultMapper) {

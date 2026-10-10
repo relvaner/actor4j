@@ -22,6 +22,7 @@ import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
 import io.actor4j.agents.langchain4j.pods.OpenAICompatibleAgentPod;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.utils.Reply;
 import io.actor4j.functions.pods.FunctionPodContext;
 import io.actor4j.functions.pods.PodFunction;
 

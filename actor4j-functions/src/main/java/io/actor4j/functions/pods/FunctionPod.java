@@ -19,7 +19,8 @@ import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
-import io.actor4j.functions.pods.PodFunction.Reply;
+import io.actor4j.core.utils.Reply;
+import io.actor4j.functions.io.AsyncIORequest;
 import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.AsyncStreams;
@@ -73,6 +74,9 @@ public abstract class FunctionPod extends ActorPod {
 				AsyncQueryRequest queryRequest = createQueryRequest(contextFunction);
 				if (queryRequest!=null)
 					contextFunction.injectQueryRequest(queryRequest);
+				AsyncIORequest ioRequest = createIORequest(contextFunction);
+				if (ioRequest!=null)
+					contextFunction.injectIORequest(ioRequest);
 				
 				podFunction = createPodFunction(contextFunction);
 			}
@@ -94,6 +98,10 @@ public abstract class FunctionPod extends ActorPod {
 	}
 	
 	public AsyncQueryRequest createQueryRequest(FunctionPodContext contextFunctions) {
+		return null;
+	}
+	
+	public AsyncIORequest createIORequest(FunctionPodContext contextFunctions) {
 		return null;
 	}
 	
