@@ -15,6 +15,8 @@
  */
 package io.actor4j.functions.pods;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
@@ -26,6 +28,7 @@ import io.actor4j.core.pods.utils.PodStatus;
 import io.actor4j.core.runtime.InternalActorSystem;
 import io.actor4j.core.runtime.config.InternalServerCallback;
 import io.actor4j.core.utils.Reply;
+import io.actor4j.functions.io.AsyncIORequest;
 import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.AsyncStreams;
@@ -36,6 +39,7 @@ public abstract class RemoteFunctionPod extends ActorPod {
 		return new PodActor() {
 			protected FunctionPodContext contextFunction;
 			protected PodRemoteFunction podRemoteFunction;
+			protected Map<UUID, ActorMessage<?>> pendingHandler = new HashMap<>();
 
 			@Override
 			public void preStart() {
@@ -56,26 +60,62 @@ public abstract class RemoteFunctionPod extends ActorPod {
 			public void postStop() {
 				RemoteFunctionPod.this.postStop(contextFunction);
 			}
-
-			@Override
-			public void receive(ActorMessage<?> message) {
-				if (message.value() instanceof RemotePodMessage remoteMessage) {
-					UUID interaction = message.interaction()!=null ? message.interaction() : UUID.randomUUID();
-					
-					Reply result = podRemoteFunction.handle(filterRemote(remoteMessage), interaction);
-					if (remoteMessage.remotePodMessageDTO().reply()) {
-						if (result!=null && result.tag()>=0)
-							internal_callback(this, remoteMessage, result);
+			
+			public void handleReply(ActorMessage<?> message, Reply result) {
+				if (result!=null) {
+					if (result.isDone()) {
+						ActorMessage<?> originMessage = pendingHandler.get(result.interaction());
+						
+						if (originMessage.value() instanceof RemotePodMessage remoteMessage) {
+							if (remoteMessage.remotePodMessageDTO().reply())
+								internal_callback(this, remoteMessage, result);
+						}
 						else
-							internal_callback(this, remoteMessage, handleRejectedReply(result));
+							internal_callback(this, message, result);
+						
+						if (originMessage!=null) 
+							pendingHandler.remove(result.interaction());	
 					}
-				}
-				else {
-					Reply result = podRemoteFunction.handle(filter(message));
-					if (result!=null && result.tag()>=0)
-						internal_callback(this, message, result);
+					else if (result.isPending())
+						pendingHandler.putIfAbsent(message.interaction(), message);
 				}
 			}
+			
+			@Override
+			public void receive(ActorMessage<?> message) {
+				Reply result = null;
+				
+				if (message.value() instanceof RemotePodMessage remoteMessage) {
+					UUID interaction = message.interaction()!=null ? message.interaction() : UUID.randomUUID();
+					result = podRemoteFunction.handle(remoteMessage, interaction);
+					if (result!=null && result.isDone())
+						internal_callback(this, remoteMessage, result);
+				}
+				else {
+					result = podRemoteFunction.handle(message);
+					handleReply(message, result);
+				}
+			}
+
+//			@Override
+//			public void receive(ActorMessage<?> message) {
+//				if (message.value() instanceof RemotePodMessage remoteMessage) {
+//					UUID interaction = message.interaction()!=null ? message.interaction() : UUID.randomUUID();
+//					
+//					Reply result = podRemoteFunction.handle(remoteMessage, interaction);
+//					if (remoteMessage.remotePodMessageDTO().reply()) {
+//						if (result!=null && result.tag()>=0)
+//							internal_callback(this, remoteMessage, result);
+//						else
+//							internal_callback(this, remoteMessage, handleRejectedReply(result));
+//					}
+//				}
+//				else {
+//					Reply result = podRemoteFunction.handle(message);
+//					if (result!=null && result.tag()>=0)
+//						internal_callback(this, message, result);
+//				}
+//			}
 			
 			@Override
 			public void register() {
@@ -121,12 +161,8 @@ public abstract class RemoteFunctionPod extends ActorPod {
 		return null;
 	}
 	
-	public ActorMessage<?> filter(ActorMessage<?> message) {
-		return message;
-	}
-	
-	public RemotePodMessage filterRemote(RemotePodMessage remoteMessage) {
-		return remoteMessage;
+	public AsyncIORequest createIORequest(FunctionPodContext contextFunctions) {
+		return null;
 	}
 	
 	public Reply handleRejectedReply(Reply result) {
