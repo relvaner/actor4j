@@ -75,21 +75,23 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 			
 			@Override
 			public void receive(ActorMessage<?> message) {
-				contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, message.source());
-				contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, message.dest());
+				ActorMessage<?> filteredMessage = filter(message);
 				
-				UUID interaction = message.interaction()!=null ? message.interaction() : UUID.randomUUID();
+				contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, filteredMessage.source());
+				contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, filteredMessage.dest());
 				
-				Reply result = podFunction.handle(message, interaction);
+				UUID interaction = filteredMessage.interaction()!=null ? filteredMessage.interaction() : UUID.randomUUID();
+				
+				Reply result = podFunction.handle(filteredMessage, interaction);
 				
 				if (result!=null) {
 					if (result.isDone()) {
 						ActorMessage<?> originMessage = result.interaction()!=null ? pendingHandler.remove(result.interaction()) : null;
 						
-						internal_callback(this, originMessage!=null ? originMessage : message, result);
+						internal_callback(this, originMessage!=null ? originMessage : filteredMessage, result);
 					}
 					else if (result.isPending())
-						pendingHandler.putIfAbsent(interaction, message);
+						pendingHandler.putIfAbsent(interaction, filteredMessage);
 				}
 			}
 
@@ -118,6 +120,10 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 	
 	protected void internal_callback(ActorRef host, ActorMessage<?> message, Reply result) {
 		host.tell(result.value(), result.tag(), message.source(), message.interaction(), message.protocol(), message.domain());
+	}
+	
+	public ActorMessage<?> filter(ActorMessage<?> message) {
+		return message;
 	}
 	
 	public PolyglotStateStore createStateStore(PolyglotContext contextPolyglot) {
