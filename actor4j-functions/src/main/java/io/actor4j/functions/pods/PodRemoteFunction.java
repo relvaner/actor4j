@@ -19,9 +19,10 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import io.actor4j.core.pods.RemotePodMessage;
+import io.actor4j.core.pods.functions.utils.PodRemoteFunctionHandler;
 import io.actor4j.core.utils.Reply;
 
-public abstract class PodRemoteFunction extends PodFunction {
+public abstract class PodRemoteFunction extends PodFunction implements PodRemoteFunctionHandler {
 	public PodRemoteFunction(FunctionPodContext context, Function<Object, Object> defaultMapper) {
 		super(context, defaultMapper);
 	}
@@ -30,5 +31,6 @@ public abstract class PodRemoteFunction extends PodFunction {
 		super(context);
 	}
 	
-	public abstract Reply handle(RemotePodMessage remoteMessage, UUID interaction);
+	/** @param replyExpected true if the remote client awaits a reply (remotePodMessageDTO().reply()) */
+	public abstract Reply handle(RemotePodMessage remoteMessage, UUID interaction, boolean replyExpected);
 }

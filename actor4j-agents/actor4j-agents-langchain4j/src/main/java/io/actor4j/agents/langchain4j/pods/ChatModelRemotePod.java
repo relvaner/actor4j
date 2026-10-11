@@ -57,7 +57,7 @@ public abstract class ChatModelRemotePod extends AgentRemoteFunctionPod {
 	public PodRemoteFunction createPodRemoteFunction(FunctionPodContext ctx) {
 		return new PodRemoteFunction(ctx) {
 			@Override
-			public Reply handle(ActorMessage<?> message, UUID interaction) {
+			public Reply handle(ActorMessage<?> message, UUID interaction, boolean replyAllowed) {
 				Reply result = null;
 				
 				if (resourceId.equals(message.source()))
@@ -71,7 +71,7 @@ public abstract class ChatModelRemotePod extends AgentRemoteFunctionPod {
 			}
 			
 			@Override
-			public Reply handle(RemotePodMessage remoteMessage, UUID interaction) {
+			public Reply handle(RemotePodMessage remoteMessage, UUID interaction, boolean replyExpected) {
 				ctx.ioRequest().execute(remoteMessage.remotePodMessageDTO().payload(), interaction);
 				return Reply.pending();
 			}

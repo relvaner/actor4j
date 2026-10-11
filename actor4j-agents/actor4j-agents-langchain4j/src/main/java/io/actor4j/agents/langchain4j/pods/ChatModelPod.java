@@ -56,7 +56,7 @@ public abstract class ChatModelPod extends AgentFunctionPod {
 	public PodFunction createPodFunction(FunctionPodContext ctx) {
 		return new PodFunction(ctx) {
 			@Override
-			public Reply handle(ActorMessage<?> message, UUID interaction) {
+			public Reply handle(ActorMessage<?> message, UUID interaction, boolean replyAllowed) {
 				Reply result = null;
 				
 				if (resourceId.equals(message.source()))

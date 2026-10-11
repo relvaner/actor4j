@@ -19,9 +19,10 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.pods.functions.utils.PodFunctionHandler;
 import io.actor4j.core.utils.Reply;
 
-public abstract class PodFunction {
+public abstract class PodFunction implements PodFunctionHandler {
 	protected final FunctionPodContext context;
 	protected final Function<Object, Object> defaultMapper;
 	
@@ -35,7 +36,8 @@ public abstract class PodFunction {
 		this(context, (v) -> v);
 	}
 
-	public abstract Reply handle(ActorMessage<?> message, UUID interaction);
+	/** @param replyAllowed false if the sender declined a reply (NO_REPLY), otherwise a reply is permitted */
+	public abstract Reply handle(ActorMessage<?> message, UUID interaction, boolean replyAllowed);
 	
 	public Reply handleQueryRequest(ActorMessage<?> message, UUID interaction) {
 		return Reply.none();

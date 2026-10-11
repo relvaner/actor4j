@@ -159,7 +159,7 @@ public class ExampleFunctionPod extends FunctionPod {
 			protected Set<UUID> gqlHandler = new HashSet<>();
 			
 			@Override
-			public Reply handle(ActorMessage<?> message, UUID interaction) {
+			public Reply handle(ActorMessage<?> message, UUID interaction, boolean replyAllowed) {
 				if (!gqlHandler.remove(interaction)) {
 					StateStore<String, Integer> stateStore = ctx.stateStore();
 					
