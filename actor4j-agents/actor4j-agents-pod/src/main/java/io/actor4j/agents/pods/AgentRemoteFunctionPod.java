@@ -18,5 +18,15 @@ package io.actor4j.agents.pods;
 import io.actor4j.functions.pods.RemoteFunctionPod;
 
 public abstract class AgentRemoteFunctionPod extends RemoteFunctionPod {
+	protected final String domain;
 	
+	public AgentRemoteFunctionPod(String domain) {
+		super();
+		this.domain = domain;
+	}
+	
+	@Override
+	public String domain() {
+		return domain;
+	}
 }

@@ -27,13 +27,19 @@ import io.actor4j.functions.pods.FunctionPodContext;
 import io.actor4j.functions.pods.PodFunction;
 
 public abstract class ChatModelPod extends AgentFunctionPod {
+	protected final ChatModelConfig chatModelConfig;
 	protected ActorId resourceId;
 	
-	public abstract ChatModelResourceActor createChatModelResourceActor();
+	public ChatModelPod(String domain, ChatModelConfig chatModelConfig) {
+		super(domain);
+		this.chatModelConfig = chatModelConfig;
+	}
+	
+	public abstract ChatModelResourceActor createChatModelResourceActor(ChatModelConfig chatModelConfig);
 	
 	@Override
 	public void preStart(FunctionPodContext ctx) {
-		resourceId = ctx.host().getSystem().addActor(() -> createChatModelResourceActor());
+		resourceId = ctx.host().getSystem().addActor(() -> createChatModelResourceActor(chatModelConfig));
 	}
 	
 	@Override
@@ -70,5 +76,7 @@ public abstract class ChatModelPod extends AgentFunctionPod {
 		};
 	}
 	
-	public abstract Reply handleIoRequest(ActorMessage<?> message, UUID interaction, FunctionPodContext ctx);
+	public Reply handleIoRequest(ActorMessage<?> message, UUID interaction, FunctionPodContext ctx) {
+		return Reply.of(message.value(), 0, interaction);
+	}
 }

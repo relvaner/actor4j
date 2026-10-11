@@ -20,17 +20,19 @@ import io.actor4j.core.actors.ResourceActor;
 
 public abstract class ChatModelResourceActor extends ResourceActor {
 	protected ChatModel model;
+	protected ChatModelConfig chatModelConfig;
 
-	public abstract ChatModel createAiChatModel();
+	public abstract ChatModel createAiChatModel(ChatModelConfig chatModelConfig);
 	public abstract void createAiServices(ChatModel chatModel);
 	
-	public ChatModelResourceActor() {
+	public ChatModelResourceActor(ChatModelConfig chatModelConfig) {
 		super(true);
+		this.chatModelConfig = chatModelConfig;
 	}
 	
 	@Override
 	public void preStart() {
-		model = createAiChatModel();
+		model = createAiChatModel(chatModelConfig);
 		createAiServices(model);
 	}
 }

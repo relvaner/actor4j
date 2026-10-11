@@ -18,5 +18,15 @@ package io.actor4j.agents.pods;
 import io.actor4j.functions.pods.FunctionPod;
 
 public abstract class AgentFunctionPod extends FunctionPod {
+	protected final String domain;
 	
+	public AgentFunctionPod(String domain) {
+		super();
+		this.domain = domain;
+	}
+	
+	@Override
+	public String domain() {
+		return domain;
+	}
 }
