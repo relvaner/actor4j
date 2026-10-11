@@ -25,6 +25,8 @@ import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.utils.Reply;
 import io.actor4j.functions.io.AsyncIORequest;
+import io.actor4j.functions.pods.runtime.FunctionPodContextImpl;
+import io.actor4j.functions.pods.runtime.FunctionPodContextInternal;
 import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.AsyncStreams;
@@ -33,7 +35,7 @@ public abstract class FunctionPod extends ActorPod {
 	@Override
 	public PodActor create() {
 		return new PodActor() {
-			protected FunctionPodContext contextFunction;
+			protected FunctionPodContextInternal contextFunction;
 			protected PodFunction podFunction;
 			protected Map<UUID, ActorMessage<?>> pendingHandler;
 			
@@ -78,7 +80,7 @@ public abstract class FunctionPod extends ActorPod {
 			
 			@Override
 			public void register() {
-				contextFunction = FunctionPodContext.create(this, getContext());
+				contextFunction = FunctionPodContextImpl.create(this, getContext());
 				
 				StateStore<?, ?> stateStore = createStateStore(contextFunction);
 				if (stateStore!=null)

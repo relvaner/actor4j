@@ -22,63 +22,12 @@ import io.actor4j.functions.query.AsyncQueryRequest;
 import io.actor4j.functions.state.StateStore;
 import io.actor4j.functions.streams.AsyncStreams;
 
-public class FunctionPodContext {
-	protected final ActorRef host;
-	protected final PodContext podContext;
+public interface FunctionPodContext {
+	public ActorRef host();
+	public PodContext podContext();
 	
-	protected StateStore<?, ?> stateStore;
-	protected AsyncStreams streams;
-	protected AsyncQueryRequest queryRequest;
-	protected AsyncIORequest ioRequest;
-	
-	public FunctionPodContext(ActorRef host, PodContext podContext) {
-		super();
-		this.host = host;
-		this.podContext = podContext;
-	}
-	
-	public static FunctionPodContext create(ActorRef host, PodContext podContext) {
-		return new FunctionPodContext(host, podContext);
-	}
-	
-	public ActorRef host() {
-		return host;
-	}
-	
-	public PodContext podContext() {
-		return podContext;
-	}
-	
-	public void injectStateStore(StateStore<?, ?> stateStore) {
-		this.stateStore = stateStore;
-	}
-	
-	public void injectStreams(AsyncStreams streams) {
-		this.streams = streams;
-	}
-	
-	public void injectQueryRequest(AsyncQueryRequest queryRequest) {
-		this.queryRequest = queryRequest;
-	}
-	
-	public void injectIORequest(AsyncIORequest ioRequest) {
-		this.ioRequest = ioRequest;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public <K, V> StateStore<K, V> stateStore() {
-		return (StateStore<K, V>)stateStore;
-	}
-	
-	public AsyncStreams streams() {
-		return streams;
-	}
-	
-	public AsyncQueryRequest queryRequest() {
-		return queryRequest;
-	}
-	
-	public AsyncIORequest ioRequest() {
-		return ioRequest;
-	}
+	public <K, V> StateStore<K, V> stateStore();
+	public AsyncStreams streams();
+	public AsyncQueryRequest queryRequest();
+	public AsyncIORequest ioRequest();
 }
