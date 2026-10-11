@@ -26,8 +26,8 @@ import io.actor4j.agents.langchain4j.pods.ChatModelResourceActor;
 import io.actor4j.agents.langchain4j.pods.OpenAiCompatibleChatModelResourceActor;
 import io.actor4j.core.messages.ActorMessage;
 
-public class ExampleAgentFuctionPod extends ChatModelPod {	
-	public ExampleAgentFuctionPod(String domain, ChatModelConfig chatModelConfig) {
+public class ExampleAgentFunctionPod extends ChatModelPod {	
+	public ExampleAgentFunctionPod(String domain, ChatModelConfig chatModelConfig) {
 		super(domain, chatModelConfig);
 	}
 

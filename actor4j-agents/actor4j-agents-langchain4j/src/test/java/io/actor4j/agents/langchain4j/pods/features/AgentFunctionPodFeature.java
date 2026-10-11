@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.actor4j.agents.langchain4j.pods.ChatModelConfig;
-import io.actor4j.agents.langchain4j.pods.features.ExampleAgentFuctionPod.TaskAnalysis;
+import io.actor4j.agents.langchain4j.pods.features.ExampleAgentFunctionPod.TaskAnalysis;
 import io.actor4j.core.ActorRuntime;
 import io.actor4j.core.ActorSystem;
 import io.actor4j.core.ActorSystemFactory;
@@ -53,8 +53,8 @@ public class AgentFunctionPodFeature {
 		String domain = "ExampleAgentFuctionPod";
 		
 		system.deployPods(
-				() -> new ExampleAgentFuctionPod(domain, ChatModelConfig.create().build()), 
-				new PodConfiguration(domain, ExampleAgentFuctionPod.class.getName(), 1, 1));
+				() -> new ExampleAgentFunctionPod(domain, ChatModelConfig.create().build()), 
+				new PodConfiguration(domain, ExampleAgentFunctionPod.class.getName(), 1, 1));
 		ActorId client = system.addActor(() -> new Actor(){
 			@Override
 			public void receive(ActorMessage<?> message) {
