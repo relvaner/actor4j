@@ -17,7 +17,6 @@ package io.actor4j.polyglot.pods;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import io.actor4j.core.actors.ActorRef;
 import io.actor4j.core.id.ActorId;
@@ -25,6 +24,7 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.ActorPod;
 import io.actor4j.core.pods.actors.PodActor;
 import io.actor4j.core.pods.functions.PodFunction;
+import io.actor4j.core.pods.functions.utils.FunctionPodProxyHandler;
 import io.actor4j.core.utils.Reply;
 import io.actor4j.polyglot.api.ActorPolyglotAPI;
 import io.actor4j.polyglot.api.ActorPolyglotMessage;
@@ -41,12 +41,11 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 			protected PolyglotContextInternal contextPolyglot;
 			protected PodFunction podFunction;
 			
-			protected Map<UUID, ActorMessage<?>> pendingHandler;
+			protected FunctionPodProxyHandler proxy;
 			protected Map<Long, ActorId> routes;
 			
 			@Override
 			public void preStart() {
-				pendingHandler = new HashMap<>();
 				routes = new HashMap<>();
 				
 				if (isExposed())
@@ -80,19 +79,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 				contextPolyglot.api().router().put(ActorPolyglotMessage.SOURCE, filteredMessage.source());
 				contextPolyglot.api().router().put(ActorPolyglotMessage.DEST, filteredMessage.dest());
 				
-				UUID interaction = filteredMessage.interaction()!=null ? filteredMessage.interaction() : UUID.randomUUID();
-				
-				Reply result = podFunction.handle(filteredMessage, interaction);
-				
-				if (result!=null) {
-					if (result.isDone()) {
-						ActorMessage<?> originMessage = result.interaction()!=null ? pendingHandler.remove(result.interaction()) : null;
-						
-						internal_callback(this, originMessage!=null ? originMessage : filteredMessage, result);
-					}
-					else if (result.isPending())
-						pendingHandler.putIfAbsent(interaction, filteredMessage);
-				}
+				proxy.apply(filteredMessage);
 			}
 
 			@Override
@@ -114,6 +101,7 @@ public abstract class PolyglotFunctionPod extends ActorPod {
 					contextPolyglot.injectQueryRequest(queryRequest);
 				
 				podFunction = new PolyglotPodFunction(this, getContext(), contextPolyglot, script());
+				proxy = new FunctionPodProxyHandler(this, podFunction); 
 			}
 		};
 	}

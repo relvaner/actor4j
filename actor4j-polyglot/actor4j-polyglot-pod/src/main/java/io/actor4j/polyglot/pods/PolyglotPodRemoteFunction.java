@@ -37,5 +37,6 @@ public abstract class PolyglotPodRemoteFunction extends PolyglotPodFunction {
 		super(host, context, contextPolyglot, script);
 	}
 	
-	public abstract Reply handle(RemotePodMessage remoteMessage, UUID interaction);
+	/** @param replyExpected true if the remote client awaits a reply (remotePodMessageDTO().reply()) */
+	public abstract Reply handle(RemotePodMessage remoteMessage, UUID interaction, boolean replyExpected);
 }

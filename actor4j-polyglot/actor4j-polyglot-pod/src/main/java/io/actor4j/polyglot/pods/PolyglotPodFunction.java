@@ -46,7 +46,7 @@ public class PolyglotPodFunction extends PodFunction {
 	}
 
 	@Override
-	public Reply handle(ActorMessage<?> message, UUID interaction) {
+	public Reply handle(ActorMessage<?> message, UUID interaction, boolean replyAllowed/*TODO*/) {
 		Reply result;
 		
 		try {
