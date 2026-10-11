@@ -26,6 +26,7 @@ import io.actor4j.agents.langchain4j.pods.ChatModelPod;
 import io.actor4j.agents.langchain4j.pods.ChatModelResourceActor;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Reply;
+import io.actor4j.functions.pods.FunctionPodContext;
 
 public class ExampleAgentFuctionPod extends ChatModelPod {
 	public static final String BASE_URL = "http://localhost:9090/v1";
@@ -76,7 +77,7 @@ public class ExampleAgentFuctionPod extends ChatModelPod {
 	}
 
 	@Override
-	public Reply handleIoRequest(ActorMessage<?> message, UUID interaction) {
+	public Reply handleIoRequest(ActorMessage<?> message, UUID interaction, FunctionPodContext ctx) {
 		return Reply.of(message.value(), 0, interaction);
 	}
 }

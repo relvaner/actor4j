@@ -65,10 +65,10 @@ public abstract class ChatModelPod extends AgentFunctionPod {
 			
 			@Override
 			public Reply handleIoRequest(ActorMessage<?> message, UUID interaction) {
-				return ChatModelPod.this.handleIoRequest(message, interaction);
+				return ChatModelPod.this.handleIoRequest(message, interaction, ctx);
 			}
 		};
 	}
 	
-	public abstract Reply handleIoRequest(ActorMessage<?> message, UUID interaction);
+	public abstract Reply handleIoRequest(ActorMessage<?> message, UUID interaction, FunctionPodContext ctx);
 }
