@@ -10,7 +10,7 @@
 	<artifactId>actor4j-dataformat-json-vertx</artifactId>
 	
 	<properties>
-		<vertx.version>4.3.3</vertx.version>
+		<vertx.version>4.5.35</vertx.version>
 	</properties>
 	
 	<dependencyManagement>

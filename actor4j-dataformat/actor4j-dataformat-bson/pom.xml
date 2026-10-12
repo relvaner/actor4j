@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>bson</artifactId>
-			<version>4.11.2</version>
+			<version>4.11.5</version>
 		</dependency>
 	</dependencies>
 </project>
