@@ -38,8 +38,8 @@ public class MyActor extends Actor {
 	
 	public static void main(String[] args) {
 		ActorSystemConfig config = ActorSystemConfig.builder()
-				.parallelism(2)
-				.build();
+			.parallelism(2)
+			.build();
 		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
 		
 		ActorId dest = system.addActor(() -> new MyActor());
