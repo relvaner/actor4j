@@ -17,8 +17,12 @@ package io.actor4j.examples.starter;
 
 import static io.actor4j.core.logging.ActorLogger.*;
 
+import io.actor4j.core.ActorSystem;
 import io.actor4j.core.actors.Actor;
+import io.actor4j.core.config.ActorSystemConfig;
+import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.examples.shared.ExamplesSettings;
 
 public class MyActor extends Actor {
 	@Override
@@ -30,5 +34,23 @@ public class MyActor extends Actor {
 		} 
 		else
 			unhandled(message);
+	}
+	
+	public static void main(String[] args) {
+		ActorSystemConfig config = ActorSystemConfig.builder()
+				.parallelism(2)
+				.build();
+		ActorSystem system = ActorSystem.create(ExamplesSettings.factory(), config);
+		
+		ActorId dest = system.addActor(() -> new MyActor());
+		system.start();
+		system.send(ActorMessage.create("Hello World!", 0, system.SYSTEM_ID(), dest));
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		system.shutdownWithActors(true);
 	}
 }
