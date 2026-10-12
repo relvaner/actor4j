@@ -11,6 +11,7 @@
 	<packaging>pom</packaging>
 	
 	<modules>
+		<module>actor4j-agents-mcp</module>
 		<module>actor4j-agents-langchain4j</module>
 		<module>actor4j-agents-pod</module>
 	</modules>
