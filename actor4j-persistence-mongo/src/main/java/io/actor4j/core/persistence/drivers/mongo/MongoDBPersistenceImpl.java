@@ -71,8 +71,10 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 	
 	public void checkTimeStamp(Document document) {
 		long timestamp = (long)document.get("timeStamp");
-		if (timestamp==lastTimeStamp)
+		if (timestamp<=lastTimeStamp) {
+			document.put("timeStamp", lastTimeStamp);
 			document.put("index", ++indexIfEqualTimeStamp);
+		}
 		else {
 			lastTimeStamp = timestamp;
 			indexIfEqualTimeStamp = 0;
