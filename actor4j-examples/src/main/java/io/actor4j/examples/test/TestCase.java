@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +30,7 @@ import io.actor4j.testing.config.TestSystemConfig;
 import io.actor4j.bdd.Story;
 import io.actor4j.core.actors.Actor;
 import io.actor4j.core.messages.ActorMessage;
+import io.actor4j.core.mutable.MutableObject;
 
 import static io.actor4j.bdd.OutcomeFactory.*;
 import static io.actor4j.core.logging.ActorLogger.logger;
