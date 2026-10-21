@@ -139,4 +139,19 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 		ActorMessage<?> message = pseudoActor.peek();
 		assertNull("Unexpected message: "+message, message);
 	}
+
+	@Override
+	public void assertNoMessages(long timeout, TimeUnit unit) {
+		long deadline = System.nanoTime()+unit.toNanos(timeout);
+		do {
+			ActorMessage<?> message = pseudoActor.peek();
+			assertNull("Unexpected message: "+message, message);
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				fail("Interrupted while waiting for no messages");
+			}
+		} while (System.nanoTime()-deadline<0);
+	}
 }

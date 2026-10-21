@@ -51,5 +51,6 @@ public interface TestSystem extends ActorSystem {
 	public void testAllActors();
 	
 	public ActorMessage<?> awaitMessage(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException;
+	public void assertNoMessages(long timeout, TimeUnit unit);
 	public void assertNoMessages();
 }

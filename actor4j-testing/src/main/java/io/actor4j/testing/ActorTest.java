@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,5 +20,8 @@ import java.util.List;
 import io.actor4j.bdd.Story;
 
 public interface ActorTest {
+	/**
+	 * Stories run on the caller's thread, not the actor's: send and await messages, don't touch actor fields
+	 */
 	public List<Story> test();
 }
