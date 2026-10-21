@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  */
 package io.actor4j.testing.runtime;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import io.actor4j.bdd.Story;
@@ -84,36 +84,55 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 		return (cell!=null)? cell.getActor() : null;
 	}
 	
-	protected void testActor(Actor actor) {
+	protected void testActor(Actor actor, List<Throwable> failures) {
 		if (actor!=null && actor instanceof ActorTest) {
 			testActorId = actor.getId();
-			List<Story> list = ((ActorTest)actor).test();
-			if (list!=null)
-				for (Story story : list) {
-					pseudoActor.reset();
-					try { // workaround, Java hangs, when an AssertionError is thrown!
-						story.run();
+			try {
+				List<Story> list = ((ActorTest)actor).test();
+				if (list!=null)
+					for (Story story : list) {
+						pseudoActor.reset();
+						try {
+							story.run();
+						}
+						catch (AssertionError | RuntimeException e) {
+							failures.add(e);
+						}
 					}
-					catch (AssertionError e) {
-						e.printStackTrace();
-					}
-				}
-			testActorId = null;
+			}
+			finally {
+				testActorId = null;
+			}
 		}
 	}
 	
+	protected void throwIfFailed(List<Throwable> failures) {
+		if (failures.isEmpty())
+			return;
+		Throwable first = failures.get(0);
+		for (int i=1; i<failures.size(); i++)
+			first.addSuppressed(failures.get(i));
+		if (first instanceof AssertionError e)
+			throw e;
+		throw (RuntimeException)first;
+	}
+
+	
 	@Override
 	public void testActor(ActorId id) {
-		testActor(underlyingActor(id));
+		List<Throwable> failures = new ArrayList<>();
+		testActor(underlyingActor(id), failures);
+		throwIfFailed(failures);
 	}
 	
 	@Override
 	public void testAllActors() {
-		Function<InternalActorCell, Boolean> testAction = (cell) -> {
-			testActor(cell.getActor());
+		List<Throwable> failures = new ArrayList<>();
+		internal_iterateCell((InternalActorCell)USER_ID, (cell) -> {
+			testActor(cell.getActor(), failures);
 			return false;
-		};
-		internal_iterateCell((InternalActorCell)USER_ID, testAction);
+		});
+		throwIfFailed(failures);
 	}
 
 	@Override
