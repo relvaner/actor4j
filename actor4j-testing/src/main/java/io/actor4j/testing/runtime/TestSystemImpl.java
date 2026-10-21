@@ -17,7 +17,6 @@ package io.actor4j.testing.runtime;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
@@ -40,7 +39,6 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 	protected PseudoActor pseudoActor;
 	protected volatile ActorId pseudoActorId;
 	protected volatile ActorId testActorId;
-	protected volatile CompletableFuture<ActorMessage<?>> actualMessage;
 	
 	public TestSystemImpl() {
 		this(null);
@@ -54,7 +52,7 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 		createPseudoActor(() -> new PseudoActor(this, true) {
 			@Override
 			public void receive(ActorMessage<?> message) {
-				getActualMessage().complete(message);
+				// empty, messages are only fetched via awaitMessage
 			}
 		});
 	}
@@ -67,10 +65,6 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 	public void createPseudoActor(Supplier<PseudoActor> factory) {
 		pseudoActor = factory.get();
 		pseudoActorId = pseudoActor.getId();
-	}
-	
-	public CompletableFuture<ActorMessage<?>> getActualMessage() {
-		return actualMessage;
 	}
 
 	@Override
@@ -142,6 +136,7 @@ public class TestSystemImpl extends DefaultActorSystemImpl implements TestSystem
 	
 	@Override
 	public void assertNoMessages() {
-		assertFalse(pseudoActor.runOnce());
+		ActorMessage<?> message = pseudoActor.peek();
+		assertNull("Unexpected message: "+message, message);
 	}
 }
