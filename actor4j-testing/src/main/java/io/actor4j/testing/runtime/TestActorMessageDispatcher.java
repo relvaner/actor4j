@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,7 @@
  */
 package io.actor4j.testing.runtime;
 
-import java.util.function.BiConsumer;
-
 import io.actor4j.core.runtime.ActorSystemImpl;
-import io.actor4j.core.runtime.ActorThread;
 import io.actor4j.core.runtime.DefaultActorMessageDispatcher;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
@@ -30,13 +27,18 @@ public class TestActorMessageDispatcher extends DefaultActorMessageDispatcher {
 	}
 	
 	@Override
-	public void post(ActorMessage<?> message, ActorId source, String alias) {
-		super.post(redirect(message), source, alias);
+	public void unsafe_post(ActorMessage<?> message, ActorId source, String alias) {
+		ActorMessage<?> redirected = redirect(message);
+		if (redirected!=message)
+			super.post(redirected, source, null); // pseudo actor has no actor thread, unsafe path would drop it
+		else
+			super.unsafe_post(message, source, alias);
 	}
 	
 	@Override
-	protected void postQueue(ActorMessage<?> message, BiConsumer<ActorThread, ActorMessage<?>> biconsumer) {
-		super.postQueue(redirect(message), biconsumer);
+	public void post(ActorMessage<?> message, ActorId source, String alias) {
+		ActorMessage<?> redirected = redirect(message);
+		super.post(redirected, source, redirected!=message ? null : alias);
 	}
 	
 	@Override
@@ -44,8 +46,19 @@ public class TestActorMessageDispatcher extends DefaultActorMessageDispatcher {
 		super.postOuter(redirect(message));
 	}
 	
+	@Override
+	public void postServer(ActorMessage<?> message) {
+		super.postServer(redirect(message));
+	}
+	
+	@Override
+	public void postPriority(ActorMessage<?> message) {
+		super.postPriority(redirect(message));
+	}
+
 	protected ActorMessage<?> redirect(ActorMessage<?> message) {
-		if (message!=null && ((TestSystemImpl)system).testActorId!=null && message.dest()!=((TestSystemImpl)system).testActorId)
+		ActorId testActorId = ((TestSystemImpl)system).testActorId;
+		if (message!=null && testActorId!=null && message.source()==testActorId && message.dest()!=testActorId)
 			return message.shallowCopy(((TestSystemImpl)system).pseudoActorId);
 		else
 			return message;
