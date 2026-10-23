@@ -78,6 +78,9 @@ public abstract class RemoteFunctionPod extends ActorPod {
 				AsyncQueryRequest queryRequest = createQueryRequest(contextFunction);
 				if (queryRequest!=null)
 					contextFunction.injectQueryRequest(queryRequest);
+				AsyncIORequest ioRequest = createIORequest(contextFunction);
+				if (ioRequest!=null)
+					contextFunction.injectIORequest(ioRequest);
 				
 				podRemoteFunction = createPodRemoteFunction(contextFunction);
 				proxy = new RemoteFunctionPodProxyHandler(this, podRemoteFunction);
