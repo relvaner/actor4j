@@ -118,7 +118,7 @@ public class JsonArrayImpl implements JsonArray {
 	public JsonArray add(Object value) {
 		if (value instanceof JsonObjectImpl impl)
 			jsonArray.add(impl.jsonObject);
-		if (value instanceof JsonArrayImpl impl)
+		else if (value instanceof JsonArrayImpl impl)
 			jsonArray.add(impl.jsonArray);
 		else
 			jsonArray.add(value);
@@ -130,7 +130,7 @@ public class JsonArrayImpl implements JsonArray {
 	public JsonArray add(int pos, Object value) {
 		if (value instanceof JsonObjectImpl impl)
 			jsonArray.add(pos, impl.jsonObject);
-		if (value instanceof JsonArrayImpl impl)
+		else if (value instanceof JsonArrayImpl impl)
 			jsonArray.add(pos, impl.jsonArray);
 		else
 			jsonArray.add(pos, value);
@@ -151,7 +151,7 @@ public class JsonArrayImpl implements JsonArray {
 	public JsonArray set(int pos, Object value) {
 		if (value instanceof JsonObjectImpl impl)
 			jsonArray.set(pos, impl.jsonObject);
-		if (value instanceof JsonArrayImpl impl)
+		else if (value instanceof JsonArrayImpl impl)
 			jsonArray.set(pos, impl.jsonArray);
 		else
 			jsonArray.set(pos, value);
@@ -165,7 +165,7 @@ public class JsonArrayImpl implements JsonArray {
 		
 		if (value instanceof JsonObjectImpl impl)
 			 result = jsonArray.contains(impl.jsonObject);
-		if (value instanceof JsonArrayImpl impl)
+		else if (value instanceof JsonArrayImpl impl)
 			 result = jsonArray.contains(impl.jsonArray);
 		else
 			 result = jsonArray.contains(value);

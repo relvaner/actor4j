@@ -128,7 +128,7 @@ public class JsonObjectImpl implements JsonObject {
 	public JsonObject put(String key, Object value) {
 		if (value instanceof JsonObjectImpl impl)
 			jsonObject.put(key, impl.jsonObject);
-		if (value instanceof JsonArrayImpl impl)
+		else if (value instanceof JsonArrayImpl impl)
 			jsonObject.put(key, impl.jsonArray);
 		else
 			jsonObject.put(key, value);
