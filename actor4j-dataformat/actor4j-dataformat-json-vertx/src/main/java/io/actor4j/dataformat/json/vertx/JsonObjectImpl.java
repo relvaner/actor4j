@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package io.actor4j.dataformat.json.vertx;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import io.actor4j.core.json.JsonArray;
 import io.actor4j.core.json.JsonObject;
+import io.vertx.core.json.DecodeException;
 
 public class JsonObjectImpl implements JsonObject {
 	protected io.vertx.core.json.JsonObject jsonObject;
@@ -29,19 +31,30 @@ public class JsonObjectImpl implements JsonObject {
 		
 		jsonObject = new io.vertx.core.json.JsonObject();
 	}
-	
+
 	public JsonObjectImpl(Object obj) {
 		super();
 		
 		if (obj instanceof io.vertx.core.json.JsonObject)
 			jsonObject = (io.vertx.core.json.JsonObject)obj;
+		else if (obj instanceof Map<?, ?> map) {
+			Map<String, Object> copy = new LinkedHashMap<>();
+			for (Map.Entry<?, ?> entry : map.entrySet())
+				if (entry.getKey() instanceof String key)
+					copy.put(key, entry.getValue() instanceof JsonObjectImpl impl ? impl.jsonObject
+						: entry.getValue() instanceof JsonArrayImpl impl ? impl.jsonArray : entry.getValue());
+				else
+					throw new IllegalArgumentException("JSON keys must be strings: "+entry.getKey());
+			jsonObject = new io.vertx.core.json.JsonObject(copy);
+		}
 		else {
-			
 			try {
 				jsonObject = io.vertx.core.json.JsonObject.mapFrom(obj);
-			} catch(IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				jsonObject = new io.vertx.core.json.JsonObject();
 				e.printStackTrace();
+			} catch(DecodeException e) {
+				throw new IllegalStateException("mapping of "+(obj!=null ? obj.getClass().getName() : null)+" requires jackson-databind on the classpath", e);
 			}
 		}
 	}

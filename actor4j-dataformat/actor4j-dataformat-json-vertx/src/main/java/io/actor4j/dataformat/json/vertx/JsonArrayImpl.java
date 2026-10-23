@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package io.actor4j.dataformat.json.vertx;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,14 +37,16 @@ public class JsonArrayImpl implements JsonArray {
 		
 		if (obj instanceof io.vertx.core.json.JsonArray)
 			jsonArray = (io.vertx.core.json.JsonArray)obj;
+		else if (obj instanceof Collection<?> collection)
+			jsonArray = copy(collection);
 		else
-			jsonArray = new io.vertx.core.json.JsonArray();
+			throw new IllegalArgumentException("not a JSON array: "+(obj!=null ? obj.getClass().getName() : null));
 	}
 	
 	public JsonArrayImpl(List<?> list) {
 		super();
 		
-		jsonArray = new io.vertx.core.json.JsonArray(list);
+		jsonArray = copy(list);
 	}
 	
 	public JsonArrayImpl(String json) {
@@ -58,6 +62,15 @@ public class JsonArrayImpl implements JsonArray {
 			jsonArray = arr;
 		else
 			jsonArray = new io.vertx.core.json.JsonArray();
+	}
+	
+	protected static io.vertx.core.json.JsonArray copy(Collection<?> collection) {
+		List<Object> result = new ArrayList<>();
+		for (Object value : collection)
+			result.add(value instanceof JsonObjectImpl impl ? impl.jsonObject
+				: value instanceof JsonArrayImpl impl ? impl.jsonArray : value);
+		
+		return new io.vertx.core.json.JsonArray(result);
 	}
 
 	@Override
