@@ -45,8 +45,7 @@ public class PersistenceFeature {
 	
 	static record MyEvent(String title) {
 	}
-	
-	//@Ignore("Works only until MongoDB Java Driver 3.6.4, with Fongo 2.2.0-RC2")
+
 	@Test(timeout=30000)
 	public void test() {
 		CountDownLatch testDone = new CountDownLatch(2);

@@ -22,8 +22,8 @@
 		<artifactId>actor4j</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>actor4j-persistence-mongo</artifactId>	
-	
+	<artifactId>actor4j-persistence-mongo</artifactId>
+
 	<dependencies>
 		<dependency>
 			<groupId>io.actor4j</groupId>
@@ -48,24 +48,24 @@
 			<version>${revision}</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongodb-driver-sync</artifactId>
-			<version>4.10.2</version>
+			<version>5.13.0</version>
 		</dependency>
-		
+
 		<dependency>
-    		<groupId>de.bwaldvogel</groupId>
-    		<artifactId>mongo-java-server</artifactId>
-    		<version>1.45.0</version>
-    		<scope>test</scope>
+			<groupId>de.bwaldvogel</groupId>
+			<artifactId>mongo-java-server</artifactId>
+			<version>1.47.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-    		<groupId>org.apache.logging.log4j</groupId>
-    		<artifactId>log4j-slf4j-impl</artifactId>
-    		<version>2.20.0</version>
-    		<scope>test</scope>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.26.1</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.vintage</groupId>

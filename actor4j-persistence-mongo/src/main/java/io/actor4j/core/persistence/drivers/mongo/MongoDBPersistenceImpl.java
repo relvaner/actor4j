@@ -126,47 +126,54 @@ public class MongoDBPersistenceImpl extends PersistenceImpl {
 		else if (message.tag()==RECOVER) {
 			try {
 				JsonObject obj = JsonObject.create();
-				Document document = null;
+			
+				long stateTimeStamp = -1;
+				int stateIndex = -1;
 				
 				FindIterable<Document> statesIterable = states.find(new Document("persistenceId", message.valueAsString())).sort(new Document("timeStamp", -1).append("index", -1)).limit(1);
-				document = statesIterable.first();
+				Document document = statesIterable.first();
 				if (document!=null) {
 					JsonObject stateValue = JsonObject.create(document.toJson());
 					stateValue.remove("_id");
 //					long stateTimeStamp = stateValue.getJSONObject("timeStamp").getLong("$numberLong");
-					long stateTimeStamp = stateValue.getLong("timeStamp");
-					int stateIndex = stateValue.getInteger("index");
+					stateTimeStamp = stateValue.getLong("timeStamp");
+					stateIndex = stateValue.getInteger("index");
 					stateValue.put("timeStamp", stateTimeStamp);
 					obj.put("state", stateValue);
-					
-					FindIterable<Document> eventsIterable = events
-							.find(new Document("persistenceId", message.valueAsString()).append("timeStamp", new Document("$gte", stateTimeStamp)))
-							.sort(new Document("timeStamp", 1).append("index", 1));
-					JsonArray array = JsonArray.create();
-					MongoCursor<Document> cursor = eventsIterable.iterator();
-					while (cursor.hasNext()) {
-						document = cursor.next();
-						JsonObject eventValue = JsonObject.create(document.toJson());
-						eventValue.remove("_id");
-//						long timeStamp = eventValue.getJsonObject("timeStamp").getLong("$numberLong");
-						long timeStamp = eventValue.getLong("timeStamp");
-						int index = eventValue.getInteger("index");
-						if (timeStamp==stateTimeStamp) {
-							if (index>stateIndex) {
-								eventValue.put("timeStamp", timeStamp);
-								array.add(eventValue);
-							}
-						}
-						else {
+				}
+				else
+					obj.put("state", JsonObject.empty());
+				
+				Document filter = new Document("persistenceId", message.valueAsString());
+				if (document!=null)
+					filter.append("timeStamp", new Document("$gte", stateTimeStamp));
+				FindIterable<Document> eventsIterable = events
+						.find(filter)
+						.sort(new Document("timeStamp", 1).append("index", 1));
+				JsonArray array = JsonArray.create();
+				MongoCursor<Document> cursor = eventsIterable.iterator();
+				while (cursor.hasNext()) {
+					Document event = cursor.next();
+					JsonObject eventValue = JsonObject.create(event.toJson());
+					eventValue.remove("_id");
+//					long timeStamp = eventValue.getJsonObject("timeStamp").getLong("$numberLong");
+					long timeStamp = eventValue.getLong("timeStamp");
+					int index = eventValue.getInteger("index");
+					if (timeStamp==stateTimeStamp) {
+						if (index>stateIndex) {
 							eventValue.put("timeStamp", timeStamp);
 							array.add(eventValue);
 						}
 					}
-					cursor.close();
-					obj.put("events", array);
+					else {
+						eventValue.put("timeStamp", timeStamp);
+						array.add(eventValue);
+					}
 				}
-				else
-					obj.put("state", JsonObject.empty());
+				cursor.close();
+				
+				if (document!=null || !array.isEmpty())
+					obj.put("events", array);
 				
 				parent.send(ActorMessage.create(obj, INTERNAL_PERSISTENCE_RECOVER, self(), message.source()));
 			}
