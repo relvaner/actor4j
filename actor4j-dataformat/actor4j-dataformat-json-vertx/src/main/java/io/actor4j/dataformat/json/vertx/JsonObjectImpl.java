@@ -50,9 +50,6 @@ public class JsonObjectImpl implements JsonObject {
 		else {
 			try {
 				jsonObject = io.vertx.core.json.JsonObject.mapFrom(obj);
-			} catch (IllegalArgumentException e) {
-				jsonObject = new io.vertx.core.json.JsonObject();
-				e.printStackTrace();
 			} catch(DecodeException e) {
 				throw new IllegalStateException("mapping of "+(obj!=null ? obj.getClass().getName() : null)+" requires jackson-databind on the classpath", e);
 			}

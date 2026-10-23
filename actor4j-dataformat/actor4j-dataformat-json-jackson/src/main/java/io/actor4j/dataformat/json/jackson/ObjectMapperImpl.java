@@ -16,56 +16,34 @@
 package io.actor4j.dataformat.json.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-
 import io.actor4j.core.json.ObjectMapper;
 import io.actor4j.core.utils.GenericType;
 
 public class ObjectMapperImpl implements ObjectMapper {
-	private static final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
-	
-	static {
-		objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
-		
-		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-	}
-
 	@Override
 	public String mapFrom(Object obj) {
-		String result = null;
-		
 		try {
-			result = objectMapper.writeValueAsString(obj);
+			return JsonNodeConverter.objectMapper.writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException("cannot map to JSON: "+e.getOriginalMessage(), e);
 		}
-
-		return result;
 	}
 
 	@Override
 	public <T> T mapTo(String json, Class<T> type) {
-		T result = null;
-		
 		try {
-			result = objectMapper.readValue(json, type);
+			return JsonNodeConverter.objectMapper.readValue(json, type);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException("cannot map from JSON: "+e.getOriginalMessage(), e);
 		}
-		
-		return result;
 	}
 
 	@Override
 	public <T> T mapTo(String json, GenericType<T> type) {
-		T result = null;
-		
 		try {
-			result = objectMapper.readValue(json, TypeReferenceGenerator.generate(type));
+			return JsonNodeConverter.objectMapper.readValue(json, TypeReferenceGenerator.generate(type));
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException("cannot map from JSON: "+e.getOriginalMessage(), e);
 		}
-		
-		return result;
 	}
 }
