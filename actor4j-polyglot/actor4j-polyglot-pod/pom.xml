@@ -20,18 +20,21 @@
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-polyglot-js</artifactId>
 			<version>${revision}</version>
+			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-polyglot-python</artifactId>
 			<version>${revision}</version>
+			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.actor4j</groupId>
 			<artifactId>actor4j-polyglot-java</artifactId>
 			<version>${revision}</version>
+			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
