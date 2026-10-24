@@ -226,11 +226,6 @@
 							</descriptorRefs>
 							<finalName>${project.artifactId}-${project.version}</finalName>
 							<appendAssemblyId>true</appendAssemblyId>
-							<archive>
-								<manifestEntries>
-									<Automatic-Module-Name>io.actor4j.core</Automatic-Module-Name>
-								</manifestEntries>
-							</archive>
 						</configuration>
 						<executions>
 							<execution>
