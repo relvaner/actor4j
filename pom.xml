@@ -21,7 +21,7 @@
 	<artifactId>actor4j</artifactId>
 	<version>${revision}</version>
 	<packaging>pom</packaging>
-	
+
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Actor4j is an actor-oriented Java framework.</description>
 	<url>https://github.com/relvaner/actor4j</url>
@@ -41,202 +41,209 @@
 			<email>relvaner.github@gmail.com</email>
 		</developer>
 	</developers>
-	
+
 	<scm>
 		<connection>scm:git:https://github.com/relvaner/actor4j.git</connection>
 		<developerConnection>scm:git:git@github.com:relvaner/actor4j.git</developerConnection>
 		<url>https://github.com/relvaner/actor4j/</url>
 	</scm>
-	
+
 	<properties>
 		<revision>2.4.0</revision>
 		<actor4j.core.version>2.4.0</actor4j.core.version>
-		<junit.version>5.14.3</junit.version>
+		<junit.version>5.14.4</junit.version>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 	<build>
 		<plugins>
 			<plugin>
-      			<groupId>org.apache.maven.plugins</groupId>
-      			<artifactId>maven-source-plugin</artifactId>
-      			<version>3.3.1</version>
-      			<executions>
-        			<execution>
-          				<id>attach-sources</id>
-          				<goals>
-            				<goal>jar-no-fork</goal>
-          				</goals>
-        			</execution>
-      			</executions>
-    		</plugin>
-    		<plugin>
-      			<groupId>org.apache.maven.plugins</groupId>
-      			<artifactId>maven-javadoc-plugin</artifactId>
-      			<version>3.11.2</version>
-      			<executions>
-        			<execution>
-          				<id>attach-javadocs</id>
-          				<goals>
-            				<goal>jar</goal>
-          				</goals>
-        			</execution>
-      			</executions>
-    		</plugin>
-    		
-    		<plugin>
-       			<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-assembly-plugin</artifactId>
-        		<version>3.7.1</version>
-        		<configuration>
-        			<descriptorRefs>
-            			<descriptorRef>jar-with-dependencies</descriptorRef>
-          			</descriptorRefs>
-              		<finalName>${project.artifactId}-${project.version}</finalName>
-              		<appendAssemblyId>false</appendAssemblyId>
-              		<archive>
-            			<manifestEntries>
-                			<Automatic-Module-Name>io.actor4j.core</Automatic-Module-Name>
-            			</manifestEntries>
-        			</archive>
-            	</configuration>
-        		<executions>
-          			<execution>
-            			<id>make-assembly</id>
-            			<phase>package</phase>
-            			<goals>
-              				<goal>single</goal>
-            			</goals>
-          			</execution>
-        		</executions>
-    		</plugin>
-    		
-    		<plugin>
-      			<groupId>org.codehaus.mojo</groupId>
-      			<artifactId>flatten-maven-plugin</artifactId>
-      			<version>1.7.0</version>
-      			<configuration>
-        			<flattenMode>resolveCiFriendliesOnly</flattenMode>
-        			<updatePomFile>true</updatePomFile>
-      			</configuration>
-      			<executions>
-        			<execution>
-          				<id>flatten</id>
-          				<phase>verify</phase>
-          				<goals>
-            				<goal>flatten</goal>
-          				</goals>
-        			</execution>
-      			</executions>
-    		</plugin>
-    		<plugin>
-      			<groupId>org.apache.maven.plugins</groupId>
-      			<artifactId>maven-gpg-plugin</artifactId>
-      			<version>3.2.7</version>
-      			<configuration>
-    				<skip>true</skip>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.3.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.11.2</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.7.0</version>
+				<configuration>
+					<flattenMode>resolveCiFriendliesOnly</flattenMode>
+					<updatePomFile>true</updatePomFile>
 				</configuration>
-      			<executions>
-        			<execution>
-          				<id>sign-artifacts</id>
-          				<phase>verify</phase>
-          				<goals>
-            				<goal>sign</goal>
-          				</goals>
-        			</execution>
-      			</executions>
-    		</plugin>
-    		
-    		<plugin>
-          		<groupId>org.sonatype.central</groupId>
-          		<artifactId>central-publishing-maven-plugin</artifactId>
-          		<version>0.7.0</version>
-          		<extensions>true</extensions>
-          		<configuration>
-            		<publishingServerId>central</publishingServerId>
-          		</configuration>
-        	</plugin>
-    	</plugins>
-    </build>
-	
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>3.2.7</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.7.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>central</publishingServerId>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<modules>
 		<module>actor4j-database-jpa-sync</module>
 		<module>actor4j-database-mongo-sync</module>
 
 		<module>actor4j-cache</module>
-		
+
 		<module>actor4j-dataformat</module>
 		<module>actor4j-data</module>
 		<module>actor4j-data-jpa</module>
 		<module>actor4j-data-mongo</module>
 		<module>actor4j-query</module>
-		
+
 		<module>actor4j-persistence-mongo</module>
-		
+
 		<module>actor4j-testing</module>
 		<module>actor4j-verification</module>
 
 		<module>actor4j-analyzer</module>
 		<module>actor4j-analyzer-swing</module>
 		<module>actor4j-analyzer-fx</module>
-		
+
 		<module>actor4j-lang</module>
-		
+
 		<module>actor4j-web</module>
-		
+
 		<module>actor4j-streams</module>
 		<module>actor4j-streams-reactive-bridge</module>
 		<module>actor4j-rx</module>
-		
+
 		<module>actor4j-functions</module>
 		<module>actor4j-polyglot</module>
 		<module>actor4j-agents</module>
 	</modules>
-	
+
 	<profiles>
 		<profile>
 			<id>all</id>
 			<modules>
 				<module>actor4j-database-jpa-sync</module>
 				<module>actor4j-database-mongo-sync</module>
-		
+
 				<module>actor4j-cache</module>
-				
+
 				<module>actor4j-dataformat</module>
 				<module>actor4j-data</module>
 				<module>actor4j-data-jpa</module>
 				<module>actor4j-data-mongo</module>
 				<module>actor4j-query</module>
-				
+
 				<module>actor4j-persistence-mongo</module>
-				
+
 				<module>actor4j-testing</module>
 				<module>actor4j-verification</module>
-		
+
 				<module>actor4j-analyzer</module>
 				<module>actor4j-analyzer-swing</module>
 				<module>actor4j-analyzer-fx</module>
-				
+
 				<module>actor4j-benchmark-cli</module>
 				<module>actor4j-benchmark</module>
-				
+
 				<module>actor4j-patterns</module>
 				<module>actor4j-examples</module>
-				
+
 				<module>actor4j-lang</module>
-				
+
 				<module>actor4j-web</module>
-				
+
 				<module>actor4j-streams</module>
 				<module>actor4j-streams-reactive-bridge</module>
 				<module>actor4j-rx</module>
-				
+
 				<module>actor4j-functions</module>
 				<module>actor4j-polyglot</module>
 				<module>actor4j-agents</module>
 			</modules>
-    		</profile>
+		</profile>
+
+		<profile>
+			<id>fatjar</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>3.7.1</version>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<finalName>${project.artifactId}-${project.version}</finalName>
+							<appendAssemblyId>true</appendAssemblyId>
+							<archive>
+								<manifestEntries>
+									<Automatic-Module-Name>io.actor4j.core</Automatic-Module-Name>
+								</manifestEntries>
+							</archive>
+						</configuration>
+						<executions>
+							<execution>
+								<id>make-assembly</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 </project>
