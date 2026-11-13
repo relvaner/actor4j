@@ -49,9 +49,10 @@
 	</scm>
 
 	<properties>
-		<revision>2.4.0</revision>
-		<actor4j.core.version>2.4.0</actor4j.core.version>
+		<revision>2.5.0</revision>
+		<actor4j.core.version>2.5.0</actor4j.core.version>
 		<junit.version>5.14.4</junit.version>
+		<gpg.skip>true</gpg.skip> <!-- release: -Dgpg.skip=false -->
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -62,7 +63,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.0</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -75,7 +76,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.2</version>
+				<version>3.12.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -89,7 +90,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>
-				<version>1.7.0</version>
+				<version>1.9.0</version>
 				<configuration>
 					<flattenMode>resolveCiFriendliesOnly</flattenMode>
 					<updatePomFile>true</updatePomFile>
@@ -107,9 +108,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>3.2.7</version>
+				<version>3.2.8</version>
 				<configuration>
-					<skip>true</skip>
+					<skip>${gpg.skip}</skip>
 				</configuration>
 				<executions>
 					<execution>
@@ -125,7 +126,7 @@
 			<plugin>
 				<groupId>org.sonatype.central</groupId>
 				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>0.7.0</version>
+				<version>0.12.0</version>
 				<extensions>true</extensions>
 				<configuration>
 					<publishingServerId>central</publishingServerId>
@@ -219,7 +220,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-assembly-plugin</artifactId>
-						<version>3.7.1</version>
+						<version>3.8.0</version>
 						<configuration>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
