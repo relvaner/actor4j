@@ -15,9 +15,12 @@
  */
 package io.actor4j.verification;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.Graph;
@@ -63,6 +66,34 @@ public class ActorVerificationUtils {
 		return result;
 	}
 	
+	// actors with the same name get unique prefixes (name#1, name#2, ...), otherwise their states would merge
+	public static void uniqueNames(List<ActorVerificationSM> list) {
+		Map<String, Integer> count = new HashMap<>();
+		for (ActorVerificationSM sm : list)
+			count.merge(sm.getPrefix(), 1, Integer::sum);
+		Map<String, Integer> index = new HashMap<>();
+		for (ActorVerificationSM sm : list) {
+			String prefix = sm.getPrefix();
+			if (count.get(prefix)>1)
+				sm.rename(prefix.substring(0, prefix.length()-1)+"#"+index.merge(prefix, 1, Integer::sum));
+		}
+	}
+
+	// overall graph with own edge objects (interconnect must not change the models of the single actors)
+	public static Graph<String, ActorVerificationEdge> overallGraph(List<ActorVerificationSM> list) {
+		Graph<String, ActorVerificationEdge> graph = new DefaultDirectedGraph<>(ActorVerificationEdge.class);
+		for (ActorVerificationSM sm : list) {
+			Graphs.addAllVertices(graph, sm.getGraph().vertexSet());
+			for (ActorVerificationEdge edge : sm.getGraph().edgeSet())
+				graph.addEdge(sm.getGraph().getEdgeSource(edge), sm.getGraph().getEdgeTarget(edge), new ActorVerificationEdge(
+					edge.getEvents()!=null ? new HashSet<>(edge.getEvents()) : null,
+					edge.getTuples()!=null ? new ArrayList<>(edge.getTuples()) : null));
+		}
+		interconnect(list, graph);
+
+		return graph;
+	}
+
 	public static void interconnect(List<ActorVerificationSM> list, Graph<String, ActorVerificationEdge> graph) {
 		for (ActorVerificationSM sender : list)
 			for (ActorVerificationEdge outEdge : sender.getGraph().edgeSet())

@@ -35,7 +35,7 @@ public class DocumentationFeature {
 	@Test
 	public void test_single_ping() {
 		ActorVerificationSM sm = ping();
-		Set<String> unreachables = ActorVerificationUtils.findUnreachables(sm.getGraph(), sm.getIntialStateMarker());
+		Set<String> unreachables = ActorVerificationUtils.findUnreachables(sm.getGraph(), sm.getInitialState());
 
 		assertEquals(Set.of(Set.of("ping:PING"), Set.of("ping:A", "ping:B", "ping:C")), normalize(ActorVerificationUtils.findCycles(sm.getGraph())));
 		assertEquals(Set.of("ping:A", "ping:B", "ping:C"), unreachables);
@@ -45,7 +45,7 @@ public class DocumentationFeature {
 	@Test
 	public void test_single_pong() {
 		ActorVerificationSM sm = pong();
-		Set<String> unreachables = ActorVerificationUtils.findUnreachables(sm.getGraph(), sm.getIntialStateMarker());
+		Set<String> unreachables = ActorVerificationUtils.findUnreachables(sm.getGraph(), sm.getInitialState());
 
 		assertEquals(Set.of(Set.of("pong:PONG")), normalize(ActorVerificationUtils.findCycles(sm.getGraph())));
 		assertTrue(unreachables.isEmpty());

@@ -23,6 +23,9 @@ import org.junit.runners.Suite;
 	ActorVerificationSMFeature.class,
 	InterconnectFeature.class,
 	VerificatorFeature.class,
+	BuilderFeature.class,
+	ActorVerifierFeature.class,
+	ConformanceFeature.class,
 	DocumentationFeature.class
 })
 public class AllFeaturesTest {

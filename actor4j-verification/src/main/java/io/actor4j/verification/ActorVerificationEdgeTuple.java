@@ -46,6 +46,6 @@ public class ActorVerificationEdgeTuple {
 
 	@Override
 	public String toString() {
-		return "ActorVerficationEdgeTuple [events=" + events + ", aliases=" + aliases + "]";
+		return "ActorVerificationEdgeTuple [events=" + events + ", aliases=" + aliases + "]";
 	}
 }

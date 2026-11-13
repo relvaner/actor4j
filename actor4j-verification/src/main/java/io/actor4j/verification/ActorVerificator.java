@@ -15,6 +15,7 @@
  */
 package io.actor4j.verification;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.jgrapht.Graph;
@@ -42,5 +43,10 @@ public interface ActorVerificator extends ActorSystem {
 	public boolean setConfig(ActorVerificationConfig config);
 	
 	public void verify(Consumer<ActorVerificationSM> consumer);
+
+	// conformance check: messages observed while the system ran, compared with the models of the actors
+	public ConformanceResult conformance();
+	public ConformanceResult conformance(Map<Integer, String> eventNames);
+	public void clearObserved();
 	public void verifyAll(Consumer<ActorVerificationSM> consumer, Consumer<Graph<String, ActorVerificationEdge>> consumerAll);
 }

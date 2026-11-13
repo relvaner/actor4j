@@ -90,7 +90,7 @@ public class VerificatorFeature {
 	public void test_rename_keeps_states_and_initial_state() {
 		ActorVerificationSM sm = ping().rename("ping#1");
 
-		assertEquals("ping#1:PING", sm.getIntialStateMarker());
+		assertEquals("ping#1:PING", sm.getInitialState());
 		assertTrue(sm.getGraph().containsEdge("ping#1:A", "ping#1:B"));
 		assertEquals(Set.of(PONG), sm.getGraph().getEdge("ping#1:PING", "ping#1:PING").getEvents());
 		assertEquals("ping", sm.getName());

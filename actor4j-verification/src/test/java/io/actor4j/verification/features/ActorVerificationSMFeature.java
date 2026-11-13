@@ -33,7 +33,7 @@ public class ActorVerificationSMFeature {
 			.addStateMarker("T")
 			.addInTransition("S", "T", 1);
 
-		assertEquals("worker:S", sm.getIntialStateMarker());
+		assertEquals("worker:S", sm.getInitialState());
 		assertEquals(Set.of("worker:S", "worker:T"), sm.getGraph().vertexSet());
 		assertEquals(Set.of(1), sm.getGraph().getEdge("worker:S", "worker:T").getEvents());
 	}

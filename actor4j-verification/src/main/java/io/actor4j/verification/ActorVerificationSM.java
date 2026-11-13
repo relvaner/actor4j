@@ -31,7 +31,9 @@ public class ActorVerificationSM {
 	protected ActorRef actor;
 	protected String prefix;
 	
-	protected String intialStateMarker;
+	protected String initialState;
+	// last transition (on/from ... to), target of send
+	protected ActorVerificationEdge lastEdge;
 	
 	public ActorVerificationSM(ActorRef actor) {
 		super();
@@ -40,6 +42,10 @@ public class ActorVerificationSM {
 		prefix = (actor.getName()!=null ? actor.getName():actor.getId())+":"; 
 	}
 	
+	public static ActorVerificationSM of(ActorRef actor) {
+		return new ActorVerificationSM(actor);
+	}
+
 	public Graph<String, ActorVerificationEdge> getGraph() {
 		return graph;
 	}
@@ -63,8 +69,8 @@ public class ActorVerificationSM {
 				newPrefix+graph.getEdgeSource(edge).substring(prefix.length()), 
 				newPrefix+graph.getEdgeTarget(edge).substring(prefix.length()), 
 				new ActorVerificationEdge(edge.events, edge.tuples));
-		if (intialStateMarker!=null)
-			intialStateMarker = newPrefix+intialStateMarker.substring(prefix.length());
+		if (initialState!=null)
+			initialState = newPrefix+initialState.substring(prefix.length());
 		
 		graph = renamed;
 		prefix = newPrefix;
@@ -72,13 +78,18 @@ public class ActorVerificationSM {
 		return this;
 	}
 	
+	public String getInitialState() {
+		return initialState;
+	}
+
+	@Deprecated
 	public String getIntialStateMarker() {
-		return intialStateMarker;
+		return getInitialState();
 	}
 
 	public ActorVerificationSM addInitialStateMarker(String state) {
-		intialStateMarker = prefix+state;
-		graph.addVertex(intialStateMarker);
+		initialState = prefix+state;
+		graph.addVertex(initialState);
 		
 		return this;
 	}
@@ -89,7 +100,22 @@ public class ActorVerificationSM {
 		return this;
 	}
 	
+	// states are created with the first transition (no addStateMarker needed)
+	protected ActorVerificationEdge edge(String sourceState, String targetState) {
+		graph.addVertex(prefix+sourceState);
+		graph.addVertex(prefix+targetState);
+		ActorVerificationEdge edge = graph.getEdge(prefix+sourceState, prefix+targetState);
+		if (edge==null) {
+			edge = new ActorVerificationEdge(null, null);
+			graph.addEdge(prefix+sourceState, prefix+targetState, edge);
+		}
+
+		return edge;
+	}
+
 	protected ActorVerificationSM addTransition(String sourceState, String targetState, Set<Integer> events, List<ActorVerificationEdgeTuple> tuples) {
+		graph.addVertex(prefix+sourceState);
+		graph.addVertex(prefix+targetState);
 		ActorVerificationEdge edge = graph.getEdge(prefix+sourceState, prefix+targetState);
 		// copy and add: the collections of the caller stay untouched (may be immutable)
 		if (edge!=null) {
@@ -109,9 +135,11 @@ public class ActorVerificationSM {
 				events!=null ? new HashSet<>(events) : null, tuples!=null ? new ArrayList<>(tuples) : null));
 		
 		return this;
-	};
+	}
 	
 	protected ActorVerificationSM addTransition(String sourceState, String targetState, int event) {
+		graph.addVertex(prefix+sourceState);
+		graph.addVertex(prefix+targetState);
 		ActorVerificationEdge edge = graph.getEdge(prefix+sourceState, prefix+targetState);
 		if (edge!=null) {
 			if (edge.events!=null)
@@ -123,9 +151,11 @@ public class ActorVerificationSM {
 			graph.addEdge(prefix+sourceState, prefix+targetState, new ActorVerificationEdge(new HashSet<Integer>(Arrays.asList(event)), null));
 	
 		return this;
-	};
+	}
 	
 	protected ActorVerificationSM addTransition(String sourceState, String targetState, ActorVerificationEdgeTuple tuple) {
+		graph.addVertex(prefix+sourceState);
+		graph.addVertex(prefix+targetState);
 		ActorVerificationEdge edge = graph.getEdge(prefix+sourceState, prefix+targetState);
 		if (edge!=null) {
 			if (edge.tuples!=null)
@@ -137,15 +167,15 @@ public class ActorVerificationSM {
 			graph.addEdge(prefix+sourceState, prefix+targetState, new ActorVerificationEdge(null, new ArrayList<>(List.of(tuple))));
 	
 		return this;
-	};
+	}
 	
 	public ActorVerificationSM addInTransition(String sourceState, String targetState, Set<Integer> events) {
 		return addTransition(sourceState, targetState, events, null);
-	};
+	}
 	
 	public ActorVerificationSM addInTransition(String sourceState, String targetState, int event) {
 		return addTransition(sourceState, targetState, event);
-	};
+	}
 	
 	public ActorVerificationSM addOutTransition(String sourceState, String targetState, List<ActorVerificationEdgeTuple> tuples) {
 		return addTransition(sourceState, targetState, null, tuples);
@@ -157,5 +187,71 @@ public class ActorVerificationSM {
 	
 	public ActorVerificationSM addOutTransition(String sourceState, String targetState, int event, String... aliases) {
 		return addTransition(sourceState, targetState, new ActorVerificationEdgeTuple(new HashSet<Integer>(Arrays.asList(event)), Arrays.asList(aliases)));
+	}
+
+	// builder: initial("S"), on(event).from("S").to("T").send(event, aliases), from("S").to("T").send(...)
+	public ActorVerificationSM initial(String state) {
+		return addInitialStateMarker(state);
+	}
+
+	public ActorVerificationSM state(String state) {
+		return addStateMarker(state);
+	}
+
+	// transition triggered by one or more received events
+	public Transition on(int... events) {
+		Set<Integer> set = new HashSet<>();
+		for (int event : events)
+			set.add(event);
+
+		return new Transition(set);
+	}
+
+	// transition without received event (e.g. only sending)
+	public Transition.Source from(String sourceState) {
+		return new Transition(null).from(sourceState);
+	}
+
+	// sends with the last transition (on/from ... to)
+	public ActorVerificationSM send(int event, String... aliases) {
+		if (lastEdge==null)
+			throw new IllegalStateException("send without transition: use on(event).from(state).to(state) or from(state).to(state) first");
+		if (lastEdge.tuples==null)
+			lastEdge.tuples = new ArrayList<>();
+		lastEdge.tuples.add(new ActorVerificationEdgeTuple(new HashSet<>(List.of(event)), new ArrayList<>(Arrays.asList(aliases))));
+
+		return this;
+	}
+
+	public class Transition {
+		protected final Set<Integer> events;
+
+		protected Transition(Set<Integer> events) {
+			this.events = events;
+		}
+
+		public Source from(String sourceState) {
+			return new Source(sourceState);
+		}
+
+		public class Source {
+			protected final String sourceState;
+
+			protected Source(String sourceState) {
+				this.sourceState = sourceState;
+			}
+
+			public ActorVerificationSM to(String targetState) {
+				ActorVerificationEdge edge = edge(sourceState, targetState);
+				if (events!=null) {
+					if (edge.events==null)
+						edge.events = new HashSet<>();
+					edge.events.addAll(events);
+				}
+				lastEdge = edge;
+
+				return ActorVerificationSM.this;
+			}
+		}
 	}
 }
