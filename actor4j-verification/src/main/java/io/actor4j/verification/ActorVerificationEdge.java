@@ -24,9 +24,9 @@ public class ActorVerificationEdge extends DefaultEdge {
 	protected static final long serialVersionUID = -3962581299999193897L;
 	
 	protected Set<Integer> events;
-	protected List<ActorVerficationEdgeTuple> tuples;
+	protected List<ActorVerificationEdgeTuple> tuples;
 	
-	public ActorVerificationEdge(Set<Integer> events, List<ActorVerficationEdgeTuple> tuples) {
+	public ActorVerificationEdge(Set<Integer> events, List<ActorVerificationEdgeTuple> tuples) {
 		super();
 		this.events = events;
 		this.tuples = tuples;
@@ -36,7 +36,7 @@ public class ActorVerificationEdge extends DefaultEdge {
 		return events;
 	}
 
-	public List<ActorVerficationEdgeTuple> getTuples() {
+	public List<ActorVerificationEdgeTuple> getTuples() {
 		return tuples;
 	}
 	

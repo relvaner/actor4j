@@ -18,11 +18,11 @@ package io.actor4j.verification;
 import java.util.List;
 import java.util.Set;
 
-public class ActorVerficationEdgeTuple {
+public class ActorVerificationEdgeTuple {
 	protected Set<Integer> events;
 	protected List<String> aliases;
 	
-	public ActorVerficationEdgeTuple(Set<Integer> events, List<String> aliases) {
+	public ActorVerificationEdgeTuple(Set<Integer> events, List<String> aliases) {
 		super();
 		this.events = events;
 		this.aliases = aliases;

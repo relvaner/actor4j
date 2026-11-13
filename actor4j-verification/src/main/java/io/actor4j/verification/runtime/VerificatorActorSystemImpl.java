@@ -15,6 +15,11 @@
  */
 package io.actor4j.verification.runtime;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -27,6 +32,7 @@ import io.actor4j.core.runtime.InternalActorCell;
 import io.actor4j.verification.ActorVerification;
 import io.actor4j.verification.ActorVerificationEdge;
 import io.actor4j.verification.ActorVerificationSM;
+import io.actor4j.verification.ActorVerificationUtils;
 import io.actor4j.verification.ActorVerificator;
 import io.actor4j.verification.config.ActorVerificationConfig;
 
@@ -58,12 +64,32 @@ public class VerificatorActorSystemImpl extends DefaultActorSystemImpl implement
 	
 	@Override
 	public void verifyAll(Consumer<ActorVerificationSM> consumer, Consumer<Graph<String, ActorVerificationEdge>> consumerAll) {
+		List<ActorVerificationSM> list = new ArrayList<>();
+		verify(list::add);
+		
+		// actors with the same name get unique prefixes (name#1, name#2, ...), otherwise their states would merge
+		Map<String, Integer> count = new HashMap<>();
+		for (ActorVerificationSM sm : list)
+			count.merge(sm.getPrefix(), 1, Integer::sum);
+		Map<String, Integer> index = new HashMap<>();
+		for (ActorVerificationSM sm : list) {
+			String prefix = sm.getPrefix();
+			if (count.get(prefix)>1)
+				sm.rename(prefix.substring(0, prefix.length()-1)+"#"+index.merge(prefix, 1, Integer::sum));
+		}
+		
+		// overall graph with own edge objects: interconnect must not change the models of the single actors
 		Graph<String, ActorVerificationEdge> graph = new DefaultDirectedGraph<>(ActorVerificationEdge.class);
-		verify((sm) -> {
+		for (ActorVerificationSM sm : list) {
 			if (consumer!=null)
 				consumer.accept(sm);
-			Graphs.addGraph(graph, sm.getGraph());
-		});
+			Graphs.addAllVertices(graph, sm.getGraph().vertexSet());
+			for (ActorVerificationEdge edge : sm.getGraph().edgeSet())
+				graph.addEdge(sm.getGraph().getEdgeSource(edge), sm.getGraph().getEdgeTarget(edge), new ActorVerificationEdge(
+					edge.getEvents()!=null ? new HashSet<>(edge.getEvents()) : null, 
+					edge.getTuples()!=null ? new ArrayList<>(edge.getTuples()) : null));
+		}
+		ActorVerificationUtils.interconnect(list, graph);
 		
 		if (consumerAll!=null)
 			consumerAll.accept(graph);

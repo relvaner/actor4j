@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,22 @@ import java.util.List;
 import java.util.Set;
 
 import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.alg.cycle.JohnsonSimpleCycles;
+import org.jgrapht.graph.DefaultDirectedGraph;
 
 public class ActorVerificationUtils {
 	// find cycles
 	public static <V, E> List<List<V>> findCycles(Graph<V, E> graph) {
-		return new JohnsonSimpleCycles<>(graph).findSimpleCycles();
+		// copy with plain (non-intrusive) edges: since jgrapht 1.5.1 an intrusive edge (DefaultEdge) may only belong
+		// to one graph, but JohnsonSimpleCycles adds the edges of its input to its own subgraphs
+		Graph<V, Object> copy = new DefaultDirectedGraph<>(null, Object::new, false);
+		Graphs.addAllVertices(copy, graph.vertexSet());
+		for (E edge : graph.edgeSet())
+			copy.addEdge(graph.getEdgeSource(edge), graph.getEdgeTarget(edge));
+		
+		return new JohnsonSimpleCycles<>(copy).findSimpleCycles();
 	}
 	
 	// find unreachable vertexes from the start vertex
@@ -55,56 +64,28 @@ public class ActorVerificationUtils {
 	}
 	
 	public static void interconnect(List<ActorVerificationSM> list, Graph<String, ActorVerificationEdge> graph) {
-		Set<Integer> outEvents = new HashSet<>();
-		Set<Integer> outEventsCopy = new HashSet<>();
-		
-		for (ActorVerificationSM sm : list)
-			for (ActorVerificationEdge outEdge : sm.getGraph().edgeSet())
-				if (outEdge.tuples!=null) {
-					outEvents.clear();
-					for (ActorVerficationEdgeTuple tuple : outEdge.tuples)
-						outEvents.addAll(tuple.events);
-					
-					//System.out.println(outEvents);
-					
-					for (ActorVerificationSM _sm : list) {
-						for (ActorVerificationEdge inEdge : _sm.getGraph().edgeSet())
-							if (inEdge.tuples==null) {
-								//System.out.println(inEdge);
-								outEventsCopy.clear();
-								outEventsCopy.addAll(outEvents);
-								outEventsCopy.retainAll(inEdge.events);
-								if (!outEventsCopy.isEmpty()) {
-									for (Integer event : outEvents) {
-										ActorVerificationEdge newEdge = graph.getEdge(outEdge.getTarget(), inEdge.getSource());
-										if (newEdge!=null)
-											newEdge.events.add(event);
-										else
-											graph.addEdge(outEdge.getTarget(), inEdge.getSource(), new ActorVerificationEdge(new HashSet<>(), null));
+		for (ActorVerificationSM sender : list)
+			for (ActorVerificationEdge outEdge : sender.getGraph().edgeSet())
+				if (outEdge.tuples!=null)
+					for (ActorVerificationEdgeTuple tuple : outEdge.tuples)
+						for (ActorVerificationSM receiver : list)
+							if (tuple.aliases.contains(receiver.getName()))
+								for (ActorVerificationEdge inEdge : receiver.getGraph().edgeSet())
+									if (inEdge.events!=null) {
+										Set<Integer> matching = new HashSet<>(tuple.events);
+										matching.retainAll(inEdge.events);
+										if (!matching.isEmpty())
+											connect(graph, outEdge.getTarget(), inEdge.getSource(), matching);
 									}
-								}
-							}
-						// self reference edges
-						for (String vertex : _sm.getGraph().vertexSet()) {
-							ActorVerificationEdge inEdge = _sm.getGraph().getEdge(vertex, vertex);
-							if (inEdge!=null) {
-								//System.out.println(inEdge);
-								outEventsCopy.clear();
-								outEventsCopy.addAll(outEvents);
-								outEventsCopy.retainAll(inEdge.events);
-								if (!outEventsCopy.isEmpty()) {
-									for (Integer event : outEvents) {
-										ActorVerificationEdge newEdge = graph.getEdge(outEdge.getTarget(), inEdge.getSource());
-										if (newEdge!=null)
-											newEdge.events.add(event);
-										else
-											graph.addEdge(outEdge.getTarget(), inEdge.getSource(), new ActorVerificationEdge(new HashSet<>(), null));
-									}
-								}
-							}
-						}
-					}
-				}
-			
+	}
+
+	protected static void connect(Graph<String, ActorVerificationEdge> graph, String source, String target, Set<Integer> events) {
+		ActorVerificationEdge edge = graph.getEdge(source, target);
+		if (edge==null)
+			graph.addEdge(source, target, new ActorVerificationEdge(new HashSet<>(events), null));
+		else if (edge.events==null)
+			edge.events = new HashSet<>(events);
+		else
+			edge.events.addAll(events);
 	}
 }
