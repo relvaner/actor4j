@@ -71,7 +71,7 @@ public class JsonFactoryTest {
 
 		assertThrows(ClassCastException.class, () -> obj.getInteger("text"));
 		assertThrows(ClassCastException.class, () -> obj.getString("obj"));
-		assertNull(obj.getJsonArray("obj"));
+		assertThrows(ClassCastException.class, () -> obj.getJsonArray("obj"));
 	}
 
 	@Test

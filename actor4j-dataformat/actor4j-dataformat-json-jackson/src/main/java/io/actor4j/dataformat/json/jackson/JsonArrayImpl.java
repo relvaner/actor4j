@@ -43,8 +43,14 @@ public class JsonArrayImpl implements JsonArray {
 			jsonArray = node;
 		else if (obj instanceof JsonArrayImpl impl)
 			jsonArray = impl.jsonArray;
-		else
-			jsonArray = objectMapper.createArrayNode();
+		else {
+			// Collection, array or another JsonArray implementation
+			JsonNode node = toNode(obj);
+			if (node instanceof ArrayNode arrayNode)
+				jsonArray = arrayNode;
+			else
+				throw new IllegalArgumentException("not a JSON array: " + node.getNodeType());
+		}
 	}
 
 	public JsonArrayImpl(List<?> list) {
@@ -102,10 +108,8 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonObject getJsonObject(int pos) {
 		JsonNode result = jsonArray.get(pos);
-		if (result!=null && !result.isNull() && !result.isObject()) {
-			new ClassCastException("not a JSON object: " + result.getNodeType()).printStackTrace();
-			return null;
-		}
+		if (result!=null && !result.isNull() && !result.isObject())
+			throw new ClassCastException("not a JSON object: " + result.getNodeType());
 
 		return result!=null && result.isObject() ? new JsonObjectImpl(result) : null;
 	}
@@ -113,10 +117,8 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonArray getJsonArray(int pos) {
 		JsonNode result = jsonArray.get(pos);
-		if (result!=null && !result.isNull() && !result.isArray()) {
-			new ClassCastException("not a JSON array: " + result.getNodeType()).printStackTrace();
-			return null;
-		}
+		if (result!=null && !result.isNull() && !result.isArray())
+			throw new ClassCastException("not a JSON array: " + result.getNodeType());
 
 		return result!=null && result.isArray() ? new JsonArrayImpl(result) : null;
 	}
@@ -155,7 +157,7 @@ public class JsonArrayImpl implements JsonArray {
 	public boolean contains(Object value) {
 		JsonNode node = toNode(value);
 		for (JsonNode element : jsonArray)
-			if (element.equals(node))
+			if (same(element, node))
 				return true;
 
 		return false;
@@ -176,9 +178,7 @@ public class JsonArrayImpl implements JsonArray {
 		return jsonArray.isEmpty();
 	}
 
-	/**
-	 * @return a copy as plain Java list (nested objects and arrays as Map and List)
-	 */
+	// a copy, nested values as Map and List
 	@Override
 	public List<Object> getList() {
 		return objectMapper.convertValue(jsonArray, new TypeReference<List<Object>>() {});
@@ -201,9 +201,7 @@ public class JsonArrayImpl implements JsonArray {
 		return JsonNodeConverter.encodePrettily(jsonArray);
 	}
 
-	/**
-	 * Elements as in {@link #getValue(int)}: objects and arrays as JsonObject / JsonArray.
-	 */
+	// elements as in getValue: objects and arrays as JsonObject/JsonArray
 	@Override
 	public Iterator<Object> iterator() {
 		Iterator<JsonNode> iterator = jsonArray.iterator();
@@ -218,6 +216,11 @@ public class JsonArrayImpl implements JsonArray {
 			public Object next() {
 				return toJava(iterator.next());
 			}
+
+			@Override
+			public void remove() {
+				iterator.remove();
+			}
 		};
 	}
 
@@ -228,12 +231,12 @@ public class JsonArrayImpl implements JsonArray {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof JsonArrayImpl other && jsonArray.equals(other.jsonArray);
+		return obj instanceof JsonArrayImpl other && same(jsonArray, other.jsonArray);
 	}
 
 	@Override
 	public int hashCode() {
-		return jsonArray.hashCode();
+		return hash(jsonArray);
 	}
 
 	@Override

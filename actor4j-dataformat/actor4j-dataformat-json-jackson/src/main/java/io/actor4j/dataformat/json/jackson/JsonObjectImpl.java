@@ -45,16 +45,11 @@ public class JsonObjectImpl implements JsonObject {
 		else if (obj instanceof JsonObjectImpl impl)
 			jsonObject = impl.jsonObject;
 		else {
-			try {
-				JsonNode node = toNode(obj);
-				if (node instanceof ObjectNode objectNode)
-					jsonObject = objectNode;
-				else
-					throw new IllegalArgumentException("not a JSON object: " + node.getNodeType());
-			} catch(IllegalArgumentException e) {
-				jsonObject = objectMapper.createObjectNode();
-				e.printStackTrace();
-			}
+			JsonNode node = toNode(obj);
+			if (node instanceof ObjectNode objectNode)
+				jsonObject = objectNode;
+			else
+				throw new IllegalArgumentException("not a JSON object: " + node.getNodeType());
 		}
 	}
 
@@ -112,10 +107,8 @@ public class JsonObjectImpl implements JsonObject {
 	@Override
 	public JsonObject getJsonObject(String key) {
 		JsonNode result = jsonObject.get(key);
-		if (result!=null && !result.isNull() && !result.isObject()) {
-			new ClassCastException("not a JSON object: " + result.getNodeType()).printStackTrace();
-			return null;
-		}
+		if (result!=null && !result.isNull() && !result.isObject())
+			throw new ClassCastException("not a JSON object: " + result.getNodeType());
 
 		return result!=null && result.isObject() ? new JsonObjectImpl(result) : null;
 	}
@@ -123,10 +116,8 @@ public class JsonObjectImpl implements JsonObject {
 	@Override
 	public JsonArray getJsonArray(String key) {
 		JsonNode result = jsonObject.get(key);
-		if (result!=null && !result.isNull() && !result.isArray()) {
-			new ClassCastException("not a JSON array: " + result.getNodeType()).printStackTrace();
-			return null;
-		}
+		if (result!=null && !result.isNull() && !result.isArray())
+			throw new ClassCastException("not a JSON array: " + result.getNodeType());
 
 		return result!=null && result.isArray() ? new JsonArrayImpl(result) : null;
 	}
@@ -156,11 +147,12 @@ public class JsonObjectImpl implements JsonObject {
 		return toJava(jsonObject.remove(key));
 	}
 
+	// works with every JsonObject implementation, nested values are copied
 	@Override
 	public JsonObject mergeIn(JsonObject other) {
 		if (other!=null)
 			for (String key : other.fieldNames())
-				put(key, other.getValue(key));
+				jsonObject.set(key, toNode(other.getValue(key)).deepCopy());
 
 		return this;
 	}
@@ -175,9 +167,7 @@ public class JsonObjectImpl implements JsonObject {
 		return JsonNodeConverter.encodePrettily(jsonObject);
 	}
 
-	/**
-	 * @return a copy as plain Java map (nested objects and arrays as Map and List)
-	 */
+	// a copy, nested values as Map and List
 	@Override
 	public Map<String,Object> getMap() {
 		return objectMapper.convertValue(jsonObject, new TypeReference<Map<String,Object>>() {});
@@ -207,12 +197,12 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof JsonObjectImpl other && jsonObject.equals(other.jsonObject);
+		return obj instanceof JsonObjectImpl other && same(jsonObject, other.jsonObject);
 	}
 
 	@Override
 	public int hashCode() {
-		return jsonObject.hashCode();
+		return hash(jsonObject);
 	}
 
 	@Override

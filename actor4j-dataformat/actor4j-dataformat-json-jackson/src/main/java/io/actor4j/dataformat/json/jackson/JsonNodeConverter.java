@@ -15,6 +15,9 @@
  */
 package io.actor4j.dataformat.json.jackson;
 
+import java.util.Comparator;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,9 +26,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-/**
- * Conversion between Java values and Jackson nodes, shared by JsonObjectImpl and JsonArrayImpl.
- */
+import io.actor4j.core.json.JsonArray;
+import io.actor4j.core.json.JsonObject;
+
+// conversion between Java values and Jackson nodes, shared by JsonObjectImpl and JsonArrayImpl
 final class JsonNodeConverter {
 	static final ObjectMapper objectMapper;
 
@@ -39,10 +43,7 @@ final class JsonNodeConverter {
 	private JsonNodeConverter() {
 	}
 
-	/**
-	 * Java value -> node: wrappers of this module, Jackson nodes, null,
-	 * simple values, maps, lists and POJOs/records.
-	 */
+	// wrappers of this module (shared), other JsonObject/JsonArray implementations, nodes, simple values, maps, lists, POJOs/records
 	static JsonNode toNode(Object value) {
 		if (value==null)
 			return NullNode.getInstance();
@@ -52,14 +53,15 @@ final class JsonNodeConverter {
 			return impl.jsonArray;
 		else if (value instanceof JsonNode node)
 			return node;
+		else if (value instanceof JsonObject other)
+			return parse(other.encode());
+		else if (value instanceof JsonArray other)
+			return parse(other.encode());
 		else
 			return objectMapper.valueToTree(value);
 	}
 
-	/**
-	 * Node -> Java value: objects and arrays as JsonObject / JsonArray (sharing the node),
-	 * simple values as String, Integer, Long, Double, Boolean ..., null and missing as null.
-	 */
+	// objects and arrays as JsonObject/JsonArray (sharing the node), null and missing as null
 	static Object toJava(JsonNode node) {
 		if (node==null || node.isNull() || node.isMissingNode())
 			return null;
@@ -126,5 +128,44 @@ final class JsonNodeConverter {
 		if (!node.isBoolean())
 			throw new ClassCastException("not a boolean: " + node.getNodeType());
 		return node.booleanValue();
+	}
+
+	// numbers by value (1 equals 1L and 1.0), everything else as Jackson compares
+	static final Comparator<JsonNode> CONTENT = (a, b) -> {
+		if (a.isNumber() && b.isNumber())
+			try {
+				return a.decimalValue().compareTo(b.decimalValue());
+			} catch (NumberFormatException e) {
+				return Double.compare(a.doubleValue(), b.doubleValue());
+			}
+		return a.equals(b) ? 0 : 1;
+	};
+
+	static boolean same(JsonNode a, JsonNode b) {
+		return a.equals(CONTENT, b);
+	}
+
+	// consistent with same
+	static int hash(JsonNode node) {
+		if (node.isNumber())
+			try {
+				return node.decimalValue().stripTrailingZeros().hashCode();
+			} catch (NumberFormatException e) {
+				return Double.hashCode(node.doubleValue());
+			}
+		else if (node.isObject()) {
+			int result = 0;
+			for (Map.Entry<String, JsonNode> entry : node.properties())
+				result += entry.getKey().hashCode() ^ hash(entry.getValue());
+			return result;
+		}
+		else if (node.isArray()) {
+			int result = 1;
+			for (JsonNode element : node)
+				result = 31*result + hash(element);
+			return result;
+		}
+		else
+			return node.hashCode();
 	}
 }
