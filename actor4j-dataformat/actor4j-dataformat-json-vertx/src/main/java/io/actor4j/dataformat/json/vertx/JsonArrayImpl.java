@@ -23,6 +23,8 @@ import java.util.List;
 import io.actor4j.core.json.JsonArray;
 import io.actor4j.core.json.JsonObject;
 
+import static io.actor4j.dataformat.json.vertx.JsonVertxConverter.*;
+
 public class JsonArrayImpl implements JsonArray {
 	protected io.vertx.core.json.JsonArray jsonArray;
 	
@@ -39,6 +41,12 @@ public class JsonArrayImpl implements JsonArray {
 			jsonArray = (io.vertx.core.json.JsonArray)obj;
 		else if (obj instanceof Collection<?> collection)
 			jsonArray = copy(collection);
+		else if (obj!=null && obj.getClass().isArray()) {
+			List<Object> list = new ArrayList<>();
+			for (int i=0; i<java.lang.reflect.Array.getLength(obj); i++)
+				list.add(java.lang.reflect.Array.get(obj, i));
+			jsonArray = copy(list);
+		}
 		else
 			throw new IllegalArgumentException("not a JSON array: "+(obj!=null ? obj.getClass().getName() : null));
 	}
@@ -49,10 +57,11 @@ public class JsonArrayImpl implements JsonArray {
 		jsonArray = copy(list);
 	}
 	
+	// invalid JSON is an IllegalArgumentException
 	public JsonArrayImpl(String json) {
 		super();
-		
-		jsonArray = new io.vertx.core.json.JsonArray(json);
+
+		jsonArray = parseArray(json);
 	}
 	
 	public JsonArrayImpl(io.vertx.core.json.JsonArray arr) {
@@ -67,15 +76,14 @@ public class JsonArrayImpl implements JsonArray {
 	protected static io.vertx.core.json.JsonArray copy(Collection<?> collection) {
 		List<Object> result = new ArrayList<>();
 		for (Object value : collection)
-			result.add(value instanceof JsonObjectImpl impl ? impl.jsonObject
-				: value instanceof JsonArrayImpl impl ? impl.jsonArray : value);
+			result.add(toJsonVertx(value));
 		
 		return new io.vertx.core.json.JsonArray(result);
 	}
 
 	@Override
 	public Object getValue(int pos) {
-		return  jsonArray.getValue(pos);
+		return toJava(jsonArray.getValue(pos));
 	}
 
 	@Override
@@ -104,91 +112,59 @@ public class JsonArrayImpl implements JsonArray {
 	}
 
 	@Override
+	// a wrong type is a ClassCastException (as the other getters)
 	public JsonObject getJsonObject(int pos) {
-		io.vertx.core.json.JsonObject result = null;
-		try {
-			result = jsonArray.getJsonObject(pos);
-		} catch(ClassCastException e) {
-			e.printStackTrace();
-		}
-		
+		io.vertx.core.json.JsonObject result = jsonArray.getJsonObject(pos);
+
 		return result!=null ? new JsonObjectImpl(result) : null;
 	}
 
 	@Override
 	public JsonArray getJsonArray(int pos) {
-		io.vertx.core.json.JsonArray result = null;
-		try {
-			result = jsonArray.getJsonArray(pos);
-		} catch(ClassCastException e) {
-			e.printStackTrace();
-		}
-		
+		io.vertx.core.json.JsonArray result = jsonArray.getJsonArray(pos);
+
 		return result!=null ? new JsonArrayImpl(result) : null;
 	}
 
 	@Override
 	public JsonArray add(Object value) {
-		if (value instanceof JsonObjectImpl impl)
-			jsonArray.add(impl.jsonObject);
-		else if (value instanceof JsonArrayImpl impl)
-			jsonArray.add(impl.jsonArray);
-		else
-			jsonArray.add(value);
-		
+		jsonArray.add(toJsonVertx(value));
+
 		return this;
 	}
 
 	@Override
 	public JsonArray add(int pos, Object value) {
-		if (value instanceof JsonObjectImpl impl)
-			jsonArray.add(pos, impl.jsonObject);
-		else if (value instanceof JsonArrayImpl impl)
-			jsonArray.add(pos, impl.jsonArray);
-		else
-			jsonArray.add(pos, value);
-		
+		jsonArray.add(pos, toJsonVertx(value));
+
 		return this;
 	}
 
 	@Override
+	// works with every JsonArray implementation
 	public JsonArray addAll(JsonArray array) {
-		if (array!=null && array instanceof JsonArrayImpl array_)
-			for (Object value : array_.jsonArray)
+		if (array!=null)
+			for (Object value : array)
 				add(value);
-			
+
 		return this;
 	}
 
 	@Override
 	public JsonArray set(int pos, Object value) {
-		if (value instanceof JsonObjectImpl impl)
-			jsonArray.set(pos, impl.jsonObject);
-		else if (value instanceof JsonArrayImpl impl)
-			jsonArray.set(pos, impl.jsonArray);
-		else
-			jsonArray.set(pos, value);
-		
+		jsonArray.set(pos, toJsonVertx(value));
+
 		return this;
 	}
 
 	@Override
 	public boolean contains(Object value) {
-		boolean result = false;
-		
-		if (value instanceof JsonObjectImpl impl)
-			 result = jsonArray.contains(impl.jsonObject);
-		else if (value instanceof JsonArrayImpl impl)
-			 result = jsonArray.contains(impl.jsonArray);
-		else
-			 result = jsonArray.contains(value);
-		
-		return result;
+		return jsonArray.contains(toJsonVertx(value));
 	}
 
 	@Override
 	public Object remove(int pos) {
-		return jsonArray.remove(pos);
+		return toJava(jsonArray.remove(pos));
 	}
 
 	@Override
@@ -225,8 +201,42 @@ public class JsonArrayImpl implements JsonArray {
 	}
 
 	@Override
+	// nested values wrapped as JsonObject/JsonArray
 	public Iterator<Object> iterator() {
-		return jsonArray.iterator();
+		Iterator<Object> iterator = jsonArray.iterator();
+
+		return new Iterator<Object>() {
+			@Override
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			@Override
+			public Object next() {
+				return toJava(iterator.next());
+			}
+
+			@Override
+			public void remove() {
+				iterator.remove();
+			}
+		};
+	}
+
+	// equal content (vert.x compares numbers by value)
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof JsonArrayImpl other && jsonArray.equals(other.jsonArray);
+	}
+
+	@Override
+	public int hashCode() {
+		return jsonArray.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return jsonArray.encode();
 	}
 
 	@Override

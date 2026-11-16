@@ -23,6 +23,8 @@ import io.actor4j.core.json.JsonArray;
 import io.actor4j.core.json.JsonObject;
 import io.vertx.core.json.DecodeException;
 
+import static io.actor4j.dataformat.json.vertx.JsonVertxConverter.*;
+
 public class JsonObjectImpl implements JsonObject {
 	protected io.vertx.core.json.JsonObject jsonObject;
 	
@@ -56,10 +58,11 @@ public class JsonObjectImpl implements JsonObject {
 		}
 	}
 	
+	// invalid JSON is an IllegalArgumentException
 	public JsonObjectImpl(String json) {
 		super();
 
-		jsonObject = new io.vertx.core.json.JsonObject(json);
+		jsonObject = parseObject(json);
 	}
 	
 	public static JsonObject of() {
@@ -72,7 +75,7 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public Object getValue(String key) {
-		return jsonObject.getValue(key);
+		return toJava(jsonObject.getValue(key));
 	}
 
 	@Override
@@ -101,26 +104,17 @@ public class JsonObjectImpl implements JsonObject {
 	}
 
 	@Override
+	// a wrong type is a ClassCastException (as the other getters)
 	public JsonObject getJsonObject(String key) {
-		io.vertx.core.json.JsonObject result = null;
-		try {
-			result = jsonObject.getJsonObject(key);
-		} catch(ClassCastException e) {
-			e.printStackTrace();
-		}
-		
+		io.vertx.core.json.JsonObject result = jsonObject.getJsonObject(key);
+
 		return result!=null ? new JsonObjectImpl(result) : null;
 	}
 
 	@Override
 	public JsonArray getJsonArray(String key) {
-		io.vertx.core.json.JsonArray result = null;
-		try {
-			result = jsonObject.getJsonArray(key);
-		} catch(ClassCastException e) {
-			e.printStackTrace();
-		}
-		
+		io.vertx.core.json.JsonArray result = jsonObject.getJsonArray(key);
+
 		return result!=null ? new JsonArrayImpl(result) : null;
 	}
 
@@ -136,27 +130,23 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public JsonObject put(String key, Object value) {
-		if (value instanceof JsonObjectImpl impl)
-			jsonObject.put(key, impl.jsonObject);
-		else if (value instanceof JsonArrayImpl impl)
-			jsonObject.put(key, impl.jsonArray);
-		else
-			jsonObject.put(key, value);
-		
+		jsonObject.put(key, toJsonVertx(value));
+
 		return this;
 	}
 
 	@Override
 	public Object remove(String key) {
-		return jsonObject.remove(key);
+		return toJava(jsonObject.remove(key));
 	}
 
 	@Override
+	// works with every JsonObject implementation, nested values are copied
 	public JsonObject mergeIn(JsonObject other) {
-		if (other!=null && other instanceof JsonObjectImpl other_)
-			for (String key : other_.jsonObject.fieldNames())
-				put(key, other.getValue(key));
-			
+		if (other!=null)
+			for (String key : other.fieldNames())
+				jsonObject.put(key, copy(toJsonVertx(other.getValue(key))));
+
 		return this;
 	}
 
@@ -190,6 +180,22 @@ public class JsonObjectImpl implements JsonObject {
 	@Override
 	public boolean isEmpty() {
 		return jsonObject.isEmpty();
+	}
+
+	// equal content (vert.x compares numbers by value)
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof JsonObjectImpl other && jsonObject.equals(other.jsonObject);
+	}
+
+	@Override
+	public int hashCode() {
+		return jsonObject.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return jsonObject.encode();
 	}
 
 	@Override
