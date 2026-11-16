@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,22 @@
  */
 package io.actor4j.database.mongo;
 
-import java.util.LinkedList;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.json.JsonMode;
+import org.bson.json.JsonWriterSettings;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.InsertOneModel;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.UpdateOneModel;
 
@@ -37,16 +40,31 @@ import io.actor4j.core.utils.GenericType;
 public final class MongoOperations {
 	private static final ObjectMapper objectMapper = ObjectMapper.create();
 	
+	// plain JSON for the ObjectMapper: ObjectId as hex string, date as ISO-8601 string, Decimal128 and Int64 as number
+	private static final JsonWriterSettings JSON_SETTINGS = JsonWriterSettings.builder()
+		.outputMode(JsonMode.RELAXED)
+		.objectIdConverter((value, writer) -> writer.writeString(value.toHexString()))
+		.dateTimeConverter((value, writer) -> writer.writeString(Instant.ofEpochMilli(value).toString()))
+		.decimal128Converter((value, writer) -> writer.writeNumber(value.bigDecimalValue().toPlainString()))
+		.int64Converter((value, writer) -> writer.writeNumber(value.toString()))
+		.build();
+	
+	private static ObjectMapper objectMapper() {
+		if (objectMapper==null)
+			throw new IllegalStateException("no JSON implementation (ObjectMapperService) found, add actor4j-dataformat-json-jackson");
+		
+		return objectMapper;
+	}
+	
+	// a document as plain JSON, as read by convertToEntity
+	public static String toJson(Document document) {
+		return document.toJson(JSON_SETTINGS);
+	}
+	
 	public static boolean hasOne(Bson filter, MongoClient client, String databaseName, String collectionName) {
-		boolean result = false;
-		
 		MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-		Document document = collection.find(filter).first();
 		
-		if (document!=null)
-			result = true;
-		
-		return result;
+		return collection.find(filter).projection(Projections.include("_id")).limit(1).first()!=null;
 	}
 	
 	public static void insertOne(Document document, MongoClient client, String databaseName, String collectionName) {
@@ -127,19 +145,12 @@ public final class MongoOperations {
 	}
 	
 	public static List<Document> findAll(Bson filter, MongoClient client, String databaseName, String collectionName) {
-		List<Document> result = new LinkedList<>();;
-		
 		MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
-		FindIterable<Document> iterable = collection.find(filter);
 		
-		iterable.forEach((Consumer<? super Document>) document -> {result.add(document);});
-
-		return result;
+		return (filter!=null ? collection.find(filter) : collection.find()).into(new ArrayList<>());
 	}
 	
 	public static List<Document> find(Bson filter, Bson sort, Bson projection, int skip, int limit, MongoClient client, String databaseName, String collectionName) {
-		List<Document> result = new LinkedList<>();
-		
 		MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
 		
 		FindIterable<Document> iterable = null;
@@ -157,18 +168,16 @@ public final class MongoOperations {
 		if (limit>0)
 			iterable = iterable.limit(limit);
 		
-		iterable.forEach((Consumer<? super Document>) document -> {result.add(document);});
-		//iterable.forEach((Block<Document>) document -> {result.add(document);});
-		
-		return result;
+		return iterable.into(new ArrayList<>());
 	}
 	
 	public static List<Document> findAll(Bson filter, Bson sort, Bson projection, MongoClient client, String databaseName, String collectionName) {
 		return find(filter, sort, projection, 0, 0, client, databaseName, collectionName);
 	}
 	
+	// via JSON: java.time values become ISO-8601 strings, small long values int32
 	public static <E> Document convertToDocument(E entity) {
-		return Document.parse(objectMapper.mapFrom(entity));
+		return Document.parse(objectMapper().mapFrom(entity));
 	}
 	
 	public static <V> V convertToValue(Document document, Class<V> valueType) {
@@ -179,16 +188,18 @@ public final class MongoOperations {
 		E result = null;
 		
 		if (document!=null)
-			result = objectMapper.mapTo(document.toJson(), entityType);
+			result = objectMapper().mapTo(toJson(document), entityType);
 
 		return result;
 	}
 	
+	// null as list gives an empty list, null documents give null entities
 	public static <E> List<E> convertToEntities(List<Document> documents, Class<E> entityType) {
-		List<E> result = new LinkedList<>();
+		List<E> result = new ArrayList<>();
 		
-		for (Document document : documents)
-			result.add(objectMapper.mapTo(document.toJson(), entityType));
+		if (documents!=null)
+			for (Document document : documents)
+				result.add(convertToEntity(document, entityType));
 		
 		return result;
 	}
@@ -201,16 +212,17 @@ public final class MongoOperations {
 		E result = null;
 		
 		if (document!=null)
-			result = objectMapper.mapTo(document.toJson(), entityTypeRef);
+			result = objectMapper().mapTo(toJson(document), entityTypeRef);
 
 		return result;
 	}
 	
 	public static <E> List<E> convertToEntities(List<Document> documents, GenericType<E> entityTypeRef) {
-		List<E> result = new LinkedList<>();
+		List<E> result = new ArrayList<>();
 		
-		for (Document document : documents)
-			result.add(objectMapper.mapTo(document.toJson(), entityTypeRef));
+		if (documents!=null)
+			for (Document document : documents)
+				result.add(convertToEntity(document, entityTypeRef));
 		
 		return result;
 	}

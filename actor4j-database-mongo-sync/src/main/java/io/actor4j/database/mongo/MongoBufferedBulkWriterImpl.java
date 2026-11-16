@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2023, David A. Bauer. All rights reserved.
- * 
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,76 +15,129 @@
  */
 package io.actor4j.database.mongo;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.bson.Document;
 
+import com.mongodb.MongoBulkWriteException;
+import com.mongodb.bulk.BulkWriteError;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.BulkWriteOptions;
 import com.mongodb.client.model.WriteModel;
 
 import io.actor4j.core.utils.Pair;
 
+// not thread-safe, see ConcurrentMongoBufferedBulkWriterImpl
 public class MongoBufferedBulkWriterImpl implements MongoBufferedBulkWriter {
 	protected final MongoCollection<Document> collection;
-	
-	protected final Queue<Pair<UUID, WriteModel<Document>>> requestsQueue;
+
+	protected List<Pair<UUID, WriteModel<Document>>> requests;
 	protected final boolean ordered;
-	
+
 	protected final int size;
-	protected int count;
-	
+
 	protected final Consumer<List<Pair<UUID, WriteModel<Document>>>> onSuccess;
 	protected final BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError;
 
-	public MongoBufferedBulkWriterImpl(MongoCollection<Document> collection, boolean ordered, int size, 
+	public MongoBufferedBulkWriterImpl(MongoCollection<Document> collection, boolean ordered, int size,
 			Consumer<List<Pair<UUID, WriteModel<Document>>>> onSuccess, BiConsumer<List<Pair<UUID, WriteModel<Document>>>, Throwable> onError) {
 		super();
+		if (size<1)
+			throw new IllegalArgumentException("size must be at least 1: "+size);
+
 		this.collection = collection;
 		this.ordered = ordered;
 		this.size = size;
 		this.onSuccess = onSuccess;
 		this.onError = onError;
-		
-		count = 0;
-		requestsQueue = new LinkedList<>();
+
+		requests = new ArrayList<>();
 	}
-	
+
 	@Override
 	public void write(WriteModel<Document> request, UUID id) {
-		requestsQueue.offer(Pair.of(id, request));
-		if (++count==size)
+		requests.add(Pair.of(id, request));
+		if (requests.size()>=size)
 			flush();
 	}
-	
+
 	@Override
 	public void flush() {
-		List<Pair<UUID, WriteModel<Document>>> requests = new LinkedList<>(requestsQueue);
+		List<Pair<UUID, WriteModel<Document>>> batch = take();
+		if (batch!=null)
+			bulkWrite(batch);
+	}
+
+	// the buffered requests (buffer is empty afterwards), null if there are none
+	protected List<Pair<UUID, WriteModel<Document>>> take() {
+		if (requests.isEmpty())
+			return null;
+
+		List<Pair<UUID, WriteModel<Document>>> result = requests;
+		requests = new ArrayList<>();
+
+		return result;
+	}
+
+	// exceptions of the callbacks are passed on, the buffer is already empty
+	protected void bulkWrite(List<Pair<UUID, WriteModel<Document>>> batch) {
+		List<WriteModel<Document>> writeModels = batch.stream().map(Pair::b).toList();
+
 		try {
-			List<WriteModel<Document>> writeModels = requestsQueue.stream().map((r) -> r.b()).collect(Collectors.toList());
-			
-			if (ordered)
-				collection.bulkWrite(writeModels);
+			collection.bulkWrite(writeModels, new BulkWriteOptions().ordered(ordered));
+		}
+		catch(MongoBulkWriteException e) {
+			partial(batch, e);
+			return;
+		}
+		catch(RuntimeException e) {
+			error(batch, e);
+			return;
+		}
+
+		if (onSuccess!=null)
+			onSuccess.accept(batch);
+	}
+
+	// ordered: written up to the first error, unordered: all except the errors
+	protected void partial(List<Pair<UUID, WriteModel<Document>>> batch, MongoBulkWriteException e) {
+		Set<Integer> failedIndexes = new HashSet<>();
+		for (BulkWriteError error : e.getWriteErrors())
+			failedIndexes.add(error.getIndex());
+		int firstFailed = failedIndexes.isEmpty() ? batch.size() : failedIndexes.stream().mapToInt(i -> i).min().getAsInt();
+
+		List<Pair<UUID, WriteModel<Document>>> succeeded = new ArrayList<>();
+		List<Pair<UUID, WriteModel<Document>>> failed = new ArrayList<>();
+		for (int i=0; i<batch.size(); i++)
+			if (ordered ? i<firstFailed : !failedIndexes.contains(i))
+				succeeded.add(batch.get(i));
 			else
-				collection.bulkWrite(writeModels, new BulkWriteOptions().ordered(false));
-			
-			if (onSuccess!=null)
-				onSuccess.accept(requests);
+				failed.add(batch.get(i));
+		// e.g. a write concern error: nothing is known as failed, report all
+		if (failed.isEmpty()) {
+			failed = batch;
+			succeeded = List.of();
 		}
-		catch(Exception e) {
-			e.printStackTrace();
-			
-			if (onError!=null)
-				onError.accept(requests, e);
+
+		try {
+			if (!succeeded.isEmpty() && onSuccess!=null)
+				onSuccess.accept(succeeded);
 		}
-		
-		requestsQueue.clear();
-		count = 0;
+		finally {
+			error(failed, e);
+		}
+	}
+
+	protected void error(List<Pair<UUID, WriteModel<Document>>> batch, Throwable t) {
+		if (onError!=null)
+			onError.accept(batch, t);
+		else
+			t.printStackTrace();
 	}
 }
