@@ -25,13 +25,15 @@ import java.util.function.Consumer;
 
 import io.actor4j.core.utils.Pair;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 
 // not thread-safe, see ConcurrentJPABatchWriterImpl
 // ordered: one transaction per batch (all or nothing), unordered: on failure each request in its own transaction
+// each transaction uses its own EntityManager from the factory (no growing persistence context, no managed entities afterwards)
 public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
-	protected final EntityManager entityManager;
-	protected final Class<E> entityType;
+	protected final EntityManagerFactory entityManagerFactory;
+protected final Class<E> entityType;
 
 	protected List<Pair<UUID, JPAWriteModel>> requests;
 	protected final boolean ordered;
@@ -41,14 +43,14 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 	protected final Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess;
 	protected final BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError;
 
-	public JPABatchWriterImpl(EntityManager entityManager, Class<E> entityType, boolean ordered, int size,
+	public JPABatchWriterImpl(EntityManagerFactory entityManagerFactory, Class<E> entityType, boolean ordered, int size,
 			Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
 		super();
 		if (size<1)
 			throw new IllegalArgumentException("size must be at least 1: "+size);
 
-		this.entityManager = entityManager;
-		this.entityType = entityType;
+		this.entityManagerFactory = entityManagerFactory;
+this.entityType = entityType;
 		this.ordered = ordered;
 		this.size = size;
 		this.onSuccess = onSuccess;
@@ -121,24 +123,25 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 		}
 	}
 
-	// commit before any callback, rollback and a cleared persistence context on failure
+	// commit before any callback, rollback on failure, a new EntityManager per transaction
 	protected void transaction(List<Pair<UUID, JPAWriteModel>> batch) {
-		EntityTransaction transaction = entityManager.getTransaction();
-		transaction.begin();
-		try {
-			for (Pair<UUID, JPAWriteModel> request : batch)
-				write(request.b());
-			transaction.commit();
-		}
-		catch(RuntimeException e) {
-			if (transaction.isActive())
-				transaction.rollback();
-			entityManager.clear();
-			throw e;
+		try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+			EntityTransaction transaction = entityManager.getTransaction();
+			transaction.begin();
+			try {
+				for (Pair<UUID, JPAWriteModel> request : batch)
+					write(entityManager, request.b());
+				transaction.commit();
+			}
+			catch(RuntimeException e) {
+				if (transaction.isActive())
+					transaction.rollback();
+				throw e;
+			}
 		}
 	}
 
-	protected void write(JPAWriteModel request) {
+	protected void write(EntityManager entityManager, JPAWriteModel request) {
 		if (request.op()==RESERVED_DATA_ACCESS_INSERT_ONE)
 			entityManager.persist(request.obj()/*value*/);
 		else if (request.op()==RESERVED_DATA_ACCESS_REPLACE_ONE

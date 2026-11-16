@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import io.actor4j.core.utils.Pair;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 // buffers write requests and writes them in a transaction when size is reached, on flush or on close
 public interface JPABatchWriter<K, E> extends AutoCloseable {
@@ -34,8 +34,8 @@ public interface JPABatchWriter<K, E> extends AutoCloseable {
 	}
 
 	// not thread-safe, see ConcurrentJPABatchWriter
-	public static <K, E> JPABatchWriter<K, E> create(EntityManager entityManager, Class<E> entityType, boolean ordered, int size,
+	public static <K, E> JPABatchWriter<K, E> create(EntityManagerFactory entityManagerFactory, Class<E> entityType, boolean ordered, int size,
 		Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
-		return new JPABatchWriterImpl<K, E>(entityManager, entityType, ordered, size, onSuccess, onError);
+		return new JPABatchWriterImpl<K, E>(entityManagerFactory, entityType, ordered, size, onSuccess, onError);
 	}
 }

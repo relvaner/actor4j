@@ -21,11 +21,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import io.actor4j.core.utils.Pair;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 public interface ConcurrentJPABatchWriter<K, E> extends JPABatchWriter<K, E> {
-	public static <K, E> ConcurrentJPABatchWriter<K, E> create(EntityManager entityManager, Class<E> entityType, boolean ordered, int size,
+	public static <K, E> ConcurrentJPABatchWriter<K, E> create(EntityManagerFactory entityManagerFactory, Class<E> entityType, boolean ordered, int size,
 		Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
-		return new ConcurrentJPABatchWriterImpl<K, E>(entityManager, entityType, ordered, size, onSuccess, onError);
+		return new ConcurrentJPABatchWriterImpl<K, E>(entityManagerFactory, entityType, ordered, size, onSuccess, onError);
 	}
 }

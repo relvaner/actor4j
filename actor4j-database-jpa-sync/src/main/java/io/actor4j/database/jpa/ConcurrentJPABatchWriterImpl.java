@@ -25,19 +25,18 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import io.actor4j.core.utils.Pair;
-import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 // thread-safe: the buffer lock is held only briefly, batches are written one after another in their order
-// the EntityManager is only used under writeLock, nobody else may use it at the same time
 public class ConcurrentJPABatchWriterImpl<K, E> extends JPABatchWriterImpl<K, E> implements ConcurrentJPABatchWriter<K, E> {
 	protected final Lock lock;
 	protected final Lock writeLock;
 	protected final Queue<List<Pair<UUID, JPAWriteModel>>> batches;
 
-	public ConcurrentJPABatchWriterImpl(EntityManager entityManager, Class<E> entityType,
+	public ConcurrentJPABatchWriterImpl(EntityManagerFactory entityManagerFactory, Class<E> entityType,
 			boolean ordered, int size, Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess,
 			BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
-		super(entityManager, entityType, ordered, size, onSuccess, onError);
+		super(entityManagerFactory, entityType, ordered, size, onSuccess, onError);
 
 		lock = new ReentrantLock();
 		writeLock = new ReentrantLock();

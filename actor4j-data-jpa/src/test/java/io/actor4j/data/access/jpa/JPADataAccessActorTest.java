@@ -49,6 +49,7 @@ public class JPADataAccessActorTest {
 	protected ActorSystem system;
 	protected ActorId client;
 	protected final BlockingQueue<String> replies = new LinkedBlockingQueue<>();
+	protected final BlockingQueue<Person> entities = new LinkedBlockingQueue<>();
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -67,8 +68,11 @@ public class JPADataAccessActorTest {
 					key = String.valueOf(success.dto().key());
 				else if (message.value() instanceof PersistentFailureDTO<?, ?> failure)
 					key = String.valueOf(failure.dto().key());
-				else if (message.value() instanceof PersistentDataAccessDTO<?, ?> dto)
+				else if (message.value() instanceof PersistentDataAccessDTO<?, ?> dto) {
 					key = String.valueOf(dto.key());
+					if (dto.value() instanceof Person person)
+						entities.add(person);
+				}
 				replies.add(tag(message.tag())+"("+key+")");
 			}
 		});
@@ -130,6 +134,41 @@ public class JPADataAccessActorTest {
 		finally {
 			factory.close();
 		}
+	}
+
+	// a separate factory on the same in-memory database, changes a row outside of the actor
+	protected void rename(long id, String name) {
+		EntityManagerFactory factory = Persistence.createEntityManagerFactory("test", java.util.Map.of("jakarta.persistence.schema-generation.database.action", "none"));
+		try (EntityManager entityManager = factory.createEntityManager()) {
+			entityManager.getTransaction().begin();
+			entityManager.find(Person.class, id).name = name;
+			entityManager.getTransaction().commit();
+		}
+		finally {
+			factory.close();
+		}
+	}
+
+	// M3
+	@Test
+	public void test_no_stale_reads_and_no_managed_entities() throws InterruptedException {
+		ActorId dataAccess = dataAccess(false, 0);
+		send(write(1), DataAccessActor.INSERT_ONE, dataAccess);
+		assertEquals(List.of("SUCCESS(1)"), await(1));
+
+		send(PersistentDTO.create(1L, null, client), ActorWithCache.GET, dataAccess);
+		assertEquals(List.of("FIND_ONE(1)"), await(1));
+		Person person = entities.poll(5, TimeUnit.SECONDS);
+		assertEquals("p1", person.name);
+
+		person.name = "changed by the client"; // detached, must not be written
+		rename(1, "changed outside");
+		send(write(2), DataAccessActor.INSERT_ONE, dataAccess); // a later commit of the actor
+		assertEquals(List.of("SUCCESS(2)"), await(1));
+
+		send(PersistentDTO.create(1L, null, client), ActorWithCache.GET, dataAccess);
+		assertEquals(List.of("FIND_ONE(1)"), await(1));
+		assertEquals("changed outside", entities.poll(5, TimeUnit.SECONDS).name);
 	}
 
 	// M1

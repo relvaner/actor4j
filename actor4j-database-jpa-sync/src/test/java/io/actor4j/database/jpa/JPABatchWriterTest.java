@@ -89,7 +89,7 @@ public class JPABatchWriterTest {
 	}
 
 	protected JPABatchWriter<Long, Person> writer(boolean ordered, int size) {
-		return JPABatchWriter.create(entityManager, Person.class, ordered, size,
+		return JPABatchWriter.create(factory, Person.class, ordered, size,
 			batch -> batch.forEach(pair -> succeeded.add(id(pair))),
 			(batch, t) -> batch.forEach(pair -> failed.add(id(pair))));
 	}
@@ -168,7 +168,7 @@ public class JPABatchWriterTest {
 	// H4
 	@Test
 	public void test_throwing_onError_clears_the_buffer() {
-		try (JPABatchWriter<Long, Person> writer = JPABatchWriter.create(entityManager, Person.class, true, 2,
+		try (JPABatchWriter<Long, Person> writer = JPABatchWriter.create(factory, Person.class, true, 2,
 			batch -> batch.forEach(pair -> succeeded.add(id(pair))), (batch, t) -> { throw new NullPointerException("in onError"); })) {
 
 			writer.write(insert(1), UUID.randomUUID());
@@ -184,7 +184,7 @@ public class JPABatchWriterTest {
 	// M1
 	@Test
 	public void test_throwing_onSuccess_after_commit() {
-		try (JPABatchWriter<Long, Person> writer = JPABatchWriter.create(entityManager, Person.class, true, 1,
+		try (JPABatchWriter<Long, Person> writer = JPABatchWriter.create(factory, Person.class, true, 1,
 			batch -> { throw new IllegalStateException("in onSuccess"); }, (batch, t) -> failed.add(id(batch.get(0))))) {
 
 			assertThrows(IllegalStateException.class, () -> writer.write(insert(1), UUID.randomUUID()));
@@ -203,7 +203,7 @@ public class JPABatchWriterTest {
 
 	@Test
 	public void test_concurrent_writes() throws InterruptedException {
-		try (JPABatchWriter<Long, Person> writer = ConcurrentJPABatchWriter.create(entityManager, Person.class, true, 10,
+		try (JPABatchWriter<Long, Person> writer = ConcurrentJPABatchWriter.create(factory, Person.class, true, 10,
 			batch -> batch.forEach(pair -> succeeded.add(id(pair))), (batch, t) -> failed.add(-1L))) {
 
 			List<Thread> threads = new ArrayList<>();
