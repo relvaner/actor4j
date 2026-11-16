@@ -10,16 +10,18 @@
 	<artifactId>actor4j-database-jpa-sync</artifactId>
 
 	<dependencies>
+		<!-- only the JPA API, the provider (e.g. Hibernate) is chosen by the application -->
 		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>4.0.5</version>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>3.2.0</version>
 		</dependency>
-		
+
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>7.4.15.Final</version>
+			<scope>test</scope>
 		</dependency>
 		
 		<dependency>
