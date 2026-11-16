@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026,David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,14 @@ import io.actor4j.data.access.SqlPersistentContext;
 import io.actor4j.database.jpa.JPABatchWriter;
 import io.actor4j.database.jpa.JPAOperations;
 import io.actor4j.database.jpa.JPAWriteModel;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
+// batch mode: writes are answered by the callbacks of the batch writer, everything else directly
 public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> {
-	protected record BatchWriterRequest<K, E>(int tag, UUID interaction, ActorId source, PersistentDataAccessDTO<K, E> dto) {
+protected record BatchWriterRequest<K, E>(int tag, UUID interaction, ActorId source, PersistentDataAccessDTO<K, E> dto) {
 	}
 	
 	protected EntityManagerFactory entityManagerFactory;
@@ -54,13 +56,13 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	protected final int batchSize;
 	protected final Map<String, Class<E>> entityTypes;
 	protected final Map<String, JPABatchWriter<K, E>> batchWriters;
-	protected final Map<UUID, BatchWriterRequest<K, E>> batchWriterRequests; // id -> request
+	protected final Map<UUID, BatchWriterRequest<K, E>> batchWriterRequests; // write id -> request
 	
 	protected JPABatchWriter<K, E> selectedBatchWriter;
 	
 	public JPADataAccessActorImpl(ActorRef dataAccess, String persistenceUnitName, boolean batchWrite, 
 			boolean batchOrdered, int batchSize, Class<E> entityType, int maxFailures, long resetTimeout) {
-		this(dataAccess, persistenceUnitName, batchWrite, batchOrdered, batchSize, Map.of(entityType.getClass().getSimpleName(), entityType), maxFailures, resetTimeout);
+		this(dataAccess, persistenceUnitName, batchWrite, batchOrdered, batchSize, Map.of(entityName(entityType), entityType), maxFailures, resetTimeout);
 	}
 	
 	public JPADataAccessActorImpl(ActorRef dataAccess, String persistenceUnitName, boolean batchWrite, 
@@ -77,61 +79,79 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 		batchWriterRequests = new HashMap<>();
 	}
 	
+	// the entity name as used in JPQL: @Entity(name=...) or the simple class name
+	public static String entityName(Class<?> entityType) {
+		Entity entity = entityType.getAnnotation(Entity.class);
+
+		return entity!=null && !entity.name().isEmpty() ? entity.name() : entityType.getSimpleName();
+	}
+
 	protected Pair<String, Class<E>> getEntityTypeAsPair(PersistentContext context) {
 		if (context==null && entityTypes.size()==1) {
 			Entry<String, Class<E>> entry = entityTypes.entrySet().iterator().next();
 			return Pair.of(entry.getKey(), entry.getValue());
 		}
-		else if (context instanceof SqlPersistentContext ctx)
-			return Pair.of(ctx.entityName(), entityTypes.get(ctx.entityName()));
+		else if (context instanceof SqlPersistentContext ctx) {
+			Class<E> entityType = entityTypes.get(ctx.entityName());
+			if (entityType==null)
+				throw new IllegalArgumentException("Unknown entity: "+ctx.entityName());
+			return Pair.of(ctx.entityName(), entityType);
+		}
 		else
 			throw new IllegalArgumentException("Wrong context");
 	}
-	
+
 	protected Class<E> getEntityType(PersistentContext context) {
-		if (context==null && entityTypes.size()==1)
-			return entityTypes.entrySet().iterator().next().getValue();
-		else if (context instanceof SqlPersistentContext ctx)
-			return entityTypes.get(ctx.entityName());
-		else
-			throw new IllegalArgumentException("Wrong context");
+		return getEntityTypeAsPair(context).value();
 	}
-	
+
 	public void preStart() {
-		EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
+		entityManagerFactory = Persistence.createEntityManagerFactory(persistenceUnitName);
 		entityManager = entityManagerFactory.createEntityManager();
 	}
-	
+
+	// writes the buffered requests first (their senders get a reply), then closes the EntityManager and the factory
 	public void close() {
-		if (entityManager!=null)
-			entityManager.close();
-		if (entityManagerFactory!=null)
-			entityManagerFactory.close();
+		try {
+			for (JPABatchWriter<K, E> batchWriter : batchWriters.values())
+				try {
+					batchWriter.close();
+				}
+				catch(RuntimeException e) {
+					e.printStackTrace();
+				}
+		}
+		finally {
+			if (entityManager!=null)
+				entityManager.close();
+			if (entityManagerFactory!=null)
+				entityManagerFactory.close();
+		}
 	}
 	
 	public void onBatchWriterSuccess(List<Pair<UUID, JPAWriteModel>> requests) {
 		for (Pair<UUID, JPAWriteModel> pair : requests) {
-			BatchWriterRequest<K, E> originRequest = batchWriterRequests.get(pair.a()/*id*/);
-			dataAccess.tell(PersistentSuccessDTO.of(originRequest.dto(), originRequest.tag()), SUCCESS, originRequest.source(), originRequest.interaction());
-			
-			batchWriterRequests.remove(pair.a());
+			BatchWriterRequest<K, E> originRequest = batchWriterRequests.remove(pair.a()/*write id*/);
+			if (originRequest!=null)
+				dataAccess.tell(PersistentSuccessDTO.of(originRequest.dto(), originRequest.tag()), SUCCESS, originRequest.source(), originRequest.interaction());
 		}
 	}
-	
+
 	public void onBatchWriterError(List<Pair<UUID, JPAWriteModel>> requests, Throwable t) {
 		for (Pair<UUID, JPAWriteModel> pair : requests) {
-			BatchWriterRequest<K, E> originRequest = batchWriterRequests.get(pair.a()/*id*/);
-			dataAccess.tell(PersistentFailureDTO.of(originRequest.dto(), originRequest.tag(), t), FAILURE, originRequest.source(), originRequest.interaction());
-			
-			batchWriterRequests.remove(pair.a());
+			BatchWriterRequest<K, E> originRequest = batchWriterRequests.remove(pair.a()/*write id*/);
+			if (originRequest!=null)
+				dataAccess.tell(PersistentFailureDTO.of(originRequest.dto(), originRequest.tag(), t), FAILURE, originRequest.source(), originRequest.interaction());
 		}
 	}
 
 	@Override
 	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		if (batchWrite) {
+		selectedBatchWriter = null;
+
+		if (batchWrite && !(msg.tag()==FLUSH && dto.context()==null)) { // FLUSH without context: all entity types
 			Pair<String, Class<E>> pair = getEntityTypeAsPair(dto.context());
-			
+
 			JPABatchWriter<K, E> batchWriter = batchWriters.get(pair.key());
 			if (batchWriter==null) {
 				batchWriter = JPABatchWriter.create(entityManager, pair.value(), batchOrdered, batchSize, 
@@ -140,12 +160,20 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 			}
 			
 			selectedBatchWriter = batchWriter;
-			
-			if (msg.tag()!=FIND_ONE && msg.tag()!=ActorWithCache.GET && msg.tag()!=HAS_ONE)
-				batchWriterRequests.put(dto.id(), new BatchWriterRequest<>(msg.tag(), msg.interaction(), msg.source(), dto));
-		}	
+		}
 	}
-	
+
+	// a new id per write (copies of a DTO share its id), registered right before the write
+	protected UUID register(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		if (selectedBatchWriter==null)
+			return dto.id();
+
+		UUID writeId = UUID.randomUUID();
+		batchWriterRequests.put(writeId, new BatchWriterRequest<>(msg.tag(), msg.interaction(), msg.source(), dto));
+
+		return writeId;
+	}
+
 	@Override
 	public void queryOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (dto.context() instanceof SqlPersistentContext ctx) {
@@ -196,46 +224,59 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	}
 
 	@Override
+	// SET is written with merge (insert or update): idempotent, no failing batch if the insert is still in the buffer
 	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.insertOne(dto.entity(), dto.id(), entityManager, selectedBatchWriter);
+		if (msg.tag()==ActorWithCache.SET)
+			JPAOperations.replaceOne(dto.entity(), register(msg, dto), entityManager, selectedBatchWriter);
+		else
+			JPAOperations.insertOne(dto.entity(), register(msg, dto), entityManager, selectedBatchWriter);
 	}
 
 	@Override
 	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.replaceOne(dto.entity(), dto.id(), entityManager, selectedBatchWriter);
+		JPAOperations.replaceOne(dto.entity(), register(msg, dto), entityManager, selectedBatchWriter);
 	}
 
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.updateOne(dto.entity(), dto.id(), entityManager, selectedBatchWriter);
+		JPAOperations.updateOne(dto.entity(), register(msg, dto), entityManager, selectedBatchWriter);
 	}
 
 	@Override
 	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		JPAOperations.deleteOne(dto.key(), getEntityType(dto.context()), dto.id(), entityManager, selectedBatchWriter);
+		JPAOperations.deleteOne(dto.key(), getEntityType(dto.context()), register(msg, dto), entityManager, selectedBatchWriter);
 	}
 
 	@Override
+	// FLUSH with a context writes this entity type, without a context all entity types
 	public boolean handleMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		boolean result = false;
-		
+
 		if (msg.tag()==FLUSH && batchWrite) {
-			selectedBatchWriter.flush();
+			if (selectedBatchWriter!=null)
+				selectedBatchWriter.flush();
+			else
+				batchWriters.values().forEach(JPABatchWriter::flush);
 			result = true;
 		}
-		
+
 		return result;	
 	}
 
+	// reads answer with their result, in batch mode writes are answered by the batch writer
 	@Override
 	public void onSuccess(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		if (!batchWrite && msg.tag()!=FIND_ONE && msg.tag()!=ActorWithCache.GET && msg.tag()!=HAS_ONE)
+		if (!batchWrite && !isRead(msg.tag()))
 			dataAccess.tell(PersistentSuccessDTO.of(dto, msg.tag()), SUCCESS, msg.source(), msg.interaction());
 	}
 
+	// every failure is answered (failures of buffered writes are answered by the batch writer)
 	@Override
 	public void onFailure(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto, Throwable t) {
-		if (!batchWrite)
-			dataAccess.tell(PersistentFailureDTO.of(dto, msg.tag(), t), FAILURE, msg.source(), msg.interaction());
+		dataAccess.tell(PersistentFailureDTO.of(dto, msg.tag(), t), FAILURE, msg.source(), msg.interaction());
+	}
+
+	protected static boolean isRead(int tag) {
+		return tag==FIND_ONE || tag==ActorWithCache.GET || tag==HAS_ONE || tag==FIND_ALL || tag==ActorWithCache.GET_ALL || tag==QUERY_ONE || tag==QUERY_ALL;
 	}
 }
