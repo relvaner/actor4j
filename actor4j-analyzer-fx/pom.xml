@@ -27,7 +27,7 @@
   		<maven.compiler.target>21</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<javafx.version>23.0.2</javafx.version>
-		<smartgraph.version>2.3.0</smartgraph.version>
+		<smartgraph.version>2.6.1</smartgraph.version>
 		<javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
 	</properties>
 	
