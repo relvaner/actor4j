@@ -31,6 +31,7 @@ import jakarta.persistence.EntityTransaction;
 // not thread-safe, see ConcurrentJPABatchWriterImpl
 // ordered: one transaction per batch (all or nothing), unordered: on failure each request in its own transaction
 // each transaction uses its own EntityManager from the factory (no growing persistence context, no managed entities afterwards)
+// replace, update and delete of a missing key change nothing and go to onNotFound (to onSuccess, if there is none)
 public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 	protected final EntityManagerFactory entityManagerFactory;
 	protected final Class<E> entityType;
@@ -42,9 +43,16 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 
 	protected final Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess;
 	protected final BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError;
+	protected final Consumer<List<Pair<UUID, JPAWriteModel>>> onNotFound;
 
 	public JPABatchWriterImpl(EntityManagerFactory entityManagerFactory, Class<E> entityType, boolean ordered, int size,
 			Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
+		this(entityManagerFactory, entityType, ordered, size, onSuccess, onError, null);
+	}
+
+	public JPABatchWriterImpl(EntityManagerFactory entityManagerFactory, Class<E> entityType, boolean ordered, int size,
+			Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError,
+			Consumer<List<Pair<UUID, JPAWriteModel>>> onNotFound) {
 		super();
 		if (size<1)
 			throw new IllegalArgumentException("size must be at least 1: "+size);
@@ -55,6 +63,7 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 		this.size = size;
 		this.onSuccess = onSuccess;
 		this.onError = onError;
+		this.onNotFound = onNotFound;
 
 		requests = new ArrayList<>();
 	}
@@ -86,8 +95,9 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 
 	// exceptions of the callbacks are passed on, the buffer is already empty
 	protected void batchWrite(List<Pair<UUID, JPAWriteModel>> batch) {
+		List<Pair<UUID, JPAWriteModel>> notFound;
 		try {
-			transaction(batch);
+			notFound = transaction(batch);
 		}
 		catch(RuntimeException e) {
 			if (ordered)
@@ -97,25 +107,24 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 			return;
 		}
 
-		if (onSuccess!=null)
-			onSuccess.accept(batch);
+		success(batch, notFound);
 	}
 
 	protected void oneByOne(List<Pair<UUID, JPAWriteModel>> batch) {
-		List<Pair<UUID, JPAWriteModel>> succeeded = new ArrayList<>();
+		List<Pair<UUID, JPAWriteModel>> written = new ArrayList<>();
+		List<Pair<UUID, JPAWriteModel>> notFound = new ArrayList<>();
 		List<Pair<Pair<UUID, JPAWriteModel>, RuntimeException>> failed = new ArrayList<>();
 		for (Pair<UUID, JPAWriteModel> request : batch)
 			try {
-				transaction(List.of(request));
-				succeeded.add(request);
+				notFound.addAll(transaction(List.of(request)));
+				written.add(request);
 			}
 			catch(RuntimeException e) {
 				failed.add(Pair.of(request, e));
 			}
 
 		try {
-			if (!succeeded.isEmpty() && onSuccess!=null)
-				onSuccess.accept(succeeded);
+			success(written, notFound);
 		}
 		finally {
 			for (Pair<Pair<UUID, JPAWriteModel>, RuntimeException> pair : failed)
@@ -123,14 +132,35 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 		}
 	}
 
-	// commit before any callback, rollback on failure, a new EntityManager per transaction
-	protected void transaction(List<Pair<UUID, JPAWriteModel>> batch) {
+	// requests of the batch without the not found ones go to onSuccess, the not found ones to onNotFound
+	protected void success(List<Pair<UUID, JPAWriteModel>> batch, List<Pair<UUID, JPAWriteModel>> notFound) {
+		List<Pair<UUID, JPAWriteModel>> succeeded = batch;
+		if (!notFound.isEmpty() && onNotFound!=null) {
+			succeeded = new ArrayList<>(batch);
+			succeeded.removeAll(notFound);
+		}
+
+		try {
+			if (!succeeded.isEmpty() && onSuccess!=null)
+				onSuccess.accept(succeeded);
+		}
+		finally {
+			if (!notFound.isEmpty() && onNotFound!=null)
+				onNotFound.accept(notFound);
+		}
+	}
+
+	// commit before any callback, rollback on failure, a new EntityManager per transaction, returns the not found requests
+	protected List<Pair<UUID, JPAWriteModel>> transaction(List<Pair<UUID, JPAWriteModel>> batch) {
+		List<Pair<UUID, JPAWriteModel>> result = new ArrayList<>();
+
 		try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
 			EntityTransaction transaction = entityManager.getTransaction();
 			transaction.begin();
 			try {
 				for (Pair<UUID, JPAWriteModel> request : batch)
-					write(entityManager, request.b());
+					if (!write(entityManager, request.b()))
+						result.add(request);
 				transaction.commit();
 			}
 			catch(RuntimeException e) {
@@ -139,20 +169,32 @@ public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 				throw e;
 			}
 		}
+
+		return result;
 	}
 
-	protected void write(EntityManager entityManager, JPAWriteModel request) {
+	// false if the key of a replace, update or delete does not exist (nothing is changed then)
+	protected boolean write(EntityManager entityManager, JPAWriteModel request) {
 		if (request.op()==RESERVED_DATA_ACCESS_INSERT_ONE)
 			entityManager.persist(request.obj()/*value*/);
-		else if (request.op()==RESERVED_DATA_ACCESS_REPLACE_ONE
-			|| request.op()==RESERVED_DATA_ACCESS_UPDATE_ONE)
+		else if (request.op()==RESERVED_CACHE_SET)
 			entityManager.merge(request.obj()/*value*/);
+		else if (request.op()==RESERVED_DATA_ACCESS_REPLACE_ONE
+			|| request.op()==RESERVED_DATA_ACCESS_UPDATE_ONE) {
+			if (!JPAOperations.exists(request.obj(), entityManager))
+				return false;
+			entityManager.merge(request.obj()/*value*/);
+		}
 		else if (request.op()==RESERVED_DATA_ACCESS_DELETE_ONE) {
-			E reference = entityManager.getReference(entityType, request.obj()/*primaryKey*/);
-			entityManager.remove(reference);
+			E entity = entityManager.find(entityType, request.obj()/*primaryKey*/);
+			if (entity==null)
+				return false;
+			entityManager.remove(entity);
 		}
 		else
 			throw new IllegalArgumentException("unknown operation: "+request.op());
+
+		return true;
 	}
 
 	protected void error(List<Pair<UUID, JPAWriteModel>> batch, Throwable t) {

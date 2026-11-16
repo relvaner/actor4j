@@ -15,6 +15,7 @@
  */
 package io.actor4j.database.jpa;
 
+import static io.actor4j.core.messages.ActorReservedTag.RESERVED_CACHE_SET;
 import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_DELETE_ONE;
 import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_INSERT_ONE;
 import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_REPLACE_ONE;
@@ -23,6 +24,7 @@ import static io.actor4j.core.messages.ActorReservedTag.RESERVED_DATA_ACCESS_UPD
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -30,62 +32,112 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaQuery;
 
+// replace, update and delete return false if the key does not exist (nothing is changed then),
+// with a batch writer they return true and a missing key is reported by its onNotFound
 public class JPAOperations {
 	public static boolean hasOne(Object primaryKey, Class<?> entityType, EntityManager entityManager) {
 		return entityManager.find(entityType, primaryKey)!=null;
+	}
+
+	// whether an entity with the id of this entity exists in the database
+	public static boolean exists(Object entity, EntityManager entityManager) {
+		Object primaryKey = entityManager.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(entity);
+
+		return primaryKey!=null && entityManager.find(entity.getClass(), primaryKey)!=null;
 	}
 
 	public static <K, E> void insertOne(E entity, UUID id, EntityManager entityManager) {
 		insertOne(entity, id, entityManager, null);
 	}
 
-	public static <K, E> void replaceOne(E entity, UUID id, EntityManager entityManager) {
-		replaceOne(entity, id, entityManager, null);
+	public static <K, E> void upsertOne(E entity, UUID id, EntityManager entityManager) {
+		upsertOne(entity, id, entityManager, null);
 	}
 
-	public static <K, E> void updateOne(E entity, UUID id, EntityManager entityManager) {
-		updateOne(entity, id, entityManager, null);
+	public static <K, E> boolean replaceOne(E entity, UUID id, EntityManager entityManager) {
+		return replaceOne(entity, id, entityManager, null);
 	}
 
-	public static <K, E> void deleteOne(K primaryKey, Class<E> entityType, UUID id, EntityManager entityManager) {
-		deleteOne(primaryKey, entityType, id, entityManager, null);
+	public static <K, E> boolean updateOne(E entity, UUID id, EntityManager entityManager) {
+		return updateOne(entity, id, entityManager, null);
+	}
+
+	public static <K, E> boolean deleteOne(K primaryKey, Class<E> entityType, UUID id, EntityManager entityManager) {
+		return deleteOne(primaryKey, entityType, id, entityManager, null);
 	}
 
 	public static <K, E> void insertOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
 		if (batchWriter!=null)
 			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_INSERT_ONE, entity), id);
 		else
-			transaction(entityManager, () -> entityManager.persist(entity));
+			transaction(entityManager, () -> {
+				entityManager.persist(entity);
+				return true;
+			});
 	}
 
-	public static <K, E> void replaceOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+	// inserts or replaces (merge), as for SET
+	public static <K, E> void upsertOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
 		if (batchWriter!=null)
+			batchWriter.write(JPAWriteModel.of(RESERVED_CACHE_SET, entity), id);
+		else
+			transaction(entityManager, () -> {
+				entityManager.merge(entity);
+				return true;
+			});
+	}
+
+	public static <K, E> boolean replaceOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+		if (batchWriter!=null) {
 			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_REPLACE_ONE, entity), id);
+			return true;
+		}
 		else
-			transaction(entityManager, () -> entityManager.merge(entity));
+			return merge(entity, entityManager);
 	}
 
-	public static <K, E> void updateOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
-		if (batchWriter!=null)
+	public static <K, E> boolean updateOne(E entity, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+		if (batchWriter!=null) {
 			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_UPDATE_ONE, entity), id);
+			return true;
+		}
 		else
-			transaction(entityManager, () -> entityManager.merge(entity));
+			return merge(entity, entityManager);
 	}
 
-	public static <K, E> void deleteOne(K primaryKey, Class<E> entityType, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
-		if (batchWriter!=null)
+	protected static <E> boolean merge(E entity, EntityManager entityManager) {
+		return transaction(entityManager, () -> {
+			if (!exists(entity, entityManager))
+				return false;
+			entityManager.merge(entity);
+			return true;
+		});
+	}
+
+	public static <K, E> boolean deleteOne(K primaryKey, Class<E> entityType, UUID id, EntityManager entityManager, JPABatchWriter<K, E> batchWriter) {
+		if (batchWriter!=null) {
 			batchWriter.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_DELETE_ONE, primaryKey), id);
+			return true;
+		}
 		else
-			transaction(entityManager, () -> entityManager.remove(entityManager.getReference(entityType, primaryKey)));
+			return transaction(entityManager, () -> {
+				E entity = entityManager.find(entityType, primaryKey);
+				if (entity==null)
+					return false;
+				entityManager.remove(entity);
+				return true;
+			});
 	}
 
 	// rollback and a cleared persistence context on failure, the transaction never stays open
-	protected static void transaction(EntityManager entityManager, Runnable operation) {
+	protected static <T> T transaction(EntityManager entityManager, Supplier<T> operation) {
 		EntityTransaction transaction = entityManager.getTransaction();
 		transaction.begin();
 		try {
-			operation.run();
+			T result = operation.get();
 			transaction.commit();
+
+			return result;
 		}
 		catch(RuntimeException e) {
 			if (transaction.isActive())

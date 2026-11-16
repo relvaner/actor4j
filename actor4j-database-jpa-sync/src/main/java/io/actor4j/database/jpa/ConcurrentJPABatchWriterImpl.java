@@ -36,7 +36,13 @@ public class ConcurrentJPABatchWriterImpl<K, E> extends JPABatchWriterImpl<K, E>
 	public ConcurrentJPABatchWriterImpl(EntityManagerFactory entityManagerFactory, Class<E> entityType,
 			boolean ordered, int size, Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess,
 			BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
-		super(entityManagerFactory, entityType, ordered, size, onSuccess, onError);
+		this(entityManagerFactory, entityType, ordered, size, onSuccess, onError, null);
+	}
+
+	public ConcurrentJPABatchWriterImpl(EntityManagerFactory entityManagerFactory, Class<E> entityType,
+			boolean ordered, int size, Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess,
+			BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError, Consumer<List<Pair<UUID, JPAWriteModel>>> onNotFound) {
+		super(entityManagerFactory, entityType, ordered, size, onSuccess, onError, onNotFound);
 
 		lock = new ReentrantLock();
 		writeLock = new ReentrantLock();

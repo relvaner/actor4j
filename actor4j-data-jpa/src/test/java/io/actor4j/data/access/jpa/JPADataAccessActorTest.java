@@ -171,6 +171,37 @@ public class JPADataAccessActorTest {
 		assertEquals("changed outside", entities.poll(5, TimeUnit.SECONDS).name);
 	}
 
+	// M4: replace, update and delete of a missing key change nothing and answer FIND_NONE
+	@Test
+	public void test_missing_key_is_not_found() throws InterruptedException {
+		ActorId dataAccess = dataAccess(false, 0);
+		send(write(7), DataAccessActor.REPLACE_ONE, dataAccess);
+		send(write(7), DataAccessActor.UPDATE_ONE, dataAccess);
+		send(PersistentDTO.create(7L, null, client), DataAccessActor.DELETE_ONE, dataAccess);
+
+		assertEquals(List.of("FIND_NONE(7)", "FIND_NONE(7)", "FIND_NONE(7)"), await(3));
+		assertEquals(List.of(), rest());
+		assertEquals(0, count());
+
+		send(write(1), DataAccessActor.INSERT_ONE, dataAccess);
+		send(write(1), DataAccessActor.UPDATE_ONE, dataAccess);
+		send(PersistentDTO.create(1L, null, client), DataAccessActor.DELETE_ONE, dataAccess);
+		assertEquals(List.of("SUCCESS(1)", "SUCCESS(1)", "SUCCESS(1)"), await(3));
+	}
+
+	// M4: in batch mode, a missing key does not fail the ordered batch
+	@Test
+	public void test_missing_key_in_batch_mode() throws InterruptedException {
+		ActorId dataAccess = dataAccess(true, 3);
+		send(write(1), DataAccessActor.INSERT_ONE, dataAccess);
+		send(PersistentDTO.create(99L, null, client), DataAccessActor.DELETE_ONE, dataAccess);
+		send(write(7), DataAccessActor.UPDATE_ONE, dataAccess);
+
+		List<String> result = await(3);
+		assertTrue(result.toString(), result.containsAll(List.of("SUCCESS(1)", "FIND_NONE(99)", "FIND_NONE(7)")));
+		assertEquals(1, count());
+	}
+
 	// M1
 	@Test
 	public void test_entity_name_from_the_context() throws InterruptedException {

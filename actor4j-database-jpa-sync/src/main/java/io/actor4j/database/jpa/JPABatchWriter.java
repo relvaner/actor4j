@@ -38,4 +38,11 @@ public interface JPABatchWriter<K, E> extends AutoCloseable {
 		Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError) {
 		return new JPABatchWriterImpl<K, E>(entityManagerFactory, entityType, ordered, size, onSuccess, onError);
 	}
+
+	// onNotFound: replace, update and delete of a missing key (nothing is changed)
+	public static <K, E> JPABatchWriter<K, E> create(EntityManagerFactory entityManagerFactory, Class<E> entityType, boolean ordered, int size,
+		Consumer<List<Pair<UUID, JPAWriteModel>>> onSuccess, BiConsumer<List<Pair<UUID, JPAWriteModel>>, Throwable> onError,
+		Consumer<List<Pair<UUID, JPAWriteModel>>> onNotFound) {
+		return new JPABatchWriterImpl<K, E>(entityManagerFactory, entityType, ordered, size, onSuccess, onError, onNotFound);
+	}
 }

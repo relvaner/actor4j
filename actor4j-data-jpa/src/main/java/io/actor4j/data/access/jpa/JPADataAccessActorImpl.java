@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import io.actor4j.core.actors.ActorRef;
@@ -61,7 +60,8 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	protected final Map<UUID, BatchWriterRequest<K, E>> batchWriterRequests; // write id -> request
 	
 	protected JPABatchWriter<K, E> selectedBatchWriter;
-	
+	protected boolean notFound; // the current message was answered with FIND_NONE
+
 	public JPADataAccessActorImpl(ActorRef dataAccess, String persistenceUnitName, boolean batchWrite, 
 			boolean batchOrdered, int batchSize, Class<E> entityType, int maxFailures, long resetTimeout) {
 		this(dataAccess, persistenceUnitName, batchWrite, batchOrdered, batchSize, Map.of(entityName(entityType), entityType), maxFailures, resetTimeout);
@@ -118,14 +118,20 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	}
 
 	// in batch mode the batch writer opens its own EntityManager per transaction
-	protected void write(Consumer<EntityManager> operation) {
+	protected <T> T write(Function<EntityManager, T> operation) {
 		if (selectedBatchWriter!=null)
-			operation.accept(null);
+			return operation.apply(null);
 		else
-			withEntityManager(entityManager -> {
-				operation.accept(entityManager);
-				return null;
-			});
+			return withEntityManager(operation);
+	}
+
+	// replace, update or delete of a missing key: nothing changed, answered with FIND_NONE instead of SUCCESS
+	// (in batch mode reported by the batch writer)
+	protected void found(boolean found, ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		if (!found) {
+			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+			notFound = true;
+		}
 	}
 
 	// writes the buffered requests first (their senders get a reply), then closes the factory
@@ -153,6 +159,14 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 		}
 	}
 
+	public void onBatchWriterNotFound(List<Pair<UUID, JPAWriteModel>> requests) {
+		for (Pair<UUID, JPAWriteModel> pair : requests) {
+			BatchWriterRequest<K, E> originRequest = batchWriterRequests.remove(pair.a()/*write id*/);
+			if (originRequest!=null)
+				dataAccess.tell(originRequest.dto(), FIND_NONE, originRequest.source(), originRequest.interaction());
+		}
+	}
+
 	public void onBatchWriterError(List<Pair<UUID, JPAWriteModel>> requests, Throwable t) {
 		for (Pair<UUID, JPAWriteModel> pair : requests) {
 			BatchWriterRequest<K, E> originRequest = batchWriterRequests.remove(pair.a()/*write id*/);
@@ -164,6 +178,7 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	@Override
 	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		selectedBatchWriter = null;
+		notFound = false;
 
 		if (batchWrite && !(msg.tag()==FLUSH && dto.context()==null)) { // FLUSH without context: all entity types
 			Pair<String, Class<E>> pair = getEntityTypeAsPair(dto.context());
@@ -171,7 +186,7 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 			JPABatchWriter<K, E> batchWriter = batchWriters.get(pair.key());
 			if (batchWriter==null) {
 				batchWriter = JPABatchWriter.create(entityManagerFactory, pair.value(),batchOrdered, batchSize, 
-					this::onBatchWriterSuccess, this::onBatchWriterError);
+					this::onBatchWriterSuccess, this::onBatchWriterError, this::onBatchWriterNotFound);
 				batchWriters.put(pair.key(), batchWriter);
 			}
 			
@@ -244,28 +259,34 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	public void insertOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		UUID id = register(msg, dto);
 		if (msg.tag()==ActorWithCache.SET)
-			write(entityManager -> JPAOperations.replaceOne(dto.entity(), id, entityManager, selectedBatchWriter));
+			write(entityManager -> {
+				JPAOperations.upsertOne(dto.entity(), id, entityManager, selectedBatchWriter);
+				return null;
+			});
 		else
-			write(entityManager -> JPAOperations.insertOne(dto.entity(), id, entityManager, selectedBatchWriter));
+			write(entityManager -> {
+				JPAOperations.insertOne(dto.entity(), id, entityManager, selectedBatchWriter);
+				return null;
+			});
 	}
 
 	@Override
 	public void replaceOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		UUID id = register(msg, dto);
-		write(entityManager -> JPAOperations.replaceOne(dto.entity(), id, entityManager, selectedBatchWriter));
+		found(write(entityManager -> JPAOperations.replaceOne(dto.entity(), id, entityManager, selectedBatchWriter)), msg, dto);
 	}
 
 	@Override
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		UUID id = register(msg, dto);
-		write(entityManager -> JPAOperations.updateOne(dto.entity(), id, entityManager, selectedBatchWriter));
+		found(write(entityManager -> JPAOperations.updateOne(dto.entity(), id, entityManager, selectedBatchWriter)), msg, dto);
 	}
 
 	@Override
 	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		Class<E> entityType = getEntityType(dto.context());
 		UUID id = register(msg, dto);
-		write(entityManager -> JPAOperations.deleteOne(dto.key(), entityType, id, entityManager, selectedBatchWriter));
+		found(write(entityManager -> JPAOperations.deleteOne(dto.key(), entityType, id, entityManager, selectedBatchWriter)), msg, dto);
 	}
 
 	@Override
@@ -287,7 +308,7 @@ public class JPADataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E> 
 	// reads answer with their result, in batch mode writes are answered by the batch writer
 	@Override
 	public void onSuccess(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		if (!batchWrite && !isRead(msg.tag()))
+		if (!batchWrite && !isRead(msg.tag()) && !notFound)
 			dataAccess.tell(PersistentSuccessDTO.of(dto, msg.tag()), SUCCESS, msg.source(), msg.interaction());
 	}
 

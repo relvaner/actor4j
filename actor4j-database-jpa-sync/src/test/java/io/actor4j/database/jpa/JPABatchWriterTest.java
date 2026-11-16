@@ -134,18 +134,57 @@ public class JPABatchWriterTest {
 
 	@Test
 	public void test_ordered_is_all_or_nothing() {
+		JPAOperations.insertOne(new Person(5L, "x"), UUID.randomUUID(), entityManager);
+
 		try (JPABatchWriter<Long, Person> writer = writer(true, 2)) {
 			writer.write(insert(1), UUID.randomUUID());
-			writer.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_DELETE_ONE, 99L), UUID.randomUUID());
+			writer.write(insert(5), UUID.randomUUID()); // duplicate
 
-			assertEquals(List.of(1L, 99L), failed);
-			assertEquals(0, count());
-			assertFalse(entityManager.getTransaction().isActive());
+			assertEquals(List.of(1L, 5L), failed);
+			assertEquals(1, count());
 
 			writer.write(insert(2), UUID.randomUUID());
 			writer.write(insert(3), UUID.randomUUID());
 			assertEquals(List.of(2L, 3L), succeeded);
 		}
+	}
+
+	// M4: a missing key is no failure, it changes nothing and is reported as not found
+	@Test
+	public void test_missing_key_in_batch() {
+		JPAOperations.insertOne(new Person(1L, "a"), UUID.randomUUID(), entityManager);
+		List<Long> notFound = new ArrayList<>();
+
+		try (JPABatchWriter<Long, Person> writer = JPABatchWriter.create(factory, Person.class, true, 4,
+			batch -> batch.forEach(pair -> succeeded.add(id(pair))), (batch, t) -> batch.forEach(pair -> failed.add(id(pair))),
+			batch -> batch.forEach(pair -> notFound.add(id(pair))))) {
+
+			writer.write(insert(2), UUID.randomUUID());
+			writer.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_UPDATE_ONE, new Person(7L, "ghost")), UUID.randomUUID());
+			writer.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_DELETE_ONE, 99L), UUID.randomUUID());
+			writer.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_DELETE_ONE, 1L), UUID.randomUUID());
+		}
+
+		assertEquals(List.of(2L, 1L), succeeded);
+		assertEquals(List.of(7L, 99L), notFound);
+		assertTrue(failed.isEmpty());
+		assertEquals(1, count()); // 2 inserted, 1 deleted, 7 not created
+	}
+
+	// M4, direct
+	@Test
+	public void test_missing_key_direct() {
+		JPAOperations.insertOne(new Person(1L, "a"), UUID.randomUUID(), entityManager);
+
+		assertFalse(JPAOperations.updateOne(new Person(7L, "ghost"), UUID.randomUUID(), entityManager));
+		assertFalse(JPAOperations.replaceOne(new Person(7L, "ghost"), UUID.randomUUID(), entityManager));
+		assertFalse(JPAOperations.deleteOne(99L, Person.class, UUID.randomUUID(), entityManager));
+		assertTrue(JPAOperations.updateOne(new Person(1L, "b"), UUID.randomUUID(), entityManager));
+		assertEquals(1, count());
+
+		JPAOperations.upsertOne(new Person(7L, "set"), UUID.randomUUID(), entityManager); // SET creates it
+		assertTrue(JPAOperations.deleteOne(7L, Person.class, UUID.randomUUID(), entityManager));
+		assertEquals(1, count());
 	}
 
 	// H3
@@ -172,7 +211,7 @@ public class JPABatchWriterTest {
 			batch -> batch.forEach(pair -> succeeded.add(id(pair))), (batch, t) -> { throw new NullPointerException("in onError"); })) {
 
 			writer.write(insert(1), UUID.randomUUID());
-			assertThrows(NullPointerException.class, () -> writer.write(JPAWriteModel.of(RESERVED_DATA_ACCESS_DELETE_ONE, 99L), UUID.randomUUID()));
+			assertThrows(NullPointerException.class, () -> writer.write(insert(1), UUID.randomUUID())); // duplicate
 			writer.write(insert(3), UUID.randomUUID());
 			writer.write(insert(4), UUID.randomUUID()); // automatic flush still works
 
@@ -246,8 +285,9 @@ public class JPABatchWriterTest {
 	@Test
 	public void test_failed_operation_leaves_no_transaction() {
 		JPAOperations.insertOne(new Person(1L, "a"), UUID.randomUUID(), entityManager);
+		entityManager.clear();
 
-		assertThrows(RuntimeException.class, () -> JPAOperations.deleteOne(99L, Person.class, UUID.randomUUID(), entityManager));
+		assertThrows(RuntimeException.class, () -> JPAOperations.insertOne(new Person(1L, "dup"), UUID.randomUUID(), entityManager));
 		assertFalse(entityManager.getTransaction().isActive());
 
 		JPAOperations.insertOne(new Person(2L, "b"), UUID.randomUUID(), entityManager);
