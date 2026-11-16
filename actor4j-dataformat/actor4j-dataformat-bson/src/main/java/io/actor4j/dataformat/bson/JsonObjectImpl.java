@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
- * 
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,8 +15,9 @@
  */
 package io.actor4j.dataformat.bson;
 
-import java.util.HashMap;
-import java.util.List;
+import static io.actor4j.dataformat.bson.JsonBsonConverter.*;
+
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,29 +31,28 @@ public class JsonObjectImpl implements JsonObject {
 
 	public JsonObjectImpl() {
 		super();
-		
+
 		document = new Document();
 	}
-	
+
+	// Document (shared), JsonObject, Map or record, everything else is an IllegalArgumentException
 	public JsonObjectImpl(Object obj) {
 		super();
-		
-		if (obj instanceof Document)
-			document = (Document)obj;
-		else 
-			throw new UnsupportedOperationException();
+
+		document = toDocument(obj);
 	}
-	
+
+	// invalid JSON is an IllegalArgumentException
 	public JsonObjectImpl(String json) {
 		super();
 
-		document = Document.parse(json);
+		document = parseObject(json);
 	}
-	
+
 	public static JsonObject of() {
 		return new JsonObjectImpl();
 	}
-	
+
 	public static JsonObject of(String key, Object value) {
 		return new JsonObjectImpl().put(key, value);
 	}
@@ -63,58 +63,45 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public Object getValue(String key) {
-		return document.get(key);
+		return toJava(document.get(key));
 	}
 
 	@Override
 	public String getString(String key) {
-		return document.getString(key);
+		return asString(document.get(key));
 	}
 
 	@Override
 	public Integer getInteger(String key) {
-		return document.getInteger(key);
+		Number result = asNumber(document.get(key));
+		return result!=null ? result.intValue() : null;
 	}
 
 	@Override
 	public Long getLong(String key) {
-		return document.getLong(key);
+		Number result = asNumber(document.get(key));
+		return result!=null ? result.longValue() : null;
 	}
 
 	@Override
 	public Double getDouble(String key) {
-		return document.getDouble(key);
+		Number result = asNumber(document.get(key));
+		return result!=null ? result.doubleValue() : null;
 	}
 
 	@Override
 	public Boolean getBoolean(String key) {
-		return document.getBoolean(key);
+		return asBoolean(document.get(key));
 	}
 
 	@Override
 	public JsonObject getJsonObject(String key) {
-		Document result = null;
-		try {
-			result = document.get(key, Document.class);
-		}
-		catch(ClassCastException e) {
-			e.printStackTrace();
-		}
-
-		return result!=null ? new JsonObjectImpl(result) : null;
+		return asJsonObject(document.get(key));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public JsonArray getJsonArray(String key) {
-		List<Object> result = null;
-		try {
-			result = document.get(key, List.class);
-		} catch(ClassCastException e) {
-			e.printStackTrace();
-		}
-
-		return result!=null ? new JsonArrayImpl(result) : null;
+		return asJsonArray(document.get(key));
 	}
 
 	@Override
@@ -129,27 +116,25 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public JsonObject put(String key, Object value) {
-		if (value instanceof JsonObjectImpl impl)
-			document.put(key, impl.document);
-		if (value instanceof JsonArrayImpl impl)
-			document.put(key, impl.list);
-		else
-			document.put(key, value);
-		
+		document.put(key, toJsonBson(value));
+
 		return this;
 	}
 
 	@Override
 	public Object remove(String key) {
-		return document.remove(key);
+		return toJava(document.remove(key));
 	}
 
+	// works with every JsonObject implementation, nested values are copied
 	@Override
 	public JsonObject mergeIn(JsonObject other) {
-		if (other!=null && other instanceof JsonObjectImpl other_)
-			for (String key : other_.document.keySet())
-				put(key, other.getValue(key));
-			
+		if (other!=null) {
+			Document source = toDocument(other);
+			for (String key : source.keySet())
+				document.put(key, copy(source.get(key)));
+		}
+
 		return this;
 	}
 
@@ -160,17 +145,13 @@ public class JsonObjectImpl implements JsonObject {
 
 	@Override
 	public String encodePrettily() {
-		return document.toJson();
+		return document.toJson(PRETTY);
 	}
 
+	// a copy (keeps the order), changes do not affect this object
 	@Override
 	public Map<String, Object> getMap() {
-		Map<String, Object> result = new HashMap<>();
-		
-		for (String key : document.keySet())
-			result.put(key, document.get(key));
-		
-		return result;
+		return new LinkedHashMap<>(document);
 	}
 
 	@Override
@@ -188,6 +169,22 @@ public class JsonObjectImpl implements JsonObject {
 	@Override
 	public boolean isEmpty() {
 		return document.isEmpty();
+	}
+
+	// equal content (numbers by value, nested values deep)
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof JsonObjectImpl other && same(document, other.document);
+	}
+
+	@Override
+	public int hashCode() {
+		return hash(document);
+	}
+
+	@Override
+	public String toString() {
+		return encode();
 	}
 
 	@Override

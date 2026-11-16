@@ -15,14 +15,17 @@ import org.bson.io.BasicOutputBuffer;
 public final class BsonUtils {
 	private static final Codec<Document> DOCUMENT_CODEC = new DocumentCodec();
 	
-	public static byte[] encode(Document document) {	
-		BasicOutputBuffer buffer = new BasicOutputBuffer();
-		DOCUMENT_CODEC.encode(new BsonBinaryWriter(buffer), document, EncoderContext.builder().isEncodingCollectibleDocument(true).build());
-		
-		return buffer.toByteArray();
+	public static byte[] encode(Document document) {
+		try (BasicOutputBuffer buffer = new BasicOutputBuffer(); BsonBinaryWriter writer = new BsonBinaryWriter(buffer)) {
+			DOCUMENT_CODEC.encode(writer, document, EncoderContext.builder().isEncodingCollectibleDocument(true).build());
+
+			return buffer.toByteArray();
+		}
 	}
-		
+
 	public static Document decode(byte[] src) {
-		return DOCUMENT_CODEC.decode(new BsonBinaryReader(ByteBuffer.wrap(src)), DecoderContext.builder().build());
+		try (BsonBinaryReader reader = new BsonBinaryReader(ByteBuffer.wrap(src))) {
+			return DOCUMENT_CODEC.decode(reader, DecoderContext.builder().build());
+		}
 	}
 }

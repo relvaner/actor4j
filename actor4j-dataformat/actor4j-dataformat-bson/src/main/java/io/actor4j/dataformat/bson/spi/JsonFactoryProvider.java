@@ -44,10 +44,9 @@ public class JsonFactoryProvider implements JsonFactoryService {
 		return new JsonArrayImpl();
 	}
 	
-	@Deprecated
 	@Override
 	public JsonArray createJsonArray(Object obj) {
-		throw new UnsupportedOperationException();
+		return new JsonArrayImpl(obj);
 	}
 
 	@Override
@@ -55,9 +54,8 @@ public class JsonFactoryProvider implements JsonFactoryService {
 		return new JsonArrayImpl(list);
 	}
 
-	@Deprecated
 	@Override
 	public JsonArray createJsonArray(String json) {
-		throw new UnsupportedOperationException();
+		return new JsonArrayImpl(json);
 	}
 }
