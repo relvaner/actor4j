@@ -153,15 +153,11 @@
 		<module>actor4j-verification</module>
 
 		<module>actor4j-analyzer</module>
-		<module>actor4j-analyzer-swing</module>
 		<module>actor4j-analyzer-fx</module>
-
-		<module>actor4j-lang</module>
 
 		<module>actor4j-web</module>
 
 		<module>actor4j-streams</module>
-		<module>actor4j-streams-reactive-bridge</module>
 		<module>actor4j-rx</module>
 
 		<module>actor4j-functions</module>
