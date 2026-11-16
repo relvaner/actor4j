@@ -17,6 +17,7 @@ package io.actor4j.dataformat.json.jackson;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Proxy;
 import java.util.Iterator;
 import java.util.List;
 
@@ -67,7 +68,8 @@ public class JsonJacksonContractTest {
 	@Test
 	public void test_foreign_implementation_by_content() {
 		// a JsonObject of another implementation is taken by its content, not as a bean
-		JsonObject foreign = new ForeignJsonObject("{\"k\":\"v\",\"n\":[1,2]}");
+		JsonObject foreign = foreign("{\"k\":\"v\",\"n\":[1,2]}");
+		assertFalse(foreign instanceof JsonObjectImpl);
 
 		assertEquals(JsonObject.create("{\"k\":\"v\",\"n\":[1,2]}"), JsonObject.create().mergeIn(foreign));
 		assertEquals("{\"f\":{\"k\":\"v\",\"n\":[1,2]}}", JsonObject.create().put("f", foreign).encode());
@@ -96,9 +98,9 @@ public class JsonJacksonContractTest {
 	}
 
 	// a JsonObject that is not a JsonObjectImpl, delegating to one
-	protected static class ForeignJsonObject extends JsonObjectImpl {
-		public ForeignJsonObject(String json) {
-			super(json);
-		}
+	protected static JsonObject foreign(String json) {
+		JsonObject delegate = new JsonObjectImpl(json);
+		return (JsonObject)Proxy.newProxyInstance(JsonObject.class.getClassLoader(), new Class<?>[] {JsonObject.class},
+			(proxy, method, args) -> method.invoke(delegate, args));
 	}
 }
