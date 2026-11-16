@@ -18,6 +18,7 @@ package io.actor4j.agents.langchain4j.pods;
 import java.util.UUID;
 
 import io.actor4j.agents.pods.AgentFunctionPod;
+import io.actor4j.core.actors.Actor;
 import io.actor4j.core.id.ActorId;
 import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.utils.Reply;
@@ -39,7 +40,7 @@ public abstract class ChatModelPod extends AgentFunctionPod {
 	
 	@Override
 	public void preStart(FunctionPodContext ctx) {
-		resourceId = ctx.host().getSystem().addActor(() -> createChatModelResourceActor(chatModelConfig));
+		resourceId = ((Actor)ctx.host()).addChild(() -> createChatModelResourceActor(chatModelConfig));
 	}
 	
 	@Override

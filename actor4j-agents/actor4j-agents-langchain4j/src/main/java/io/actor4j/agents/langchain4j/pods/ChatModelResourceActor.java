@@ -45,7 +45,7 @@ public abstract class ChatModelResourceActor extends ResourceActor {
 	}
 
 	public ChatModelResourceActor(ChatModelConfig chatModelConfig) {
-		super(true);
+		super();
 		this.chatModelConfig = chatModelConfig;
 	}
 
