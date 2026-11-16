@@ -33,7 +33,7 @@ import jakarta.persistence.EntityTransaction;
 // each transaction uses its own EntityManager from the factory (no growing persistence context, no managed entities afterwards)
 public class JPABatchWriterImpl<K, E> implements JPABatchWriter<K, E> {
 	protected final EntityManagerFactory entityManagerFactory;
-protected final Class<E> entityType;
+	protected final Class<E> entityType;
 
 	protected List<Pair<UUID, JPAWriteModel>> requests;
 	protected final boolean ordered;
@@ -50,7 +50,7 @@ protected final Class<E> entityType;
 			throw new IllegalArgumentException("size must be at least 1: "+size);
 
 		this.entityManagerFactory = entityManagerFactory;
-this.entityType = entityType;
+		this.entityType = entityType;
 		this.ordered = ordered;
 		this.size = size;
 		this.onSuccess = onSuccess;
