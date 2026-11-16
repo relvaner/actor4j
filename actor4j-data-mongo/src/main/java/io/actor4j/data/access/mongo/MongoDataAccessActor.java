@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,5 +64,10 @@ public class MongoDataAccessActor<K, E> extends DataAccessActor<K, E> {
 	@Override
 	public void receive(ActorMessage<?> message) {
 		impl.receive(message);
+	}
+	
+	@Override
+	public void postStop() {
+		impl.close();
 	}
 }

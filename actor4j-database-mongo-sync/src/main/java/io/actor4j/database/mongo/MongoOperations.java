@@ -32,6 +32,7 @@ import com.mongodb.client.model.DeleteOneModel;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.ReplaceOneModel;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOneModel;
 
 import io.actor4j.core.json.ObjectMapper;
@@ -114,6 +115,16 @@ public final class MongoOperations {
 		else {
 			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
 			collection.replaceOne(filter, document);
+		}
+	}
+	
+	// replaces the document or inserts it if there is none (idempotent, also in the bulk writer)
+	public static void upsertOne(Bson filter, Document document, UUID id, MongoClient client, String databaseName, String collectionName, MongoBufferedBulkWriter bulkWriter) {
+		if (bulkWriter!=null)
+			bulkWriter.write(new ReplaceOneModel<>(filter, document, new ReplaceOptions().upsert(true)), id);
+		else {
+			MongoCollection<Document> collection = client.getDatabase(databaseName).getCollection(collectionName);
+			collection.replaceOne(filter, document, new ReplaceOptions().upsert(true));
 		}
 	}
 	
