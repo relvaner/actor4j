@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.json.jackson.features;
+package io.actor4j.dataformat.json.jackson.features;
 
 import static org.junit.Assert.*;
 
@@ -28,7 +28,7 @@ import io.actor4j.core.json.JsonObject;
 import io.actor4j.dataformat.json.jackson.JsonArrayImpl;
 import io.actor4j.dataformat.json.jackson.JsonObjectImpl;
 
-public class JsonFactoryFeature {
+public class JsonFactoryTest {
 	record Plan(String summary, List<String> steps) {}
 
 	@Test

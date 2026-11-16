@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.actor4j.json.jackson.features;
+package io.actor4j.dataformat.json.jackson.features;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,7 +29,7 @@ import io.actor4j.core.json.ObjectMapper;
 import io.actor4j.core.utils.GenericType;
 import io.actor4j.core.utils.Pair;
 
-public class ObjectMapperFeature {
+public class ObjectMapperTest {
 	@Test
 	public void test_01() {
 		ObjectMapper objectMapper = ObjectMapper.create();

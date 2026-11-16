@@ -8,12 +8,12 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>actor4j-dataformat-json-org</artifactId>
-	
+
 	<dependencies>
-    	<dependency>
-    		<groupId>org.json</groupId>
-    		<artifactId>json</artifactId>
-    		<version>20260814</version>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20260814</version>
 		</dependency>
-    </dependencies>
+	</dependencies>
 </project>

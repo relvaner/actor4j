@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2024, David A. Bauer. All rights reserved.
- * 
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,59 +15,49 @@
  */
 package io.actor4j.dataformat.json.org;
 
+import static io.actor4j.dataformat.json.org.JsonOrgConverter.*;
+
 import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import io.actor4j.core.json.JsonArray;
 import io.actor4j.core.json.JsonObject;
 
 public class JsonArrayImpl implements JsonArray {
 	protected JSONArray jsonArray;
-	
+
 	public JsonArrayImpl() {
 		super();
-		
+
 		jsonArray = new JSONArray();
 	}
-	
+
+	// JSONArray, JsonArray, Collection or array, everything else is an IllegalArgumentException
 	public JsonArrayImpl(Object obj) {
 		super();
-		
-		if (obj instanceof JSONArray)
-			jsonArray = (JSONArray)obj;
-		else
-			jsonArray = new JSONArray();
+
+		jsonArray = toJSONArray(obj);
 	}
-	
+
 	public JsonArrayImpl(List<?> list) {
 		super();
-		
-		try {
-			jsonArray = new JSONArray(list);
-		} catch(JSONException e) {
-			jsonArray = new JSONArray();
-			e.printStackTrace();
-		}
+
+		jsonArray = toJSONArray(list);
 	}
-	
+
+	// invalid JSON is an IllegalArgumentException
 	public JsonArrayImpl(String json) {
 		super();
-		
-		try {
-			jsonArray = new JSONArray(json);
-		} catch(JSONException e) {
-			jsonArray = new JSONArray();
-			e.printStackTrace();
-		}
+
+		jsonArray = parseArray(json);
 	}
-	
+
 	public JsonArrayImpl(JSONArray arr) {
 		super();
-		
+
 		if (arr!=null)
 			jsonArray = arr;
 		else
@@ -76,179 +66,118 @@ public class JsonArrayImpl implements JsonArray {
 
 	@Override
 	public Object getValue(int pos) {
-		Object result = null;
-		try {
-			result = jsonArray.get(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		return toJava(jsonArray.opt(pos));
 	}
 
 	@Override
 	public String getString(int pos) {
-		String result = null;
-		try {
-			result = jsonArray.getString(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		return asString(jsonArray.opt(pos));
 	}
 
 	@Override
 	public Integer getInteger(int pos) {
-		Integer result = null;
-		try {
-			result = jsonArray.getInt(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		Number result = asNumber(jsonArray.opt(pos));
+		return result!=null ? result.intValue() : null;
 	}
 
 	@Override
 	public Long getLong(int pos) {
-		Long result = null;
-		try {
-			result = jsonArray.getLong(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		Number result = asNumber(jsonArray.opt(pos));
+		return result!=null ? result.longValue() : null;
 	}
 
 	@Override
 	public Double getDouble(int pos) {
-		Double result = null;
-		try {
-			result = jsonArray.getDouble(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		Number result = asNumber(jsonArray.opt(pos));
+		return result!=null ? result.doubleValue() : null;
 	}
 
 	@Override
 	public Boolean getBoolean(int pos) {
-		Boolean result = null;
-		try {
-			result = jsonArray.getBoolean(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		return asBoolean(jsonArray.opt(pos));
 	}
 
 	@Override
 	public JsonObject getJsonObject(int pos) {
-		JSONObject result = null;
-		try {
-			result = jsonArray.getJSONObject(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result!=null ? new JsonObjectImpl(result) : null;
+		return asJsonObject(jsonArray.opt(pos));
 	}
 
 	@Override
 	public JsonArray getJsonArray(int pos) {
-		JSONArray result = null;
-		try {
-			result = jsonArray.getJSONArray(pos);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result!=null ? new JsonArrayImpl(result) : null;
+		return asJsonArray(jsonArray.opt(pos));
 	}
 
 	@Override
 	public JsonArray add(Object value) {
 		try {
-			if (value instanceof JsonObjectImpl impl)
-				jsonArray.put(impl.jsonObject);
-			else if (value instanceof JsonArrayImpl impl)
-				jsonArray.put(impl.jsonArray);
-			else
-				jsonArray.put(value);
+			jsonArray.put(toJsonOrg(value));
 		} catch(JSONException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage(), e);
 		}
-		
+
 		return this;
 	}
 
+	// inserts at pos (the following elements move up), pos>=size appends
 	@Override
 	public JsonArray add(int pos, Object value) {
+		if (pos<0)
+			throw new IndexOutOfBoundsException(pos);
+
 		try {
-			if (value instanceof JsonObjectImpl impl)
-				jsonArray.put(pos, impl.jsonObject);
-			else if (value instanceof JsonArrayImpl impl)
-				jsonArray.put(pos, impl.jsonArray);
-			else
-				jsonArray.put(pos, value);
+			Object element = toJsonOrg(value);
+			int size = jsonArray.length();
+			if (pos>=size)
+				jsonArray.put(element);
+			else {
+				jsonArray.put(jsonArray.get(size-1));
+				for (int i=size-1; i>pos; i--)
+					jsonArray.put(i, jsonArray.get(i-1));
+				jsonArray.put(pos, element);
+			}
 		} catch(JSONException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage(), e);
 		}
-		
+
 		return this;
 	}
 
+	// works with every JsonArray implementation, nested values keep their type
 	@Override
 	public JsonArray addAll(JsonArray array) {
-		if (array!=null && array instanceof JsonArrayImpl array_)
-			for (Object value : array_.jsonArray.toList()) {
-				try {
-					add(value);
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-			}
-			
+		if (array!=null) {
+			JSONArray source = toJSONArray(array);
+			for (int i=0; i<source.length(); i++)
+				jsonArray.put(source.opt(i));
+		}
+
 		return this;
 	}
 
 	@Override
 	public JsonArray set(int pos, Object value) {
 		try {
-			if (value instanceof JsonObjectImpl impl)
-				jsonArray.put(pos, impl.jsonObject);
-			else if (value instanceof JsonArrayImpl impl)
-				jsonArray.put(pos, impl.jsonArray);
-			else
-				jsonArray.put(pos, value);
+			jsonArray.put(pos, toJsonOrg(value));
 		} catch(JSONException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage(), e);
 		}
-		
+
 		return this;
 	}
 
 	@Override
 	public boolean contains(Object value) {
-		boolean result = false;
+		Object element = toJsonOrg(value);
+		for (int i=0; i<jsonArray.length(); i++)
+			if (same(jsonArray.opt(i), element))
+				return true;
 
-		if (value instanceof JsonObjectImpl impl)
-			result = jsonArray.toList().contains(impl.jsonObject);
-		else if (value instanceof JsonArrayImpl impl)
-			result = jsonArray.toList().contains(impl.jsonArray);
-		else
-			result = jsonArray.toList().contains(value);
-
-		return result;
+		return false;
 	}
 
 	@Override
 	public Object remove(int pos) {
-		return jsonArray.remove(pos);
+		return toJava(jsonArray.remove(pos));
 	}
 
 	@Override
@@ -261,6 +190,7 @@ public class JsonArrayImpl implements JsonArray {
 		return jsonArray.isEmpty();
 	}
 
+	// a copy, changes do not affect this array
 	@Override
 	public List<Object> getList() {
 		return jsonArray.toList();
@@ -269,7 +199,7 @@ public class JsonArrayImpl implements JsonArray {
 	@Override
 	public JsonArray clear() {
 		jsonArray.clear();
-		
+
 		return this;
 	}
 
@@ -280,24 +210,46 @@ public class JsonArrayImpl implements JsonArray {
 
 	@Override
 	public String encodePrettily() {
-		String result = null;
-		try {
-			result = jsonArray.toString(2);
-		} catch(JSONException e) {
-			e.printStackTrace();
-		}
-		
-		return result;
+		return jsonArray.toString(2);
 	}
-	
+
+	// equal content (numbers by value, nested values deep)
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof JsonArrayImpl other && jsonArray.similar(other.jsonArray);
+	}
+
+	@Override
+	public int hashCode() {
+		return hash(jsonArray);
+	}
+
 	@Override
 	public String toString() {
 		return jsonArray.toString();
 	}
 
+	// nested values wrapped as JsonObject/JsonArray, JSON null as null
 	@Override
 	public Iterator<Object> iterator() {
-		return jsonArray.iterator();
+		Iterator<Object> iterator = jsonArray.iterator();
+
+		return new Iterator<Object>() {
+			@Override
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			@Override
+			public Object next() {
+				return toJava(iterator.next());
+			}
+
+			@Override
+			public void remove() {
+				iterator.remove();
+			}
+		};
 	}
 
 	@Override
