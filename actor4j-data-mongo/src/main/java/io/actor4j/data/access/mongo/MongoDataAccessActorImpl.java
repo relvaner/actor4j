@@ -56,6 +56,7 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	protected final Map<UUID, BulkWriterRequest<K, E>> bulkWriterRequests; // write id -> request
 
 	protected MongoBufferedBulkWriter selectedBulkWriter;
+	protected boolean notFound; // the current message was answered with FIND_NONE
 
 	public MongoDataAccessActorImpl(ActorRef dataAccess, MongoClient client, String databaseName,
 			boolean bulkWrite, boolean bulkOrdered, int bulkSize, Class<E> entityType, int maxFailures, long resetTimeout) {
@@ -102,7 +103,8 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	@Override
 	public void onReceiveMessage(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		selectedBulkWriter = null;
-
+		notFound = false;
+		
 		if (bulkWrite)
 			if (dto.context() instanceof DocPersistentContext ctx) {
 				MongoBufferedBulkWriter bulkWriter = bulkWriters.get(ctx.collectionName());
@@ -192,7 +194,7 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 			upsertOne(msg, dto);
 		else if (dto.context() instanceof DocPersistentContext ctx) {
 			Document document = convertToDocument(dto.value());
-			MongoOperations.replaceOne(filterWithPrimary(dto.key(), ctx), document, register(msg, dto), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+			found(MongoOperations.replaceOne(filterWithPrimary(dto.key(), ctx), document, register(msg, dto), client, databaseName, ctx.collectionName(), selectedBulkWriter), msg, dto);
 		}
 		else
 			throw new IllegalArgumentException("Wrong context");
@@ -211,7 +213,7 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	public void updateOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (dto.context() instanceof DocPersistentContext ctx) {
 			Document update = Document.parse(ctx.update().encode());
-			MongoOperations.updateOne(filterWithPrimary(dto.key(), ctx), update, register(msg, dto), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+			found(MongoOperations.updateOne(filterWithPrimary(dto.key(), ctx), update, register(msg, dto), client, databaseName, ctx.collectionName(), selectedBulkWriter), msg, dto);
 		}
 		else
 			throw new IllegalArgumentException("Wrong context");
@@ -220,9 +222,18 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	@Override
 	public void deleteOne(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
 		if (dto.context() instanceof DocPersistentContext ctx)
-			MongoOperations.deleteOne(filterWithPrimary(dto.key(), ctx), register(msg, dto), client, databaseName, ctx.collectionName(), selectedBulkWriter);
+			found(MongoOperations.deleteOne(filterWithPrimary(dto.key(), ctx), register(msg, dto), client, databaseName, ctx.collectionName(), selectedBulkWriter), msg, dto);
 		else
 			throw new IllegalArgumentException("Wrong context");
+	}
+
+	// replace, update or delete of a missing key: nothing changed, answered with FIND_NONE instead of SUCCESS
+	// (in bulk mode always found, the bulk result has only totals)
+	protected void found(boolean found, ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
+		if (!found) {
+			dataAccess.tell(dto, FIND_NONE, msg.source(), msg.interaction());
+			notFound = true;
+		}
 	}
 
 	// FLUSH with a context writes this collection, without a context all collections
@@ -244,7 +255,7 @@ public class MongoDataAccessActorImpl<K, E> extends BaseDataAccessActorImpl<K, E
 	// reads answer with their result, in bulk mode writes are answered by the bulk writer
 	@Override
 	public void onSuccess(ActorMessage<?> msg, PersistentDataAccessDTO<K, E> dto) {
-		if (!bulkWrite && !isRead(msg.tag()))
+		if (!bulkWrite && !isRead(msg.tag()) && !notFound)
 			dataAccess.tell(PersistentSuccessDTO.of(dto, msg.tag()), SUCCESS, msg.source(), msg.interaction());
 	}
 

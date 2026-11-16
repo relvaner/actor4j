@@ -239,6 +239,34 @@ public class MongoDataAccessActorTest {
 		assertEquals(1, count("R"));
 	}
 
+	// M2: replace, update and delete of a missing key change nothing and answer FIND_NONE
+	@Test
+	public void test_missing_key_is_not_found() throws InterruptedException {
+		ActorId dataAccess = dataAccess(false, 0);
+		DocPersistentContext update = new DefaultDocPersistentContext("key", null, JsonObject.create().put("$set", JsonObject.create().put("value", "w")), "R");
+		send(write("ghost", "R"), DataAccessActor.REPLACE_ONE, dataAccess);
+		send(PersistentDTO.create("ghost", null, update, client), DataAccessActor.UPDATE_ONE, dataAccess);
+		send(PersistentDTO.create("ghost", null, ctx("R"), client), DataAccessActor.DELETE_ONE, dataAccess);
+
+		assertEquals(List.of("FIND_NONE(ghost)", "FIND_NONE(ghost)", "FIND_NONE(ghost)"), await(3));
+		assertEquals(List.of(), rest());
+		assertEquals(0, count("R"));
+
+		send(write("k", "R"), DataAccessActor.INSERT_ONE, dataAccess);
+		send(PersistentDTO.create("k", null, update, client), DataAccessActor.UPDATE_ONE, dataAccess);
+		send(PersistentDTO.create("k", null, ctx("R"), client), DataAccessActor.DELETE_ONE, dataAccess);
+		assertEquals(List.of("SUCCESS(k)", "SUCCESS(k)", "SUCCESS(k)"), await(3));
+	}
+
+	// M2: in bulk mode the bulk result has only totals, a missing key counts as success
+	@Test
+	public void test_missing_key_in_bulk_mode_is_success() throws InterruptedException {
+		ActorId dataAccess = dataAccess(true, 1);
+		send(PersistentDTO.create("ghost", null, ctx("R"), client), DataAccessActor.DELETE_ONE, dataAccess);
+
+		assertEquals(List.of("SUCCESS(ghost)"), await(1));
+	}
+
 	// M3
 	@Test
 	public void test_filter_of_the_context_is_not_changed() throws InterruptedException {
