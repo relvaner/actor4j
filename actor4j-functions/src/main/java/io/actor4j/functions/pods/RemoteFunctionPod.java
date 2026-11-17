@@ -96,7 +96,7 @@ public abstract class RemoteFunctionPod extends ActorPod {
 		InternalServerCallback internalServerCallback = ((InternalActorSystem)host.getSystem()).getRuntimeConfig().internalServerCallback();
 		
 		if (remoteMessage.remotePodMessageDTO().reply() && internalServerCallback!=null)
-			internalServerCallback.accept(remoteMessage.replyAddress(), result.value(), result.tag());
+			internalServerCallback.accept(remoteMessage.replyTo(), result.value(), result.tag());
 	}
 	
 	public abstract PodRemoteFunction createPodRemoteFunction(FunctionPodContext contextFunction);
