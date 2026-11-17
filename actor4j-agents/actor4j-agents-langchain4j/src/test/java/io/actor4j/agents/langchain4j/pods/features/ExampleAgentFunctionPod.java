@@ -53,16 +53,12 @@ public class ExampleAgentFunctionPod extends ChatModelPod {
 			public void receive(ActorMessage<?> message) {
 				System.out.println("ChatModelResourceActor.receive: " + message.value());
 				
-				TaskAnalysis result = null;
 				try {
-					result = agent.analyze(message.valueAsString());
+					reply(message, agent.analyze(message.valueAsString()));
 				}
 				catch(Exception e) {
-					e.printStackTrace();
+					fail(message, e);
 				}
-				
-				if (result!=null)
-					tell(result, 0, message.source(), message.interaction());
 			}
 		};
 	}

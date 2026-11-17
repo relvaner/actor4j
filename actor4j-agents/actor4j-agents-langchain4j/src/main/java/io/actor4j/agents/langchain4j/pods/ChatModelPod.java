@@ -78,6 +78,10 @@ public abstract class ChatModelPod extends AgentFunctionPod {
 	}
 	
 	public Reply handleIoRequest(ActorMessage<?> message, UUID interaction, FunctionPodContext ctx) {
+		// with the interaction, the pending request is answered
+		if (message.value() instanceof Throwable t)
+			return Reply.failure(t, interaction);
+
 		return Reply.of(message.value(), 0, interaction);
 	}
 }

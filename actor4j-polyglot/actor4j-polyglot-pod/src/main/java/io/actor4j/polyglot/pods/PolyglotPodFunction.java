@@ -26,8 +26,11 @@ import io.actor4j.core.messages.ActorMessage;
 import io.actor4j.core.pods.PodContext;
 import io.actor4j.core.pods.functions.PodFunction;
 import io.actor4j.core.utils.Reply;
+import io.actor4j.core.utils.Reply.Failure;
 import io.actor4j.polyglot.api.utils.ValueToJsonMapper;
 import io.actor4j.polyglot.pods.runtime.PolyglotContextInternal;
+
+import static io.actor4j.core.logging.ActorLogger.*;
 
 public class PolyglotPodFunction extends PodFunction {
 	protected final PolyglotContextInternal contextPolyglot;
@@ -55,12 +58,17 @@ public class PolyglotPodFunction extends PodFunction {
 				Object mappedObject = defaultMapper.apply(resultValue);
 				
 				int tag = 0;
-				if (mappedObject!=null) {
-					if (mappedObject instanceof JsonObject obj && obj.containsKey(PolyglotContext.TAG))
+				boolean failure = false;
+				if (mappedObject instanceof JsonObject obj) {
+					if (obj.containsKey(PolyglotContext.TAG))
 						tag = obj.getInteger(PolyglotContext.TAG);
+					// the script reports a failure with {error: ..., tag: ...}, without tag: unspecified
+					failure = obj.containsKey(PolyglotContext.ERROR);
 				}
-				
-				if (tag>=0)
+
+				if (failure)
+					result = Reply.failure(mappedObject, tag>=0 ? tag : Failure.UNSPECIFIED, interaction);
+				else if (tag>=0)
 					result = Reply.of(mappedObject, tag, interaction);
 				else if (tag==Reply.PENDING)
 					result = Reply.pending();
@@ -71,9 +79,9 @@ public class PolyglotPodFunction extends PodFunction {
 				result = Reply.none();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
-			
-			result = Reply.of(JsonObject.create().put(PolyglotContext.ERROR, e.getMessage()), 0, interaction);
+			systemLogger().log(ERROR, String.format("[POLYGLOT] script failed: %s", e));
+
+			result = Reply.failure(JsonObject.create().put(PolyglotContext.ERROR, e.getMessage()), Failure.UNSPECIFIED, interaction);
 		}
 		
 		return result;

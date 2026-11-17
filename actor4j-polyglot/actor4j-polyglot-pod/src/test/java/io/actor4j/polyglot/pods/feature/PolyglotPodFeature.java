@@ -16,6 +16,9 @@
 package io.actor4j.polyglot.pods.feature;
 
 import java.util.concurrent.CountDownLatch;
+import io.actor4j.core.pods.utils.PodStatus;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -347,5 +350,41 @@ public class PolyglotPodFeature {
 			e.printStackTrace();
 		}
 		system.shutdownWithActors(true);
+	}
+
+	@Test(timeout=5000)
+	public void test_factory_ExamplePolyglotFunctionPod_JS7_failure() {
+		CountDownLatch testDone = new CountDownLatch(3);
+		Map<String, Integer> tags = new ConcurrentHashMap<>();
+
+		system.deployPods(
+				() -> new ExamplePolyglotFunctionPod_JS7(),
+				new PodConfiguration("ExamplePolyglotFunctionPod_JS7", ExamplePolyglotFunctionPod_JS7.class.getName(), 1, 1));
+		ActorId client = system.addActor(() -> new Actor(){
+			@Override
+			public void receive(ActorMessage<?> message) {
+				logger().log(DEBUG, String.format("client received a message ('%s', %d) from ExamplePolyglotFunctionPod_JS7", message.value(), message.tag()));
+				JsonObject obj = message.valueAsJsonObject();
+				tags.put(obj.containsKey("error") ? obj.getString("error") : obj.getString("value"), message.tag());
+				testDone.countDown();
+			}
+		});
+		system.start();
+
+		system.sendViaAlias(ActorMessage.create("ok", 0, client, null), "ExamplePolyglotFunctionPod_JS7");
+		system.sendViaAlias(ActorMessage.create("fail", 0, client, null), "ExamplePolyglotFunctionPod_JS7");
+		system.sendViaAlias(ActorMessage.create("throw", 0, client, null), "ExamplePolyglotFunctionPod_JS7");
+
+		try {
+			testDone.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		system.shutdownWithActors(true);
+
+		assertEquals(Integer.valueOf(42), tags.get("OK"));
+		assertEquals(Integer.valueOf(PodStatus.BAD_REQUEST), tags.get("Invalid request"));
+		Integer thrown = tags.entrySet().stream().filter(e -> e.getKey().contains("Script failed")).map(Map.Entry::getValue).findFirst().orElse(null);
+		assertEquals(Integer.valueOf(PodStatus.INTERNAL_SERVER_ERROR), thrown);
 	}
 }

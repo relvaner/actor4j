@@ -15,6 +15,7 @@
  */
 package io.actor4j.agents.langchain4j.pods;
 
+import io.actor4j.core.messages.ActorMessage;
 import static dev.langchain4j.model.chat.request.ResponseFormatType.JSON;
 
 import java.util.HashMap;
@@ -76,6 +77,16 @@ public abstract class ChatModelResourceActor extends ResourceActor {
 			request.responseFormat(ResponseFormat.builder().type(JSON).jsonSchema(schema).build());
 
 		return model.chat(request.build()).aiMessage().text();
+	}
+
+	// answer to the pod
+	public void reply(ActorMessage<?> request, Object result) {
+		tell(result, 0, request.source(), request.interaction());
+	}
+
+	// a failed call goes back to the pod as Throwable, the pod answers with Reply.failure
+	public void fail(ActorMessage<?> request, Throwable t) {
+		tell(t, 0, request.source(), request.interaction());
 	}
 
 	/**
