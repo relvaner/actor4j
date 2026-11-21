@@ -77,6 +77,11 @@ public class BenchmarkApplication {
 		}
 	}
 	
+	// for main methods of launchers, so that scripts notice a failed run
+	public void runAndExit(String[] args) {
+		System.exit(run(args));
+	}
+	
 	public int run(String[] args) {
 		Options options = new Options();
 		
@@ -173,7 +178,10 @@ public class BenchmarkApplication {
 				System.err.printf("Benchmark not found: %s%n", e.getMessage());
 				return 1;
 			} catch (InvocationTargetException e) {
-				e.getCause().printStackTrace(); // the benchmark itself failed (it runs in the constructor)
+				if (e.getCause() instanceof IllegalArgumentException)
+					System.err.println(e.getCause().getMessage());
+				else
+					e.getCause().printStackTrace(); // the benchmark itself failed (it runs in the constructor)
 				return 1;
 			} catch (ReflectiveOperationException e) {
 				e.printStackTrace();

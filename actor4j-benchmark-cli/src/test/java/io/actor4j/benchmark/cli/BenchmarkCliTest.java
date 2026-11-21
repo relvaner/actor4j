@@ -68,6 +68,19 @@ public class BenchmarkCliTest {
 	}
 	
 	@Test
+	public void test_time_benchmark_quiet() {
+		DescriptiveStatistics statistics = new io.actor4j.benchmark.Benchmark(new BenchmarkConfig().warmupIterations(1).iterations(3))
+			.console(false)
+			.start((timeMeasurement, iteration) -> {
+				timeMeasurement.start();
+				try { Thread.sleep(5); } catch (InterruptedException e) { }
+				timeMeasurement.stop();
+			});
+		assertEquals(3, statistics.getN());
+		assertTrue(statistics.getMin()>=4);
+	}
+	
+	@Test
 	public void test_time_measurement() throws InterruptedException {
 		TimeMeasurement measurement = new TimeMeasurement();
 		assertFalse(measurement.isMeasuring());

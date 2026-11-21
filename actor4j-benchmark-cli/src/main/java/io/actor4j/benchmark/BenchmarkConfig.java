@@ -158,6 +158,23 @@ public class BenchmarkConfig {
 		return this;
 	}
 
+	// for required numeric parameters: clear message instead of a NumberFormatException in the middle of a run
+	public int param1AsInt(String name) {
+		return asInt("param1", name, param1);
+	}
+	
+	public int param2AsInt(String name) {
+		return asInt("param2", name, param2);
+	}
+	
+	protected static int asInt(String option, String name, String value) {
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (RuntimeException e) {
+			throw new IllegalArgumentException(String.format("Missing or invalid -%s (%s): '%s'", option, name, value));
+		}
+	}
+	
 	public int totalParallelism() {
 		return parallelism*parallelismFactor;
 	}

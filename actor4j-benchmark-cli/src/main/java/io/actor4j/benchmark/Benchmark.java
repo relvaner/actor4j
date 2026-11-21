@@ -24,6 +24,7 @@ import io.actor4j.benchmark.utils.TimeMeasurement;
 
 public class Benchmark {
 	protected BenchmarkConfig config;
+	protected boolean console;
 	
 	public Benchmark(int times) {
 		this(10, times);
@@ -36,13 +37,21 @@ public class Benchmark {
 	public Benchmark(BenchmarkConfig config) {
 		super();
 		this.config = config;
+		
+		console = true;
 	}
 	
-	public void start(BiConsumer<TimeMeasurement, Integer> runnable) {
+	public Benchmark console(boolean console) {
+		this.console = console;
+		return this;
+	}
+	
+	// returns the statistics of the measured iterations (in ms)
+	public DescriptiveStatistics start(BiConsumer<TimeMeasurement, Integer> runnable) {
 		final DescriptiveStatistics statistics = new DescriptiveStatistics();
 		
-		System.out.printf("Logical cores: %d%n", Runtime.getRuntime().availableProcessors());
-		System.out.printf("Benchmark started...%n");
+		print("Logical cores: %d%n", Runtime.getRuntime().availableProcessors());
+		print("Benchmark started...%n");
 		
 		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,##0.000");
 		final TimeMeasurement timeMeasurement = new TimeMeasurement();
@@ -51,17 +60,24 @@ public class Benchmark {
 				runnable.accept(timeMeasurement, i);
 			if (i>config.warmupIterations()) {
 				statistics.addValue(timeMeasurement.getTimeMillisAsDouble());
-				System.out.printf("%-2d : %s ms%n", i-config.warmupIterations(), decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
+				print("%-2d : %s ms%n", i-config.warmupIterations(), decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
 			}
 			else
-				System.out.printf("Warmup %-2d : %s ms%n", i, decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
+				print("Warmup %-2d : %s ms%n", i, decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
 			timeMeasurement.reset();
 		}
-		System.out.printf("statistics::mean          : %s ms%n", decimalFormat.format(statistics.getMean()));
-		System.out.printf("statistics::sd            : %s ms%n", decimalFormat.format(statistics.getStandardDeviation()));
-		System.out.printf("statistics::median        : %s ms%n", decimalFormat.format(statistics.getPercentile(50)));
-		System.out.printf("statistics::min           : %s ms%n", decimalFormat.format(statistics.getMin()));
-		System.out.printf("statistics::max           : %s ms%n", decimalFormat.format(statistics.getMax()));
-		System.out.println("Benchmark finished...");
+		print("statistics::mean          : %s ms%n", decimalFormat.format(statistics.getMean()));
+		print("statistics::sd            : %s ms%n", decimalFormat.format(statistics.getStandardDeviation()));
+		print("statistics::median        : %s ms%n", decimalFormat.format(statistics.getPercentile(50)));
+		print("statistics::min           : %s ms%n", decimalFormat.format(statistics.getMin()));
+		print("statistics::max           : %s ms%n", decimalFormat.format(statistics.getMax()));
+		print("Benchmark finished...%n");
+		
+		return statistics;
+	}
+	
+	protected void print(String format, Object... args) {
+		if (console)
+			System.out.printf(format, args);
 	}
 }
