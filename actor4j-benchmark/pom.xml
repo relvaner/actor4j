@@ -15,4 +15,9 @@
 			<version>${revision}</version>
 		</dependency>
 	</dependencies>
+	
+	<modules>
+		<module>actor4j-benchmark-with-cli</module>
+		<module>actor4j-benchmark-with-jmh</module>
+	</modules>
 </project>
