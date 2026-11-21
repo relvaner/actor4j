@@ -15,12 +15,15 @@
  */
 package io.actor4j.benchmark.cli;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -28,22 +31,29 @@ import org.apache.commons.cli.ParseException;
 import io.actor4j.benchmark.BenchmarkConfig;
 
 public class BenchmarkApplication {
-	protected static final String VERSION = "2.1.0";
+	// from the jar manifest (Implementation-Version), "unknown" when run from classes
+	protected static final String VERSION = version();
+	
+	protected static String version() {
+		String result = BenchmarkApplication.class.getPackage().getImplementationVersion();
+		return result!=null ? result : "unknown";
+	}
 	
 	public static String prefixToName(String prefix) {
-		StringBuffer buffer = new StringBuffer("");
+		StringBuilder builder = new StringBuilder();
 		
-		String[] array = prefix.split("\\.");
-		for (int i=0; i<array.length; i++) {
-			String capitalized = array[i].substring(0, 1).toUpperCase();
-			buffer.append(capitalized+array[i].substring(1));
+		for (String segment : prefix.split("\\.")) {
+			if (segment.isEmpty())
+				continue;
+			builder.append(Character.toUpperCase(segment.charAt(0)));
+			builder.append(segment, 1, segment.length());
 		}
 			
-		return buffer.toString();
+		return builder.toString();
 	}
 	
 	public void frameworkOptions(Options options) {
-//		Option optionFrameworkActor4j = Option.builder("actor4j").desc("using the Actor4j framework").argName("actor4j").build();
+//		Option optionFrameworkActor4j = Option.builder("actor4j").desc("using the Actor4j framework").argName("actor4j").get();
 //		options.addOption(optionFrameworkActor4j);
 	}
 	
@@ -57,24 +67,36 @@ public class BenchmarkApplication {
 		return null;
 	}
 	
-	public void run(String[] args) {
+	protected void printHelp(Options options) {
+		try {
+			HelpFormatter.builder().setShowSince(false).get().printHelp("benchmark",
+				"Benchmark Application for Actor4j. Options:", options,
+				"For more details, see https://github.com/relvaner/actor4j", true);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+	
+	public int run(String[] args) {
 		Options options = new Options();
 		
 		frameworkOptions(options);
 		
-		Option optionClass = Option.builder("class").hasArg().desc("the class name prefix").argName("class").build();
-		Option optionActors = Option.builder("actors").hasArg().desc("actors per thread").argName("actors").build();
+		Option optionClass = Option.builder("class").hasArg().desc("the class name prefix").argName("class").get();
+		Option optionActors = Option.builder("actors").hasArg().desc("actors per thread").argName("actors").get();
 
-		Option optionWarmupIterations = Option.builder("warmup").hasArg().desc("the warmup iterations for the benchmark").argName("warmup").build();
-		Option optionIterations = Option.builder("iters").hasArg().desc("the benchmark iterations").argName("iters").build();
+		Option optionWarmupIterations = Option.builder("warmup").hasArg().desc("the warmup iterations for the benchmark").argName("warmup").get();
+		Option optionIterations = Option.builder("iters").hasArg().desc("the benchmark iterations").argName("iters").get();
+		Option optionWarmupTime = Option.builder("warmupTime").hasArg().desc("the duration of a warmup iteration in ms").argName("ms").get();
+		Option optionMeasurementTime = Option.builder("time").hasArg().desc("the duration of a benchmark iteration in ms").argName("ms").get();
 		
-		Option optionThreadMode = Option.builder("mode").hasArg().desc("the thread mode").argName("mode").build();
-		Option optionParallelismMin = Option.builder("threads").hasArg().desc("the number of threads").argName("threads").build();
-		Option optionParallelismFactor = Option.builder("factor").hasArg().desc("the parallelism factor").argName("factor").build();
-		Option optionThroughput = Option.builder("throughput").hasArg().desc("the throughput").argName("throughput").build();
+		Option optionThreadMode = Option.builder("mode").hasArg().desc("the thread mode").argName("mode").get();
+		Option optionParallelismMin = Option.builder("threads").hasArg().desc("the number of threads").argName("threads").get();
+		Option optionParallelismFactor = Option.builder("factor").hasArg().desc("the parallelism factor").argName("factor").get();
+		Option optionThroughput = Option.builder("throughput").hasArg().desc("the throughput").argName("throughput").get();
 		
-		Option optionParam1 = Option.builder("param1").hasArg().desc("the first parameter").argName("param1").build();
-		Option optionParam2 = Option.builder("param2").hasArg().desc("the second parameter").argName("param2").build();
+		Option optionParam1 = Option.builder("param1").hasArg().desc("the first parameter").argName("param1").get();
+		Option optionParam2 = Option.builder("param2").hasArg().desc("the second parameter").argName("param2").get();
 		
 		options.addOption("?", "help", false, "print this message");
 		options.addOption("version", false, "print the version information and exit");
@@ -83,6 +105,8 @@ public class BenchmarkApplication {
 		options.addOption(optionActors);
 		options.addOption(optionWarmupIterations);
 		options.addOption(optionIterations);
+		options.addOption(optionWarmupTime);
+		options.addOption(optionMeasurementTime);
 		options.addOption(optionThreadMode);
 		options.addOption(optionParallelismMin);
 		options.addOption(optionParallelismFactor);
@@ -97,14 +121,23 @@ public class BenchmarkApplication {
 			CommandLine line = parser.parse(options, args);
 
 			if (line.hasOption("help")) {
-				HelpFormatter formatter = new HelpFormatter();
-				formatter.printHelp("benchmark [-options]",
-						"Benchmark Application for Actor4j. Options:", options,
-						"For more details, see https://github.com/relvaner/actor4j");
-				return;
+				printHelp(options);
+				return 0;
 			} else if (line.hasOption("version")) {
 				System.out.printf("benchmark version \"%s\"%n", VERSION);
-				return;
+				return 0;
+			}
+			
+			String framework = frameworkClasspath(line);
+			if (framework==null) {
+				System.err.println("Missing framework option (e.g. -actor4j)");
+				printHelp(options);
+				return 1;
+			}
+			if (!line.hasOption("class")) {
+				System.err.println("Missing option -class (e.g. -class ping.pong)");
+				printHelp(options);
+				return 1;
 			}
 			
 			BenchmarkConfig config = new BenchmarkConfig();
@@ -115,6 +148,10 @@ public class BenchmarkApplication {
 				config.warmupIterations(Integer.valueOf(line.getOptionValue("warmup")));
 			if (line.hasOption("iters"))
 				config.iterations(Integer.valueOf(line.getOptionValue("iters")));
+			if (line.hasOption("warmupTime"))
+				config.warmupTime(Long.valueOf(line.getOptionValue("warmupTime")));
+			if (line.hasOption("time"))
+				config.measurementTime(Long.valueOf(line.getOptionValue("time")));
 			if (line.hasOption("mode"))
 				config.threadMode(line.getOptionValue("mode"));
 			if (line.hasOption("threads"))
@@ -128,20 +165,25 @@ public class BenchmarkApplication {
 			if (line.hasOption("param2"))
 				config.param2(line.getOptionValue("param2"));
 			
-			if (line.hasOption("class")) {
-				Class<?> clazz;
-				try {
-					String framework = frameworkClasspath(line);
-					clazz = Class.forName(framework+line.getOptionValue("class")+".Benchmark"+prefixToName(line.getOptionValue("class")));
-					Constructor<?> constructor = clazz.getConstructor(BenchmarkConfig.class);
-					constructor.newInstance(config);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			try {
+				Class<?> clazz = Class.forName(framework+line.getOptionValue("class")+".Benchmark"+prefixToName(line.getOptionValue("class")));
+				Constructor<?> constructor = clazz.getConstructor(BenchmarkConfig.class);
+				constructor.newInstance(config);
+			} catch (ClassNotFoundException e) {
+				System.err.printf("Benchmark not found: %s%n", e.getMessage());
+				return 1;
+			} catch (InvocationTargetException e) {
+				e.getCause().printStackTrace(); // the benchmark itself failed (it runs in the constructor)
+				return 1;
+			} catch (ReflectiveOperationException e) {
+				e.printStackTrace();
+				return 1;
 			}
+			return 0;
 			
-		} catch (ParseException e) {
-			System.err.println("Unexpected exception: " + e.getMessage());
+		} catch (ParseException | NumberFormatException e) {
+			System.err.println("Invalid arguments: " + e.getMessage());
+			return 1;
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2025, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,43 @@
 package io.actor4j.benchmark.utils;
 
 public class TimeMeasurement {
-	
-	protected long time      = 0;	
-	protected long startTime = 0;
-	protected long stopTime  = 0;	
+	protected long timeNanos  = 0;
+	protected long startNanos = 0;
+	protected boolean measuring;
 	
 	public void start() { 
-		startTime = System.currentTimeMillis();
+		startNanos = System.nanoTime();
+		measuring = true;
 	}
   
 	public void stop() {
-		stopTime = System.currentTimeMillis();
-    
-		time = stopTime-startTime;
+		timeNanos = System.nanoTime()-startNanos;
+		measuring = false;
 	}
 	
 	public boolean isMeasuring() {
-		return (startTime!=0);
+		return measuring;
 	}
 	
 	public void reset() {
-		time      = 0;
-		startTime = 0;
-		stopTime  = 0;
+		timeNanos  = 0;
+		startNanos = 0;
+		measuring  = false;
 	}
 	
-	public long getTime() {
-		return time;
+	public long getTimeMillis() {
+		return timeNanos/1_000_000;
+	}
+	
+	public long getTimeNanos() {
+		return timeNanos;
+	}
+	
+	public double getTimeMillisAsDouble() {
+		return timeNanos/1e6;
 	}
   
 	public String getTimeStr() {
-		return String.valueOf(time) + " ms";
+		return String.format("%.3f ms", getTimeMillisAsDouble());
 	}
 }

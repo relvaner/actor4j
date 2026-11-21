@@ -44,17 +44,17 @@ public class Benchmark {
 		System.out.printf("Logical cores: %d%n", Runtime.getRuntime().availableProcessors());
 		System.out.printf("Benchmark started...%n");
 		
-		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,###");
+		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,##0.000");
 		final TimeMeasurement timeMeasurement = new TimeMeasurement();
 		for (int i=1; i<=config.warmupIterations()+config.iterations(); i++) {
 			if (runnable!=null)
 				runnable.accept(timeMeasurement, i);
-			if (statistics!=null && i>config.warmupIterations())
-				statistics.addValue(timeMeasurement.getTime());
-			if (i>config.warmupIterations())
-				System.out.printf("%-2d : %s ms%n", i-config.warmupIterations(), decimalFormat.format(timeMeasurement.getTime()));
+			if (i>config.warmupIterations()) {
+				statistics.addValue(timeMeasurement.getTimeMillisAsDouble());
+				System.out.printf("%-2d : %s ms%n", i-config.warmupIterations(), decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
+			}
 			else
-				System.out.printf("Warmup %-2d : %s ms%n", i, decimalFormat.format(timeMeasurement.getTime()));
+				System.out.printf("Warmup %-2d : %s ms%n", i, decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
 			timeMeasurement.reset();
 		}
 		System.out.printf("statistics::mean          : %s ms%n", decimalFormat.format(statistics.getMean()));

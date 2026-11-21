@@ -21,8 +21,8 @@ public class BenchmarkConfig {
 	private int warmupIterations;
 	private int iterations;
 	
-	private final long warmupTime;
-	private final long measurementTime;
+	private long warmupTime;
+	private long measurementTime;
 	
 	private int parallelism;
 	private int parallelismFactor; 
@@ -82,8 +82,20 @@ public class BenchmarkConfig {
 		return warmupTime;
 	}
 	
+	public BenchmarkConfig warmupTime(long warmupTime) {
+		this.warmupTime = warmupTime;
+		
+		return this;
+	}
+	
 	public long measurementTime() {
 		return measurementTime;
+	}
+	
+	public BenchmarkConfig measurementTime(long measurementTime) {
+		this.measurementTime = measurementTime;
+		
+		return this;
 	}
 
 	public int parallelism() {
