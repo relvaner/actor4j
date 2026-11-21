@@ -15,6 +15,9 @@
  */
 package io.actor4j.benchmark;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class BenchmarkConfig {
 	private int numberOfActors;
 	
@@ -33,6 +36,9 @@ public class BenchmarkConfig {
 	
 	private String param1;
 	private String param2;
+	
+	// framework specific settings (e.g. the runtime), set by the launcher via frameworkConfig
+	private final Map<String, String> properties;
 		
 	public BenchmarkConfig() {
 		numberOfActors    = 100;
@@ -46,6 +52,7 @@ public class BenchmarkConfig {
 		threadMode        = "park";
 		param1            = "";
 		param2            = "";
+		properties        = new HashMap<>();
 	}
 	
 	public int numberOfActors() {
@@ -158,6 +165,20 @@ public class BenchmarkConfig {
 		return this;
 	}
 
+	public String property(String key) {
+		return properties.get(key);
+	}
+	
+	public String propertyOrDefault(String key, String defaultValue) {
+		return properties.getOrDefault(key, defaultValue);
+	}
+	
+	public BenchmarkConfig property(String key, String value) {
+		properties.put(key, value);
+		
+		return this;
+	}
+	
 	// for required numeric parameters: clear message instead of a NumberFormatException in the middle of a run
 	public int param1AsInt(String name) {
 		return asInt("param1", name, param1);

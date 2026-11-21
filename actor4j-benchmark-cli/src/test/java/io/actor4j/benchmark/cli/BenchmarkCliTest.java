@@ -81,6 +81,37 @@ public class BenchmarkCliTest {
 	}
 	
 	@Test
+	public void test_framework_config_and_properties() {
+		BenchmarkApplication application = new SampleApplication() {
+			@Override
+			public void frameworkOptions(org.apache.commons.cli.Options options) {
+				options.addOption(org.apache.commons.cli.Option.builder("runtime").hasArg().get());
+			}
+			@Override
+			public void frameworkConfig(CommandLine line, BenchmarkConfig config) {
+				if (line.hasOption("runtime"))
+					config.property("runtime", line.getOptionValue("runtime"));
+			}
+		};
+		assertEquals(0, application.run(new String[] {"-class", "sample.run", "-runtime", "classic"}));
+		assertEquals("classic", BenchmarkSampleRun.last.property("runtime"));
+		assertEquals("x", BenchmarkSampleRun.last.propertyOrDefault("other", "x"));
+	}
+	
+	@Test
+	public void test_report_analyzer_separates_runtimes() throws IOException {
+		String report = String.join(System.lineSeparator(),
+			"#actors: 100", "activeThreads: 4", "runtime: classic", "Benchmark started (PingPong)...", "statistics::mean          : 10 msg/s",
+			"#actors: 100", "activeThreads: 4", "runtime: default", "Benchmark started (PingPong)...", "statistics::mean          : 20 msg/s");
+		StringWriter output = new StringWriter();
+		BenchmarkReportAnalyzer.analyze(new StringReader(report), output);
+		String[] groups = output.toString().split("\\R\\R");
+		assertEquals(output.toString(), 2, groups.length);
+		assertTrue(groups[0].contains("runtime: classic"));
+		assertTrue(groups[1].contains("runtime: default"));
+	}
+	
+	@Test
 	public void test_time_measurement() throws InterruptedException {
 		TimeMeasurement measurement = new TimeMeasurement();
 		assertFalse(measurement.isMeasuring());

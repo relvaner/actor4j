@@ -57,6 +57,10 @@ public class BenchmarkApplication {
 //		options.addOption(optionFrameworkActor4j);
 	}
 	
+	// framework specific options into the config (e.g. -runtime), called before the scenario is created
+	public void frameworkConfig(CommandLine line, BenchmarkConfig config) {
+	}
+	
 	public String frameworkClasspath(CommandLine line) {
 //		String result = null;
 //		
@@ -169,6 +173,8 @@ public class BenchmarkApplication {
 				config.param1(line.getOptionValue("param1"));
 			if (line.hasOption("param2"))
 				config.param2(line.getOptionValue("param2"));
+			
+			frameworkConfig(line, config);
 			
 			try {
 				Class<?> clazz = Class.forName(framework+line.getOptionValue("class")+".Benchmark"+prefixToName(line.getOptionValue("class")));

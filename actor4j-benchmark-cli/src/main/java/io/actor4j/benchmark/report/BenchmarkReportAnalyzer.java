@@ -27,6 +27,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -49,6 +50,7 @@ public class BenchmarkReportAnalyzer {
 		String countActors   = "";
 		String activeThreads = "";
 		String benchmarkName = "";
+		String runtime       = "";
 		BufferedReader reader = new BufferedReader(input);
 		String line;
 		while ((line = reader.readLine()) != null) {
@@ -56,10 +58,12 @@ public class BenchmarkReportAnalyzer {
 				countActors = line;
 			else if (line.startsWith("activeThreads"))
 				activeThreads = line;
+			else if (line.startsWith("runtime"))
+				runtime = line;
 			else if (line.startsWith("Benchmark started"))
 				benchmarkName = line;
 			else if (line.startsWith("statistics::mean ")) {
-				String header = String.join("\n", countActors, activeThreads, benchmarkName);
+				String header = String.join("\n", Stream.of(countActors, activeThreads, runtime, benchmarkName).filter(h -> !h.isEmpty()).toList());
 				groups.computeIfAbsent(header, k -> new DescriptiveStatistics()).addValue(parseNumber(line));
 			}
 		}
