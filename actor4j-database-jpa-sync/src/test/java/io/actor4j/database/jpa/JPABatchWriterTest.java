@@ -40,8 +40,10 @@ import jakarta.persistence.Id;
 public class JPABatchWriterTest {
 	@Entity(name="Person")
 	public static class Person {
-		@Id public Long id;
-		public String name;
+		// JPA: persistent fields must not be public (the provider has to intercept the access)
+		@Id
+		private Long id;
+		private String name;
 
 		public Person() {
 		}
@@ -49,6 +51,14 @@ public class JPABatchWriterTest {
 		public Person(Long id, String name) {
 			this.id = id;
 			this.name = name;
+		}
+
+		public Long getId() {
+			return id;
+		}
+
+		public String getName() {
+			return name;
 		}
 	}
 
@@ -85,7 +95,7 @@ public class JPABatchWriterTest {
 	}
 
 	protected static Long id(Pair<UUID, JPAWriteModel> pair) {
-		return pair.b().obj() instanceof Person person ? person.id : (Long)pair.b().obj();
+		return pair.b().obj() instanceof Person person ? person.getId() : (Long)pair.b().obj();
 	}
 
 	protected JPABatchWriter<Long, Person> writer(boolean ordered, int size) {
@@ -278,7 +288,7 @@ public class JPABatchWriterTest {
 		assertFalse(entityManager.getTransaction().isActive());
 
 		JPAOperations.insertOne(new Person(1L, "a"), UUID.randomUUID(), entityManager);
-		assertEquals("a", JPAOperations.queryOne("select p from Person p where p.id=:id", Map.of("id", 1L), Person.class, entityManager).name);
+		assertEquals("a", JPAOperations.queryOne("select p from Person p where p.id=:id", Map.of("id", 1L), Person.class, entityManager).getName());
 	}
 
 	// H2
