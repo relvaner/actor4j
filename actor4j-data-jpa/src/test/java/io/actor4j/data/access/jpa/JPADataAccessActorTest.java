@@ -141,7 +141,7 @@ public class JPADataAccessActorTest {
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory("test", java.util.Map.of("jakarta.persistence.schema-generation.database.action", "none"));
 		try (EntityManager entityManager = factory.createEntityManager()) {
 			entityManager.getTransaction().begin();
-			entityManager.find(Person.class, id).name = name;
+			entityManager.find(Person.class, id).setName(name);
 			entityManager.getTransaction().commit();
 		}
 		finally {
@@ -159,16 +159,16 @@ public class JPADataAccessActorTest {
 		send(PersistentDTO.create(1L, null, client), ActorWithCache.GET, dataAccess);
 		assertEquals(List.of("FIND_ONE(1)"), await(1));
 		Person person = entities.poll(5, TimeUnit.SECONDS);
-		assertEquals("p1", person.name);
+		assertEquals("p1", person.getName());
 
-		person.name = "changed by the client"; // detached, must not be written
+		person.setName("changed by the client"); // detached, must not be written
 		rename(1, "changed outside");
 		send(write(2), DataAccessActor.INSERT_ONE, dataAccess); // a later commit of the actor
 		assertEquals(List.of("SUCCESS(2)"), await(1));
 
 		send(PersistentDTO.create(1L, null, client), ActorWithCache.GET, dataAccess);
 		assertEquals(List.of("FIND_ONE(1)"), await(1));
-		assertEquals("changed outside", entities.poll(5, TimeUnit.SECONDS).name);
+		assertEquals("changed outside", entities.poll(5, TimeUnit.SECONDS).getName());
 	}
 
 	// M4: replace, update and delete of a missing key change nothing and answer FIND_NONE
