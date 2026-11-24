@@ -21,6 +21,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import io.actor4j.benchmark.report.BenchmarkOutput;
 import io.actor4j.benchmark.report.BenchmarkResult;
+import io.actor4j.benchmark.utils.MeasurementEvent;
 import io.actor4j.benchmark.utils.TimeMeasurement;
 import io.actor4j.benchmark.utils.Timeouts;
 
@@ -53,7 +54,11 @@ public class Benchmark {
 			System.err.println("Warning: -w and -r have no effect for time scenarios (one run per iteration)");
 
 		final TimeMeasurement timeMeasurement = new TimeMeasurement();
+		// JFR event from the first to the end of the last measurement iteration (profilers leave out the warmup)
+		final MeasurementEvent event = new MeasurementEvent();
 		for (int i=1; i<=config.warmupIterations()+config.iterations(); i++) {
+			if (i==config.warmupIterations()+1)
+				event.begin();
 			if (runnable!=null) {
 				final int iteration = i;
 				// with a time limit (-to): a hanging scenario ends the run with an error instead of waiting forever
@@ -69,6 +74,7 @@ public class Benchmark {
 			print("%s", BenchmarkOutput.iteration(warmup, warmup ? i : i-config.warmupIterations(), timeMeasurement.getTimeMillisAsDouble(), "ms"));
 			timeMeasurement.reset();
 		}
+		event.commit();
 		print("%s", BenchmarkOutput.result(name, statistics, "ms", null));
 		
 		BenchmarkResult.record(config, config.propertyOrDefault("scenario", "benchmark"), BenchmarkResult.MODE_TIME, "ms", statistics, null);

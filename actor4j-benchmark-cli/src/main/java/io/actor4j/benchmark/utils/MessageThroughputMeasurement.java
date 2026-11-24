@@ -80,6 +80,10 @@ public class MessageThroughputMeasurement {
 	}
 
 	protected void measure() {
+		MeasurementEvent event = new MeasurementEvent();
+		if (warmupIterations==0)
+			event.begin();
+		
 		long lastCount = baselineCount;
 		long lastTime  = baselineNanos;
 		long deadline  = baselineNanos;
@@ -99,6 +103,8 @@ public class MessageThroughputMeasurement {
 			if (warmup) {
 				baselineCount = count;
 				baselineNanos = time;
+				if (iteration==warmupIterations)
+					event.begin();
 			}
 			else {
 				if (statistics!=null)
@@ -115,6 +121,9 @@ public class MessageThroughputMeasurement {
 			if (!warmup && iterations>0 && samples>=iterations)
 				break;
 		}
+		// a measurement stopped during the warmup has no measured time
+		if (samples>0)
+			event.commit();
 	}
 
 	// ends the measurement and waits for the end of the measurement thread, so that the statistics are complete
