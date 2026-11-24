@@ -82,6 +82,10 @@ public final class BenchmarkResult {
 
 		// same names as the parameters of the JMH benchmarks (runtime, actors, mode = thread mode), "benchmark" names the scenario
 		Map<String, Object> params = new LinkedHashMap<>();
+		// short name of the scenario (-class, e.g. fib.with.stopping)
+		// so that results of the frameworks can be grouped by scenario and runtime
+		if (config.property("scenario")!=null)
+			params.put("scenario", config.property("scenario"));
 		params.put("runtime", config.propertyOrDefault("runtime", "n/a"));
 		params.put("actors", String.valueOf(config.numberOfActors()));
 		params.put("parallelism", String.valueOf(config.parallelism()));

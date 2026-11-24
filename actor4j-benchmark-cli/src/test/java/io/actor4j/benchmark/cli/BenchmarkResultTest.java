@@ -81,6 +81,7 @@ public class BenchmarkResultTest {
 		assertEquals(String.valueOf(config.parallelism()), ((Map<String, Object>)result.get("params")).get("parallelism"));
 		assertEquals("test-runtime", ((Map<String, Object>)result.get("params")).get("runtime"));
 		assertFalse(((Map<String, Object>)result.get("params")).containsKey("name")); // the name is in "benchmark"
+		assertFalse(((Map<String, Object>)result.get("params")).containsKey("scenario")); // only with -class
 		Map<String, Object> metric = (Map<String, Object>)result.get("primaryMetric");
 		assertEquals("msg/s", metric.get("scoreUnit"));
 		assertEquals(3, ((List<Object>)((List<Object>)metric.get("rawData")).get(0)).size());
@@ -88,6 +89,7 @@ public class BenchmarkResultTest {
 
 		BenchmarkConfig timeConfig = new BenchmarkConfig().warmupIterations(1).iterations(2).resultFile(file.toString());
 		timeConfig.property("benchmark", "test.Time");
+		timeConfig.property("scenario", "time.test");
 		new Benchmark(timeConfig).console(false).start((timeMeasurement, iteration) -> {
 			timeMeasurement.start();
 			timeMeasurement.stop();
@@ -96,6 +98,7 @@ public class BenchmarkResultTest {
 		result = (Map<String, Object>)results.get(results.size()-1);
 		assertEquals("test.Time", result.get("benchmark"));
 		assertEquals("time", result.get("mode"));
+		assertEquals("time.test", ((Map<String, Object>)result.get("params")).get("scenario"));
 		assertEquals("ms", ((Map<String, Object>)result.get("primaryMetric")).get("scoreUnit"));
 		// both results of this JVM are in the file
 		assertEquals("test.Throughput", ((Map<String, Object>)results.get(results.size()-2)).get("benchmark"));
