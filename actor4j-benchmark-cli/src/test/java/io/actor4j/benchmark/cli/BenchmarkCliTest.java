@@ -1,13 +1,22 @@
+/*
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.actor4j.benchmark.cli;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,7 +25,6 @@ import org.junit.Test;
 
 import io.actor4j.benchmark.BenchmarkConfig;
 import io.actor4j.benchmark.cli.sample.run.BenchmarkSampleRun;
-import io.actor4j.benchmark.report.BenchmarkReportAnalyzer;
 import io.actor4j.benchmark.utils.MessageThroughputMeasurement;
 import io.actor4j.benchmark.utils.TimeMeasurement;
 
@@ -46,25 +54,28 @@ public class BenchmarkCliTest {
 	@Test
 	public void test_errors_give_exit_code_1() {
 		assertEquals(1, new SampleApplication().run(new String[] {"-class", "no.such"}));
-		assertEquals(1, new SampleApplication().run(new String[] {"-class", "sample.run", "-iters", "x"}));
-		assertEquals(1, new SampleApplication().run(new String[] {"-class", "sample.run", "-param1", "fail"}));
+		assertEquals(1, new SampleApplication().run(new String[] {"-class", "sample.run", "-i", "x"}));
+		assertEquals(1, new SampleApplication().run(new String[] {"-class", "sample.run", "-p", "fail=true"}));
 	}
 	
 	@Test
 	public void test_options_to_config() {
-		assertEquals(0, new SampleApplication().run(new String[] {"-class", "sample.run", "-actors", "7", "-warmup", "2", "-iters", "3",
-			"-warmupTime", "200", "-time", "500", "-threads", "4", "-factor", "2", "-throughput", "50", "-mode", "yield", "-param1", "a", "-param2", "b"}));
+		assertEquals(0, new SampleApplication().run(new String[] {"-class", "sample.run", "-actors", "7", "-wi", "2", "-i", "3",
+			"-w", "200ms", "-r", "2s", "-threads", "4", "-factor", "2", "-throughput", "50", "-mode", "yield", "-p", "number=30", "-p", "hops = 5"}));
 		BenchmarkConfig config = BenchmarkSampleRun.last;
 		assertEquals(7, config.numberOfActors());
 		assertEquals(2, config.warmupIterations());
 		assertEquals(3, config.iterations());
 		assertEquals(200, config.warmupTime());
-		assertEquals(500, config.measurementTime());
+		assertEquals(2000, config.measurementTime());
 		assertEquals(8, config.totalParallelism());
 		assertEquals(50, config.throughput());
 		assertEquals("yield", config.threadMode());
-		assertEquals("a", config.param1());
-		assertEquals("b", config.param2());
+		assertEquals("30", config.param("number"));
+		assertEquals(5, config.paramAsInt("hops"));
+		assertEquals(1, new SampleApplication().run(new String[] {"-class", "sample.run", "-p", "novalue"}));
+		assertEquals(1, new SampleApplication().run(new String[] {"-class", "sample.run", "-w", "1xs"}));
+		assertEquals(1, new SampleApplication().run(new String[] {"-class", "sample.run", "-warmup", "1"})); // old name: unknown, not -w "armup"
 	}
 	
 	@Test
@@ -98,18 +109,6 @@ public class BenchmarkCliTest {
 		assertEquals("x", BenchmarkSampleRun.last.propertyOrDefault("other", "x"));
 	}
 	
-	@Test
-	public void test_report_analyzer_separates_runtimes() throws IOException {
-		String report = String.join(System.lineSeparator(),
-			"#actors: 100", "activeThreads: 4", "runtime: classic", "Benchmark started (PingPong)...", "statistics::mean          : 10 msg/s",
-			"#actors: 100", "activeThreads: 4", "runtime: default", "Benchmark started (PingPong)...", "statistics::mean          : 20 msg/s");
-		StringWriter output = new StringWriter();
-		BenchmarkReportAnalyzer.analyze(new StringReader(report), output);
-		String[] groups = output.toString().split("\\R\\R");
-		assertEquals(output.toString(), 2, groups.length);
-		assertTrue(groups[0].contains("runtime: classic"));
-		assertTrue(groups[1].contains("runtime: default"));
-	}
 	
 	@Test
 	public void test_time_measurement() throws InterruptedException {
@@ -129,50 +128,23 @@ public class BenchmarkCliTest {
 	@Test
 	public void test_throughput_measurement() throws InterruptedException {
 		AtomicLong counter = new AtomicLong();
-		AtomicLong warmupCounter = new AtomicLong(-1);
 		DescriptiveStatistics statistics = new DescriptiveStatistics();
-		MessageThroughputMeasurement measurement = new MessageThroughputMeasurement(() -> counter.addAndGet(1000), 1, warmupCounter, statistics, false, 50);
+		MessageThroughputMeasurement measurement = new MessageThroughputMeasurement(() -> counter.addAndGet(1000), 1, 50, 0, 50, statistics, false);
 		measurement.start();
 		Thread.sleep(300);
 		measurement.stop();
 		
-		assertTrue(warmupCounter.get()>0);
+		assertTrue(measurement.getMeasuredCount()>0);
 		assertTrue(measurement.getSamples()>=2);
 		assertEquals(measurement.getSamples(), statistics.getN());
 		assertTrue(statistics.getMin()>0);
 		
-		// no warmup counter and no statistics
-		measurement = new MessageThroughputMeasurement(counter::get, 1, null, null, false, 20);
+		// no statistics
+		measurement = new MessageThroughputMeasurement(counter::get, 1, 20, 0, 20, null, false);
 		measurement.start();
 		Thread.sleep(100);
 		measurement.stop();
 		assertTrue(measurement.getSamples()>=1);
 	}
 	
-	@Test
-	public void test_report_analyzer_groups_by_header() throws IOException {
-		DecimalFormat format = new DecimalFormat("###,###,###,##0.###");
-		List<String> lines = new ArrayList<>();
-		for (double[] run : new double[][] {{1000.5, 10}, {3000.5, 30}}) {
-			lines.add("#actors: 100");
-			lines.add("activeThreads: 4");
-			lines.add("Benchmark started (PingPong)...");
-			lines.add("statistics::mean::derived : 1 msg/s");
-			lines.add("statistics::mean          : "+format.format(run[0])+" msg/s");
-			lines.add("#actors: 200");
-			lines.add("activeThreads: 4");
-			lines.add("Benchmark started (PingPong)...");
-			lines.add("statistics::mean          : "+format.format(run[1])+" msg/s");
-		}
-		StringWriter output = new StringWriter();
-		BenchmarkReportAnalyzer.analyze(new StringReader(String.join("\n", lines)), output);
-		
-		String result = output.toString();
-		String[] groups = result.split("\n\n");
-		assertEquals(result, 2, groups.length);
-		assertTrue(result, groups[0].startsWith("#actors: 100"));
-		assertTrue(result, groups[0].contains("runs   : 2"));
-		assertTrue(result, groups[0].contains("mean   : "+format.format(2000.5)));
-		assertTrue(result, groups[1].contains("mean   : "+format.format(20)));
-	}
 }

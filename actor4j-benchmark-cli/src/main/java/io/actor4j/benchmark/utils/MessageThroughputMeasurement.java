@@ -15,28 +15,33 @@
  */
 package io.actor4j.benchmark.utils;
 
-import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Supplier;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import io.actor4j.benchmark.report.BenchmarkOutput;
+
 // Samples a message counter at a fixed rate (deadlines, not delays) and normalizes each sample to the real
-// elapsed time. With iterations>0 it ends by itself after that many measured samples (see awaitDone).
+// elapsed time. With iterations>0 it ends by itself after that many measured samples (see awaitDone), with
+// iterations=0 it runs until stop(). A failure of the counter ends the measurement (see getFailure).
 public class MessageThroughputMeasurement {
+	// how long stop() waits for the end of the measurement thread
+	protected static final long STOP_TIMEOUT_MILLIS = 5_000;
+
 	protected final Supplier<Long> counter;
 	protected final int warmupIterations;
 	protected final long warmupIntervalNanos;
 	protected final int iterations;
 	protected final long measurementIntervalNanos;
-	protected final AtomicLong warmupCounter;
 	protected final DescriptiveStatistics statistics;
 	protected final boolean console;
 
 	protected final CountDownLatch done = new CountDownLatch(1);
 	protected volatile boolean stopped;
+	protected volatile Throwable failure;
 	protected Thread thread;
 
 	protected volatile int samples;
@@ -46,88 +51,101 @@ public class MessageThroughputMeasurement {
 	protected volatile long lastMeasuredCount;
 	protected volatile long lastMeasuredNanos;
 
-	public MessageThroughputMeasurement(final Supplier<Long> counter, final int warmupIterations, final AtomicLong warmupCounter, final DescriptiveStatistics statistics, final boolean console) {
-		this(counter, warmupIterations, warmupCounter, statistics, console, 1000);
-	}
-
-	public MessageThroughputMeasurement(final Supplier<Long> counter, final int warmupIterations, final AtomicLong warmupCounter, final DescriptiveStatistics statistics, final boolean console, final long intervalMillis) {
-		this(counter, warmupIterations, intervalMillis, 0, intervalMillis, warmupCounter, statistics, console);
-	}
-
-	public MessageThroughputMeasurement(final Supplier<Long> counter, final int warmupIterations, final long warmupIntervalMillis, final int iterations, final long measurementIntervalMillis,
-			final AtomicLong warmupCounter, final DescriptiveStatistics statistics, final boolean console) {
+	public MessageThroughputMeasurement(final Supplier<Long> counter, final int warmupIterations, final long warmupIntervalMillis,
+			final int iterations, final long measurementIntervalMillis, final DescriptiveStatistics statistics, final boolean console) {
 		this.counter = counter;
 		this.warmupIterations = warmupIterations;
 		this.warmupIntervalNanos = warmupIntervalMillis*1_000_000;
 		this.iterations = iterations;
 		this.measurementIntervalNanos = measurementIntervalMillis*1_000_000;
-		this.warmupCounter = warmupCounter;
 		this.statistics = statistics;
 		this.console = console;
 	}
 
 	public void start() {
-		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###");
-
 		baselineCount = lastMeasuredCount = counter.get();
 		baselineNanos = lastMeasuredNanos = System.nanoTime();
-		if (warmupCounter!=null)
-			warmupCounter.set(baselineCount);
 
 		thread = new Thread(() -> {
-			long lastCount = baselineCount;
-			long lastTime  = baselineNanos;
-			long deadline  = baselineNanos;
-			for (int iteration=1; !stopped; iteration++) {
-				boolean warmup = iteration<=warmupIterations;
-				deadline += warmup ? warmupIntervalNanos : measurementIntervalNanos;
-				long wait;
-				while (!stopped && (wait = deadline-System.nanoTime())>0)
-					LockSupport.parkNanos(wait);
-				if (stopped)
-					break;
-
-				long count = counter.get();
-				long time  = System.nanoTime();
-				long perSecond = Math.round((count-lastCount)*1e9/(time-lastTime));
-
-				if (warmup) {
-					baselineCount = count;
-					baselineNanos = time;
-					if (warmupCounter!=null)
-						warmupCounter.set(count);
-				}
-				else {
-					if (statistics!=null)
-						statistics.addValue(perSecond);
-					lastMeasuredCount = count;
-					lastMeasuredNanos = time;
-					samples++;
-				}
-				if (console)
-					System.out.printf(warmup ? "Warmup %-2d : %s msg/s%n" : "%-2d : %s msg/s%n",
-						warmup ? iteration : iteration-warmupIterations, decimalFormat.format(perSecond));
-
-				lastCount = count;
-				lastTime = time;
-				if (!warmup && iterations>0 && samples>=iterations)
-					break;
+			try {
+				measure();
+			} catch (Throwable t) {
+				failure = t;
+			} finally {
+				done.countDown();
 			}
-			done.countDown();
 		}, "actor4j-benchmark-throughput");
 		thread.setDaemon(true);
 		thread.start();
 	}
 
-	public void stop() {
-		stopped = true;
-		if (thread!=null)
-			LockSupport.unpark(thread);
+	protected void measure() {
+		long lastCount = baselineCount;
+		long lastTime  = baselineNanos;
+		long deadline  = baselineNanos;
+		for (int iteration=1; !stopped; iteration++) {
+			boolean warmup = iteration<=warmupIterations;
+			deadline += warmup ? warmupIntervalNanos : measurementIntervalNanos;
+			long wait;
+			while (!stopped && (wait = deadline-System.nanoTime())>0)
+				LockSupport.parkNanos(wait);
+			if (stopped)
+				break;
+
+			long count = counter.get();
+			long time  = System.nanoTime();
+			long perSecond = Math.round((count-lastCount)*1e9/(time-lastTime));
+
+			if (warmup) {
+				baselineCount = count;
+				baselineNanos = time;
+			}
+			else {
+				if (statistics!=null)
+					statistics.addValue(perSecond);
+				lastMeasuredCount = count;
+				lastMeasuredNanos = time;
+				samples++;
+			}
+			if (console)
+				System.out.print(BenchmarkOutput.iteration(warmup, warmup ? iteration : iteration-warmupIterations, perSecond, "msg/s"));
+
+			lastCount = count;
+			lastTime = time;
+			if (!warmup && iterations>0 && samples>=iterations)
+				break;
+		}
 	}
 
-	// waits until all measured samples are taken (iterations>0) or stop() was called
+	// ends the measurement and waits for the end of the measurement thread, so that the statistics are complete
+	public void stop() {
+		stopped = true;
+		if (thread==null || thread==Thread.currentThread())
+			return;
+		LockSupport.unpark(thread);
+		boolean interrupted = Thread.interrupted();
+		try {
+			thread.join(STOP_TIMEOUT_MILLIS);
+		} catch (InterruptedException e) {
+			interrupted = true;
+		}
+		if (interrupted)
+			Thread.currentThread().interrupt();
+	}
+
+	// waits until all measured samples are taken (iterations>0), stop() was called or the counter failed
 	public void awaitDone() throws InterruptedException {
 		done.await();
+	}
+
+	// like awaitDone, at most timeoutMillis, false after the timeout
+	public boolean awaitDone(long timeoutMillis) throws InterruptedException {
+		return done.await(timeoutMillis, TimeUnit.MILLISECONDS);
+	}
+
+	// the exception of the counter, null without failure
+	public Throwable getFailure() {
+		return failure;
 	}
 
 	// number of measured (non-warmup) samples

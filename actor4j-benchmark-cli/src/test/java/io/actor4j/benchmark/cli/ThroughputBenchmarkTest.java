@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.actor4j.benchmark.cli;
 
 import static org.junit.Assert.*;
@@ -67,7 +82,7 @@ public class ThroughputBenchmarkTest {
 	@Test
 	public void test_open_ended_measurement_until_stop() throws InterruptedException {
 		AtomicLong counter = new AtomicLong();
-		MessageThroughputMeasurement measurement = new MessageThroughputMeasurement(() -> counter.addAndGet(100), 0, null, null, false, 20);
+		MessageThroughputMeasurement measurement = new MessageThroughputMeasurement(() -> counter.addAndGet(100), 0, 20, 0, 20, null, false);
 		measurement.start();
 		Thread.sleep(150);
 		measurement.stop();
@@ -76,14 +91,31 @@ public class ThroughputBenchmarkTest {
 	}
 	
 	@Test
+	public void test_time_like_jmh() {
+		assertEquals(1000, BenchmarkConfig.parseTime("1s"));
+		assertEquals(1000, BenchmarkConfig.parseTime("1"));
+		assertEquals(500, BenchmarkConfig.parseTime("500ms"));
+		assertEquals(120_000, BenchmarkConfig.parseTime("2min"));
+		assertEquals(2, BenchmarkConfig.parseTime("2000us"));
+		for (String invalid : new String[] {"1xs", "", "100us"})
+			try {
+				BenchmarkConfig.parseTime(invalid);
+				fail(invalid);
+			} catch (IllegalArgumentException e) {
+				// expected
+			}
+	}
+
+	@Test
 	public void test_param_as_int() {
-		BenchmarkConfig config = new BenchmarkConfig().param1(" 30 ").param2("x");
-		assertEquals(30, config.param1AsInt("number"));
+		BenchmarkConfig config = new BenchmarkConfig().param("number", " 30 ").param("hops", "x");
+		assertEquals(30, config.paramAsInt("number"));
+		assertEquals(7, config.paramAsInt("missing", 7));
 		try {
-			config.param2AsInt("hops");
+			config.paramAsInt("hops");
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Missing or invalid -param2 (hops): 'x'", e.getMessage());
+			assertEquals("Missing or invalid -p hops=<number>: 'x'", e.getMessage());
 		}
 	}
 }

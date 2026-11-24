@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, David A. Bauer. All rights reserved.
+ * Copyright (c) 2015-2026, David A. Bauer. All rights reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,18 @@
  */
 package io.actor4j.benchmark;
 
-import java.text.DecimalFormat;
 import java.util.function.BiConsumer;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import io.actor4j.benchmark.report.BenchmarkOutput;
+import io.actor4j.benchmark.report.BenchmarkResult;
 import io.actor4j.benchmark.utils.TimeMeasurement;
+import io.actor4j.benchmark.utils.Timeouts;
 
 public class Benchmark {
 	protected BenchmarkConfig config;
 	protected boolean console;
-	
-	public Benchmark(int times) {
-		this(10, times);
-	}
-	
-	public Benchmark(int warmupIterations, int iterations ) {
-		this(new BenchmarkConfig().warmupIterations(warmupIterations).iterations(iterations));
-	}
 	
 	public Benchmark(BenchmarkConfig config) {
 		super();
@@ -48,30 +42,36 @@ public class Benchmark {
 	
 	// returns the statistics of the measured iterations (in ms)
 	public DescriptiveStatistics start(BiConsumer<TimeMeasurement, Integer> runnable) {
+		config.validateIterations();
 		final DescriptiveStatistics statistics = new DescriptiveStatistics();
 		
-		print("Logical cores: %d%n", Runtime.getRuntime().availableProcessors());
-		print("Benchmark started...%n");
-		
-		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,##0.000");
+		final String name = config.propertyOrDefault("benchmark", config.propertyOrDefault("scenario", "benchmark"));
+		print("%s", BenchmarkOutput.header(config, name, "Time per iteration", "ms", config.totalParallelism(), false));
+
+		// -w and -r set the duration of an iteration, here each iteration is one complete run
+		if (config.warmupTime()!=BenchmarkConfig.DEFAULT_TIME || config.measurementTime()!=BenchmarkConfig.DEFAULT_TIME)
+			System.err.println("Warning: -w and -r have no effect for time scenarios (one run per iteration)");
+
 		final TimeMeasurement timeMeasurement = new TimeMeasurement();
 		for (int i=1; i<=config.warmupIterations()+config.iterations(); i++) {
-			if (runnable!=null)
-				runnable.accept(timeMeasurement, i);
-			if (i>config.warmupIterations()) {
-				statistics.addValue(timeMeasurement.getTimeMillisAsDouble());
-				print("%-2d : %s ms%n", i-config.warmupIterations(), decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
+			if (runnable!=null) {
+				final int iteration = i;
+				// with a time limit (-to): a hanging scenario ends the run with an error instead of waiting forever
+				Timeouts.run(() -> runnable.accept(timeMeasurement, iteration), config.timeout(), String.format("%s: iteration %d", name, i));
+				// a forgotten start() or stop() would silently give 0 ms or a wrong time
+				if (!timeMeasurement.isMeasured())
+					throw new IllegalStateException(String.format("%s: iteration %d without %s of the TimeMeasurement",
+						name, i, timeMeasurement.isMeasuring() ? "stop()" : "start() and stop()"));
 			}
-			else
-				print("Warmup %-2d : %s ms%n", i, decimalFormat.format(timeMeasurement.getTimeMillisAsDouble()));
+			boolean warmup = i<=config.warmupIterations();
+			if (!warmup)
+				statistics.addValue(timeMeasurement.getTimeMillisAsDouble());
+			print("%s", BenchmarkOutput.iteration(warmup, warmup ? i : i-config.warmupIterations(), timeMeasurement.getTimeMillisAsDouble(), "ms"));
 			timeMeasurement.reset();
 		}
-		print("statistics::mean          : %s ms%n", decimalFormat.format(statistics.getMean()));
-		print("statistics::sd            : %s ms%n", decimalFormat.format(statistics.getStandardDeviation()));
-		print("statistics::median        : %s ms%n", decimalFormat.format(statistics.getPercentile(50)));
-		print("statistics::min           : %s ms%n", decimalFormat.format(statistics.getMin()));
-		print("statistics::max           : %s ms%n", decimalFormat.format(statistics.getMax()));
-		print("Benchmark finished...%n");
+		print("%s", BenchmarkOutput.result(name, statistics, "ms", null));
+		
+		BenchmarkResult.record(config, config.propertyOrDefault("scenario", "benchmark"), BenchmarkResult.MODE_TIME, "ms", statistics, null);
 		
 		return statistics;
 	}

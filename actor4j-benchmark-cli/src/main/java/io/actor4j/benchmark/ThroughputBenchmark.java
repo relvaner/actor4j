@@ -15,12 +15,15 @@
  */
 package io.actor4j.benchmark;
 
-import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import io.actor4j.benchmark.report.BenchmarkOutput;
+import io.actor4j.benchmark.report.BenchmarkResult;
 import io.actor4j.benchmark.utils.MessageThroughputMeasurement;
+import io.actor4j.benchmark.utils.Timeouts;
 
 // Framework-neutral throughput benchmark: the framework supplies the message counter and how to stop and shut down.
 // Order: measurement (warmup + iterations samples), onStop, statistics, onShutdown.
@@ -59,13 +62,14 @@ public class ThroughputBenchmark {
 		return this;
 	}
 
-	// runs after the measurement, before the statistics (e.g. to end busy loops or print counters per thread)
+	// runs after the measurement, before the statistics (e.g. to end busy loops or print counters per thread),
+	// also after a failure of the counter, with the time limit -to
 	public ThroughputBenchmark onStop(Runnable onStop) {
 		this.onStop = onStop;
 		return this;
 	}
 
-	// runs at the end, also after a failure
+	// runs at the end, also after a failure, with the time limit -to
 	public ThroughputBenchmark onShutdown(Runnable onShutdown) {
 		this.onShutdown = onShutdown;
 		return this;
@@ -77,48 +81,75 @@ public class ThroughputBenchmark {
 	}
 
 	public Result start() {
-		if (config.iterations()<=0)
-			throw new IllegalArgumentException("iterations must be > 0");
+		config.validateIterations();
 		
 		final DescriptiveStatistics statistics = new DescriptiveStatistics();
-		final DecimalFormat decimalFormat = new DecimalFormat("###,###,###,###");
-
-		print("Logical cores: %d%n", Runtime.getRuntime().availableProcessors());
-		print("activeThreads: %d%n", activeThreads);
-		if (runtime!=null)
-			print("runtime: %s%n", runtime);
-		print("Benchmark started (%s)...%n", name);
+		if (runtime!=null && config.property("runtime")==null)
+			config.property("runtime", runtime);
+		final String benchmark = config.propertyOrDefault("benchmark", name);
+		print("%s", BenchmarkOutput.header(config, benchmark, "Throughput", "msg/s", activeThreads, true));
 
 		MessageThroughputMeasurement measurement = new MessageThroughputMeasurement(counter,
-			config.warmupIterations(), config.warmupTime(), config.iterations(), config.measurementTime(), null, statistics, console);
+			config.warmupIterations(), config.warmupTime(), config.iterations(), config.measurementTime(), statistics, console);
+		// the measurement takes a fixed time (-wi, -w, -i, -r), plus the timeout (-to) as buffer
+		final long limit = config.warmupIterations()*config.warmupTime()+config.iterations()*config.measurementTime()+config.timeout();
+		Throwable failure = null;
 		try {
 			measurement.start();
+			boolean done = true;
 			try {
-				measurement.awaitDone();
+				done = measurement.awaitDone(limit);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 			measurement.stop();
+			if (!done)
+				throw new IllegalStateException(String.format("Measurement did not end within %s (-to)", Timeouts.format(limit)));
+			// a failed counter ends the measurement early: fail the run instead of reporting partial values,
+			// onStop still runs (it may end parts of the scenario), its own failure is added as suppressed
+			if (measurement.getFailure()!=null) {
+				IllegalStateException e = new IllegalStateException("Message counter failed: "+measurement.getFailure(), measurement.getFailure());
+				try {
+					runOnStop();
+				} catch (RuntimeException | Error stopFailure) {
+					e.addSuppressed(stopFailure);
+				}
+				throw e;
+			}
 
-			if (onStop!=null)
-				onStop.run();
+			runOnStop();
 
-			print("statistics::count         : %s%n", decimalFormat.format(measurement.getMeasuredCount()));
-			print("statistics::mean::derived : %s msg/s%n", decimalFormat.format(measurement.getMeasuredPerSecond()));
-			print("statistics::mean          : %s msg/s%n", decimalFormat.format(statistics.getMean()));
-			print("statistics::sd            : %s msg/s%n", decimalFormat.format(statistics.getStandardDeviation()));
-			print("statistics::median        : %s msg/s%n", decimalFormat.format(statistics.getPercentile(50)));
-			print("statistics::min           : %s msg/s%n", decimalFormat.format(statistics.getMin()));
-			print("statistics::max           : %s msg/s%n", decimalFormat.format(statistics.getMax()));
-			print("Benchmark finished...%n");
+			print("%s", BenchmarkOutput.result(benchmark, statistics, "msg/s", String.format("derived: %s msg/s, count: %s msgs",
+				BenchmarkOutput.format(measurement.getMeasuredPerSecond()), BenchmarkOutput.format(measurement.getMeasuredCount()))));
+
+			BenchmarkResult.record(config, name, BenchmarkResult.MODE_THROUGHPUT, "msg/s", statistics, Map.of(
+				"derived", new Object[] { measurement.getMeasuredPerSecond(), "msg/s" },
+				"count", new Object[] { measurement.getMeasuredCount(), "msgs" }));
 
 			return new Result(measurement.getMeasuredCount(), measurement.getMeasuredPerSecond(), measurement.getSamples(), statistics);
+		}
+		catch (RuntimeException | Error e) {
+			failure = e;
+			throw e;
 		}
 		finally {
 			measurement.stop();
 			if (onShutdown!=null)
-				onShutdown.run();
+				try {
+					Timeouts.run(onShutdown, config.timeout(), "onShutdown");
+				} catch (RuntimeException | Error e) {
+					// a failure of the run stays the primary exception
+					if (failure!=null)
+						failure.addSuppressed(e);
+					else
+						throw e;
+				}
 		}
+	}
+
+	protected void runOnStop() {
+		if (onStop!=null)
+			Timeouts.run(onStop, config.timeout(), "onStop");
 	}
 
 	protected void print(String format, Object... args) {
