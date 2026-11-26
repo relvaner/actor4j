@@ -26,6 +26,7 @@ import java.util.StringJoiner;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import io.actor4j.benchmark.BenchmarkConfig;
+import io.actor4j.benchmark.utils.CpuName;
 import io.actor4j.benchmark.utils.Timeouts;
 
 // Console output like JMH: header with # lines, one line per iteration, result block with ±(99.9%).
@@ -45,6 +46,7 @@ public final class BenchmarkOutput {
 	public static String header(BenchmarkConfig config, String name, String mode, String unit, int threads, boolean timed) {
 		StringBuilder b = new StringBuilder();
 		b.append(String.format(Locale.ENGLISH, "# VM version: JDK %s, %s, %s%n", System.getProperty("java.version"), System.getProperty("java.vm.name"), System.getProperty("java.vm.version")));
+		b.append(String.format(Locale.ENGLISH, "# CPU: %s%n", CpuName.get()));
 		b.append(String.format(Locale.ENGLISH, "# VM options: %s%n", ManagementFactory.getRuntimeMXBean().getInputArguments().isEmpty() ? "<none>" : String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments())));
 		b.append(String.format(Locale.ENGLISH, "# Warmup: %d iterations%s%n", config.warmupIterations(), timed ? ", "+time(config.warmupTime())+" each" : ""));
 		b.append(String.format(Locale.ENGLISH, "# Measurement: %d iterations%s%n", config.iterations(), timed ? ", "+time(config.measurementTime())+" each" : ""));

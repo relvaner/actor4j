@@ -31,6 +31,7 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import io.actor4j.benchmark.BenchmarkConfig;
+import io.actor4j.benchmark.utils.CpuName;
 
 // Result of a run in the JSON format of JMH (-rf json -rff file), so that CLI and JMH results can be evaluated
 // with the same tools. All results of a JVM are written to the file as one list (rewritten after each result).
@@ -75,6 +76,8 @@ public final class BenchmarkResult {
 		result.put("jdkVersion", System.getProperty("java.version"));
 		result.put("vmName", System.getProperty("java.vm.name"));
 		result.put("vmVersion", System.getProperty("java.vm.version"));
+		// the CPU the run was measured on (not in the JMH format, only for telling results apart)
+		result.put("cpu", CpuName.get());
 		result.put("warmupIterations", config.warmupIterations());
 		result.put("warmupTime", config.warmupTime()+" ms");
 		result.put("measurementIterations", config.iterations());
