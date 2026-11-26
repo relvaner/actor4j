@@ -87,6 +87,12 @@ public final class BenchmarkResult {
 		if (config.property("scenario")!=null)
 			params.put("scenario", config.property("scenario"));
 		params.put("runtime", config.propertyOrDefault("runtime", "n/a"));
+		// pinning of the actor threads (-affinity of a launcher), so that pinned and unpinned results stay apart
+		if (config.property("affinity")!=null)
+			params.put("affinity", config.property("affinity"));
+		// the shared pool of the hybrid runtime (-poolAffinity, default: the rest of -affinity)
+		if (config.property("poolAffinity")!=null)
+			params.put("poolAffinity", config.property("poolAffinity"));
 		params.put("actors", String.valueOf(config.numberOfActors()));
 		params.put("parallelism", String.valueOf(config.parallelism()));
 		params.put("factor", String.valueOf(config.parallelismFactor()));

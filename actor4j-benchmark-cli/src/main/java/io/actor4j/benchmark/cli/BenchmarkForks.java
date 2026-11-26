@@ -137,6 +137,9 @@ public class BenchmarkForks {
 			for (String arg : ManagementFactory.getRuntimeMXBean().getInputArguments())
 				if (!isDebugAgent(arg))
 					command.add(arg);
+		// the manifest entry Enable-Native-Access of an executable jar does not apply with -cp (e.g. thread pinning with FFM)
+		if (Runtime.version().feature()>=22 && command.stream().noneMatch(arg -> arg.startsWith("--enable-native-access")))
+			command.add("--enable-native-access=ALL-UNNAMED");
 		command.add("-cp");
 		command.add(System.getProperty("java.class.path"));
 		command.add(mainClass.getName());

@@ -67,6 +67,10 @@ public final class BenchmarkOutput {
 		Map<String, String> params = new LinkedHashMap<>();
 		if (config.property("runtime")!=null)
 			params.put("runtime", config.property("runtime"));
+		if (config.property("affinity")!=null)
+			params.put("affinity", config.property("affinity"));
+		if (config.property("poolAffinity")!=null)
+			params.put("poolAffinity", config.property("poolAffinity"));
 		params.put("actors", String.valueOf(config.numberOfActors()));
 		params.put("mode", config.threadMode());
 		params.put("throughput", String.valueOf(config.throughput()));

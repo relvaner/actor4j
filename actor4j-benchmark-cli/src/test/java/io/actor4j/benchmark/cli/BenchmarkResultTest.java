@@ -119,7 +119,8 @@ public class BenchmarkResultTest {
 		Map<String, Object> result = (Map<String, Object>)results.get(0);
 		assertEquals("io.actor4j.benchmark.cli.sample.fork.BenchmarkFork", result.get("benchmark"));
 		assertEquals(2, (int)Json.number(result.get("forks")));
-		assertEquals(List.of("-Xmx256m", "-Dfork.test=1"), result.get("jvmArgs")); // the forks ran with -jvmArgs
+		// the forks ran with -jvmArgs, from Java 22 on also with native access (FFM, e.g. thread pinning)
+		assertEquals(Runtime.version().feature()>=22 ? List.of("-Xmx256m", "-Dfork.test=1", "--enable-native-access=ALL-UNNAMED") : List.of("-Xmx256m", "-Dfork.test=1"), result.get("jvmArgs"));
 		Map<String, Object> metric = (Map<String, Object>)result.get("primaryMetric");
 		List<Object> rawData = (List<Object>)metric.get("rawData");
 		assertEquals(2, rawData.size());
